@@ -99,6 +99,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //    private final JTextPane text = new JTextPane();
     private final Set<Pitch> pressedKeys = new HashSet<>(); // To ignore OS's key repeating when holding
 
+    //fixme: Need better threading, sometime multiple hings happen at the same time
     private void play(Pitch guess) {
         if (frozen || !isPlaying()) {
             return;
@@ -138,11 +139,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             frozen = true;
             try {
-                fugue(brightPiano, new Object[]{riddle, Interval.i16});
+                fugue(piano, new Object[]{riddle, Interval.i8});
                 //fixme: Does not help since switched to midi, so the game plays with itself@
-                Thread.sleep(500); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+//                Thread.sleep(500); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
             } finally {
                 frozen = false;
             }
@@ -171,11 +172,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 });
                 frozen = true;
                 try {
-                    fugue(brightPiano, new Object[]{riddle, Interval.i8});
+                    fugue(piano, new Object[]{riddle, Interval.i4});
                     //fixme
-                    Thread.sleep(1000); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+//                    Thread.sleep(1000); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
                 } finally {
                     frozen = false;
                 }
@@ -686,6 +687,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             debug("Frozen=" + frozen + ", key=" + event + ";");
 
+            if (pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
+                playButton.setSelected(!playButton.isSelected());
+                handlePlayButton();
+            }
+
             //fixme: Use key.ordinal() instead of the map
             Key key = KEY_BY_CODE.get(event.getKeyCode());
             if (key == null) {
@@ -705,11 +711,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             boolean added = pressedKeys.add(key.getPitch());
             if (added) {
                 transcribe(key.getPitch(), true);
-                piano.noteOn(key.getPitch().getMidi(), 127);
+                brightPiano.noteOn(key.getPitch().getMidi(), 127);
             }
         } else {
             pressedKeys.remove(key.getPitch());
-            piano.noteOff(key.getPitch().getMidi(), 0);
+            brightPiano.noteOff(key.getPitch().getMidi(), 0);
             keyButtons[key.ordinal()].setSelected(false);
             keyExecutor.execute(() -> play(key.getPitch()));
         }
@@ -1258,23 +1264,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
         playPanel.add(playButton);
         playButton.setText("Play");
-        playButton.addActionListener(event -> {
-            boolean playing = isPlaying();
-            debug("running=" + playing);
-            if (playing) {
-                riddleQueue.clear();
-                riddle.set(null);
-                prevRiddle.set(null);
-                playButton.setText("Stop");
-                penaltyLists.forEach(List::clear);
-                updatePenaltySpinners();
-                executor.execute(() -> play(null));
-            } else {
-                setColor(Color.DARK_GRAY);
-                playButton.setText("Play");
-            }
-            debug("running=" + playing);
-        });
+        playButton.addActionListener(event -> handlePlayButton());
 
         JButton resetButton = new JButton("Reset");
         playPanel.add(resetButton);
@@ -1286,6 +1276,27 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         playPanel.add(saveButton);
 
         return playPanel;
+    }
+
+    private void handlePlayButton() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            new IllegalMonitorStateException().printStackTrace();
+        }
+        boolean playing = isPlaying();
+        debug("running=" + playing);
+        if (playing) {
+            riddleQueue.clear();
+            riddle.set(null);
+            prevRiddle.set(null);
+            playButton.setText("Stop");
+            penaltyLists.forEach(List::clear);
+            updatePenaltySpinners();
+            executor.execute(() -> play(null));
+        } else {
+            setColor(Color.DARK_GRAY);
+            playButton.setText("Play");
+        }
+        debug("running=" + playing);
     }
 
     private Hinter getHinter() {
@@ -1478,10 +1489,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     private enum Ringer {
+        Tune("Ring mnemonic tune on correct answer", pitch -> pitch.getTone().getTune()),
         Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.getTone().getPitch()}),
         JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getPitch()}),
         ToneAndDo("Ring tone and Do on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), Do.getPitch()}),
-        Tune("Ring mnemonic tune on correct answer", pitch -> pitch.getTone().getTune()),
         None("Ring nothing on correct answer", pitch -> new Object[]{}),
         Pause("Short pause on correct answer", pitch -> new Object[]{Interval.i8}),
         ;
