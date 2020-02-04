@@ -28,6 +28,37 @@ New penalty Le after So times 3
  La2 | pitch=110.50Hz | m=0.88 | rms=8.05 | diff=0.50 | pitchyDiff=6.54 | ratio=0.08 | chromaColor=0,0,255 | pitchyColor=java.awt.Color[r=255,g=0,b=255] | guessColor=java.awt.Color[r=19,g=0,b=255] | borderColor=java.awt.Color[r=255,g=0,b=255]
 
 
+AWT-EventQueue-0: interface Mixer
+pitchenga-mixer0: Listening to [Default Audio Device] with [MPM]
+AWT-EventQueue-0: Frozen=false, key=java.awt.event.KeyEvent[KEY_PRESSED,keyCode=17,keyText=⌃,keyChar=Undefined keyChar,modifiers=⌃,extModifiers=⌃,keyLocation=KEY_LOCATION_LEFT,rawCode=0,primaryLevelUnicode=0,scancode=0,extendedKeyCode=0x11] on javax.swing.JTextArea[,0,0,730x1552,layout=javax.swing.plaf.basic.BasicTextUI$UpdateHandler,alignmentX=0.0,alignmentY=0.0,border=,flags=288,maximumSize=,minimumSize=,preferredSize=,caretColor=,disabledTextColor=DerivedColor(color=128,128,128 parent=nimbusDisabledText offsets=0.0,0.0,0.0,0 pColor=128,128,128,editable=false,margin=javax.swing.plaf.InsetsUIResource[top=0,left=0,bottom=0,right=0],selectedTextColor=DerivedColor(color=255,255,255 parent=nimbusSelectedText offsets=0.0,0.0,0.0,0 pColor=255,255,255,selectionColor=DerivedColor(color=104,93,156 parent=nimbusSelectionBackground offsets=0.0,0.0,0.0,0 pColor=104,93,156,colums=0,columWidth=0,rows=0,rowHeight=0,word=false,wrap=false];
+AWT-EventQueue-0: Frozen=false, key=java.awt.event.KeyEvent[KEY_PRESSED,keyCode=16,keyText=⇧,keyChar=Undefined keyChar,modifiers=⌃+⇧,extModifiers=⌃+⇧,keyLocation=KEY_LOCATION_LEFT,rawCode=0,primaryLevelUnicode=0,scancode=0,extendedKeyCode=0x10] on javax.swing.JTextArea[,0,0,730x1552,layout=javax.swing.plaf.basic.BasicTextUI$UpdateHandler,alignmentX=0.0,alignmentY=0.0,border=,flags=288,maximumSize=,minimumSize=,preferredSize=,caretColor=,disabledTextColor=DerivedColor(color=128,128,128 parent=nimbusDisabledText offsets=0.0,0.0,0.0,0 pColor=128,128,128,editable=false,margin=javax.swing.plaf.InsetsUIResource[top=0,left=0,bottom=0,right=0],selectedTextColor=DerivedColor(color=255,255,255 parent=nimbusSelectedText offsets=0.0,0.0,0.0,0 pColor=255,255,255,selectionColor=DerivedColor(color=104,93,156 parent=nimbusSelectionBackground offsets=0.0,0.0,0.0,0 pColor=104,93,156,colums=0,columWidth=0,rows=0,rowHeight=0,word=false,wrap=false];
+java.lang.IllegalArgumentException: Invalid location
+	at javax.swing.text.JTextComponent$AccessibleJTextComponent.getTextRange(JTextComponent.java:3150)
+	at sun.lwawt.macosx.CAccessibleText$14.call(CAccessibleText.java:291)
+	at sun.lwawt.macosx.CAccessibleText$14.call(CAccessibleText.java:283)
+	at sun.lwawt.macosx.LWCToolkit$CallableWrapper.run(LWCToolkit.java:597)
+	at java.awt.event.InvocationEvent.dispatch$$$capture(InvocationEvent.java:301)
+	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java)
+	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:758)
+	at java.awt.EventQueue.access$500(EventQueue.java:97)
+	at java.awt.EventQueue$3.run(EventQueue.java:709)
+	at java.awt.EventQueue$3.run(EventQueue.java:703)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:74)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:84)
+	at java.awt.EventQueue$4.run(EventQueue.java:733)
+	at java.awt.EventQueue$4.run(EventQueue.java:731)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:74)
+	at java.awt.EventQueue.dispatchEvent(EventQueue.java:730)
+	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:205)
+	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
+	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
+	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
+AWT-EventQueue-0: Frozen=false, key=java.awt.event.KeyEvent[KEY_RELEASED,keyCode=17,keyText=⌃,keyCha
+
 //    Do0("Do0", "C0", 16.35),
 //    Si0("Si0", "B0", 30.87),
 //    Do1("Do1", "C1", 32.7),

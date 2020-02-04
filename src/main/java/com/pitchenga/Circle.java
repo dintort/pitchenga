@@ -1,18 +1,16 @@
-package com.pitchenga.logo;
-
-import com.pitchenga.Tone;
+package com.pitchenga;
 
 import javax.swing.*;
 import java.awt.*;
 
 import static com.pitchenga.Tone.*;
 
-public class Logo {
+public class Circle {
 
     public static void main(String[] args) {
 
         JFrame frame = new JFrame();
-        Image image = Toolkit.getDefaultToolkit().getImage(Logo.class.getResource("/pitchenga.png"));
+        Image image = Toolkit.getDefaultToolkit().getImage(Circle.class.getResource("/pitchenga.png"));
         frame.setIconImage(image);
 
         JPanel panel = new MyPanel();
@@ -36,7 +34,7 @@ public class Logo {
             int diameter = side / 5;
             int radius = diameter / 2;
             int halfSide = side / 2;
-            Tone[] tones = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
+            Tone[] tones = new Tone[]{fI, Fa, Mi, mE, Re, rA, Do, Ti, tO, La, lU, So};
             for (int i = 0; i < tones.length; i++) {
                 double phi = (i * Math.PI * 2) / tones.length;
                 int x = (int) (halfSide * Math.sin(phi) + halfSide - radius / 2) + radius;

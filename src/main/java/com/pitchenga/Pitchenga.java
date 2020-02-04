@@ -7,7 +7,6 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
-import com.pitchenga.logo.Logo;
 
 import javax.sound.midi.*;
 import javax.sound.sampled.*;
@@ -543,6 +542,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         initIcon();
         this.setLayout(new BorderLayout());
 
+        //fixme: +Color circle to the control panel +light them up with guess update
         JPanel controlPanelPanel = new JPanel();
         controlPanelPanel.setBackground(Color.DARK_GRAY);
         JPanel controlPanel = new JPanel();
@@ -840,7 +840,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
         Tone[] tones = Tone.values();
         List<Tone> piano = new ArrayList<>(tones.length);
-        piano.addAll(Arrays.asList(Fi, Le, Se, null, Ra, Me, null));
+        piano.addAll(Arrays.asList(fI, lU, tO, null, rA, mE, null));
         piano.addAll(Arrays.asList(DIATONIC_SCALE));
 
         for (Tone tone : piano) {
@@ -889,7 +889,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
             });
 
-            keyButton.setForeground(tone.equals(Si) ? Color.BLACK : Color.WHITE);
+            keyButton.setForeground(tone.getKey().equals(Key.J) ? Color.BLACK : Color.WHITE);
             colorPanel.add(Box.createVerticalStrut(5));
 
             colorPanel.addMouseListener(new MouseAdapter() {
@@ -1373,7 +1373,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void initIcon() {
-        Image image = Toolkit.getDefaultToolkit().getImage(Logo.class.getResource("/pitchenga.png"));
+        Image image = Toolkit.getDefaultToolkit().getImage(Circle.class.getResource("/pitchenga.png"));
         this.setIconImage(image);
         try {
             Class<?> clazz = Class.forName("com.apple.eawt.Application");
@@ -1393,6 +1393,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         ChromaticOneOctave("Chromatic - 1 octave", new Tone[][]{CHROMATIC_SCALE}, Pitchenga::randomize, new Integer[0]),
         Diatonic("Diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{DIATONIC_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
         DiatonicOneOctave("Diatonic - 1 octave", new Tone[][]{DIATONIC_SCALE}, Pitchenga::randomize, new Integer[0]),
+        ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
         ChromaticWithDoubledSharps("Chromatic with doubled sharps - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
         //fixme: Add chromatic with no two sharps in a row
         //fixme: Add scales C, Am, D, etc
@@ -1403,12 +1404,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         MiSoLaDo("Step 3) Mi*2, So, La, Do", new Tone[][]{{Mi, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
         FaMiSoLaDo("Step 4) Fa*2, Mi, So, La, Do", new Tone[][]{{Fa, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
         ReFaMiSoLaDo("Step 5) Re*2, Fa, Mi, So, La, Do", new Tone[][]{{Re, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        SiReFaMiSoLaDo("Step 6) Si*2, Re, Fa, Mi, So, La, Do", new Tone[][]{{Si, Si, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusLe("Step 7) Diatonic + Le*2", new Tone[][]{DIATONIC_SCALE, {Le, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusFiLe("Step 8) Diatonic + Fi*2, Le", new Tone[][]{DIATONIC_SCALE, {Fi, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra*2, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Ra, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se*2, Ra, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Se, Se, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me*2, Se, Ra, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Me, Me, Se, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES);
+        SiReFaMiSoLaDo("Step 6) Si*2, Re, Fa, Mi, So, La, Do", new Tone[][]{{Ti, Ti, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusLu("Step 7) Diatonic + lU*2", new Tone[][]{DIATONIC_SCALE, {lU, lU}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusFiLu("Step 8) Diatonic + fI*2, lU", new Tone[][]{DIATONIC_SCALE, {fI, fI, lU}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusRaFiLu("Step 9) Diatonic + rA*2, fI, lE", new Tone[][]{DIATONIC_SCALE, {rA, rA, fI, lU}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusToRaFiLu("Step 10) Diatonic + sE*2, rA, fI, lU", new Tone[][]{DIATONIC_SCALE, {tO, tO, rA, fI, lU}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusMeToRaFiLu("Step 11) Diatonic + mE*2, tO, rA, fI, lE", new Tone[][]{DIATONIC_SCALE, {mE, mE, tO, rA, fI, lU}}, Pitchenga::randomize, DEFAULT_OCTAVES);
 
         private final String name;
         private final Tone[][] scale;

@@ -12,16 +12,19 @@ import java.awt.*;
  */
 public enum Tone {
 
-    Fi(false, new Color(0, 127, 127)),
+    //  a e   i u o
+    // d r m f s l t
+    // d a r e m f i s u l o t
+    fI(false, new Color(0, 127, 127)),
     So(true, new Color(0, 255, 255)),
-    Le(false, new Color(0, 0, 127)),
+    lU(false, new Color(0, 0, 127)),
     La(true, new Color(0, 0, 255)),
-    Se(false, new Color(127, 0, 255)),
-    Si(true, new Color(255, 0, 255)),
+    tO(false, new Color(127, 0, 255)),
+    Ti(true, new Color(255, 0, 255)),
     Do(true, new Color(255, 0, 0)),
-    Ra(false, new Color(127, 0, 0)),
+    rA(false, new Color(127, 0, 0)),
     Re(true, new Color(255, 127, 0)),
-    Me(false, new Color(127, 127, 0)),
+    mE(false, new Color(127, 127, 0)),
     Mi(true, new Color(255, 255, 0)),
     Fa(true, new Color(0, 255, 0));
 

@@ -4,7 +4,7 @@
     <module name="pitchenga" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.pitchenga.logo.*" />
+        <option name="PATTERN" value="com.pitchenga.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
