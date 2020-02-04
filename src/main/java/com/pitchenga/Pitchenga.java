@@ -248,7 +248,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             double pitchyDiff = Math.abs(guess.getFrequency() - pitchy.getFrequency());
             double accuracy = Math.abs(diff) / pitchyDiff;
-            double pitchiness = accuracy * 42;
+            double pitchiness = accuracy * 10;
             Color guessColor;
             Color pitchyColor;
             if (Math.abs(diff) < 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000314159) {
@@ -688,8 +688,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             debug("Frozen=" + frozen + ", key=" + event + ";");
 
             if (pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
-                playButton.setSelected(!playButton.isSelected());
-                handlePlayButton();
+                if (!playButton.hasFocus() /* && !otherButtons.haveFocus()*/) {
+                    playButton.setSelected(!playButton.isSelected());
+                    handlePlayButton();
+                }
             }
 
             //fixme: Use key.ordinal() instead of the map
@@ -1490,11 +1492,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     private enum Ringer {
         Tune("Ring mnemonic tune on correct answer", pitch -> pitch.getTone().getTune()),
-        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.getTone().getPitch()}),
-        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getPitch()}),
+        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), Interval.i8}),
+        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getPitch(), Interval.i8}),
         ToneAndDo("Ring tone and Do on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), Do.getPitch()}),
         None("Ring nothing on correct answer", pitch -> new Object[]{}),
-        Pause("Short pause on correct answer", pitch -> new Object[]{Interval.i8}),
+        Pause("Short pause on correct answer", pitch -> new Object[]{Interval.i16}),
         ;
 
         private final String name;
