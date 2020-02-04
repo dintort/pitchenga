@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Circle" type="Application" factoryName="Application" nameIsGenerated="true">
-    <option name="MAIN_CLASS_NAME" value="com.pitchenga.Circle" />
+  <configuration default="false" name="Circles" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="com.pitchenga.Circles" />
     <module name="pitchenga.main" />
     <extension name="coverage">
       <pattern>
