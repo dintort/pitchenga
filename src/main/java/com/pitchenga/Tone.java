@@ -3,40 +3,38 @@ package com.pitchenga;
 import java.awt.*;
 
 /**
- * Tone names are roughly based on https://en.wikipedia.org/wiki/Solfege#Chromatic_variants and http://openmusictheory.com/chromaticSolfege.html
- * but modified so that each tone can be represented by a unique letter: "darem-fisolut", where diatonic tones are consonants and sharps are vowels:
- *  a e   i o u
- * d r m f s l t
+ * Tone names are based on https://en.wikipedia.org/wiki/Solfege#Chromatic_variants and http://openmusictheory.com/chromaticSolfege.html
+ * major: do di re ri mi fa fi so se la li si
+ * minor: do di re me mi fa fi so le la se si
+ * lowrd: do ra re me mi fa se so le la se si - this one, but F# instead of Gb
  * Colors are roughly based on https://www.nature.com/articles/s41598-017-18150-y/figures/2 but only using round numbers (circle.png).
  */
 public enum Tone {
 
-    fI("i", "F#", false, new Color(0, 127, 127)),
-    So("s", "G", true, new Color(0, 255, 255)),
-    lO("o", "Ab", false, new Color(0, 0, 127)),
-    La("l", "A", true, new Color(0, 0, 255)),
-    tU("u", "Bb", false, new Color(127, 0, 255)),
-    Ti("t", "B", true, new Color(255, 0, 255)),
-    Do("d", "C", true, new Color(255, 0, 0)),
-    rA("a", "Db", false, new Color(127, 0, 0)),
-    Re("r", "D", true, new Color(255, 127, 0)),
-    mE("e", "Eb", false, new Color(127, 127, 0)),
-    Mi("m", "E", true, new Color(255, 255, 0)),
-    Fa("f", "F", true, new Color(0, 255, 0));
+    Fi("F#", false, new Color(0, 127, 127)),
+    So("G", true, new Color(0, 255, 255)),
+    Le("Ab", false, new Color(0, 0, 127)),
+    La("A", true, new Color(0, 0, 255)),
+    Se("Bb", false, new Color(127, 0, 255)),
+    Si("B", true, new Color(255, 0, 255)),
+    Do("C", true, new Color(255, 0, 0)),
+    Ra("Db", false, new Color(127, 0, 0)),
+    Re("D", true, new Color(255, 127, 0)),
+    Me("Eb", false, new Color(127, 127, 0)),
+    Mi("E", true, new Color(255, 255, 0)),
+    Fa("F", true, new Color(0, 255, 0));
 
-    private final String letter;
-    private final String western;
+    private final String note;
     private final boolean diatonic;
     private final Color color;
     private final String spacedName;
     private Fugue fugue;
 
-    Tone(String letter, String western, boolean diatonic, Color color) {
-        this.letter = letter;
-        this.western = western;
+    Tone(String note, boolean diatonic, Color color) {
+        this.note = note;
         this.diatonic = diatonic;
         this.color = color;
-        this.spacedName = " " + name() + " ";
+        this.spacedName = " " + name().toLowerCase() + " ";
     }
 
     public Color getColor() {
@@ -86,11 +84,8 @@ public enum Tone {
         return getFugue().getPitch();
     }
 
-    public String getWestern() {
-        return western;
+    public String getNote() {
+        return note;
     }
 
-    public String getLetter() {
-        return letter;
-    }
 }

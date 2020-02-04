@@ -6,7 +6,7 @@ import java.awt.*;
 import static com.pitchenga.Tone.*;
 
 public class Circles extends JFrame {
-    private static final Tone[] tones = new Tone[]{fI, Fa, Mi, mE, Re, rA, Do, Ti, tU, La, lO, So};
+    private static final Tone[] tones = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private static final int side = 1105;
     private static final int diameter = side / 5;
     private static final int radius = diameter / 2;
@@ -86,14 +86,14 @@ public class Circles extends JFrame {
 //            Graphics2D graphics = (Graphics2D) g;
 //            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 //
-//            Tone[] tones = new Tone[]{fI, Fa, Mi, mE, Re, rA, Do, Ti, tU, La, lO, So};
+//            Tone[] tones = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
 //            for (int i = 0; i < tones.length; i++) {
 //                double phi = (i * Math.PI * 2) / tones.length;
 //                int x = (int) (halfSide * Math.sin(phi) + halfSide - radius / 2) + radius;
 //                int y = (int) (halfSide * Math.cos(phi) + halfSide - radius / 2) + radius;
 //                Tone tone = tones[i];
 //                graphics.setColor(tone.getColor());
-//                graphics.fillOval(x, y, diameter, diameter);
+//                graphics.filLeval(x, y, diameter, diameter);
 //                labels[i].repaint();
 //            }
 //
