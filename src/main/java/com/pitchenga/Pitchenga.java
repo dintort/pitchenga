@@ -45,13 +45,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(Key::getKeyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
     private static final PitchEstimationAlgorithm DEFAULT_PITCH_ALGO = PitchEstimationAlgorithm.MPM;
-    //    private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
-//    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticOneOctave;
     private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
+    //    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
+    //    private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
     private static final Hinter DEFAULT_HINTER = Hinter.OneSec;
-    //    private static final Ringer DEFAULT_RINGER = Ringer.RingToneAndDo;
-    private static final Ringer DEFAULT_RINGER = Ringer.Tune;
-//    private static final Ringer DEFAULT_RINGER = Ringer.RingSame;
+    private static final GuessRinger DEFAULT_GUESS_RINGER = GuessRinger.Tune;
+    private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tune;
 
     private final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -90,7 +89,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final List<List<Tone>> penaltyLists = Arrays.stream(Tone.values()).map(tone -> new ArrayList<Tone>()).collect(Collectors.toList());
     private final JComboBox<PitchEstimationAlgorithm> pitchAlgoCombo;
     private final JComboBox<Hinter> hinterCombo;
-    private final JComboBox<Ringer> ringerCombo;
+    private final JComboBox<RiddleRinger> riddleRingerCombo;
+    private final JComboBox<GuessRinger> guessRingerCombo;
     private final JComboBox<Riddler> riddlerCombo;
     private final JComboBox<Mixer.Info> inputCombo;
     private final JToggleButton playButton = new JToggleButton();
@@ -126,7 +126,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             this.prevRiddle.set(riddle);
             this.riddle.set(null);
 
-            fugue(guitar, getRinger().ring.apply(riddle));
+            fugue(guitar, getGuessRinger().ring.apply(riddle), true);
             keyQueue.clear();
             play(null);
         } else {
@@ -139,8 +139,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             frozen = true;
             try {
-                fugue(piano, new Object[]{riddle, Interval.i8});
-                //fixme: Does not help since switched to midi, so the game plays with itself@
+                fugue(piano, getRiddleRinger().ring.apply(riddle), false);
+                //fixme: Does not help since switched to midi, so the game plays with itself
 //                Thread.sleep(500); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
@@ -172,7 +172,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 });
                 frozen = true;
                 try {
-                    fugue(piano, new Object[]{riddle, Interval.i4});
+                    fugue(piano, getRiddleRinger().ring.apply(riddle), false);
                     //fixme
 //                    Thread.sleep(1000); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
 //                } catch (InterruptedException e) {
@@ -287,7 +287,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             Key[] keys = Key.values();
             for (Key aKey : keys) {
                 JToggleButton keyButton = keyButtons[aKey.ordinal()];
-                keyButton.setSelected(aKey.getPitch() != null && aKey.getPitch().getTone().equals(key.getPitch().getTone()));
+                boolean selected = key != null
+                        && aKey.getPitch() != null
+                        && aKey.getPitch().getTone().equals(key.getPitch().getTone());
+                keyButton.setSelected(selected);
             }
         }
     }
@@ -451,7 +454,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
 
-    private void fugue(MidiChannel midiChannel, Object[] fugue) {
+    private void fugue(MidiChannel midiChannel, Object[] fugue, boolean flashColors) {
         frozen = true;
         try {
             debug("Fugue=" + Arrays.toString(fugue));
@@ -465,11 +468,20 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     }
                     Pitch pitch = (Pitch) next;
                     midiChannel.noteOn(pitch.getMidi(), 127);
+                    if (flashColors) {
+                        SwingUtilities.invokeLater(() -> {
+                            updatePianoToggleButtons(pitch.getTone().getKey(), true);
+                            setColor(pitch.getTone().getColor());
+                        });
+                    }
                     prev = pitch;
                 } else if (next instanceof Integer) {
                     Thread.sleep((Integer) next);
                     if (prev != null) {
                         midiChannel.noteOff(prev.getMidi(), 127);
+                        if (flashColors) {
+                            SwingUtilities.invokeLater(() -> updatePianoToggleButtons(null, false));
+                        }
                         prev = null;
                     }
                 } else {
@@ -479,6 +491,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (prev != null) {
                 Thread.sleep(Interval.i4);
                 midiChannel.noteOff(prev.getMidi(), 127);
+                if (flashColors) {
+                    SwingUtilities.invokeLater(() -> updatePianoToggleButtons(null, false));
+                }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -601,8 +616,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         //fixme: Move initialization to field declarations
         controlPanel.add(inputCombo = createInputCombo());
         controlPanel.add(pitchAlgoCombo = createPitchAlgoCombo());
-        controlPanel.add(ringerCombo = createRingerCombo());
         controlPanel.add(hinterCombo = createHinterCombo());
+        controlPanel.add(riddleRingerCombo = createRiddleRingerCombo());
+        controlPanel.add(guessRingerCombo = createGuessRingerCombo());
         controlPanel.add(riddlerCombo = createRiddlerCombo());
         controlPanel.add(createOctavesPanel());
         this.add(controlPanelPanel, BorderLayout.NORTH);
@@ -1220,13 +1236,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return hinterCombo;
     }
 
-    private JComboBox<Ringer> createRingerCombo() {
-        JComboBox<Ringer> ringerCombo = new JComboBox<>();
-        for (Ringer ringer : Ringer.values()) {
-            ringerCombo.addItem(ringer);
+    private JComboBox<GuessRinger> createGuessRingerCombo() {
+        JComboBox<GuessRinger> combo = new JComboBox<>();
+        for (GuessRinger guessRinger : GuessRinger.values()) {
+            combo.addItem(guessRinger);
         }
-        ringerCombo.setSelectedItem(DEFAULT_RINGER);
-        return ringerCombo;
+        combo.setSelectedItem(DEFAULT_GUESS_RINGER);
+        return combo;
+    }
+
+    private JComboBox<RiddleRinger> createRiddleRingerCombo() {
+        JComboBox<RiddleRinger> combo = new JComboBox<>();
+        for (RiddleRinger ringer : RiddleRinger.values()) {
+            combo.addItem(ringer);
+        }
+        combo.setSelectedItem(DEFAULT_RIDDLE_RINGER);
+        return combo;
     }
 
     private JComboBox<PitchEstimationAlgorithm> createPitchAlgoCombo() {
@@ -1309,8 +1334,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return (Riddler) riddlerCombo.getSelectedItem();
     }
 
-    private Ringer getRinger() {
-        return (Ringer) ringerCombo.getSelectedItem();
+    private RiddleRinger getRiddleRinger() {
+        return (RiddleRinger) riddleRingerCombo.getSelectedItem();
+    }
+
+    private GuessRinger getGuessRinger() {
+        return (GuessRinger) guessRingerCombo.getSelectedItem();
     }
 
     private static String info(Color color) {
@@ -1448,6 +1477,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
+    //fixme: Add tempo-based mode without guessing
+
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     private enum Riddler {
         Chromatic("Chromatic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
@@ -1466,11 +1497,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         FaMiSoLaDo("Step 4) Fa*2, Mi, So, La, Do", new Tone[][]{{Fa, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
         ReFaMiSoLaDo("Step 5) Re*2, Fa, Mi, So, La, Do", new Tone[][]{{Re, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
         SiReFaMiSoLaDo("Step 6) Si*2, Re, Fa, Mi, So, La, Do", new Tone[][]{{Ti, Ti, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusLu("Step 7) Diatonic + lU*2", new Tone[][]{DIATONIC_SCALE, {lO, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusFiLu("Step 8) Diatonic + fI*2, lU", new Tone[][]{DIATONIC_SCALE, {fI, fI, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusRaFiLu("Step 9) Diatonic + rA*2, fI, lE", new Tone[][]{DIATONIC_SCALE, {rA, rA, fI, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusToRaFiLu("Step 10) Diatonic + sE*2, rA, fI, lU", new Tone[][]{DIATONIC_SCALE, {tU, tU, rA, fI, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusMeToRaFiLu("Step 11) Diatonic + mE*2, tO, rA, fI, lE", new Tone[][]{DIATONIC_SCALE, {mE, mE, tU, rA, fI, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES);
+        DiatonicPlusLo("Step 7) Diatonic + lO*2", new Tone[][]{DIATONIC_SCALE, {lO, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusFiLo("Step 8) Diatonic + fI*2, lO", new Tone[][]{DIATONIC_SCALE, {fI, fI, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusRaFiLo("Step 9) Diatonic + rA*2, fI, lO", new Tone[][]{DIATONIC_SCALE, {rA, rA, fI, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusTuRaFiLo("Step 10) Diatonic + tU*2, rA, fI, lO", new Tone[][]{DIATONIC_SCALE, {tU, tU, rA, fI, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusMeTuRaFiLo("Step 11) Diatonic + mE*2, tU, rA, fI, lO", new Tone[][]{DIATONIC_SCALE, {mE, mE, tU, rA, fI, lO}}, Pitchenga::randomize, DEFAULT_OCTAVES);
 
         private final String name;
         private final Tone[][] scale;
@@ -1490,19 +1521,38 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
-    private enum Ringer {
+    private enum GuessRinger {
         Tune("Ring mnemonic tune on correct answer", pitch -> pitch.getTone().getTune()),
-        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), Interval.i8}),
-        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getPitch(), Interval.i8}),
+        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), Interval.i4}),
+        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getPitch(), Interval.i4}),
         ToneAndDo("Ring tone and Do on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), Do.getPitch()}),
         None("Ring nothing on correct answer", pitch -> new Object[]{}),
         Pause("Short pause on correct answer", pitch -> new Object[]{Interval.i16}),
         ;
-
         private final String name;
         private final Function<Pitch, Object[]> ring;
 
-        Ringer(String name, Function<Pitch, Object[]> ring) {
+        GuessRinger(String name, Function<Pitch, Object[]> ring) {
+            this.name = name;
+            this.ring = ring;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    @SuppressWarnings("unused") //fixme: They are all used in the combo box!
+    private enum RiddleRinger {
+        Tune("Riddle mnemonic tune", pitch -> pitch.getTone().getTune()),
+        Tone("Riddle tone", pitch -> new Object[]{pitch.getTone().getPitch(), Interval.i4}),
+        ToneAndDo("Riddle tone and Do", pitch -> new Object[]{pitch.getTone().getPitch(), Do.getPitch()}),
+        ;
+        private final String name;
+        private final Function<Pitch, Object[]> ring;
+
+        RiddleRinger(String name, Function<Pitch, Object[]> ring) {
             this.name = name;
             this.ring = ring;
         }
