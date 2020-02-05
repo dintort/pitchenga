@@ -46,11 +46,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
     private static final PitchEstimationAlgorithm DEFAULT_PITCH_ALGO = PitchEstimationAlgorithm.MPM;
     //fixme: Really need the save feature...
-//    private static final Pacer DEFAULT_PACER = Pacer.Answer;
-    private static final Pacer DEFAULT_PACER = Pacer.Tempo20;
     private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
     //    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
     //    private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
+    private static final Pacer DEFAULT_PACER = Pacer.Answer;
     private static final Hinter DEFAULT_HINTER = Hinter.OneSec;
     private static final GuessRinger DEFAULT_GUESS_RINGER = GuessRinger.Tune;
     private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tune;
@@ -105,7 +104,39 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //    private final JTextPane text = new JTextPane();
     private final Set<Pitch> pressedKeys = new HashSet<>(); // To ignore OS's key repeating when holding
 
-    //fixme: Need better threading, sometime multiple hings happen at the same time
+    //fixme: +Gui-less mode
+    public Pitchenga() {
+        super("Pitchenga");
+        initIcon();
+        initKeyboard();
+
+        MidiChannel[] midiChannels = initMidi();
+        piano = midiChannels[0];
+        brightPiano = midiChannels[1];
+        guitar = midiChannels[2];
+
+        initView();
+
+        updateToneSpinners();
+        updateMixer();
+
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.pack();
+
+        Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        //fixme: Change to center when saving to file is implemented
+//        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
+        this.setSize(730, (int) screenSize.getHeight());
+//        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
+        //fixme: Should resize relatively + have a slider for the user to resize
+//        riddlePanel.add(Box.createVerticalStrut((int) (this.getSize().getHeight() / 3)));
+
+        this.setLocation(screenSize.width - getSize().width - 10, screenSize.height / 2 - getSize().height / 2);
+//        this.setLocation(10, screenSize.height / 2 - getSize().height / 2);
+        this.setVisible(true);
+    }
+
+    //fixme: Need better threading, sometimes multiple things happen at the same time
     private void play(Pitch guess) {
         if (frozen || !isPlaying()) {
             return;
@@ -115,7 +146,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             return;
         }
         boolean success = getPacer().check.apply(new Pair<>(guess, riddle));
-        debug(String.format("[%s] %s [%.2fHz] : %s", riddle, guess, riddle.getFrequency(), success));
+        debug(String.format("Play: [%s] %s [%.2fHz] : %s", riddle, guess, riddle.getFrequency(), success));
         if (success) {
             if (penaltyRiddleTimestampMs != riddleTimestampMs) {
                 Pitch prevRiddle = this.prevRiddle.get();
@@ -136,7 +167,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             fugue(guitar, getGuessRinger().ring.apply(riddle), true);
             keyQueue.clear();
             executor.execute(() -> play(null));
-        } else {
+        } else if (guess != null) {
             //fixme: Move to hinter
             if (System.currentTimeMillis() - riddleTimestampMs >= getHinter().delayMs) {
                 SwingUtilities.invokeLater(() -> {
@@ -532,6 +563,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //            } catch (BadLocationException e) {
 //                e.printStackTrace();
 //            }
+            text.append(" ");
             text.append(message);
             text.setCaretPosition(text.getDocument().getLength());
         }
@@ -580,38 +612,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             new Pitchenga();
         });
-    }
-
-    //fixme: +Gui-less mode
-    public Pitchenga() {
-        super("Pitchenga");
-        initIcon();
-        initKeyboard();
-
-        MidiChannel[] midiChannels = initMidi();
-        piano = midiChannels[0];
-        brightPiano = midiChannels[1];
-        guitar = midiChannels[2];
-
-        initView();
-
-        updateToneSpinners();
-        updateMixer();
-
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.pack();
-
-        Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        //fixme: Change to center when saving to file is implemented
-//        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-        this.setSize(730, (int) screenSize.getHeight());
-//        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
-        //fixme: Should resize relatively + have a slider for the user to resize
-//        riddlePanel.add(Box.createVerticalStrut((int) (this.getSize().getHeight() / 3)));
-
-        this.setLocation(screenSize.width - getSize().width - 10, screenSize.height / 2 - getSize().height / 2);
-//        this.setLocation(10, screenSize.height / 2 - getSize().height / 2);
-        this.setVisible(true);
     }
 
     private void initView() {
@@ -667,25 +667,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pianoPanelPanel.add(createChromaticPiano(), BorderLayout.CENTER); //fixme: Remove the grey gap on the sides
         pianoPanelPanel.add(createTwoOctavesPiano(), BorderLayout.SOUTH);
 //        pianoPanelPanel.add(createOneOctavePiano(), BorderLayout.SOUTH);
-    }
-
-    private JPanel createControlPanel() {
-        JPanel controlPanelPanel = new JPanel();
-        controlPanelPanel.setBackground(Color.DARK_GRAY);
-        JPanel controlPanel = new JPanel();
-        controlPanel.setBackground(Color.DARK_GRAY);
-        controlPanelPanel.add(controlPanel);
-        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-        controlPanel.add(createButtonsPanel());
-        controlPanel.add(initInputCombo());
-        controlPanel.add(initPitchAlgoCombo());
-        controlPanel.add(initHinterCombo());
-        controlPanel.add(initPacerCombo());
-        controlPanel.add(initRiddleRingerCombo());
-        controlPanel.add(initGuessRingerCombo());
-        controlPanel.add(initRiddlerCombo());
-        controlPanel.add(createOctavesPanel());
-        return controlPanelPanel;
     }
 
     private void initKeyboard() {
@@ -753,6 +734,25 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             JToggleButton keyButton = keyButtons[k.ordinal()];
             keyButton.setSelected(k.getPitch() != null && k.getPitch().getTone().equals(key.getPitch().getTone()));
         }
+    }
+
+    private JPanel createControlPanel() {
+        JPanel controlPanelPanel = new JPanel();
+        controlPanelPanel.setBackground(Color.DARK_GRAY);
+        JPanel controlPanel = new JPanel();
+        controlPanel.setBackground(Color.DARK_GRAY);
+        controlPanelPanel.add(controlPanel);
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+        controlPanel.add(createButtonsPanel());
+        controlPanel.add(initInputCombo());
+        controlPanel.add(initPitchAlgoCombo());
+        controlPanel.add(initHinterCombo());
+        controlPanel.add(initPacerCombo());
+        controlPanel.add(initRiddleRingerCombo());
+        controlPanel.add(initGuessRingerCombo());
+        controlPanel.add(initRiddlerCombo());
+        controlPanel.add(createOctavesPanel());
+        return controlPanelPanel;
     }
 
     private JPanel createOctavesPanel() {
@@ -1404,17 +1404,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         //fixme: Add scales C, Am, D, etc
         //fixme: Add random within scales
         SharpsOnly("Sharps only - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{SHARPS_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        LaDo("Step 1) La, Do", new Tone[][]{{La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        SoLaDo("Step 2) So*2, La, Do", new Tone[][]{{So, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        MiSoLaDo("Step 3) Mi*2, So, La, Do", new Tone[][]{{Mi, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        FaMiSoLaDo("Step 4) Fa*2, Mi, So, La, Do", new Tone[][]{{Fa, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        ReFaMiSoLaDo("Step 5) Re*2, Fa, Mi, So, La, Do", new Tone[][]{{Re, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        SiReFaMiSoLaDo("Step 6) Si*2, Re, Fa, Mi, So, La, Do", new Tone[][]{{Si, Si, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusLe("Step 7) Diatonic + Le*2", new Tone[][]{DIATONIC_SCALE, {Le, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusFiLe("Step 8) Diatonic + Fi*2, Le", new Tone[][]{DIATONIC_SCALE, {Fi, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra*2, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Ra, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se*2, Ra, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Se, Se, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
-        DiatonicPlusMeTuRaFiLe("Step 11) Diatonic + Me*2, Se, Ra, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Me, Me, Se, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES);
+        SoLaDo("Step 1) So, La, Do", new Tone[][]{{So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        MiSoLaDo("Step 2) Mi*2, So, La, Do", new Tone[][]{{Mi, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        FaMiSoLaDo("Step 3) Fa*2, Mi, So, La, Do", new Tone[][]{{Fa, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        ReFaMiSoLaDo("Step 4) Re*2, Fa, Mi, So, La, Do", new Tone[][]{{Re, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        SiReFaMiSoLaDo("Step 5) Si*2, Re, Fa, Mi, So, La, Do", new Tone[][]{{Si, Si, Re, Fa, Mi, So, La, Do}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusLe("Step 6) Diatonic + Le*2", new Tone[][]{DIATONIC_SCALE, {Le, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusFiLe("Step 7) Diatonic + Fi*2, Le", new Tone[][]{DIATONIC_SCALE, {Fi, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusRaFiLe("Step 8) Diatonic + Ra*2, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Ra, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusSeRaFiLe("Step 9) Diatonic + Se*2, Ra, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Se, Se, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        DiatonicPlusMeTuRaFiLe("Step 19) Diatonic + Me*2, Se, Ra, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Me, Me, Se, Ra, Fi, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES);
 
         private final String name;
         private final Tone[][] scale;
@@ -1524,7 +1523,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
         private static volatile long lastPacerTimestamp = System.currentTimeMillis();
 
-        private static  boolean pace(int bpm) {
+        private static boolean pace(int bpm) {
             long delay = 60_000 / bpm;
             long prevTimestamp = lastPacerTimestamp;
             long elapsed = System.currentTimeMillis() - prevTimestamp;
@@ -1541,7 +1540,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
 
         private static boolean checkAnswer(Pair<Pitch, Pitch> pair) {
-            return pair.left == null || pair.left.getTone().equals(pair.right.getTone());
+            return pair.left != null && pair.left.getTone().equals(pair.right.getTone());
         }
 
         private String name;
