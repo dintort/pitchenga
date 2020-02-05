@@ -45,8 +45,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(Key::getKeyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
     private static final PitchEstimationAlgorithm DEFAULT_PITCH_ALGO = PitchEstimationAlgorithm.MPM;
-    private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
-    //    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
+    //fixme: Really need the save feature...
+        private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
+//    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
     //    private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
     private static final Hinter DEFAULT_HINTER = Hinter.OneSec;
     private static final GuessRinger DEFAULT_GUESS_RINGER = GuessRinger.Tune;
@@ -213,8 +214,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         if (same) {
                             if (maxRms > rmsThreshold) {
                                 if (isPlaying()) {
-                                    updateGuessColor(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms, null);
+                                    updateGuessColor(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms);
                                 }
+                                SwingUtilities.invokeLater(() -> updatePianoButtons(guess.getTone().getKey()));
                                 //fixme: +"Monitoring" mode with a toggle button
                                 transcribe(guess, false);
                                 play(guess);
@@ -225,7 +227,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         }
                     }
                     if (!isPlaying() && maxRms > rmsThreshold) {
-                        updateGuessColor(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms, null);
+                        updateGuessColor(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms);
                     }
                 }
             }
@@ -235,7 +237,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     //fixme: Add strobe tuner
-    private void updateGuessColor(Pitch guess, float pitch, float probability, double rms, Key keyOrNull) {
+    private void updateGuessColor(Pitch guess, float pitch, float probability, double rms) {
         Pitch flat = PITCH_BY_ORDINAL.get(guess.ordinal() - 1);
         Pitch sharp = PITCH_BY_ORDINAL.get(guess.ordinal() + 1);
         if (flat != null && sharp != null) { // Can be null when out of range, this could have been done better, but meh
@@ -269,29 +271,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 pitchyPanel.setBackground(guess.getTone().getColor());
                 setColor(guessColor);
                 pitchyPanel.setBorder(BorderFactory.createLineBorder(pitchyColor, 5));
-                updatePianoToggleButtons(keyOrNull == null ? guess.getTone().getKey() : keyOrNull, keyOrNull != null);
             });
-        }
-    }
-
-    private void updatePianoToggleButtons(Key key, boolean exactKey) {
-        if (!SwingUtilities.isEventDispatchThread()) {
-            new IllegalMonitorStateException().printStackTrace();
-        }
-        if (exactKey) {
-            JToggleButton keyButton = keyButtons[key.ordinal()];
-            for (JToggleButton next : keyButtons) {
-                next.setSelected(next == keyButton);
-            }
-        } else {
-            Key[] keys = Key.values();
-            for (Key aKey : keys) {
-                JToggleButton keyButton = keyButtons[aKey.ordinal()];
-                boolean selected = key != null
-                        && aKey.getPitch() != null
-                        && aKey.getPitch().getTone().equals(key.getPitch().getTone());
-                keyButton.setSelected(selected);
-            }
         }
     }
 
@@ -470,7 +450,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     midiChannel.noteOn(pitch.getMidi(), 127);
                     if (flashColors) {
                         SwingUtilities.invokeLater(() -> {
-                            updatePianoToggleButtons(pitch.getTone().getKey(), true);
+                            updatePianoButton(pitch.getTone().getKey(), true);
                             setColor(pitch.getTone().getColor());
                         });
                     }
@@ -480,7 +460,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     if (prev != null) {
                         midiChannel.noteOff(prev.getMidi(), 127);
                         if (flashColors) {
-                            SwingUtilities.invokeLater(() -> updatePianoToggleButtons(null, false));
+                            Key key = prev.getTone().getKey();
+                            SwingUtilities.invokeLater(() -> updatePianoButton(key, false));
                         }
                         prev = null;
                     }
@@ -492,7 +473,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 Thread.sleep(Interval.i4);
                 midiChannel.noteOff(prev.getMidi(), 127);
                 if (flashColors) {
-                    SwingUtilities.invokeLater(() -> updatePianoToggleButtons(null, false));
+                    Key key = prev.getTone().getKey();
+                    SwingUtilities.invokeLater(() -> updatePianoButton(key, false));
                 }
             }
         } catch (InterruptedException e) {
@@ -725,8 +707,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (key.getPitch() == null) {
             return;
         }
+        updatePianoButton(key, pressed);
         if (pressed) {
-            updateGuessColor(key.getPitch(), key.getPitch().getFrequency(), 1, 42, key);
+            updateGuessColor(key.getPitch(), key.getPitch().getFrequency(), 1, 42);
             boolean added = pressedKeys.add(key.getPitch());
             if (added) {
                 transcribe(key.getPitch(), true);
@@ -737,6 +720,23 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             brightPiano.noteOff(key.getPitch().getMidi(), 0);
             keyButtons[key.ordinal()].setSelected(false);
             keyExecutor.execute(() -> play(key.getPitch()));
+        }
+    }
+
+    private void updatePianoButton(Key key, boolean pressed) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            throw new IllegalMonitorStateException();
+        }
+        keyButtons[key.ordinal()].setSelected(pressed);
+    }
+
+    private void updatePianoButtons(Key key) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            throw new IllegalMonitorStateException();
+        }
+        for (Key k : Key.values()) {
+            JToggleButton keyButton = keyButtons[k.ordinal()];
+            keyButton.setSelected(k.getPitch() != null && k.getPitch().getTone().equals(key.getPitch().getTone()));
         }
     }
 
