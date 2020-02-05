@@ -46,12 +46,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
     private static final PitchEstimationAlgorithm DEFAULT_PITCH_ALGO = PitchEstimationAlgorithm.MPM;
     //fixme: Really need the save feature...
-        private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
-//    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
+//    private static final Pacer DEFAULT_PACER = Pacer.Answer;
+    private static final Pacer DEFAULT_PACER = Pacer.Tempo20;
+    private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
+    //    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
     //    private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
     private static final Hinter DEFAULT_HINTER = Hinter.OneSec;
     private static final GuessRinger DEFAULT_GUESS_RINGER = GuessRinger.Tune;
     private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tune;
+    public static final Mixer.Info NO_AUDIO_INPUT = new Mixer.Info("No audio input", "", "", "1") {
+    };
 
     private final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -77,23 +81,24 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile boolean frozen = false; //fixme: Remove as playing on audio dispatcher thread?
     private final AtomicInteger idCounter = new AtomicInteger(-1);
 
-    private final JPanel guessPanel;
-    private final JLabel guessLabel;
-    private final JPanel pitchyPanel;
-    private JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
-    private JToggleButton[] octaveToggles;
+    private final JPanel guessPanel = new JPanel();
+    private final JLabel guessLabel = new JLabel();
+    private final JPanel pitchyPanel = new JPanel();
+    private final JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
+    private final JToggleButton[] octaveToggles = new JToggleButton[ALL_OCTAVES.length];
     private final JSpinner[] toneSpinners = Arrays.stream(Tone.values())
             .map(tone -> new JSpinner(new SpinnerNumberModel(0, 0, 9, 1)))
             .collect(Collectors.toList()).toArray(new JSpinner[0]);
     private volatile boolean toneSpinnersFrozen = false; //fixme: Maybe use "frozen" instead
     private final JSpinner[] penaltySpinners = new JSpinner[Tone.values().length];
     private final List<List<Tone>> penaltyLists = Arrays.stream(Tone.values()).map(tone -> new ArrayList<Tone>()).collect(Collectors.toList());
-    private final JComboBox<PitchEstimationAlgorithm> pitchAlgoCombo;
-    private final JComboBox<Hinter> hinterCombo;
-    private final JComboBox<RiddleRinger> riddleRingerCombo;
-    private final JComboBox<GuessRinger> guessRingerCombo;
-    private final JComboBox<Riddler> riddlerCombo;
-    private final JComboBox<Mixer.Info> inputCombo;
+    private final JComboBox<PitchEstimationAlgorithm> pitchAlgoCombo = new JComboBox<>();
+    private final JComboBox<Hinter> hinterCombo = new JComboBox<>();
+    private final JComboBox<Pacer> pacerCombo = new JComboBox<>();
+    private final JComboBox<RiddleRinger> riddleRingerCombo = new JComboBox<>();
+    private final JComboBox<GuessRinger> guessRingerCombo = new JComboBox<>();
+    private final JComboBox<Riddler> riddlerCombo = new JComboBox<>();
+    private final JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
     private final JToggleButton playButton = new JToggleButton();
     private final JToggleButton[] keyButtons = new JToggleButton[Key.values().length];
     private final JTextArea text = new JTextArea();
@@ -106,11 +111,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             return;
         }
         Pitch riddle = riddle();
-        if (guess == null || riddle == null) {
+        if (riddle == null) {
             return;
         }
-        debug(String.format("  [%s] %s  -  [%s] %s [%.2fHz]", riddle.getTone(), guess.getTone(), riddle, guess, riddle.getFrequency()));
-        if (guess.getTone().equals(riddle.getTone())) {
+        boolean success = getPacer().check.apply(new Pair<>(guess, riddle));
+        debug(String.format("[%s] %s [%.2fHz] : %s", riddle, guess, riddle.getFrequency(), success));
+        if (success) {
             if (penaltyRiddleTimestampMs != riddleTimestampMs) {
                 Pitch prevRiddle = this.prevRiddle.get();
                 List<Tone> penaltyList = penaltyLists.get(riddle.getTone().ordinal());
@@ -129,7 +135,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
             fugue(guitar, getGuessRinger().ring.apply(riddle), true);
             keyQueue.clear();
-            play(null);
+            executor.execute(() -> play(null));
         } else {
             //fixme: Move to hinter
             if (System.currentTimeMillis() - riddleTimestampMs >= getHinter().delayMs) {
@@ -445,6 +451,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 } else if (next instanceof Pitch) {
                     if (prev != null) {
                         Thread.sleep(Interval.i4);
+                        midiChannel.noteOff(prev.getMidi());
                     }
                     Pitch pitch = (Pitch) next;
                     midiChannel.noteOn(pitch.getMidi(), 127);
@@ -458,7 +465,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 } else if (next instanceof Integer) {
                     Thread.sleep((Integer) next);
                     if (prev != null) {
-                        midiChannel.noteOff(prev.getMidi(), 127);
+                        midiChannel.noteOff(prev.getMidi());
                         if (flashColors) {
                             Key key = prev.getTone().getKey();
                             SwingUtilities.invokeLater(() -> updatePianoButton(key, false));
@@ -471,7 +478,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             if (prev != null) {
                 Thread.sleep(Interval.i4);
-                midiChannel.noteOff(prev.getMidi(), 127);
+                midiChannel.noteOff(prev.getMidi());
                 if (flashColors) {
                     Key key = prev.getTone().getKey();
                     SwingUtilities.invokeLater(() -> updatePianoButton(key, false));
@@ -578,38 +585,46 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: +Gui-less mode
     public Pitchenga() {
         super("Pitchenga");
+        initIcon();
         initKeyboard();
+
         MidiChannel[] midiChannels = initMidi();
         piano = midiChannels[0];
         brightPiano = midiChannels[1];
         guitar = midiChannels[2];
 
-        initIcon();
+        initView();
+
+        updateToneSpinners();
+        updateMixer();
+
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.pack();
+
+        Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        //fixme: Change to center when saving to file is implemented
+//        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
+        this.setSize(730, (int) screenSize.getHeight());
+//        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
+        //fixme: Should resize relatively + have a slider for the user to resize
+//        riddlePanel.add(Box.createVerticalStrut((int) (this.getSize().getHeight() / 3)));
+
+        this.setLocation(screenSize.width - getSize().width - 10, screenSize.height / 2 - getSize().height / 2);
+//        this.setLocation(10, screenSize.height / 2 - getSize().height / 2);
+        this.setVisible(true);
+    }
+
+    private void initView() {
         this.setLayout(new BorderLayout());
 
         //fixme: +Color circle to the control panel +light them up with guess update
-        JPanel controlPanelPanel = new JPanel();
-        controlPanelPanel.setBackground(Color.DARK_GRAY);
-        JPanel controlPanel = new JPanel();
-        controlPanel.setBackground(Color.DARK_GRAY);
-        controlPanelPanel.add(controlPanel);
-        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-        controlPanel.add(createButtonsPanel());
-        //fixme: Move initialization to field declarations
-        controlPanel.add(inputCombo = createInputCombo());
-        controlPanel.add(pitchAlgoCombo = createPitchAlgoCombo());
-        controlPanel.add(hinterCombo = createHinterCombo());
-        controlPanel.add(riddleRingerCombo = createRiddleRingerCombo());
-        controlPanel.add(guessRingerCombo = createGuessRingerCombo());
-        controlPanel.add(riddlerCombo = createRiddlerCombo());
-        controlPanel.add(createOctavesPanel());
-        this.add(controlPanelPanel, BorderLayout.NORTH);
+        this.add(createControlPanel(), BorderLayout.NORTH);
 
         JPanel centralPanel = new JPanel();
         this.add(centralPanel);
         centralPanel.setLayout(new BorderLayout());
 
-        centralPanel.add(guessPanel = new JPanel(), BorderLayout.CENTER);
+        centralPanel.add(guessPanel, BorderLayout.CENTER);
         guessPanel.setBackground(Color.DARK_GRAY);
         guessPanel.setLayout(new BorderLayout());
         JPanel labelsPanel = new JPanel();
@@ -617,10 +632,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         labelsPanel.setOpaque(false);
         labelsPanel.setLayout(new GridLayout(2, 1));
 
-        labelsPanel.add(pitchyPanel = new JPanel());
+        labelsPanel.add(pitchyPanel);
         pitchyPanel.setBackground(Color.GRAY);
         pitchyPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        pitchyPanel.add(guessLabel = new JLabel("       "));
+        pitchyPanel.add(guessLabel);
         guessLabel.setOpaque(true);
         guessLabel.setForeground(Color.WHITE);
         guessLabel.setBackground(Color.BLACK);
@@ -642,7 +657,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
 
         //fixme: +Midi instrument in
-
         for (Key key : Key.values()) {
             JToggleButton keyButton = new JToggleButton(key.getLabel());
             keyButtons[key.ordinal()] = keyButton;
@@ -650,27 +664,28 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
         JPanel pianoPanelPanel = new JPanel(new BorderLayout());
         centralPanel.add(pianoPanelPanel, BorderLayout.SOUTH);
-        pianoPanelPanel.add(createChromaticPiano(), BorderLayout.CENTER); //fixme: Remove the grey gap on the left
+        pianoPanelPanel.add(createChromaticPiano(), BorderLayout.CENTER); //fixme: Remove the grey gap on the sides
         pianoPanelPanel.add(createTwoOctavesPiano(), BorderLayout.SOUTH);
 //        pianoPanelPanel.add(createOneOctavePiano(), BorderLayout.SOUTH);
-        //fixme: +Toggleable two-octave piano with overlapping keys
-        updateToneSpinners();
-        updateMixer();
+    }
 
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.pack();
-
-        Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        //fixme: Change to center when saving to file is implemented
-//        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-        this.setSize(730, (int) screenSize.getHeight());
-//        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
-        //fixme: Should resize relatively + have a slider for the user to resize
-//        riddlePanel.add(Box.createVerticalStrut((int) (this.getSize().getHeight() / 3)));
-
-        this.setLocation(screenSize.width - getSize().width - 10, screenSize.height / 2 - getSize().height / 2);
-//        this.setLocation(10, screenSize.height / 2 - getSize().height / 2);
-        this.setVisible(true);
+    private JPanel createControlPanel() {
+        JPanel controlPanelPanel = new JPanel();
+        controlPanelPanel.setBackground(Color.DARK_GRAY);
+        JPanel controlPanel = new JPanel();
+        controlPanel.setBackground(Color.DARK_GRAY);
+        controlPanelPanel.add(controlPanel);
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+        controlPanel.add(createButtonsPanel());
+        controlPanel.add(initInputCombo());
+        controlPanel.add(initPitchAlgoCombo());
+        controlPanel.add(initHinterCombo());
+        controlPanel.add(initPacerCombo());
+        controlPanel.add(initRiddleRingerCombo());
+        controlPanel.add(initGuessRingerCombo());
+        controlPanel.add(initRiddlerCombo());
+        controlPanel.add(createOctavesPanel());
+        return controlPanelPanel;
     }
 
     private void initKeyboard() {
@@ -717,7 +732,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
         } else {
             pressedKeys.remove(key.getPitch());
-            brightPiano.noteOff(key.getPitch().getMidi(), 0);
+            brightPiano.noteOff(key.getPitch().getMidi());
             keyButtons[key.ordinal()].setSelected(false);
             keyExecutor.execute(() -> play(key.getPitch()));
         }
@@ -751,14 +766,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         penaltyFactorSpinner.setValue(DEFAULT_PENALTY_FACTOR);
 
         octavesPanel.add(new JLabel(" "));
-
         octavesPanel.add(new JLabel("Octaves:"));
-        octaveToggles = Arrays.stream(ALL_OCTAVES).map(octave -> {
+
+        for (int i = 0; i < ALL_OCTAVES.length; i++) {
+            Integer octave = ALL_OCTAVES[i];
             JToggleButton toggle = new JToggleButton("" + octave);
+            octaveToggles[i] = toggle;
             octavesPanel.add(toggle);
             toggle.setSelected(Arrays.asList(DEFAULT_OCTAVES).contains(octave));
             toggle.addItemListener(event -> {
-                playButton.requestFocus();
                 if (toneSpinnersFrozen) {
                     return;
                 }
@@ -770,8 +786,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
                 });
             });
-            return toggle;
-        }).toArray(JToggleButton[]::new);
+        }
         return octavesPanel;
     }
 
@@ -793,7 +808,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             toneSpinner.setAlignmentX(Component.CENTER_ALIGNMENT);
             toneSpinner.addChangeListener(event -> {
                 if (!toneSpinnersFrozen) {
-                    playButton.requestFocus();
                     keyExecutor.execute(() -> {
                         riddle.set(null);
                         riddleQueue.clear();
@@ -842,13 +856,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 keyButton.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        playButton.requestFocus();
                         handleKey(theKey, true);
                     }
 
                     @Override
                     public void mouseReleased(MouseEvent e) {
-                        playButton.requestFocus();
                         handleKey(theKey, false);
                     }
                 });
@@ -861,13 +873,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             colorPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    playButton.requestFocus();
                     handleKey(tone.getKey(), true);
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    playButton.requestFocus();
                     handleKey(tone.getKey(), false);
                 }
             });
@@ -941,13 +951,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //            keyButton.addMouseListener(new MouseAdapter() {
 //                @Override
 //                public void mousePressed(MouseEvent e) {
-//                    playButton.requestFocus();
 //                    handleKey(tone.getKey(), true);
 //                }
 //
 //                @Override
 //                public void mouseReleased(MouseEvent e) {
-//                    playButton.requestFocus();
 //                    handleKey(tone.getKey(), false);
 //                }
 //            });
@@ -958,13 +966,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //            colorPanel.addMouseListener(new MouseAdapter() {
 //                @Override
 //                public void mousePressed(MouseEvent e) {
-//                    playButton.requestFocus(); //fixme: The play/pause on space-bar needs to be way better than this
 //                    handleKey(tone.getKey(), true);
 //                }
 //
 //                @Override
 //                public void mouseReleased(MouseEvent e) {
-//                    playButton.requestFocus();
 //                    handleKey(tone.getKey(), false);
 //                }
 //            });
@@ -1040,13 +1046,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     keyButton.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mousePressed(MouseEvent e) {
-                            playButton.requestFocus();
                             handleKey(key, true);
                         }
 
                         @Override
                         public void mouseReleased(MouseEvent e) {
-                            playButton.requestFocus();
                             handleKey(key, false);
                         }
                     });
@@ -1061,13 +1065,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             colorPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    playButton.requestFocus(); //fixme: The play/pause on space-bar needs to be way better than this
                     handleKey(key, true);
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    playButton.requestFocus();
                     handleKey(key, false);
                 }
             });
@@ -1075,226 +1077,134 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return panel;
     }
 
-//    //fixme: Implement
-//    private JPanel createOverlappingPianoPanel() {
-//        JPanel panel = new JPanel(new GridLayout(2, 1));
-//        JPanel topPanelPanel = new JPanel(new BorderLayout());
-//        panel.add(topPanelPanel);
-//        topPanelPanel.setBackground(Color.DARK_GRAY);
-//        JPanel topPanel = new JPanel();
-//        topPanelPanel.add(topPanel, BorderLayout.CENTER);
-//        topPanel.setBackground(Color.DARK_GRAY);
-//        topPanel.setLayout(new GridLayout(1, 7));
-//        Component topStrut = Box.createHorizontalStrut(30);
-//        topPanelPanel.add(topStrut, BorderLayout.EAST);
-//        topStrut.setBackground(Color.DARK_GRAY);
-//
-//        JPanel bottomPanelPanel = new JPanel(new BorderLayout());
-//        panel.add(bottomPanelPanel);
-//        bottomPanelPanel.setBackground(Color.DARK_GRAY);
-//        Component bottomStrut = Box.createHorizontalStrut(30);
-//        bottomPanelPanel.add(bottomStrut, BorderLayout.WEST);
-//        bottomStrut.setBackground(Color.DARK_GRAY);
-//
-//        JPanel bottomPanel = new JPanel();
-//        bottomPanelPanel.add(bottomPanel, BorderLayout.CENTER);
-//        bottomPanel.setBackground(Color.DARK_GRAY);
-//        bottomPanel.setLayout(new GridLayout(1, 7));
-//
-//        Tone[] tones = Tone.values();
-//        List<Tone> piano = new ArrayList<>(tones.length);
-//        piano.addAll(Arrays.asList(Fi, Le, Se, null, Ra, Me, null));
-//        piano.addAll(Arrays.asList(DIATONIC_SCALE));
-//
-//        for (Tone tone : piano) {
-//            JPanel colorPanel = new JPanel();
-//            if (tone == null) {
-//                topPanel.add(colorPanel);
-//                colorPanel.setBackground(Color.DARK_GRAY);
-//                continue;
-//            }
-//            if (tone.isDiatonic()) {
-//                bottomPanel.add(colorPanel);
-//            } else {
-//                topPanel.add(colorPanel);
-//            }
-//            colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.Y_AXIS));
-//            Color color = tone.getColor();
-//            colorPanel.setBackground(color);
-//
-//            colorPanel.add(Box.createVerticalStrut(5));
-//
-//            JLabel colorLabel = new JLabel(tone.getSpacedName());
-//            colorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-//            colorPanel.add(colorLabel);
-//            colorLabel.setForeground(Color.WHITE);
-//            colorLabel.setBackground(Color.BLACK);
-//            colorLabel.setOpaque(true);
-//
-//            colorPanel.add(Box.createVerticalStrut(5));
-//
-//            JToggleButton keyButton = new JToggleButton(tone.getKey());
-//            keyButtons[tone.ordinal()] = keyButton;
-//            colorPanel.add(keyButton);
-//            keyButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-//            //fixme: Buttons do not look pressed
-//            keyButton.addMouseListener(new MouseAdapter() {
-//                @Override
-//                public void mousePressed(MouseEvent e) {
-//                    playButton.requestFocus();
-//                    handleKey(tone.getPitch(), true);
-//                }
-//
-//                @Override
-//                public void mouseReleased(MouseEvent e) {
-//                    playButton.requestFocus();
-//                    handleKey(tone.getPitch(), false);
-//                }
-//            });
-//
-//            keyButton.setForeground(tone.equals(Si) ? Color.BLACK : Color.WHITE);
-//            colorPanel.add(Box.createVerticalStrut(5));
-//
-//            colorPanel.addMouseListener(new MouseAdapter() {
-//                @Override
-//                public void mousePressed(MouseEvent e) {
-//                    playButton.requestFocus(); //fixme: The play/pause on space-bar needs to be way better than this
-//                    handleKey(tone.getPitch(), true);
-//                }
-//
-//                @Override
-//                public void mouseReleased(MouseEvent e) {
-//                    playButton.requestFocus();
-//                    handleKey(tone.getPitch(), false);
-//                }
-//            });
-//        }
-//        return panel;
-//    }
+    private JComboBox<Pacer> initPacerCombo() {
+        for (Pacer pacer : Pacer.values()) {
+            pacerCombo.addItem(pacer);
+        }
+        pacerCombo.setMaximumRowCount(Pacer.values().length);
+        pacerCombo.addItemListener(event -> executor.execute(() -> {
+            if (event.getStateChange() == ItemEvent.SELECTED) {
+                riddle.set(null);
+                prevRiddle.set(null);
+                riddleQueue.clear();
+                penaltyLists.forEach(List::clear);
+                try {
+                    SwingUtilities.invokeAndWait(this::updatePenaltySpinners);
+                } catch (InterruptedException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+                play(null);
+            }
+        }));
+        pacerCombo.setSelectedItem(DEFAULT_PACER);
+        return pacerCombo;
+    }
 
-    private JComboBox<Riddler> createRiddlerCombo() {
-        JComboBox<Riddler> riddlerCombo = new JComboBox<>();
+    private JComboBox<Riddler> initRiddlerCombo() {
         for (Riddler riddler : Riddler.values()) {
             riddlerCombo.addItem(riddler);
         }
         riddlerCombo.setMaximumRowCount(Riddler.values().length);
-        riddlerCombo.addItemListener(event -> {
-            playButton.requestFocus();
-            executor.execute(() -> {
-                if (event.getStateChange() == ItemEvent.SELECTED) {
-                    try {
-                        SwingUtilities.invokeAndWait(() -> {
-                            toneSpinnersFrozen = true;
-                            frozen = true;
-                            try {
-                                riddle.set(null);
-                                prevRiddle.set(null);
-                                riddleQueue.clear();
-                                Riddler riddler = (Riddler) event.getItem();
-                                List<Integer> riddlerOctaves = Arrays.asList(riddler.octaves);
-                                for (int i = 0; i < ALL_OCTAVES.length; i++) {
-                                    Integer octave = ALL_OCTAVES[i];
-                                    octaveToggles[i].setSelected(riddlerOctaves.contains(octave));
-                                }
-                                updateToneSpinners();
-                                penaltyLists.forEach(List::clear);
-                                updatePenaltySpinners();
-                            } finally {
-                                frozen = false;
-                                toneSpinnersFrozen = false;
+        riddlerCombo.addItemListener(event -> executor.execute(() -> {
+            if (event.getStateChange() == ItemEvent.SELECTED) {
+                try {
+                    SwingUtilities.invokeAndWait(() -> {
+                        toneSpinnersFrozen = true;
+                        frozen = true;
+                        try {
+                            riddle.set(null);
+                            prevRiddle.set(null);
+                            riddleQueue.clear();
+                            Riddler riddler = (Riddler) event.getItem();
+                            List<Integer> riddlerOctaves = Arrays.asList(riddler.octaves);
+                            for (int i = 0; i < ALL_OCTAVES.length; i++) {
+                                Integer octave = ALL_OCTAVES[i];
+                                octaveToggles[i].setSelected(riddlerOctaves.contains(octave));
                             }
-                        });
-                    } catch (InterruptedException | InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
-                    play(null);
+                            updateToneSpinners();
+                            penaltyLists.forEach(List::clear);
+                            updatePenaltySpinners();
+                        } finally {
+                            frozen = false;
+                            toneSpinnersFrozen = false;
+                        }
+                    });
+                } catch (InterruptedException | InvocationTargetException e) {
+                    e.printStackTrace();
                 }
-            });
-        });
+                play(null);
+            }
+        }));
         riddlerCombo.setSelectedItem(DEFAULT_RIDDLER);
         return riddlerCombo;
     }
 
-    private JComboBox<Hinter> createHinterCombo() {
-        JComboBox<Hinter> hinterCombo = new JComboBox<>();
+    private JComboBox<Hinter> initHinterCombo() {
         for (Hinter hinter : Hinter.values()) {
             hinterCombo.addItem(hinter);
         }
         hinterCombo.setSelectedItem(DEFAULT_HINTER);
-        hinterCombo.addItemListener(event -> {
-            playButton.requestFocus();
-            scheduleHintAndPenalty();
-        });
+        hinterCombo.addItemListener(event -> scheduleHintAndPenalty());
         return hinterCombo;
     }
 
-    private JComboBox<GuessRinger> createGuessRingerCombo() {
-        JComboBox<GuessRinger> combo = new JComboBox<>();
+    private JComboBox<GuessRinger> initGuessRingerCombo() {
         for (GuessRinger guessRinger : GuessRinger.values()) {
-            combo.addItem(guessRinger);
+            guessRingerCombo.addItem(guessRinger);
         }
-        combo.setSelectedItem(DEFAULT_GUESS_RINGER);
-        return combo;
+        guessRingerCombo.setSelectedItem(DEFAULT_GUESS_RINGER);
+        return guessRingerCombo;
     }
 
-    private JComboBox<RiddleRinger> createRiddleRingerCombo() {
-        JComboBox<RiddleRinger> combo = new JComboBox<>();
+    private JComboBox<RiddleRinger> initRiddleRingerCombo() {
         for (RiddleRinger ringer : RiddleRinger.values()) {
-            combo.addItem(ringer);
+            riddleRingerCombo.addItem(ringer);
         }
-        combo.setSelectedItem(DEFAULT_RIDDLE_RINGER);
-        return combo;
+        riddleRingerCombo.setSelectedItem(DEFAULT_RIDDLE_RINGER);
+        return riddleRingerCombo;
     }
 
-    private JComboBox<PitchEstimationAlgorithm> createPitchAlgoCombo() {
-        JComboBox<PitchEstimationAlgorithm> pitchAlgoCombo = new JComboBox<>();
+    private JComboBox<PitchEstimationAlgorithm> initPitchAlgoCombo() {
         for (PitchEstimationAlgorithm pitchAlgo : PitchEstimationAlgorithm.values()) {
             pitchAlgoCombo.addItem(pitchAlgo);
         }
         pitchAlgoCombo.setSelectedItem(DEFAULT_PITCH_ALGO);
-        pitchAlgoCombo.addActionListener(event -> {
-            playButton.requestFocus();
-            executor.execute(this::updateMixer);
-        });
+        pitchAlgoCombo.addActionListener(event -> executor.execute(this::updateMixer));
         return pitchAlgoCombo;
     }
 
-    private JComboBox<Mixer.Info> createInputCombo() {
+    private JComboBox<Mixer.Info> initInputCombo() {
         List<Mixer.Info> inputs = getAvailableInputs();
         Mixer.Info defaultInput = getDefaultInput(inputs);
-        JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
         for (Mixer.Info input : inputs) {
             inputCombo.addItem(input);
         }
         if (defaultInput != null) {
             inputCombo.setSelectedItem(defaultInput);
         }
-        inputCombo.addActionListener(event -> {
-            playButton.requestFocus();
-            executor.execute(this::updateMixer);
-        });
+        inputCombo.addActionListener(event -> executor.execute(this::updateMixer));
         return inputCombo;
     }
 
     private JPanel createButtonsPanel() {
-        JPanel playPanel = new JPanel();
-        playPanel.setBackground(Color.DARK_GRAY);
-        playPanel.setLayout(new GridLayout());
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.DARK_GRAY);
+        panel.setLayout(new GridLayout());
 
-        playPanel.add(playButton);
+        panel.add(playButton);
         playButton.setText("Play");
         playButton.addActionListener(event -> handlePlayButton());
 
         JButton resetButton = new JButton("Reset");
-        playPanel.add(resetButton);
+        panel.add(resetButton);
 
         JButton loadButton = new JButton("Load");
-        playPanel.add(loadButton);
+        panel.add(loadButton);
 
         JButton saveButton = new JButton("Save");
-        playPanel.add(saveButton);
+        panel.add(saveButton);
 
-        return playPanel;
+        return panel;
     }
 
     private void handlePlayButton() {
@@ -1334,6 +1244,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return (GuessRinger) guessRingerCombo.getSelectedItem();
     }
 
+    private Pacer getPacer() {
+        return (Pacer) pacerCombo.getSelectedItem();
+    }
+
     private static String info(Color color) {
         return color.getRed() + "," + color.getGreen() + "," + color.getBlue();
     }
@@ -1367,14 +1281,19 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
 
+    //fixme: Add selector for the output device
     private void updateMixer() {
         try {
             if (audioDispatcher != null) {
                 audioDispatcher.stop();
             }
+            Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
+            if (mixerInfo == null || mixerInfo == NO_AUDIO_INPUT) {
+                out("No audio input selected");
+                return;
+            }
             PitchEstimationAlgorithm pitchAlgoOrNull = (PitchEstimationAlgorithm) pitchAlgoCombo.getSelectedItem();
             PitchEstimationAlgorithm pitchAlgo = pitchAlgoOrNull == null ? DEFAULT_PITCH_ALGO : pitchAlgoOrNull;
-            Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
             Mixer mixer = AudioSystem.getMixer(mixerInfo);
             float sampleRate = 44100;
             int bufferSize = 1024;
@@ -1388,16 +1307,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             audioDispatcher = new AudioDispatcher(audioStream, bufferSize, 0);
             audioDispatcher.addAudioProcessor(new PitchProcessor(pitchAlgo, sampleRate, bufferSize, this));
             Runnable dispatch = () -> {
-                while (!Thread.currentThread().isInterrupted()) {
-                    try {
-                        out("Listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]");
-                        audioDispatcher.run();
-                        out("Stopped listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]");
-                    } catch (Throwable e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    SwingUtilities.invokeLater(() -> out("Listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]"));
+                    audioDispatcher.run();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                } finally {
+                    SwingUtilities.invokeLater(() -> out("Stopped listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]"));
                 }
-                out("Bye");
             };
             new Thread(dispatch, "pitchenga-mixer" + idCounter.incrementAndGet()).start();
         } catch (LineUnavailableException e) {
@@ -1406,7 +1323,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private List<Mixer.Info> getAvailableInputs() {
-        return Arrays.stream(AudioSystem.getMixerInfo())
+        List<Mixer.Info> result = new ArrayList<>();
+        List<Mixer.Info> mixers = Arrays.stream(AudioSystem.getMixerInfo())
                 .filter(mixer -> {
                     Mixer aMixer = AudioSystem.getMixer(mixer);
                     Line.Info[] targetLineInfo = aMixer.getTargetLineInfo();
@@ -1418,6 +1336,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     return targetLineInfo.length != 0;
                 })
                 .collect(Collectors.toList());
+        result.add(NO_AUDIO_INPUT);
+        result.addAll(mixers);
+        return result;
     }
 
     private MidiChannel[] initMidi() {
@@ -1586,6 +1507,54 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         private Pair(L left, R right) {
             this.left = left;
             this.right = right;
+        }
+    }
+
+    @SuppressWarnings("unused") //fixme: They are all used in the combo box!
+    private enum Pacer {
+        Answer("Answer to continue", Pacer::checkAnswer),
+        Tempo20("Tempo 20", pair -> pace(20)),
+        Tempo40("Tempo 40", pair -> pace(40)),
+        Tempo60("Tempo 60", pair -> pace(60)),
+        Tempo80("Tempo 80", pair -> pace(80)),
+        Tempo100("Tempo 100", pair -> pace(100)),
+        Tempo120("Tempo 120", pair -> pace(120)),
+        Tempo140("Tempo 140", pair -> pace(140)),
+        ;
+
+        private static volatile long lastPacerTimestamp = System.currentTimeMillis();
+
+        private static  boolean pace(int bpm) {
+            long delay = 60_000 / bpm;
+            long prevTimestamp = lastPacerTimestamp;
+            long elapsed = System.currentTimeMillis() - prevTimestamp;
+            if (elapsed < delay) {
+                long diff = delay - elapsed;
+                try {
+                    Thread.sleep(diff);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            lastPacerTimestamp = System.currentTimeMillis();
+            return true;
+        }
+
+        private static boolean checkAnswer(Pair<Pitch, Pitch> pair) {
+            return pair.left == null || pair.left.getTone().equals(pair.right.getTone());
+        }
+
+        private String name;
+        private Function<Pair<Pitch, Pitch>, Boolean> check;
+
+        Pacer(String name, Function<Pair<Pitch, Pitch>, Boolean> check) {
+            this.name = name;
+            this.check = check;
+        }
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 }
