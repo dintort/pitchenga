@@ -49,15 +49,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(Key::getKeyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
     private static final PitchEstimationAlgorithm DEFAULT_PITCH_ALGO = PitchEstimationAlgorithm.MPM;
-    //    private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
+    private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
+    //    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithTripledFiLe;
 //    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
-//    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithTripledFiLe;
-        private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
+//        private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
     private static final Pacer DEFAULT_PACER = Pacer.Answer;
     private static final Hinter DEFAULT_HINTER = Hinter.OneSec;
     private static final GuessRinger DEFAULT_GUESS_RINGER = GuessRinger.Tune;
 //    private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tone;
-    private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tune;
+        private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tune;
     public static final Mixer.Info NO_AUDIO_INPUT = new Mixer.Info("No audio input", "", "", "1") {
     };
 
@@ -79,8 +79,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
     private volatile long riddleTimestampMs = System.currentTimeMillis();
     private volatile long penaltyRiddleTimestampMs = System.currentTimeMillis();
-    //    private volatile String lastFugue;
-//    private volatile long lastFugueTimestampMs = System.currentTimeMillis();
     private volatile boolean frozen = false; //fixme: Remove as playing on audio dispatcher thread?
     private final AtomicInteger idCounter = new AtomicInteger(-1);
 
@@ -120,7 +118,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         updateMixer();
     }
 
-    //fixme: Need better threading, sometimes multiple things happen at the same time
+    //fixme: Need simpler threading, sometimes multiple things happen at the same time
     private void play(Pitch guess) {
         if (frozen || !isPlaying()) {
             return;
