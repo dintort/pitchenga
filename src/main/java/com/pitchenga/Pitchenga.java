@@ -1158,14 +1158,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private JComboBox<Mixer.Info> initInputCombo() {
         List<Mixer.Info> inputs = getAvailableInputs();
-        Mixer.Info defaultInput = getDefaultInput(inputs);
+        inputCombo.setMaximumRowCount(inputs.size());
         for (Mixer.Info input : inputs) {
             inputCombo.addItem(input);
         }
+        Mixer.Info defaultInput = getDefaultInput(inputs);
         if (defaultInput != null) {
             inputCombo.setSelectedItem(defaultInput);
         }
-        inputCombo.addActionListener(event -> executor.execute(this::updateMixer));
+        inputCombo.addActionListener(event -> updateMixer());
         return inputCombo;
     }
 
@@ -1277,7 +1278,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
             if (mixerInfo == null || mixerInfo == NO_AUDIO_INPUT) {
                 out("No audio input selected, play using keyboard or mouse.");
-                out("To play using a musical instrument please select audio input.");
+                out("To play using a musical instrument please select an audio input.");
                 return;
             }
             PitchEstimationAlgorithm pitchAlgoOrNull = (PitchEstimationAlgorithm) pitchAlgoCombo.getSelectedItem();
