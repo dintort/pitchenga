@@ -26,37 +26,41 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static com.pitchenga.Interval.frt;
+import static com.pitchenga.Interval.sxt;
 import static com.pitchenga.Tone.*;
 
 //fixme: Split view and controller
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
-    public static final Pitch[] PITCHES = Pitch.values();
-    private static final Map<String, Pitch> PITCH_BY_NAME = Stream.of(PITCHES).collect(Collectors.toMap(Pitch::name, pitch -> pitch));
-    private static final Map<Integer, Pitch> PITCH_BY_ORDINAL = Stream.of(PITCHES).collect(Collectors.toMap(Pitch::ordinal, pitch -> pitch));
+    private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
+    private static final Pitch[] PITCHES = Pitch.values();
+    private static final Tone[] TONES = Tone.values();
+    public static final Key[] KEYS = Key.values();
     private static final int DEFAULT_PENALTY_FACTOR = 3;
     private static final Integer[] DEFAULT_OCTAVES = new Integer[]{2, 3, 4, 5, 6};
     private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(Pitch::getOctave).distinct().toArray(Integer[]::new);
-    private static final Tone[] CHROMATIC_SCALE = Tone.values();
-    private static final Tone[] DIATONIC_SCALE = Arrays.stream(Tone.values()).filter(Tone::isDiatonic).collect(Collectors.toList()).toArray(new Tone[0]);
-    private static final Tone[] SHARPS_SCALE = Arrays.stream(Tone.values()).filter(tone -> !tone.isDiatonic()).collect(Collectors.toList()).toArray(new Tone[0]);
+    private static final Integer MIN_OCTAVE = Arrays.stream(ALL_OCTAVES).min(Integer::compare).orElse(0);
+    private static final Integer MAX_OCTAVE = Arrays.stream(ALL_OCTAVES).max(Integer::compare).orElse(0);
+    private static final Tone[] CHROMATIC_SCALE = TONES;
+    private static final Tone[] DIATONIC_SCALE = Arrays.stream(TONES).filter(Tone::isDiatonic).collect(Collectors.toList()).toArray(new Tone[0]);
+    private static final Tone[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.isDiatonic()).collect(Collectors.toList()).toArray(new Tone[0]);
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(Key::getKeyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
     private static final PitchEstimationAlgorithm DEFAULT_PITCH_ALGO = PitchEstimationAlgorithm.MPM;
-    //fixme: Really need the save feature...
-    private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
-    //    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
-    //    private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
+    //    private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
+//    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
+//    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithTripledFiLe;
+        private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
     private static final Pacer DEFAULT_PACER = Pacer.Answer;
     private static final Hinter DEFAULT_HINTER = Hinter.OneSec;
     private static final GuessRinger DEFAULT_GUESS_RINGER = GuessRinger.Tune;
+//    private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tone;
     private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tune;
     public static final Mixer.Info NO_AUDIO_INPUT = new Mixer.Info("No audio input", "", "", "1") {
     };
 
-    private final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor();
     private final BlockingQueue<Runnable> keyQueue = new ArrayBlockingQueue<>(1);
@@ -85,12 +89,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JPanel pitchyPanel = new JPanel();
     private final JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
     private final JToggleButton[] octaveToggles = new JToggleButton[ALL_OCTAVES.length];
-    private final JSpinner[] toneSpinners = Arrays.stream(Tone.values())
+    private final JSpinner[] toneSpinners = Arrays.stream(TONES)
             .map(tone -> new JSpinner(new SpinnerNumberModel(0, 0, 9, 1)))
             .collect(Collectors.toList()).toArray(new JSpinner[0]);
     private volatile boolean toneSpinnersFrozen = false; //fixme: Maybe use "frozen" instead
-    private final JSpinner[] penaltySpinners = new JSpinner[Tone.values().length];
-    private final List<List<Tone>> penaltyLists = Arrays.stream(Tone.values()).map(tone -> new ArrayList<Tone>()).collect(Collectors.toList());
+    private final JSpinner[] penaltySpinners = new JSpinner[TONES.length];
+    private final List<List<Tone>> penaltyLists = Arrays.stream(TONES).map(tone -> new ArrayList<Tone>()).collect(Collectors.toList());
     private final JComboBox<PitchEstimationAlgorithm> pitchAlgoCombo = new JComboBox<>();
     private final JComboBox<Hinter> hinterCombo = new JComboBox<>();
     private final JComboBox<Pacer> pacerCombo = new JComboBox<>();
@@ -104,36 +108,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //    private final JTextPane text = new JTextPane();
     private final Set<Pitch> pressedKeys = new HashSet<>(); // To ignore OS's key repeating when holding
 
-    //fixme: +Gui-less mode
     public Pitchenga() {
         super("Pitchenga");
-        initIcon();
-        initKeyboard();
-
         MidiChannel[] midiChannels = initMidi();
         piano = midiChannels[0];
         brightPiano = midiChannels[1];
         guitar = midiChannels[2];
 
-        initView();
-
-        updateToneSpinners();
+        initGui(); //fixme: +Gui-less mode
+        initKeyboard();
         updateMixer();
-
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.pack();
-
-        Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        //fixme: Change to center when saving to file is implemented
-//        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-        this.setSize(730, (int) screenSize.getHeight());
-//        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
-        //fixme: Should resize relatively + have a slider for the user to resize
-//        riddlePanel.add(Box.createVerticalStrut((int) (this.getSize().getHeight() / 3)));
-
-        this.setLocation(screenSize.width - getSize().width - 10, screenSize.height / 2 - getSize().height / 2);
-//        this.setLocation(10, screenSize.height / 2 - getSize().height / 2);
-        this.setVisible(true);
     }
 
     //fixme: Need better threading, sometimes multiple things happen at the same time
@@ -164,9 +148,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             this.prevRiddle.set(riddle);
             this.riddle.set(null);
 
-            fugue(guitar, getGuessRinger().ring.apply(riddle), true);
+            Object[] fugue = getGuessRinger().ring.apply(riddle);
+            fugue(guitar, fugue, true);
             keyQueue.clear();
-            executor.execute(() -> play(null));
+            //fixme: This will stack overflow in the auto-play mode
+            play(null);
         } else if (guess != null) {
             //fixme: Move to hinter
             if (System.currentTimeMillis() - riddleTimestampMs >= getHinter().delayMs) {
@@ -275,41 +261,37 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     //fixme: Add strobe tuner
     private void updateGuessColor(Pitch guess, float pitch, float probability, double rms) {
-        Pitch flat = PITCH_BY_ORDINAL.get(guess.ordinal() - 1);
-        Pitch sharp = PITCH_BY_ORDINAL.get(guess.ordinal() + 1);
-        if (flat != null && sharp != null) { // Can be null when out of range, this could have been done better, but meh
-            double diff = pitch - guess.getFrequency();
-            Pitch pitchy;
-            if (diff < 0) {
-                pitchy = flat;
-            } else {
-                pitchy = sharp;
-            }
-            double pitchyDiff = Math.abs(guess.getFrequency() - pitchy.getFrequency());
-            double accuracy = Math.abs(diff) / pitchyDiff;
-            double pitchiness = accuracy * 10;
-            Color guessColor;
-            Color pitchyColor;
-            if (Math.abs(diff) < 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000314159) {
-                guessColor = pitchyColor = guess.getTone().getColor();
-            } else {
-                //fixme: Unit test for interpolation direction
-                // pitchyColor = interpolateColor(pitchiness, guess.getTone().getColor(), pitchy.getTone().getColor()); // E.g. this should fail or something
-                // guessColor = interpolateColor(accuracy, guess.getTone().getColor(), pitchy.getTone().getColor());
-                guessColor = interpolateColor(accuracy, guess.getTone().getColor(), pitchy.getTone().getColor());
-                pitchyColor = interpolateColor(pitchiness, guess.getTone().getColor(), pitchy.getTone().getColor());
-            }
-            if (debug) {
-                debug(String.format(" %s | pitch=%.2fHz | m=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
-                        guess, pitch, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(guess.getTone().getColor()), info(pitchy.getTone().getColor()), info(guessColor), info(pitchyColor)));
-            }
-            SwingUtilities.invokeLater(() -> {
-                guessLabel.setText(guess.getTone().getSpacedName());
-                pitchyPanel.setBackground(guess.getTone().getColor());
-                setColor(guessColor);
-                pitchyPanel.setBorder(BorderFactory.createLineBorder(pitchyColor, 5));
-            });
+        double diff = pitch - guess.getFrequency();
+        Pitch pitchy;
+        if (diff < 0) {
+            pitchy = transposePitch(guess, 0, -1);
+        } else {
+            pitchy = transposePitch(guess, 0, +1);
         }
+        double pitchyDiff = Math.abs(guess.getFrequency() - pitchy.getFrequency());
+        double accuracy = Math.abs(diff) / pitchyDiff;
+        double pitchiness = accuracy * 20;
+        Color guessColor;
+        Color pitchyColor;
+        if (Math.abs(diff) < 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000314159) {
+            guessColor = pitchyColor = guess.getTone().getColor();
+        } else {
+            //fixme: Unit test for interpolation direction
+            // pitchyColor = interpolateColor(pitchiness, guess.getTone().getColor(), pitchy.getTone().getColor()); // E.g. this should fail or something
+            // guessColor = interpolateColor(accuracy, guess.getTone().getColor(), pitchy.getTone().getColor());
+            guessColor = interpolateColor(accuracy, guess.getTone().getColor(), pitchy.getTone().getColor());
+            pitchyColor = interpolateColor(pitchiness, guess.getTone().getColor(), pitchy.getTone().getColor());
+        }
+        if (debug) {
+            debug(String.format(" %s | pitch=%.2fHz | m=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
+                    guess, pitch, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(guess.getTone().getColor()), info(pitchy.getTone().getColor()), info(guessColor), info(pitchyColor)));
+        }
+        SwingUtilities.invokeLater(() -> {
+            guessLabel.setText(guess.getTone().getSpacedName());
+            pitchyPanel.setBackground(guess.getTone().getColor());
+            setColor(guessColor);
+            pitchyPanel.setBorder(BorderFactory.createLineBorder(pitchyColor, 5));
+        });
     }
 
     private void setColor(Color guessColor) {
@@ -408,26 +390,25 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private List<Pitch> randomize() {
-        Tone[] tones = Tone.values();
-        List<Tone> preScale = new ArrayList<>(toneSpinners.length * tones.length);
+        List<Tone> preScale = new ArrayList<>(toneSpinners.length * TONES.length);
         for (int i = 0; i < toneSpinners.length; i++) {
             JSpinner spinner = toneSpinners[i];
             int count = (int) spinner.getValue();
             for (int j = 0; j < count; j++) {
-                preScale.add(tones[i]);
-                preScale.add(tones[i]); // Better shuffling - allows the same note twice in a row and gives more space to put penalties.
+                preScale.add(TONES[i]);
+                preScale.add(TONES[i]); // Better shuffling - allows the same note twice in a row and gives more space to put penalties.
             }
         }
         Collections.shuffle(preScale);
 
         //fixme: When too many penalties they align in ascending scale :(
-        List<Tone> scale = new ArrayList<>(toneSpinners.length * tones.length);
+        List<Tone> scale = new ArrayList<>(toneSpinners.length * TONES.length);
         for (Tone tone : preScale) {
             scale.add(tone);
             for (int i = 0; i < penaltyLists.size(); i++) {
                 List<Tone> penaltyList = penaltyLists.get(i);
                 if (penaltyList.size() > 0) {
-                    Tone penalty = tones[i];
+                    Tone penalty = TONES[i];
                     for (Iterator<Tone> iterator = penaltyList.iterator(); iterator.hasNext(); ) {
                         Tone next = iterator.next();
                         if (next.equals(tone)) {
@@ -462,14 +443,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     } else {
                         int index = random.nextInt(selectedOctaves.size());
                         name = name + (int) selectedOctaves.get(index);
-                        pitch = PITCH_BY_NAME.get(name);
+                        pitch = Pitch.valueOf(name);
                     }
                     debug("Pitch=" + pitch + ", name=" + name);
                     return pitch;
                 })
                 .collect(Collectors.toList());
     }
-
 
     private void fugue(MidiChannel midiChannel, Object[] fugue, boolean flashColors) {
         frozen = true;
@@ -478,10 +458,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             Pitch prev = null;
             for (Object next : fugue) {
                 if (next == null) {
-                    Thread.sleep(Interval.i4);
+                    Thread.sleep(frt);
                 } else if (next instanceof Pitch) {
                     if (prev != null) {
-                        Thread.sleep(Interval.i4);
+                        Thread.sleep(frt);
                         midiChannel.noteOff(prev.getMidi());
                     }
                     Pitch pitch = (Pitch) next;
@@ -508,7 +488,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
             }
             if (prev != null) {
-                Thread.sleep(Interval.i4);
+                Thread.sleep(frt);
                 midiChannel.noteOff(prev.getMidi());
                 if (flashColors) {
                     Key key = prev.getTone().getKey();
@@ -614,7 +594,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         });
     }
 
-    private void initView() {
+    private void initGui() {
+        initIcon();
         this.setLayout(new BorderLayout());
 
         //fixme: +Color circle to the control panel +light them up with guess update
@@ -667,6 +648,23 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pianoPanelPanel.add(createChromaticPiano(), BorderLayout.CENTER); //fixme: Remove the grey gap on the sides
         pianoPanelPanel.add(createTwoOctavesPiano(), BorderLayout.SOUTH);
 //        pianoPanelPanel.add(createOneOctavePiano(), BorderLayout.SOUTH);
+
+        updateToneSpinners();
+
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.pack();
+
+        Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        //fixme: Change to center when saving to file is implemented
+//        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
+        this.setSize(730, (int) screenSize.getHeight());
+//        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
+        //fixme: Should resize relatively + have a slider for the user to resize
+//        riddlePanel.add(Box.createVerticalStrut((int) (this.getSize().getHeight() / 3)));
+
+        this.setLocation(screenSize.width - getSize().width - 10, screenSize.height / 2 - getSize().height / 2);
+//        this.setLocation(10, screenSize.height / 2 - getSize().height / 2);
+        this.setVisible(true);
     }
 
     private void initKeyboard() {
@@ -730,7 +728,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalMonitorStateException();
         }
-        for (Key k : Key.values()) {
+        for (Key k : KEYS) {
             JToggleButton keyButton = keyButtons[k.ordinal()];
             keyButton.setSelected(k.getPitch() != null && k.getPitch().getTone().equals(key.getPitch().getTone()));
         }
@@ -794,7 +792,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         JPanel panel = new JPanel(new GridLayout(1, 12));
         panel.setBackground(Color.DARK_GRAY);
 
-        for (Tone tone : Tone.values()) {
+        for (Tone tone : TONES) {
             JPanel colorPanel = new JPanel();
             panel.add(colorPanel);
             colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.Y_AXIS));
@@ -1361,7 +1359,48 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    private void debug(Object... messages) {
+    // This could be done much better
+    private static Pitch transposePitch(Pitch pitch, int octaves, int steps) {
+        Pitch result = pitch;
+        if (octaves != 0) {
+            int octave = pitch.getOctave() + octaves;
+            octave = Math.max(MIN_OCTAVE, octave);
+            octave = Math.min(MAX_OCTAVE, octave);
+            String name = pitch.getTone().name() + octave;
+            result = Pitch.valueOf(name);
+        }
+        if (steps > TONES.length || steps < -TONES.length) {
+            throw new IllegalArgumentException("Cannot shift more than " + TONES.length + ": " + steps);
+        }
+        if (steps != 0) {
+            int ordinal = pitch.getTone().ordinal() + steps;
+            if (ordinal < 0) {
+                ordinal += TONES.length;
+            }
+            if (ordinal > TONES.length - 1) {
+                ordinal -= TONES.length;
+            }
+            Tone tone = TONES[ordinal];
+            String name = tone.name() + pitch.getOctave();
+            result = Pitch.valueOf(name);
+        }
+        return result;
+    }
+
+    private static Object[] transposeFugue(Object[] fugue, int shiftOctaves) {
+        List<Object> transposed = new ArrayList<>(fugue.length);
+        for (Object next : fugue) {
+            if (next instanceof Pitch) {
+                Pitch nextPitch = (Pitch) next;
+                next = transposePitch(nextPitch, shiftOctaves, 0);
+            }
+            transposed.add(next);
+        }
+        debug("Transposed fugue: " + transposed);
+        return transposed.toArray();
+    }
+
+    private static void debug(Object... messages) {
         if (!debug) {
             return;
         }
@@ -1390,8 +1429,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    //fixme: Add tempo-based mode without guessing
-
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     private enum Riddler {
         Chromatic("Chromatic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
@@ -1400,6 +1437,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         DiatonicOneOctave("Diatonic - 1 octave", new Tone[][]{DIATONIC_SCALE}, Pitchenga::randomize, new Integer[0]),
         ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
         ChromaticWithDoubledSharps("Chromatic with doubled sharps - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
+        //fixme: Remove
+        ChromaticWithTripledFiLe("Chromatic with tripled Fi and Le - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE, {Fi, Fi, Le, Le}}, Pitchenga::randomize, DEFAULT_OCTAVES),
         //fixme: Add chromatic with no two sharps in a row
         //fixme: Add scales C, Am, D, etc
         //fixme: Add random within scales
@@ -1435,11 +1474,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     private enum GuessRinger {
         Tune("Ring mnemonic tune on correct answer", pitch -> pitch.getTone().getTune()),
-        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), Interval.i4}),
-        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getPitch(), Interval.i4}),
+        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), frt}),
+        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getPitch(), frt}),
         ToneAndDo("Ring tone and Do on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), Do.getPitch()}),
         None("Ring nothing on correct answer", pitch -> new Object[]{}),
-        Pause("Short pause on correct answer", pitch -> new Object[]{Interval.i16}),
+        Pause("Short pause on correct answer", pitch -> new Object[]{sxt}),
         ;
         private final String name;
         private final Function<Pitch, Object[]> ring;
@@ -1457,8 +1496,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     private enum RiddleRinger {
-        Tune("Riddle mnemonic tune", pitch -> pitch.getTone().getTune()),
-        Tone("Riddle tone", pitch -> new Object[]{pitch.getTone().getPitch(), Interval.i4}),
+        Tune("Riddle mnemonic tune", RiddleRinger::transposeTune),
+        Tone("Riddle tone", pitch -> new Object[]{pitch, frt}),
         ToneAndDo("Riddle tone and Do", pitch -> new Object[]{pitch.getTone().getPitch(), Do.getPitch()}),
         ;
         private final String name;
@@ -1467,6 +1506,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         RiddleRinger(String name, Function<Pitch, Object[]> ring) {
             this.name = name;
             this.ring = ring;
+        }
+
+        private static Object[] transposeTune(Pitch pitch) {
+            int shift = pitch.getOctave() - pitch.getTone().getPitch().getOctave();
+            return transposeFugue(pitch.getTone().getTune(), shift);
         }
 
         @Override

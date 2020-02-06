@@ -9,18 +9,18 @@ import static com.pitchenga.Pitch.*;
 
 public enum Fugue {
 
-    Fi(Fi3, i8, i16, So3, i16, Do4, i4),
-    So(So3, i8, La3, i16, Si3, i16, Do4, i4),
-    Le(Le3, i4, i16, So3, i16, Do4, i4),
-    La(La3, i4, Si3, i16, Do4, i4),
-    Se(Se3, i4, i16, Do4, i4),
-    Si(Si3, i4, Do4, i4),
-    Do(Do4, i8, Do4, i8, Do4, i4),
-    Ra(Ra4, i4, Do4, i4),
-    Re(Re4, i4, Do4, i4),
-    Me(Me4, i4, i16, Do4, i4),
-    Mi(Mi4, i4, Re4, i16, Do4, i4),
-    Fa(Fa4, i8, Mi4, i16, Re4, i16, Do4, i4),
+    Fi(Fi3, eit, sxt, So3, sxt, Do4, frt),
+    So(So3, eit, La3, sxt, Si3, sxt, Do4, frt),
+    Le(Le3, frt, sxt, So3, sxt, Do4, frt),
+    La(La3, frt, Si3, sxt, Do4, frt),
+    Se(Se3, frt, sxt, Do4, frt),
+    Si(Si3, frt, Do4, frt),
+    Do(Do4, eit, Do4, eit, Do4, frt),
+    Ra(Ra4, frt, Do4, frt),
+    Re(Re4, frt, Do4, frt),
+    Me(Me4, frt, sxt, Do4, frt),
+    Mi(Mi4, frt, Re4, sxt, Do4, frt),
+    Fa(Fa4, eit, Mi4, sxt, Re4, sxt, Do4, frt),
     ;
 
     private final Pitch pitch;
