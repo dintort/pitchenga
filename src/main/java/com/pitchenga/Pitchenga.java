@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.pitchenga.Defaults.*;
 import static com.pitchenga.Interval.frt;
 import static com.pitchenga.Interval.sxt;
 import static com.pitchenga.Tone.*;
@@ -37,9 +38,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
     private static final Pitch[] PITCHES = Pitch.values();
     private static final Tone[] TONES = Tone.values();
-    public static final Key[] KEYS = Key.values();
-    private static final int DEFAULT_PENALTY_FACTOR = 3;
-    private static final Integer[] DEFAULT_OCTAVES = new Integer[]{2, 3, 4, 5, 6};
+    private static final Key[] KEYS = Key.values();
     private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(Pitch::getOctave).distinct().toArray(Integer[]::new);
     private static final Integer MIN_OCTAVE = Arrays.stream(ALL_OCTAVES).min(Integer::compare).orElse(0);
     private static final Integer MAX_OCTAVE = Arrays.stream(ALL_OCTAVES).max(Integer::compare).orElse(0);
@@ -48,18 +47,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Tone[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.isDiatonic()).collect(Collectors.toList()).toArray(new Tone[0]);
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(Key::getKeyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
-    private static final PitchEstimationAlgorithm DEFAULT_PITCH_ALGO = PitchEstimationAlgorithm.MPM;
-    private static final Riddler DEFAULT_RIDDLER = Riddler.Diatonic;
-    //    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithTripledFiLe;
-//    private static final Riddler DEFAULT_RIDDLER = Riddler.ChromaticWithDoubledSharps;
-//        private static final Riddler DEFAULT_RIDDLER = Riddler.Chromatic;
-    private static final Pacer DEFAULT_PACER = Pacer.Answer;
-    private static final Hinter DEFAULT_HINTER = Hinter.OneSec;
-    private static final GuessRinger DEFAULT_GUESS_RINGER = GuessRinger.Tune;
-//    private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tone;
-        private static final RiddleRinger DEFAULT_RIDDLE_RINGER = RiddleRinger.Tune;
-    public static final Mixer.Info NO_AUDIO_INPUT = new Mixer.Info("No audio input", "", "", "1") {
-    };
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -1253,6 +1240,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private Mixer.Info getDefaultInput(List<Mixer.Info> inputs) {
+        //noinspection ConstantConditions
+        if (DEFAULT_INPUT != null) {
+            return DEFAULT_INPUT;
+        }
         Mixer.Info defaultInput = null;
         if (inputs.size() > 0) {
             for (Mixer.Info mixerInfo : inputs) {
@@ -1285,7 +1276,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
             if (mixerInfo == null || mixerInfo == NO_AUDIO_INPUT) {
-                out("No audio input selected");
+                out("No audio input selected, play using keyboard or mouse.");
+                out("To play using a musical instrument please select audio input.");
                 return;
             }
             PitchEstimationAlgorithm pitchAlgoOrNull = (PitchEstimationAlgorithm) pitchAlgoCombo.getSelectedItem();
@@ -1428,7 +1420,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
-    private enum Riddler {
+    public
+    enum Riddler {
         Chromatic("Chromatic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
         ChromaticOneOctave("Chromatic - 1 octave", new Tone[][]{CHROMATIC_SCALE}, Pitchenga::randomize, new Integer[0]),
         Diatonic("Diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{DIATONIC_SCALE}, Pitchenga::randomize, DEFAULT_OCTAVES),
@@ -1470,7 +1463,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
-    private enum GuessRinger {
+    public
+    enum GuessRinger {
         Tune("Ring mnemonic tune on correct answer", pitch -> pitch.getTone().getTune()),
         Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.getTone().getPitch(), frt}),
         JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getPitch(), frt}),
@@ -1493,7 +1487,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
-    private enum RiddleRinger {
+    public
+    enum RiddleRinger {
         Tune("Riddle mnemonic tune", RiddleRinger::transposeTune),
         Tone("Riddle tone", pitch -> new Object[]{pitch, frt}),
         ToneAndDo("Riddle tone and Do", pitch -> new Object[]{pitch.getTone().getPitch(), Do.getPitch()}),
@@ -1518,7 +1513,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
-    private enum Hinter {
+    public
+    enum Hinter {
         Always("Always hint", 0),
         OneSec("Hint after 1 second", 1000),
         TwoSec("Hint after 2 seconds", 2000),
@@ -1552,7 +1548,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
-    private enum Pacer {
+    public
+    enum Pacer {
         Answer("Answer to continue", Pacer::checkAnswer),
         Tempo20("Tempo 20", pair -> pace(20)),
         Tempo40("Tempo 40", pair -> pace(40)),
