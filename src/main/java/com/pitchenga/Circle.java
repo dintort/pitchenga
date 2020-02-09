@@ -34,7 +34,7 @@ public class Circle extends JFrame {
             int y = (int) (halfSide * Math.cos(phi) + halfSide - radius / 2) + radius;
             Tone tone = tones[i];
 
-            JPanel circle = new Circly(tone);
+            JPanel circle = new Circlet(tone);
 //            JPanel circle = new JPanel();
             panel.add(circle);
             JLabel label = new JLabel();
@@ -57,10 +57,10 @@ public class Circle extends JFrame {
     }
 
 
-    private static class Circly extends JPanel {
+    private static class Circlet extends JPanel {
         private final Tone tone;
 
-        public Circly(Tone tone) {
+        public Circlet(Tone tone) {
             this.tone = tone;
         }
 
