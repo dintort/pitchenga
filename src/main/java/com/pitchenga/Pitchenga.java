@@ -50,8 +50,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor();
-    private final BlockingQueue<Runnable> keyQueue = new ArrayBlockingQueue<>(1);
-    private final ExecutorService keyExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, keyQueue, new ThreadPoolExecutor.DiscardOldestPolicy());
+    private final BlockingQueue<Runnable> playQueue = new ArrayBlockingQueue<>(1);
+    private final ExecutorService playExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, playQueue, new ThreadPoolExecutor.DiscardOldestPolicy());
     private final Random random = new Random();
     private volatile AudioDispatcher audioDispatcher;
     //fixme: +Selectors for instruments +Random instrument: 1) guitar/piano/sax 2) more 3) all
@@ -67,14 +67,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
     private volatile long riddleTimestampMs = System.currentTimeMillis();
     private volatile long penaltyRiddleTimestampMs = System.currentTimeMillis();
-    private volatile boolean frozen = false; //fixme: Remove as playing on audio dispatcher thread?
+    private volatile boolean frozen = false;
     private final AtomicInteger idCounter = new AtomicInteger(-1);
     private final Set<Pitch> pressedKeys = new HashSet<>(); // To ignore OS's key repeating when holding
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
 
     private final JPanel guessPanel = new JPanel();
-    private final JLabel guessLabel = new JLabel();
+    private final JLabel pitchyLabel = new JLabel();
     private final JPanel pitchyPanel = new JPanel();
     private final JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
     private final JToggleButton[] octaveToggles = new JToggleButton[ALL_OCTAVES.length];
@@ -147,22 +147,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         this.prevRiddle.set(riddle);
         this.riddle.set(null);
+        SwingUtilities.invokeLater(() -> {
+            pitchyLabel.setText(riddle.tone.spacedName);
+            setPitchyColor(riddle.tone.color, riddle.tone.color);
+        });
 
-        Object[] fugue = getGuessRinger().ring.apply(riddle);
-        fugue(guitar, fugue, true);
-        keyQueue.clear();
+        fugue(guitar, getGuessRinger().ring.apply(riddle), true);
+        this.playQueue.clear();
         //fixme: This will stack overflow in the auto-play mode
         play(null);
     }
 
     private void incorrect(Pitch riddle) {
-        //fixme: Move to hinter
-        if (System.currentTimeMillis() - riddleTimestampMs >= getHinter().delayMs) {
-            SwingUtilities.invokeLater(() -> {
-                guessLabel.setText("    ");
-                setPitchyColor(riddle.tone.color, riddle.tone.color);
-            });
-        }
         frozen = true;
         try {
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
@@ -190,7 +186,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 this.riddle.set(riddle);
                 this.riddleTimestampMs = System.currentTimeMillis();
                 SwingUtilities.invokeLater(() -> {
-                    guessLabel.setText("    ");
+                    pitchyLabel.setText("    ");
                     setGuessColor(Color.DARK_GRAY);
                     //fixme: Move this logic to Hinter
                     Color pitchyColor = getHinter().equals(Hinter.Always)
@@ -217,9 +213,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Audio stops working sometimes especially when GarageBand is running
     @Override
     public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent event) {
-        if (frozen) {
-            return;
-        }
         double rms = event.getRMS() * 100;
         try {
             if (pitchDetectionResult.getPitch() != -1) {
@@ -229,7 +222,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     double rmsThreshold = 0.1;
                     if (guessQueue.size() < 2) {
                         guessQueue.add(new Pair<>(guess, rms));
-                    } else {
+                    } else if (!frozen) {
                         boolean same = true;
                         for (Pair<Pitch, Double> pitchRms : guessQueue) {
                             if (!guess.equals(pitchRms.left)) {
@@ -240,21 +233,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         }
                         if (same) {
                             if (maxRms > rmsThreshold) {
-                                if (isPlaying()) {
-                                    updateGuessColor(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms);
-                                }
-                                SwingUtilities.invokeLater(() -> updatePianoButtons(guess.tone.getKey()));
                                 //fixme: +"Monitoring" mode with a toggle button
                                 transcribe(guess, false);
-                                play(guess);
+                                playExecutor.execute(() -> play(guess));
                             }
                         } else {
                             guessQueue.clear();
                             guessQueue.add(new Pair<>(guess, rms));
                         }
                     }
-                    if (!isPlaying() && maxRms > rmsThreshold) {
+                    if (maxRms > rmsThreshold) {
                         updateGuessColor(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms);
+                        SwingUtilities.invokeLater(() -> updatePianoButtons(guess.tone.getKey()));
                     }
                 }
             }
@@ -281,6 +271,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (Math.abs(diff) < 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000314159) {
             guessColor = pitchyColor = toneColor;
         } else {
+            //fixme: Bending Si to Do seems wrong
             //fixme: Unit test for interpolation direction
             guessColor = interpolateColor(accuracy, toneColor, pitchy.tone.color);
             pitchyColor = interpolateColor(pitchiness, toneColor, pitchy.tone.color);
@@ -290,9 +281,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     guess, pitch, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchyColor)));
         }
         SwingUtilities.invokeLater(() -> {
-            guessLabel.setText(guess.tone.spacedName);
             setGuessColor(guessColor);
-            setPitchyColor(toneColor, pitchyColor);
+            if (!isPlaying()) {
+                pitchyLabel.setText(guess.tone.spacedName);
+                setPitchyColor(toneColor, pitchyColor);
+            }
         });
     }
 
@@ -375,7 +368,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     if (riddle != null) {
                         if (!hinter.equals(Hinter.Always)) {
                             setPitchyColor(riddle.tone.color, riddle.tone.color);
-                            guessLabel.setText("    ");
                         }
                         Pitch prevRiddle = this.prevRiddle.get();
                         if (prevRiddle != null) {
@@ -476,8 +468,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     if (flashColors) {
                         SwingUtilities.invokeLater(() -> {
                             updatePianoButton(pitch.tone.getKey(), true);
-                            Color color = pitch.tone.color;
-                            setPitchyColor(color, color);
+                            setPitchyColor(pitch.tone.color, pitch.tone.color);
                         });
                     }
                     prev = pitch;
@@ -624,11 +615,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         labelsPanel.add(pitchyPanel);
         pitchyPanel.setBackground(Color.GRAY);
         pitchyPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        pitchyPanel.add(guessLabel);
-        guessLabel.setOpaque(true);
-        guessLabel.setForeground(Color.WHITE);
-        guessLabel.setBackground(Color.BLACK);
-        guessLabel.setFont(COURIER);
+        pitchyPanel.add(pitchyLabel);
+        pitchyLabel.setOpaque(true);
+        pitchyLabel.setForeground(Color.WHITE);
+        pitchyLabel.setBackground(Color.BLACK);
+        pitchyLabel.setFont(COURIER);
 
         JScrollPane scroll = new JScrollPane(text);
         scroll.setBorder(null);
@@ -734,7 +725,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             pressedKeys.remove(key.pitch);
             brightPiano.noteOff(midi);
             keyButtons[key.ordinal()].setSelected(false);
-            keyExecutor.execute(() -> play(key.pitch));
+            playExecutor.execute(() -> play(key.pitch));
         }
     }
 
@@ -825,7 +816,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             toneSpinner.setAlignmentX(Component.CENTER_ALIGNMENT);
             toneSpinner.addChangeListener(event -> {
                 if (!toneSpinnersFrozen) {
-                    keyExecutor.execute(() -> {
+                    playExecutor.execute(() -> {
                         resetGame();
                         play(null);
                     });
