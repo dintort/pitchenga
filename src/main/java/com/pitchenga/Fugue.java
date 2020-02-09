@@ -9,22 +9,22 @@ import static com.pitchenga.Pitch.*;
 
 public enum Fugue {
 
-    Fi(Fi3, eit, sxt, So3, sxt, Do4, frt),
-    So(So3, eit, La3, sxt, Si3, sxt, Do4, frt),
-    Le(Le3, frt, sxt, So3, sxt, Do4, frt),
-    La(La3, frt, Si3, sxt, Do4, frt),
-    Se(Se3, frt, sxt, Do4, frt),
-    Si(Si3, frt, Do4, frt),
-    Do(Do4, eit, Do4, eit, Do4, frt),
-    Ra(Ra4, frt, Do4, frt),
-    Re(Re4, frt, Do4, frt),
-    Me(Me4, frt, sxt, Do4, frt),
-    Mi(Mi4, frt, Re4, sxt, Do4, frt),
-    Fa(Fa4, eit, Mi4, sxt, Re4, sxt, Do4, frt),
+    Fi(Fi3, eight, sixteen, So3, sixteen, Do4, four),
+    So(So3, eight, La3, sixteen, Si3, sixteen, Do4, four),
+    Le(Le3, four, sixteen, So3, sixteen, Do4, four),
+    La(La3, four, Si3, sixteen, Do4, four),
+    Se(Se3, four, sixteen, Do4, four),
+    Si(Si3, four, Do4, four),
+    Do(Do4, eight, Do4, eight, Do4, four),
+    Ra(Ra4, four, Do4, four),
+    Re(Re4, four, Do4, four),
+    Me(Me4, four, sixteen, Do4, four),
+    Mi(Mi4, four, Re4, sixteen, Do4, four),
+    Fa(Fa4, eight, Mi4, sixteen, Re4, sixteen, Do4, four),
     ;
 
-    private final Pitch pitch;
-    private final Object[] tune;
+    public final Pitch pitch;
+    public final Object[] tune;
 
     Fugue(Pitch pitch, Object... coda) {
         this.pitch = pitch;
@@ -32,14 +32,6 @@ public enum Fugue {
         shortTune.add(pitch);
         shortTune.addAll(Arrays.asList(coda));
         this.tune = shortTune.toArray();
-    }
-
-    public Pitch getPitch() {
-        return pitch;
-    }
-
-    public Object[] getTune() {
-        return tune;
     }
 
 }

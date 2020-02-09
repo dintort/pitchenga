@@ -5,7 +5,7 @@ import java.awt.*;
 
 import static com.pitchenga.Tone.*;
 
-public class Circles extends JFrame {
+public class Circle extends JFrame {
     private static final Tone[] tones = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private static final int side = 1105;
     private static final int diameter = side / 5;
@@ -13,11 +13,11 @@ public class Circles extends JFrame {
     private static final int halfSide = side / 2;
 
     public static void main(String[] args) {
-        new Circles();
+        new com.pitchenga.Circle();
     }
 
-    public Circles() {
-        Image image = Toolkit.getDefaultToolkit().getImage(Circles.class.getResource("/pitchenga.png"));
+    public Circle() {
+        Image image = Toolkit.getDefaultToolkit().getImage(com.pitchenga.Circle.class.getResource("/pitchenga.png"));
         this.setIconImage(image);
 
         JPanel panel = new JPanel(null);
@@ -34,7 +34,7 @@ public class Circles extends JFrame {
             int y = (int) (halfSide * Math.cos(phi) + halfSide - radius / 2) + radius;
             Tone tone = tones[i];
 
-            JPanel circle = new Circle(tone);
+            JPanel circle = new Circly(tone);
 //            JPanel circle = new JPanel();
             panel.add(circle);
             JLabel label = new JLabel();
@@ -57,17 +57,17 @@ public class Circles extends JFrame {
     }
 
 
-    private static class Circle extends JPanel {
+    private static class Circly extends JPanel {
         private final Tone tone;
 
-        public Circle(Tone tone) {
+        public Circly(Tone tone) {
             this.tone = tone;
         }
 
         public void paint(Graphics graphics) {
             //fixme: Use JLayeredPane or something
 //            super.paint(graphics);
-            graphics.setColor(tone.getColor());
+            graphics.setColor(tone.color);
             graphics.fillOval(0, 0, diameter, diameter);
         }
 

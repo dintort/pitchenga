@@ -3,9 +3,8 @@ package com.pitchenga;
 import java.awt.event.KeyEvent;
 
 public enum Key {
-    //fixme: +Diatonic keyboard layout with sharps via shift
-    //fixme: +Micro-tones on unused keys?
-    //fixme: +Fret-less sliding up and down on shift and control
+    //fixme: +Alternative full-keyboard diatonic layout with sharps via shift?
+    //fixme: +Fret-less sliding up and down with mofifier keys
     //fixme: +Toggleable A B C D E etc button labels
     //fixme: +Num-pad mapping
 
@@ -23,76 +22,81 @@ public enum Key {
 //    np12(Pitch.Fa4, KeyEvent.VK_ , "=", false),
 
 
-    n01(Pitch.Fi3, KeyEvent.VK_1, "1", true),
-    n02(Pitch.So3, KeyEvent.VK_2, "2", true),
-    n03(Pitch.Le3, KeyEvent.VK_3, "3", true),
-    n04(Pitch.La3, KeyEvent.VK_4, "4", true),
-    n05(Pitch.Se3, KeyEvent.VK_5, "5", true),
-    n06(Pitch.Si3, KeyEvent.VK_6, "6", true),
-    n07(Pitch.Do4, KeyEvent.VK_7, "7", true),
-    n08(Pitch.Ra4, KeyEvent.VK_8, "8", true),
-    n09(Pitch.Re4, KeyEvent.VK_9, "9", true),
-    n10(Pitch.Me4, KeyEvent.VK_0, "0", true),
-    n11(Pitch.Mi4, KeyEvent.VK_MINUS, "-", true),
-    n12(Pitch.Fa4, KeyEvent.VK_EQUALS, "=", true),
+    n01(Pitch.Fi3, KeyEvent.VK_1, 0,"1"),
+    n02(Pitch.So3, KeyEvent.VK_2, 0, "2"),
+    n03(Pitch.Le3, KeyEvent.VK_3, 0, "3"),
+    n04(Pitch.La3, KeyEvent.VK_4, 0, "4"),
+    n05(Pitch.Se3, KeyEvent.VK_5, 0, "5"),
+    n06(Pitch.Si3, KeyEvent.VK_6, 0, "6"),
+    n07(Pitch.Do4, KeyEvent.VK_7, 0, "7"),
+    n08(Pitch.Ra4, KeyEvent.VK_8, 0, "8"),
+    n09(Pitch.Re4, KeyEvent.VK_9, 0, "9"),
+    n10(Pitch.Me4, KeyEvent.VK_0, 0, "0"),
+    n11(Pitch.Mi4, KeyEvent.VK_MINUS, 0, "-"),
+    n12(Pitch.Fa4, KeyEvent.VK_EQUALS, 0, "="),
 
-    m01(Pitch.Fi3, -1, null, false),
-    m02(Pitch.So3, -2, null, false),
-    m03(Pitch.Le3, -3, null, false),
-    m04(Pitch.La3, -4, null, false),
-    m05(Pitch.Se3, -5, null, false),
-    m06(Pitch.Si3, -6, null, false),
-    m07(null, -7, null, false),
-    A(Pitch.Do3, KeyEvent.VK_A, "a", false),
-    W(Pitch.Ra3, KeyEvent.VK_W, "w", false),
-    S(Pitch.Re3, KeyEvent.VK_S, "s", false),
-    E(Pitch.Me3, KeyEvent.VK_E, "e", false),
-    D(Pitch.Mi3, KeyEvent.VK_D, "d", false),
-    R(null, KeyEvent.VK_R, null, false),
-    F(Pitch.Fa3, KeyEvent.VK_F, "f", false),
-    T(Pitch.Fi3, KeyEvent.VK_T, "t", false),
-    G(Pitch.So3, KeyEvent.VK_G, "g", false),
-    Y(Pitch.Le3, KeyEvent.VK_Y, "y", false),
-    H(Pitch.La3, KeyEvent.VK_H, "h", false),
-    U(Pitch.Se3, KeyEvent.VK_U, "u", false),
-    I(null, KeyEvent.VK_I, null, false),
-    J(Pitch.Si3, KeyEvent.VK_J, "j", false),
-    K(Pitch.Do4, KeyEvent.VK_K, "k", false),
-    O(Pitch.Ra4, KeyEvent.VK_O, "o", false),
-    L(Pitch.Re4, KeyEvent.VK_L, "l", false),
-    P(Pitch.Me4, KeyEvent.VK_P, "p", false),
-    SEMICOLON(Pitch.Mi4, KeyEvent.VK_SEMICOLON, ";", false),
-    QUOTE(Pitch.Fa4, KeyEvent.VK_QUOTE, "\"", false),
-    m999(null, -999, null, false),
+//    do3(Pitch.Do3, -1, 1, null, false),
+//    ra3(Pitch.Ra3, -2, 1, null, false),
+//    re3(Pitch.Re3, -3, 1, null, false),
+//    me3(Pitch.Me3, -4, 1, null, false),
+//    mi3(Pitch.Mi3, -5, 1, null, false),
+//    fa3(Pitch.Fa3, -6, 1, null, false),
+//    fi3(Pitch.Fi3, -7, 1,null, true),
+//    so3(Pitch.So3, -8, 1, null, true),
+//    le3(Pitch.Le3, -9, 1, null, true),
+//    la3(Pitch.La3, -10, 1, null, true),
+//    se3(Pitch.Se3, -11, 1, null, true),
+//    si3(Pitch.Si3, -12, 1, null, true),
+//    do4(Pitch.Do4, -13, 1, null, true),
+//    ra4(Pitch.Ra4, -14, 1, null, true),
+//    re4(Pitch.Re4, -15, 1, null, true),
+//    me4(Pitch.Me4, -16, 1, null, true),
+//    mi4(Pitch.Mi4, -17, 1,null, true),
+//    fa4(Pitch.Fa4, -18, 1, null, true),
+//    m01(Pitch.Fi3, -1, null, false),
+//    m02(Pitch.So3, -2, null, false),
+//    m03(Pitch.Le3, -3, null, false),
+//    m04(Pitch.La3, -4, null, false),
+//    m05(Pitch.Se3, -5, null, false),
+//    m06(Pitch.Si3, -6, null, false),
+//    m07(null, -7, null, false),
+//    Q(null, KeyEvent.VK_Q, 1, null, false),
+    A(Pitch.Do3, KeyEvent.VK_A, 2, "a"),
+    W(Pitch.Ra3, KeyEvent.VK_W, 1, "w"),
+    S(Pitch.Re3, KeyEvent.VK_S, 2, "s"),
+    E(Pitch.Me3, KeyEvent.VK_E, 1, "e"),
+    D(Pitch.Mi3, KeyEvent.VK_D, 2, "d"),
+    R(null, KeyEvent.VK_R, 1, null), //fixme: Micro-tonal "fleh" and "floh"
+    F(Pitch.Fa3, KeyEvent.VK_F, 2, "f"),
+    T(Pitch.Fi3, KeyEvent.VK_T, 1, "t"),
+    G(Pitch.So3, KeyEvent.VK_G, 2, "g"),
+    Y(Pitch.Le3, KeyEvent.VK_Y, 1, "y"),
+    H(Pitch.La3, KeyEvent.VK_H, 2, "h"),
+    U(Pitch.Se3, KeyEvent.VK_U, 1, "u"),
+    J(Pitch.Si3, KeyEvent.VK_J, 2, "j"),
+    I(null, KeyEvent.VK_I, 1, null),
+    K(Pitch.Do4, KeyEvent.VK_K, 2, "k"),
+    O(Pitch.Ra4, KeyEvent.VK_O, 1, "o"),
+    L(Pitch.Re4, KeyEvent.VK_L, 2, "l"),
+    P(Pitch.Me4, KeyEvent.VK_P, 1, "p"),
+    SEMICOLON(Pitch.Mi4, KeyEvent.VK_SEMICOLON, 2, ";"),
+    OPEN_BRACKET(null, KeyEvent.VK_OPEN_BRACKET, 1, null),
+    QUOTE(Pitch.Fa4, KeyEvent.VK_QUOTE, 2, "\""),
+//    OPEN_BRACKET(Pitch.Fi4, KeyEvent.VK_OPEN_BRACKET, null, false),
+//    CLOSE_BRACKET(Pitch.Fi4, KeyEvent.VK_CLOSE_BRACKET, 2, null, false),
+//    BACK_SLASH(Pitch.So4, KeyEvent.VK_BACK_SLASH, null, false),
     ;
 
-    private final Pitch pitch;
-    private final int keyEvent;
-    private final String label;
-    private final boolean chromaticPiano;
+    public final Pitch pitch;
+    public final int keyEventCode;
+    public final int row;
+    public final String label;
 
-    Key(Pitch pitch, int keyEvent, String label, boolean chromaticPiano) {
+    Key(Pitch pitch, int keyEventCode, int row, String label) {
         this.pitch = pitch;
-        this.keyEvent = keyEvent;
+        this.keyEventCode = keyEventCode;
+        this.row = row;
         this.label = label;
-        this.chromaticPiano = chromaticPiano;
-    }
-
-
-    public Pitch getPitch() {
-        return pitch;
-    }
-
-    public int getKeyEventCode() {
-        return keyEvent;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public boolean isChromaticPiano() {
-        return chromaticPiano;
     }
 
 }

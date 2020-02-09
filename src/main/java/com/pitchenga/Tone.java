@@ -7,7 +7,7 @@ import java.awt.*;
  * major: do di re ri mi fa fi so se la li si
  * minor: do di re me mi fa fi so le la se si
  * lowrd: do ra re me mi fa se so le la se si - this one, but F# instead of Gb
- * Colors are roughly based on https://www.nature.com/articles/s41598-017-18150-y/figures/2 but only using round numbers (circle.png).
+ * Colors are roughly based on Isaac Newton's color wheel and https://www.nature.com/articles/s41598-017-18150-y/figures/2 but only using round numbers 127 and 255 (circle.png).
  */
 public enum Tone {
 
@@ -24,11 +24,11 @@ public enum Tone {
     Mi("E", true, new Color(255, 255, 0)),
     Fa("F", true, new Color(0, 255, 0));
 
-    private final String note;
-    private final boolean diatonic;
-    private final Color color;
-    private final String spacedName;
-    private Fugue fugue;
+    public final String note;
+    public final boolean diatonic;
+    public final Color color;
+    public final String spacedName;
+    public Fugue fugue;
 
     Tone(String note, boolean diatonic, Color color) {
         this.note = note;
@@ -37,24 +37,12 @@ public enum Tone {
         this.spacedName = " " + name().toLowerCase() + " ";
     }
 
-    public Color getColor() {
-        return color;
-    }
-
-    public boolean isDiatonic() {
-        return diatonic;
-    }
-
-    public String getSpacedName() {
-        return spacedName;
-    }
-
-    //fixme: Cache them i.e. move to a static map
+    //fixme: Cache them i.e. move into a static map
     public Fugue getFugue() {
         Fugue fugue = this.fugue;
         if (fugue == null) {
             for (Fugue aFugue : Fugue.values()) {
-                if (aFugue.getPitch().getTone().equals(this)) {
+                if (aFugue.pitch.tone.equals(this)) {
                     this.fugue = aFugue;
                     return aFugue;
                 }
@@ -69,23 +57,11 @@ public enum Tone {
         Key[] keys = Key.values();
         for (int i = keys.length - 1; i >= 0; i--) {
             Key key = keys[i];
-            if (key.getPitch() != null && key.getPitch().getTone() == this) {
+            if (key.pitch != null && key.pitch.tone == this) {
                 return key;
             }
         }
         throw new IllegalArgumentException("Key not found for=" + this);
-    }
-
-    public Object[] getTune() {
-        return getFugue().getTune();
-    }
-
-    public Pitch getPitch() {
-        return getFugue().getPitch();
-    }
-
-    public String getNote() {
-        return note;
     }
 
 }

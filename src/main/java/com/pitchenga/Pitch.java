@@ -3,10 +3,10 @@ package com.pitchenga;
 import static com.pitchenga.Tone.*;
 
 public enum Pitch {
-    Do0(Do, 0, 10, 16.35f),
-    Ra0(Ra, 0, 12, 17.32f),
-    Re0(Re, 0, 13, 18.35f),
-    Me0(Me, 0, 14, 19.45f),
+    Do0(Do, 0, 12, 16.35f),
+    Ra0(Ra, 0, 13, 17.32f),
+    Re0(Re, 0, 14, 18.35f),
+    Me0(Me, 0, 15, 19.45f),
     Mi0(Mi, 0, 16, 20.6f),
     Fa0(Fa, 0, 17, 21.83f),
     Fi0(Fi, 0, 18, 23.12f),
@@ -23,8 +23,8 @@ public enum Pitch {
     Fa1(Fa, 1, 29, 43.65f),
     Fi1(Fi, 1, 30, 46.25f),
     So1(So, 1, 31, 49f),
-    Le1(Le, 1, 33, 51.91f),
-    La1(La, 1, 32, 55f),
+    Le1(Le, 1, 32, 51.91f),
+    La1(La, 1, 33, 55f),
     Se1(Se, 1, 34, 58.27f),
     Si1(Si, 1, 35, 61.74f),
     Do2(Do, 2, 36, 65.41f),
@@ -113,10 +113,10 @@ public enum Pitch {
     Si8(Si, 8, 119, 7902.13f),
     ;
 
-    private final Tone tone;
-    private final int midi;
-    private final float frequency;
-    private final int octave;
+    public final Tone tone;
+    public final int midi;
+    public final float frequency;
+    public final int octave;
 
     Pitch(Tone tone, int octave, int midi, float frequency) {
         this.tone = tone;
@@ -125,19 +125,4 @@ public enum Pitch {
         this.frequency = frequency;
     }
 
-    public Tone getTone() {
-        return tone;
-    }
-
-    public int getOctave() {
-        return octave;
-    }
-
-    public float getFrequency() {
-        return frequency;
-    }
-
-    public int getMidi() {
-        return midi;
-    }
 }
