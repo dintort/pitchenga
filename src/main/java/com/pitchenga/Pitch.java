@@ -117,12 +117,16 @@ public enum Pitch {
     public final int midi;
     public final float frequency;
     public final int octave;
+    public final String note;
+    public final String label;
 
     Pitch(Tone tone, int octave, int midi, float frequency) {
         this.tone = tone;
         this.octave = octave;
         this.midi = midi;
         this.frequency = frequency;
+        this.note = tone.note + octave;
+        this.label = name().toLowerCase();
     }
 
 }

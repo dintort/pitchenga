@@ -11,33 +11,35 @@ import java.awt.*;
  */
 public enum Tone {
 
-    Fi("F#", false, new Color(0, 127, 127)),
-    So("G", true, new Color(0, 255, 255)),
-    Le("Ab", false, new Color(0, 0, 127)),
-    La("A", true, new Color(0, 0, 255)),
-    Se("Bb", false, new Color(127, 0, 255)),
-    Si("B", true, new Color(255, 0, 255)),
-    Do("C", true, new Color(255, 0, 0)),
-    Ra("Db", false, new Color(127, 0, 0)),
-    Re("D", true, new Color(255, 127, 0)),
-    Me("Eb", false, new Color(127, 127, 0)),
-    Mi("E", true, new Color(255, 255, 0)),
-    Fa("F", true, new Color(0, 255, 0));
+    //fixme: Foreground colors don't work
+    Fi("F#", false, new Color(0, 127, 127), Color.WHITE),
+    So("G", true, new Color(0, 255, 255), Color.DARK_GRAY),
+    Le("Ab", false, new Color(0, 0, 127), Color.DARK_GRAY),
+    La("A", true, new Color(0, 0, 255), Color.DARK_GRAY),
+    Se("Bb", false, new Color(127, 0, 255), Color.DARK_GRAY),
+    Si("B", true, new Color(255, 0, 255), Color.DARK_GRAY),
+    Do("C", true, new Color(255, 0, 0), Color.DARK_GRAY),
+    Ra("Db", false, new Color(127, 0, 0), Color.DARK_GRAY),
+    Re("D", true, new Color(255, 127, 0), Color.DARK_GRAY),
+    Me("Eb", false, new Color(127, 127, 0), Color.DARK_GRAY),
+    Mi("E", true, new Color(255, 255, 0), Color.DARK_GRAY),
+    Fa("F", true, new Color(0, 255, 0), Color.DARK_GRAY);
 
     public final String note;
     public final boolean diatonic;
     public final Color color;
-    public final String spacedName;
+    public final Color fontColor;
+    public final String label;
     public Fugue fugue;
 
-    Tone(String note, boolean diatonic, Color color) {
+    Tone(String note, boolean diatonic, Color color, Color fontColor) {
         this.note = note;
         this.diatonic = diatonic;
         this.color = color;
-        this.spacedName = " " + name().toLowerCase() + " ";
+        this.fontColor = fontColor;
+        this.label = " " + name().toLowerCase() + " ";
     }
 
-    //fixme: Cache them i.e. move into a static map
     public Fugue getFugue() {
         Fugue fugue = this.fugue;
         if (fugue == null) {
@@ -54,6 +56,7 @@ public enum Tone {
     }
 
     public Key getKey() {
+        //fixme: Cache them same way as fugues
         Key[] keys = Key.values();
         for (int i = keys.length - 1; i >= 0; i--) {
             Key key = keys[i];
