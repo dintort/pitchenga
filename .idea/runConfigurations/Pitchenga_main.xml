@@ -2,6 +2,7 @@
   <configuration default="false" name="Pitchenga-main" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.pitchenga.Pitchenga" />
     <module name="pitchenga.main" />
+    <option name="PROGRAM_PARAMETERS" value="-NSRequiresAquaSystemAppearance False" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.pitchenga.player.*" />

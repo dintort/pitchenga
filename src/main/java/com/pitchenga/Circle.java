@@ -9,7 +9,7 @@ import static com.pitchenga.Tone.So;
 public class Circle extends JPanel {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     //    private static final int side = 1105;
-    private static final int SIDE = 1100;
+    private static final int SIDE = 730;
     private static final int DIAMETER = SIDE / 4;
     private static final int RADIUS = DIAMETER / 2;
     private static final int HALF_SIDE = SIDE / 2;

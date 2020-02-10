@@ -2,6 +2,7 @@
   <configuration default="false" name="Pitchenga-debug" type="Application" factoryName="Application" singleton="true">
     <option name="MAIN_CLASS_NAME" value="com.pitchenga.Pitchenga" />
     <module name="pitchenga.main" />
+    <option name="PROGRAM_PARAMETERS" value="-NSRequiresAquaSystemAppearance False" />
     <option name="VM_PARAMETERS" value="-Dcom.pitchenga.debug=true" />
     <extension name="coverage">
       <pattern>
