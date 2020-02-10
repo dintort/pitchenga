@@ -286,9 +286,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
         }
         SwingUtilities.invokeLater(() -> {
-            circle.update(guess, guessColor, pitchinessColor);
             updateGuessColor(guessColor);
-            updateSlider(guess, frequency);
+            if (!frozen) {
+                circle.update(guess, guessColor, pitchinessColor);
+                updateSlider(guess, frequency);
+            }
             frequencyLabel.setText(String.format("%07.2f", frequency));
             if (!isPlaying()) {
                 pitchinessLabel.setText(guess.tone.label);
@@ -444,13 +446,29 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         debug(shuffled + " are the new riddles without penalties");
 
         List<Pitch> result = new ArrayList<>(shuffled.size() * 2);
-        for (List<Pair<Pitch, Pitch>> penaltyList : penaltyLists) {
-            penaltyList = new LinkedList<>(penaltyList);
+        for (List<Pair<Pitch, Pitch>> aPenaltyList : penaltyLists) {
+            List<Pair<Pitch, Pitch>> penaltyList = new LinkedList<>(aPenaltyList);
             Collections.shuffle(penaltyList);
+            penaltyList.addAll(0, aPenaltyList);
+            Pair<Pitch, Pitch> prev = null;
+            int prevCount = 0;
             for (int i = 0; i < penaltyList.size(); i++) {
                 Pair<Pitch, Pitch> penalty = penaltyList.get(i);
-                result.add(penalty.left);
-                result.add(penalty.right);
+                int transpose = 0;
+                if (prev != null && prev.equals(penalty)) {
+                    int mod = prevCount++ % 3;
+                    if (mod == 0) {
+                        transpose = +1;
+                    } else if (mod == 1) {
+                        transpose = -1;
+                    }
+                    System.out.println("Transpose penalty=" + transpose);
+                } else {
+                    prevCount = 0;
+                }
+                result.add(transposePitch(penalty.left, transpose, 0));
+                result.add(transposePitch(penalty.right, transpose, 0));
+                prev = penalty;
                 if (i >= 13) { // Enough is enough
                     break;
                 }
@@ -655,7 +673,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             circleFrame.setIconImage(image);
             circleFrame.add(circle);
             circleFrame.pack();
-            circleFrame.setLocation(pitchenga.getLocation().x - circleFrame.getSize().width - 10, (int) pitchenga.getLocation().getY());
+//            circleFrame.setLocation(pitchenga.getLocation().x - circleFrame.getSize().width - 10, (int) pitchenga.getLocation().getY());
+            circleFrame.setLocation(0, screenSize.height / 2 - circleFrame.getSize().height / 2);
 //            circleFrame.setLocation(screenSize.width / 2 - circleFrame.getSize().width / 2, screenSize.height / 2 - circleFrame.getSize().height / 2);
             circleFrame.setVisible(true);
             pitchenga.setVisible(true);
@@ -725,7 +744,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         textArea.setForeground(Color.LIGHT_GRAY);
         textArea.setBackground(null);
         textArea.setOpaque(false);
-//        text.setBackground(Color.DARK_GRAY);
+        textArea.setBackground(Color.DARK_GRAY);
         textArea.setBorder(null);
 //        text("<html>");
         for (int i = 0; i < 500; i++) { //There must be a better way
