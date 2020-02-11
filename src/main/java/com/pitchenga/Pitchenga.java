@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 import static com.pitchenga.Default.*;
 import static com.pitchenga.Interval.four;
 import static com.pitchenga.Interval.sixteen;
-import static com.pitchenga.Tone.*;
+import static com.pitchenga.Pitch.*;
+import static com.pitchenga.Tone.Do;
 
 //fixme: Split view and controller
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
@@ -39,10 +40,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Pitch[] PITCHES = Pitch.values();
     private static final Tone[] TONES = Tone.values();
     private static final Key[] KEYS = Key.values();
-    private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(pitch -> pitch.octave).distinct().toArray(Integer[]::new);
-    private static final Tone[] CHROMATIC_SCALE = TONES;
-    private static final Tone[] DIATONIC_SCALE = Arrays.stream(TONES).filter(tone -> tone.diatonic).collect(Collectors.toList()).toArray(new Tone[0]);
-    private static final Tone[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).collect(Collectors.toList()).toArray(new Tone[0]);
+    private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(pitch -> pitch.octave).filter(octave -> octave >= 0).distinct().toArray(Integer[]::new);
+    private static final Pitch[] CHROMATIC_SCALE = Arrays.stream(TONES).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
+    private static final Pitch[] DIATONIC_SCALE = Arrays.stream(TONES).filter(tone -> tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
+    private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(key -> key.keyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
 
@@ -103,7 +104,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     //fixme: Colored waveform visualization
     //fixme: Audio output as input +monitoring
-    //fixme: MP3 player +"light organ" https://en.wikipedia.org/wiki/Light_organ (#Circle)
+    //fixme: MP3 player
     //fixme: Text editor +converter for chords from multi-line to single-line
     public Pitchenga(Circle circle) {
         super("Pitchenga");
@@ -119,19 +120,23 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void play(Pitch guess) {
-        if (frozen || !isPlaying()) {
-            return;
-        }
-        Pitch riddle = riddle();
-        if (riddle == null) {
-            return;
-        }
-        boolean success = getPacer().check.apply(new Pair<>(guess, riddle));
-        debug(String.format("Play: [%s] %s [%.2fHz] : %s", riddle, guess, riddle.frequency, success));
-        if (success) {
-            correct(riddle);
-        } else if (guess != null) {
-            incorrect(riddle);
+        try {
+            if (frozen || !isPlaying()) {
+                return;
+            }
+            Pitch riddle = riddle();
+            if (riddle == null) {
+                return;
+            }
+            boolean success = getPacer().check.apply(new Pair<>(guess, riddle));
+            debug(String.format("Play: [%s] %s [%.2fHz] : %s", riddle, guess, riddle.frequency, success));
+            if (success) {
+                correct(riddle);
+            } else if (guess != null) {
+                incorrect(riddle);
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
         }
     }
 
@@ -188,8 +193,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             Pitch riddle = riddleQueue.poll();
             if (riddle != null) {
                 debug(" [" + riddle + "] is the new riddle");
-                this.riddle.set(riddle);
-                this.riddleTimestampMs = System.currentTimeMillis();
+                if (riddle != None) {
+                    this.riddle.set(riddle);
+                    this.riddleTimestampMs = System.currentTimeMillis();
+                }
                 SwingUtilities.invokeLater(() -> {
                     pitchinessLabel.setText("    ");
                     updateGuessColor(Color.DARK_GRAY);
@@ -378,12 +385,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         toneSpinnersFrozen = true; // barf
         try {
             Arrays.asList(toneSpinners).forEach(spinner -> spinner.setValue(0));
-            Tone[][] scale = getRiddler().scale;
-            for (Tone[] row : scale) {
-                for (Tone tone : row) {
-                    JSpinner spinner = toneSpinners[tone.ordinal()];
-                    int value = (int) spinner.getValue();
-                    spinner.setValue(value + 1);
+            Pitch[][] scale = getRiddler().scale;
+            for (Pitch[] row : scale) {
+                for (Pitch pitch : row) {
+                    if (pitch != null && pitch != None) {
+                        JSpinner spinner = toneSpinners[pitch.tone.ordinal()];
+                        int value = (int) spinner.getValue();
+                        spinner.setValue(value + 1);
+                    }
                 }
             }
         } finally {
@@ -486,6 +495,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return result;
     }
 
+    private List<Pitch> order() {
+        return Arrays.stream(getRiddler().scale)
+                .flatMap(Arrays::stream)
+                .collect(Collectors.toList());
+    }
+
     private List<Pitch> addOctaves(List<Tone> scale) {
         return scale.stream()
                 .map(tone -> {
@@ -525,7 +540,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         midiChannel.noteOff(prev.midi);
                     }
                     Pitch pitch = (Pitch) next;
-                    midiChannel.noteOn(pitch.midi, 127);
+                    if (pitch != None) {
+                        midiChannel.noteOn(pitch.midi, 127);
+                    }
                     if (flashColors) {
                         SwingUtilities.invokeLater(() -> {
                             updateSlider(pitch, pitch.frequency);
@@ -1332,8 +1349,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
             if (mixerInfo == null || mixerInfo == NO_AUDIO_INPUT) {
-                out("No audio input selected, play using keyboard or mouse.");
-                out("To play using a musical instrument please select an audio input.");
+                out("No audio input selected, play using keyboard or mouse");
+                out("To play using a musical instrument please select an audio input");
                 return;
             }
             PitchEstimationAlgorithm pitchAlgoOrNull = (PitchEstimationAlgorithm) pitchAlgoCombo.getSelectedItem();
@@ -1352,12 +1369,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             audioDispatcher.addAudioProcessor(new PitchProcessor(pitchAlgo, sampleRate, bufferSize, this));
             Runnable dispatch = () -> {
                 try {
-                    out("Listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]");
+                    SwingUtilities.invokeLater(() -> out("Listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]"));
                     audioDispatcher.run();
                 } catch (Throwable e) {
                     e.printStackTrace();
                 } finally {
-                    out("Stopped listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]");
+                    SwingUtilities.invokeLater(() -> out("Stopped listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]"));
                 }
             };
             new Thread(dispatch, "pitchenga-mixer" + idCounter.incrementAndGet()).start();
@@ -1459,35 +1476,51 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
+    private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
+            {Mi3, Fa3, Fi3, So3, Le3, None},
+            {La3, Se3, Si3, Do4, Ra4, None},
+            {Re4, Me4, Mi4, Fa4, Fi4, None},
+            {So4, Le4, La4, Se4, Si4, None},
+            {Si4, Do5, Ra5, Re5, Me5, None},
+            {Mi5, Fa5, Fi5, So5, Le5, None},
+            {Le5, So5, Fi5, Fa5, Mi5, None},
+            {Me5, Re5, Ra5, Do5, Si4, None},
+            {Si4, Se4, La4, Le4, So4, None},
+            {Fi4, Fa4, Mi4, Me4, Re4, None},
+            {Ra4, Do4, Si3, Se3, La3, None},
+            {Le3, So3, Fi3, Fa3, Mi3, None},
+    };
+
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Riddler {
-        Chromatic("Chromatic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        ChromaticOneOctave("Chromatic - 1 octave", new Tone[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        Diatonic("Diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{DIATONIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicOneOctave("Diatonic - 1 octave", new Tone[][]{DIATONIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        ChromaticWithDoubledSharps("Chromatic with doubled sharps - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        Chromatic("Chromatic - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        ChromaticOneOctave("Chromatic - 1 octave", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
+        Diatonic("Diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{DIATONIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicOneOctave("Diatonic - 1 octave", new Pitch[][]{DIATONIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
+        ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        ChromaticWithDoubledSharps("Chromatic with doubled sharps - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::order, new Integer[] {3, 4, 5}),
         //fixme: Add scales C, Am, D, etc
         //fixme: Add random within scales
-        SharpsOnly("Sharps only - " + DEFAULT_OCTAVES.length + " octaves", new Tone[][]{SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        LaDo("Step 1) La, Do", new Tone[][]{{La, Do}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        SoLaDo("Step 2) So, La, Do", new Tone[][]{{So, La, Do}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        MiSoLaDo("Step 3) Mi*2, So, La, Do", new Tone[][]{{Mi, Mi, So, La, Do}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        FaMiSoLaDo("Step 4) Fa*2, Mi, So, La, Do", new Tone[][]{{Fa, Fa, Mi, So, La, Do}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        ReFaMiSoLaDo("Step 5) Re*2, Fa, Mi, So, La, Do", new Tone[][]{{Re, Re, Fa, Mi, So, La, Do}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        SiReFaMiSoLaDo("Step 6) Si*2, Re, Fa, Mi, So, La, Do", new Tone[][]{{Si, Si, Re, Fa, Mi, So, La, Do}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusLe("Step 7) Diatonic + Le*2", new Tone[][]{DIATONIC_SCALE, {Le, Le}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusFiLe("Step 8) Diatonic + Fi*2, Le", new Tone[][]{DIATONIC_SCALE, {Fi, Fi, Le}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra*2, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Ra, Ra, Fi, Le}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se*2, Ra, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Se, Se, Ra, Fi, Le}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me*2, Se, Ra, Fi, Le", new Tone[][]{DIATONIC_SCALE, {Me, Me, Se, Ra, Fi, Le}}, Pitchenga::shuffle, DEFAULT_OCTAVES);
+        SharpsOnly("Sharps only - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        LaDo("Step 1) La, Do", new Pitch[][]{{La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        SoLaDo("Step 2) So, La, Do", new Pitch[][]{{So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        MiSoLaDo("Step 3) Mi*2, So, La, Do", new Pitch[][]{{Mi0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        FaMiSoLaDo("Step 4) Fa*2, Mi, So, La, Do", new Pitch[][]{{Fa0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        ReFaMiSoLaDo("Step 5) Re*2, Fa, Mi, So, La, Do", new Pitch[][]{{Re0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        SiReFaMiSoLaDo("Step 6) Si*2, Re, Fa, Mi, So, La, Do", new Pitch[][]{{Si0, Si0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusLe("Step 7) Diatonic + Le*2", new Pitch[][]{DIATONIC_SCALE, {Le0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusFiLe("Step 8) Diatonic + Fi*2, Le", new Pitch[][]{DIATONIC_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra*2, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se*2, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me*2, Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES);
 
         private final String name;
-        private final Tone[][] scale;
+        private final Pitch[][] scale;
         private final Function<Pitchenga, List<Pitch>> riddleAction;
         private final Integer[] octaves;
 
-        Riddler(String name, Tone[][] scale, Function<Pitchenga, List<Pitch>> riddleAction, Integer[] octaves) {
+        Riddler(String name, Pitch[][] scale, Function<Pitchenga, List<Pitch>> riddleAction, Integer[] octaves) {
             this.name = name;
             this.scale = scale;
             this.riddleAction = riddleAction;
