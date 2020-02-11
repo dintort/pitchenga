@@ -11,7 +11,7 @@ public class Default {
     public static final Pitchenga.Pacer DEFAULT_PACER = Pitchenga.Pacer.Answer;
     public static final Pitchenga.Hinter DEFAULT_HINTER = Pitchenga.Hinter.OneSec;
 
-        public static final Pitchenga.Riddler DEFAULT_RIDDLER = Pitchenga.Riddler.Diatonic;
+    public static final Pitchenga.Riddler DEFAULT_RIDDLER = Pitchenga.Riddler.Diatonic;
 //    public static final Pitchenga.Riddler DEFAULT_RIDDLER = Pitchenga.Riddler.Chromatic;
 
     public static final Pitchenga.GuessRinger DEFAULT_GUESS_RINGER = Pitchenga.GuessRinger.Tune;
@@ -24,4 +24,10 @@ public class Default {
     };
     public static final Mixer.Info DEFAULT_AUDIO_INPUT = NO_AUDIO_INPUT; //fixme: Audio input disabled by default, because of the bug where the game plays with itself through the microphone which is confusing.
 //    public static final Mixer.Info DEFAULT_AUDIO_INPUT = null;
+
+    public static final boolean CIRCLE_FRAME_VISIBLE = true;
+//    public static final boolean CIRCLE_FRAME_VISIBLE = false;
+
+    public static final boolean MAIN_FRAME_VISIBLE = true;
+//    public static final boolean MAIN_FRAME_VISIBLE = false;
 }

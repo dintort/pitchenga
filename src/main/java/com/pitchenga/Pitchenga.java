@@ -675,8 +675,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //            circleFrame.setLocation(pitchenga.getLocation().x - circleFrame.getSize().width - 10, (int) pitchenga.getLocation().getY());
             circleFrame.setLocation(0, 0);
 //            circleFrame.setLocation(screenSize.width / 2 - circleFrame.getSize().width / 2, screenSize.height / 2 - circleFrame.getSize().height / 2);
-            circleFrame.setVisible(true);
-            pitchenga.setVisible(true);
+            circleFrame.setVisible(CIRCLE_FRAME_VISIBLE);
+            pitchenga.setVisible(MAIN_FRAME_VISIBLE);
+            if (!MAIN_FRAME_VISIBLE && !CIRCLE_FRAME_VISIBLE) {
+                JFrame frame = new JFrame("Pitchenga");
+                frame.setVisible(true);
+            }
         });
     }
 
