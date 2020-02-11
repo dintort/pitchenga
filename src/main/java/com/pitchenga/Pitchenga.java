@@ -449,7 +449,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (List<Pair<Pitch, Pitch>> aPenaltyList : penaltyLists) {
             List<Pair<Pitch, Pitch>> penaltyList = new LinkedList<>(aPenaltyList);
             Collections.shuffle(penaltyList);
-            penaltyList.addAll(0, aPenaltyList);
             Pair<Pitch, Pitch> prev = null;
             int prevCount = 0;
             for (int i = 0; i < penaltyList.size(); i++) {
@@ -457,12 +456,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 int transpose = 0;
                 if (prev != null && prev.equals(penalty)) {
                     int mod = prevCount++ % 3;
-                    if (mod == 0) {
+                    if (mod == 1) {
                         transpose = +1;
-                    } else if (mod == 1) {
+                    } else if (mod == 2) {
                         transpose = -1;
                     }
-                    System.out.println("Transpose penalty=" + transpose);
+                    debug("Transpose penalty=" + transpose);
                 } else {
                     prevCount = 0;
                 }
@@ -685,7 +684,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         initIcon();
         this.setLayout(new BorderLayout());
 
-        //fixme: +Color circle to the control panel +light them up with guess update
         this.add(createControlPanel(), BorderLayout.NORTH);
 
         JPanel centerPanelPanel = new JPanel();
