@@ -69,7 +69,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile long penaltyRiddleTimestampMs = System.currentTimeMillis();
     private volatile boolean frozen = false;
     private final AtomicInteger idCounter = new AtomicInteger(-1);
-    private final Set<Pitch> pressedKeys = new HashSet<>(); // To ignore OS's key repeating when holding
+    private final Map<Key, Integer> pressedKeyToMidi = new HashMap<>(); // To ignore OS's key repeating when holding and to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
 
@@ -100,8 +100,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JTextArea textArea = new JTextArea();
     //    private final JTextPane text = new JTextPane();
 
-    //fixme: Korg PX5D is recognized, but no audio coming - same problem in Pod Farm, but not in Garage Band.
-
+    //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band.
     //fixme: Colored waveform visualization
     //fixme: Audio output as input +monitoring
     //fixme: MP3 player
@@ -382,7 +381,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (!SwingUtilities.isEventDispatchThread()) {
             new IllegalMonitorStateException().printStackTrace();
         }
-        toneSpinnersFrozen = true; // barf
+        toneSpinnersFrozen = true;
         try {
             Arrays.asList(toneSpinners).forEach(spinner -> spinner.setValue(0));
             Pitch[][] scale = getRiddler().scale;
@@ -844,7 +843,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         updatePianoButton(key, pressed);
         int midi = key.pitch.midi;
-        //fixme: Note off does not work when shift/control was released before the key
         if (fall) {
             midi -= TONES.length;
         }
@@ -853,15 +851,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         if (pressed) {
             updatePitch(key.pitch, key.pitch.frequency, 1, 42);
-            boolean added = pressedKeys.add(key.pitch);
-            if (added) {
+            if (!pressedKeyToMidi.containsKey(key)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
+                pressedKeyToMidi.put(key, midi);
                 transcribe(key.pitch, true);
                 brightPiano.noteOn(midi, 127);
             }
         } else {
-            pressedKeys.remove(key.pitch);
+            Integer modifiedMidi = pressedKeyToMidi.remove(key);
+            if (modifiedMidi != null) {
+                midi = modifiedMidi;
+            }
             brightPiano.noteOff(midi);
-            keyButtons[key.ordinal()].setSelected(false);
             playExecutor.execute(() -> play(key.pitch));
         }
     }
@@ -1500,7 +1500,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         DiatonicOneOctave("Diatonic - 1 octave", new Pitch[][]{DIATONIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
         ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
         ChromaticWithDoubledSharps("Chromatic with doubled sharps - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::order, new Integer[] {3, 4, 5}),
+        ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::order, new Integer[]{3, 4, 5}),
         //fixme: Add scales C, Am, D, etc
         //fixme: Add random within scales
         SharpsOnly("Sharps only - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
