@@ -1312,6 +1312,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         SwingUtilities.invokeLater(this::updatePenaltySpinners);
     }
 
+    @SuppressWarnings("RedundantSuppression")
     private Mixer.Info getDefaultInput(List<Mixer.Info> inputs) {
         //noinspection ConstantConditions
         if (DEFAULT_AUDIO_INPUT != null) {
