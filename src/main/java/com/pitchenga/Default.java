@@ -14,14 +14,14 @@ public class Default {
         public static final Pitchenga.Riddler DEFAULT_RIDDLER = Pitchenga.Riddler.Diatonic;
 //    public static final Pitchenga.Riddler DEFAULT_RIDDLER = Pitchenga.Riddler.Chromatic;
 
-        public static final Pitchenga.GuessRinger DEFAULT_GUESS_RINGER = Pitchenga.GuessRinger.Tune;
+    public static final Pitchenga.GuessRinger DEFAULT_GUESS_RINGER = Pitchenga.GuessRinger.Tune;
 //    public static final Pitchenga.GuessRinger DEFAULT_GUESS_RINGER = Pitchenga.GuessRinger.Tone;
 
-        public static final Pitchenga.RiddleRinger DEFAULT_RIDDLE_RINGER = Pitchenga.RiddleRinger.Tune;
+    public static final Pitchenga.RiddleRinger DEFAULT_RIDDLE_RINGER = Pitchenga.RiddleRinger.Tune;
 //    public static final Pitchenga.RiddleRinger DEFAULT_RIDDLE_RINGER = Pitchenga.RiddleRinger.Tone;
 
     public static final Mixer.Info NO_AUDIO_INPUT = new Mixer.Info("No audio input selected", "", "", "1") {
     };
-    //    public static final Mixer.Info DEFAULT_AUDIO_INPUT = NO_AUDIO_INPUT; //fixme: Audio input disabled by default, because of the bug where the game plays with itself through the microphone which is confusing.
-    public static final Mixer.Info DEFAULT_AUDIO_INPUT = null;
+    public static final Mixer.Info DEFAULT_AUDIO_INPUT = NO_AUDIO_INPUT; //fixme: Audio input disabled by default, because of the bug where the game plays with itself through the microphone which is confusing.
+//    public static final Mixer.Info DEFAULT_AUDIO_INPUT = null;
 }
