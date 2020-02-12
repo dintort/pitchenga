@@ -74,9 +74,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile boolean lift = false; // Shift - octave up
 
     private final Circle circle;
-    private final JPanel guessPanel = new JPanel();
-    private final JLabel pitchinessLabel = new JLabel();
-    private final JPanel pitchinessPanel = new JPanel();
+    private final JPanel tuner = new JPanel();
     private final JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
     private final JToggleButton[] octaveToggles = new JToggleButton[ALL_OCTAVES.length];
     private final JSpinner[] toneSpinners = Arrays.stream(TONES)
@@ -100,6 +98,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JTextArea textArea = new JTextArea();
     //    private final JTextPane text = new JTextPane();
 
+    //fixme: Profiling
     //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band.
     //fixme: Colored waveform visualization
     //fixme: Solfege sound bank for midi
@@ -109,6 +108,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Midi instrument in
     //fixme: Colored notes in the transcribe log
     //fixme: Sliding mouse while holding the button over the piano should activate the keys
+    //fixme: Audio stops working sometimes
+    //fixme: Midi stops working sometimes
     public Pitchenga() {
         super("Pitchenga");
         this.circle = new Circle();
@@ -165,10 +166,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         this.prevRiddle.set(riddle);
         this.prevPrevRiddle.set(prevRiddle);
         this.riddle.set(null);
-        SwingUtilities.invokeLater(() -> {
-            pitchinessLabel.setText(riddle.tone.label);
-            updatePitchinessColor(riddle.tone.color, riddle.tone.color);
-        });
+        SwingUtilities.invokeLater(() -> circle.setText(riddle.tone.label));
 
         fugue(guitar, getGuessRinger().ring.apply(riddle), true);
         this.playQueue.clear();
@@ -179,12 +177,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void incorrect(Pitch riddle, Pitch guess) {
         frozen = true;
         try {
-            circle.update(guess.tone, guess.tone.color, riddle.tone);
+            if (!getHinter().equals(Hinter.Never)) {
+                circle.updateToneAndHint(guess.tone, guess.tone.color, riddle.tone);
+            }
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
             //fixme: Does not help since switched to midi, so the game plays with itself
-//                Thread.sleep(500); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
+//            Thread.sleep(1000); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
         } finally {
             frozen = false;
         }
@@ -207,9 +207,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     this.riddleTimestampMs = System.currentTimeMillis();
                 }
                 SwingUtilities.invokeLater(() -> {
-                    pitchinessLabel.setText("    ");
+                    circle.setText("    ");
                     Tone hint = getHinter().equals(Hinter.Always) ? riddle.tone : null;
-                    circle.update(hint, null, null);
+                    circle.updateToneAndHint(null, null, hint);
+                    tuner.setBackground(Color.GRAY);
                 });
                 frozen = true;
                 try {
@@ -221,13 +222,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 } finally {
                     frozen = false;
                 }
-                schedulePenalty();
+                scheduleHint();
             }
         }
         return this.riddle.get();
     }
 
-    //fixme: Audio stops working sometimes especially when GarageBand is running
     @Override
     public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent event) {
         double rms = event.getRMS() * 100;
@@ -270,7 +270,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    //fixme: Add strobe tuner
     private void updatePitch(Pitch guess, float frequency, float probability, double rms) {
         double diff = frequency - guess.frequency;
         Pitch pitchy;
@@ -298,15 +297,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         SwingUtilities.invokeLater(() -> {
             if (frozen) {
-                circle.update(guessColor);
+                circle.updateBackground(guessColor);
             } else {
-                circle.update(guess.tone, guessColor);
+                circle.updateTone(guess.tone, guessColor);
                 updateSlider(guess, frequency);
             }
             frequencyLabel.setText(String.format("%07.2f", frequency));
-            if (!isPlaying()) {
-                pitchinessLabel.setText(guess.tone.label);
-                updatePitchinessColor(toneColor, pitchinessColor);
+            if (isPlaying()) {
+                tuner.setBackground(guessColor);
+            } else {
+                tuner.setBackground(pitchinessColor);
+                circle.setText(guess.tone.label);
             }
         });
     }
@@ -345,11 +346,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
         }
         return value;
-    }
-
-    private void updatePitchinessColor(Color panelColor, Color borderColor) {
-        pitchinessPanel.setBackground(panelColor);
-        pitchinessPanel.setBorder(BorderFactory.createLineBorder(borderColor, 5));
     }
 
     private Color interpolateColor(double ratio, Color color1, Color color2) {
@@ -409,16 +405,19 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    private void schedulePenalty() {
+    private void scheduleHint() {
         long riddleTimestampMs = System.currentTimeMillis();
         this.riddleTimestampMs = riddleTimestampMs;
         Hinter hinter = getHinter();
+        if (hinter == Hinter.Never) {
+            return;
+        }
         asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> {
             if (isPlaying() && riddleTimestampMs == this.riddleTimestampMs) {
                 Pitch riddle = this.riddle.get();
                 if (riddle != null) {
                     if (!hinter.equals(Hinter.Always)) {
-                        updatePitchinessColor(riddle.tone.color, riddle.tone.color);
+                        circle.updateHint(riddle.tone);
                     }
                     Pitch prevRiddle = this.prevRiddle.get();
                     Pitch prevPrevRiddle = this.prevPrevRiddle.get();
@@ -570,8 +569,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         SwingUtilities.invokeLater(() -> {
                             updateSlider(pitch, pitch.frequency);
                             updatePianoButton(pitch.tone.getKey(), true);
-                            updatePitchinessColor(pitch.tone.color, pitch.tone.color);
-                            circle.update(pitch.tone, pitch.tone.color, null);
+                            circle.updateToneAndHint(pitch.tone, pitch.tone.color, null);
                         });
                     }
                     prev = pitch;
@@ -682,7 +680,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
             }
 
-
             Pitchenga pitchenga = new Pitchenga();
             pitchenga.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             pitchenga.pack();
@@ -697,18 +694,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
             pitchenga.setLocation(screenSize.width - pitchenga.getSize().width - 10, screenSize.height / 2 - pitchenga.getSize().height / 2);
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
-
-//            JFrame circleFrame = new JFrame("Circle");
-//            Image image = Toolkit.getDefaultToolkit().getImage(com.pitchenga.Circle.class.getResource("/pitchenga.png"));
-//            circleFrame.setIconImage(image);
-//            circleFrame.add(circle);
-//            circleFrame.pack();
-////            circleFrame.setLocation(pitchenga.getLocation().x - circleFrame.getSize().width - 10, (int) pitchenga.getLocation().getY());
-//            circleFrame.setLocation(0, 0);
-////            circleFrame.setLocation(screenSize.width / 2 - circleFrame.getSize().width / 2, screenSize.height / 2 - circleFrame.getSize().height / 2);
-//            circleFrame.setVisible(CIRCLE_FRAME_VISIBLE);
             pitchenga.setVisible(MAIN_FRAME_VISIBLE);
-            if (!MAIN_FRAME_VISIBLE && !CIRCLE_FRAME_VISIBLE) {
+
+            if (!MAIN_FRAME_VISIBLE) {
                 JFrame frame = new JFrame("Test");
                 frame.setVisible(true);
             }
@@ -724,13 +712,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         mainPanel.setBackground(Color.DARK_GRAY);
         mainPanel.setLayout(new BorderLayout());
 
+        JPanel guessPanel = new JPanel();
         mainPanel.add(guessPanel, BorderLayout.CENTER);
         guessPanel.setBackground(Color.DARK_GRAY);
         guessPanel.setLayout(new BorderLayout());
-        guessPanel.add(initPitchinessPanel(), BorderLayout.NORTH);
 
         guessPanel.add(circle, BorderLayout.CENTER);
-        guessPanel.setOpaque(false);
+        guessPanel.add(initTuner(), BorderLayout.SOUTH);
 
         mainPanel.add(initPitchSlider(), BorderLayout.WEST);
         mainPanel.add(initTextArea(), BorderLayout.EAST);
@@ -747,22 +735,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         updateToneSpinners();
     }
 
-    private JPanel initPitchinessPanel() {
-        pitchinessPanel.setBackground(Color.GRAY);
-        pitchinessPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        pitchinessPanel.add(pitchinessLabel);
-        pitchinessLabel.setOpaque(true);
-        pitchinessLabel.setForeground(Color.WHITE);
-        pitchinessLabel.setBackground(Color.BLACK);
-        pitchinessLabel.setFont(COURIER);
-        pitchinessLabel.setText("    ");
-        return pitchinessPanel;
+    private JPanel initTuner() {
+        tuner.setBackground(Color.DARK_GRAY);
+        JLabel strutLabel = new JLabel("    ");
+        strutLabel.setFont(COURIER);
+        tuner.add(strutLabel);
+        return tuner;
     }
 
     private JScrollPane initTextArea() {
         JScrollPane scroll = new JScrollPane(textArea);
-        scroll.getViewport().setOpaque(false);
-        scroll.setOpaque(false);
         scroll.setBorder(null);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
@@ -770,8 +752,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         textArea.setFont(COURIER);
         textArea.setEditable(false);
         textArea.setForeground(Color.LIGHT_GRAY);
-        textArea.setBackground(null);
-        textArea.setOpaque(false);
         textArea.setBackground(Color.DARK_GRAY);
         textArea.setBorder(null);
 //        text("<html>");
@@ -1198,7 +1178,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             hinterCombo.addItem(hinter);
         }
         hinterCombo.setSelectedItem(DEFAULT_HINTER);
-        hinterCombo.addItemListener(event -> schedulePenalty());
+        hinterCombo.addItemListener(event -> scheduleHint());
         return hinterCombo;
     }
 
@@ -1268,7 +1248,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         boolean playing = isPlaying();
         debug("running=" + playing);
-        circle.update(null, null, null);
+        circle.updateToneAndHint(null, null, null);
         if (playing) {
             resetGame();
             playButton.setText("Stop");
@@ -1588,7 +1568,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Hinter {
         Always("Hint: always"),
-        OnAnswer("Hint: on wrong answer"),
+        Delayed("Hint: delayed"),
         //fixme: Implement
         Never("Hint: never");
 

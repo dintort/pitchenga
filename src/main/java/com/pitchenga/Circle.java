@@ -3,10 +3,11 @@ package com.pitchenga;
 import javax.swing.*;
 import java.awt.*;
 
+import static com.pitchenga.Pitchenga.COURIER;
 import static com.pitchenga.Tone.*;
 import static com.pitchenga.Tone.So;
 
-public class Circle extends JComponent {
+public class Circle extends JLabel {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private volatile Tone tone;
     private volatile Color color;
@@ -31,28 +32,39 @@ public class Circle extends JComponent {
 
     public Circle() {
         super();
+        setHorizontalAlignment(SwingConstants.CENTER);
+        setVerticalAlignment(SwingConstants.CENTER);
+        setForeground(Color.WHITE);
+        setFont(COURIER);
     }
 
-    public void update(Color toneColor) {
+    public void updateBackground(Color toneColor) {
         this.color = toneColor;
         repaint();
     }
 
-    public void update(Tone guess, Color toneColor) {
-        this.tone = guess;
-        this.color = toneColor;
+    public void updateTone(Tone tone, Color background) {
+        this.tone = tone;
+        this.color = background;
         repaint();
     }
 
-    public void update(Tone guess, Color toneColor, Tone hint) {
-        this.tone = guess;
-        this.color = toneColor;
+    public void updateHint(Tone hint) {
+        this.hint = hint;
+        if (this.tone == null) {
+            this.tone = hint;
+        }
+        repaint();
+    }
+
+    public void updateToneAndHint(Tone tone, Color background, Tone hint) {
+        this.tone = tone;
+        this.color = background;
         this.hint = hint;
         repaint();
     }
 
     public void paint(Graphics graphics) {
-        super.paint(graphics);
         final Tone tone = Circle.this.tone;
         final Tone hint = Circle.this.hint;
         final Color color = Circle.this.color;
@@ -87,6 +99,11 @@ public class Circle extends JComponent {
                 graphics.fillOval(x, y, diameter, diameter);
             }
         }
+
+        //Could have been done less hacky
+        setSize(fullSide, fullSide);
+        super.paint(graphics);
+        setSize(bounds.width, bounds.height);
     }
 
 }
