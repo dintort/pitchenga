@@ -3,6 +3,7 @@
     <option name="MAIN_CLASS_NAME" value="com.pitchenga.Pitchenga" />
     <module name="pitchenga.main" />
     <option name="PROGRAM_PARAMETERS" value="-NSRequiresAquaSystemAppearance False" />
+    <option name="VM_PARAMETERS" value="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=. -XX:+ExitOnOutOfMemoryError -DdddXloggc:/app-home/logs/gc-${app_name_env}.log -XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution -XX:+PrintAdaptiveSizePolicy -DddddXX:+UseGCLogFileRotation -DdddXX:NumberOfGCLogFiles=10 -DdddXX:GCLogFileSize=10M&quot;" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.pitchenga.player.*" />
