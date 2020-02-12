@@ -3,11 +3,9 @@ package com.pitchenga;
 import javax.swing.*;
 import java.awt.*;
 
-import static com.pitchenga.Pitchenga.COURIER;
 import static com.pitchenga.Tone.*;
-import static com.pitchenga.Tone.So;
 
-public class Circle extends JLabel {
+public class Circle extends JComponent {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private volatile Tone tone;
     private volatile Color color;
@@ -32,10 +30,6 @@ public class Circle extends JLabel {
 
     public Circle() {
         super();
-        setHorizontalAlignment(SwingConstants.CENTER);
-        setVerticalAlignment(SwingConstants.CENTER);
-        setForeground(Color.WHITE);
-        setFont(COURIER);
     }
 
     public void updateBackground(Color toneColor) {
@@ -99,11 +93,7 @@ public class Circle extends JLabel {
                 graphics.fillOval(x, y, diameter, diameter);
             }
         }
-
-        //Could have been done less hacky
-        setSize(fullSide, fullSide);
         super.paint(graphics);
-        setSize(bounds.width, bounds.height);
     }
 
 }

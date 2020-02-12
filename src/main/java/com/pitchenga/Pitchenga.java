@@ -93,7 +93,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
     private final JToggleButton playButton = new JToggleButton();
     private final JToggleButton[] keyButtons = new JToggleButton[Key.values().length];
-    private final JLabel frequencyLabel = new JLabel("      ");
+    private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JTextArea textArea = new JTextArea();
     //    private final JTextPane text = new JTextPane();
@@ -105,6 +105,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Audio output as input +monitoring
     //fixme: MP3 player
     //fixme: Text editor +converter for chords from multi-line to single-line
+    //fixme: Center the circle horizontally when the width is greater than the height
     //fixme: Midi instrument in
     //fixme: Colored notes in the transcribe log
     //fixme: Sliding mouse while holding the button over the piano should activate the keys
@@ -166,7 +167,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         this.prevRiddle.set(riddle);
         this.prevPrevRiddle.set(prevRiddle);
         this.riddle.set(null);
-        SwingUtilities.invokeLater(() -> circle.setText(riddle.tone.label));
 
         fugue(guitar, getGuessRinger().ring.apply(riddle), true);
         this.playQueue.clear();
@@ -207,7 +207,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     this.riddleTimestampMs = System.currentTimeMillis();
                 }
                 SwingUtilities.invokeLater(() -> {
-                    circle.setText("    ");
                     Tone hint = getHinter().equals(Hinter.Always) ? riddle.tone : null;
                     circle.updateToneAndHint(null, null, hint);
                     tuner.setBackground(Color.GRAY);
@@ -307,7 +306,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 tuner.setBackground(guessColor);
             } else {
                 tuner.setBackground(pitchinessColor);
-                circle.setText(guess.tone.label);
             }
         });
     }
