@@ -13,10 +13,7 @@ class Pair<L, R> {
 
     @Override
     public String toString() {
-        return "Pair{" +
-                "left=" + left +
-                ", right=" + right +
-                '}';
+        return "{" + left + "," + right + "}";
     }
 
     @Override

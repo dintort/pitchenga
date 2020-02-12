@@ -67,12 +67,12 @@ public class Circle extends JPanel {
         if (pitchinessColor == null) {
             pitchinessColor = color;
         }
-        if (pitchinessColor == null) {
-            setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        } else {
-            //fixme: Probably creating lots of garbage with all these borders
-            setBorder(BorderFactory.createLineBorder(pitchinessColor, 5));
-        }
+//        if (pitchinessColor == null) {
+//            setBorder(BorderFactory.createLineBorder(Color.BLACK));
+//        } else {
+//            //fixme: Probably creating lots of garbage with all these borders
+//            setBorder(BorderFactory.createLineBorder(pitchinessColor, 5));
+//        }
         repaint();
     }
 

@@ -28,8 +28,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.pitchenga.Default.*;
-import static com.pitchenga.Interval.four;
-import static com.pitchenga.Interval.sixteen;
+import static com.pitchenga.Interval.*;
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.Do;
 
@@ -65,6 +64,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final Queue<Pitch> riddleQueue = new LinkedBlockingQueue<>();
     private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
+    private final AtomicReference<Pitch> prevPrevRiddle = new AtomicReference<>(null);
     private volatile long riddleTimestampMs = System.currentTimeMillis();
     private volatile long penaltyRiddleTimestampMs = System.currentTimeMillis();
     private volatile boolean frozen = false;
@@ -84,8 +84,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             .collect(Collectors.toList()).toArray(new JSpinner[0]);
     private volatile boolean toneSpinnersFrozen = false; //fixme: Maybe use "frozen" instead
     private final JSpinner[] penaltySpinners = new JSpinner[TONES.length];
-    private final List<List<Pair<Pitch, Pitch>>> penaltyLists = Arrays.stream(TONES).map(tone -> new ArrayList<Pair<Pitch, Pitch>>()).collect(Collectors.toList());
-    private final Set<Pair<Pitch, Pitch>> penaltyReminders = new LinkedHashSet<>();
+    private final List<List<Triplet<Pitch, Pitch, Pitch>>> penaltyLists = Arrays.stream(TONES).map(tone -> new ArrayList<Triplet<Pitch, Pitch, Pitch>>()).collect(Collectors.toList());
+    private final Set<Triplet<Pitch, Pitch, Pitch>> penaltyReminders = new LinkedHashSet<>();
     private final JComboBox<PitchEstimationAlgorithm> pitchAlgoCombo = new JComboBox<>();
     private final JComboBox<Hinter> hinterCombo = new JComboBox<>();
     private final JComboBox<Pacer> pacerCombo = new JComboBox<>();
@@ -140,14 +140,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void correct(Pitch riddle) {
+        Pitch prevRiddle = this.prevRiddle.get();
+        Pitch prevPrevRiddle = this.prevPrevRiddle.get();
         if (penaltyRiddleTimestampMs != riddleTimestampMs) {
-            Pitch prevRiddle = this.prevRiddle.get();
-            List<Pair<Pitch, Pitch>> penaltyList = penaltyLists.get(riddle.tone.ordinal());
-            for (Iterator<Pair<Pitch, Pitch>> iterator = penaltyList.iterator(); iterator.hasNext(); ) {
-                Pair<Pitch, Pitch> penalty = iterator.next();
-                if (penalty.left.equals(prevRiddle) && penalty.right.equals(riddle)) {
-                    debug("Removing penalty " + riddle + " after " + prevRiddle);
+            List<Triplet<Pitch, Pitch, Pitch>> penaltyList = penaltyLists.get(riddle.tone.ordinal());
+            for (Iterator<Triplet<Pitch, Pitch, Pitch>> iterator = penaltyList.iterator(); iterator.hasNext(); ) {
+                Triplet<Pitch, Pitch, Pitch> penalty = iterator.next();
+                if (penalty.first.equals(prevPrevRiddle)
+                        && penalty.second.equals(prevRiddle)
+                        && penalty.third.equals(riddle)) {
+                    debug("Removing penalty " + penalty);
                     iterator.remove();
+                    debug("Remaining penalties for " + riddle.tone + ": " + penaltyList);
                     penaltyReminders.add(penalty);
                     break;
                 }
@@ -155,6 +159,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             SwingUtilities.invokeLater(this::updatePenaltySpinners);
         }
         this.prevRiddle.set(riddle);
+        this.prevPrevRiddle.set(prevRiddle);
         this.riddle.set(null);
         SwingUtilities.invokeLater(() -> {
             pitchinessLabel.setText(riddle.tone.label);
@@ -287,7 +292,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             guessColor = interpolateColor(accuracy, toneColor, pitchy.tone.color);
             pitchinessColor = interpolateColor(pitchiness, toneColor, pitchy.tone.color);
         }
-        if (debug) {
+        if (debug && !isPlaying()) {
             debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
                     guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
         }
@@ -402,7 +407,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void updatePenaltySpinners() {
         for (int i = 0; i < penaltySpinners.length; i++) {
             JSpinner penaltySpinner = penaltySpinners[i];
-            List<Pair<Pitch, Pitch>> penaltyList = penaltyLists.get(i);
+            List<Triplet<Pitch, Pitch, Pitch>> penaltyList = penaltyLists.get(i);
             int value = penaltyList.size();
             penaltySpinner.setValue(value);
         }
@@ -422,14 +427,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                             updateTopColor(riddle.tone.color, riddle.tone.color);
                         }
                         Pitch prevRiddle = this.prevRiddle.get();
-                        if (prevRiddle != null) {
-                            List<Pair<Pitch, Pitch>> penaltyList = penaltyLists.get(riddle.tone.ordinal());
+                        Pitch prevPrevRiddle = this.prevPrevRiddle.get();
+                        if (prevRiddle != null && prevPrevRiddle != null) {
+                            List<Triplet<Pitch, Pitch, Pitch>> penaltyList = penaltyLists.get(riddle.tone.ordinal());
                             int penaltyFactor = (int) penaltyFactorSpinner.getValue();
                             if (penaltyFactor > 0) {
-                                debug("New penalty " + riddle + " after " + prevRiddle);
                                 penaltyRiddleTimestampMs = riddleTimestampMs;
+                                Triplet<Pitch, Pitch, Pitch> penalty = new Triplet<>(prevPrevRiddle, prevRiddle, riddle);
+                                debug("New penalty: " + penalty + ", other penalties for " + riddle.tone + ": " + penaltyList);
                                 for (int i = 0; i < penaltyFactor; i++) {
-                                    penaltyList.add(new Pair<>(prevRiddle, riddle));
+                                    penaltyList.add(penalty);
                                 }
                                 updatePenaltySpinners();
                             }
@@ -453,16 +460,31 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         List<Pitch> shuffled = addOctaves(tones);
         debug(shuffled + " are the new riddles without penalties");
 
-        List<Pitch> result = new ArrayList<>(shuffled.size() * 2);
-        for (List<Pair<Pitch, Pitch>> aPenaltyList : penaltyLists) {
-            List<Pair<Pitch, Pitch>> penaltyList = new LinkedList<>(aPenaltyList);
+        List<Pitch> result = createPenalties();
+        result.addAll(shuffled);
+        debug(result + " are the new riddles with penalties");
+
+        Set<Triplet<Pitch, Pitch, Pitch>> reminders = new LinkedHashSet<>(penaltyReminders);
+        for (Triplet<Pitch, Pitch, Pitch> reminder : reminders) {
+            result.add(reminder.first);
+            result.add(reminder.second);
+            result.add(reminder.third);
+        }
+        debug(result + " are the new riddles with penalties and reminders");
+        return result;
+    }
+
+    private List<Pitch> createPenalties() {
+        List<Pitch> result = new ArrayList<>();
+        for (List<Triplet<Pitch, Pitch, Pitch>> aPenaltyList : penaltyLists) {
+            List<Triplet<Pitch, Pitch, Pitch>> penaltyList = new LinkedList<>(aPenaltyList);
             Collections.shuffle(penaltyList);
-            Pair<Pitch, Pitch> prev = null;
+            Triplet<Pitch, Pitch, Pitch> prevPenalty = null;
             int prevCount = 0;
             for (int i = 0; i < penaltyList.size(); i++) {
-                Pair<Pitch, Pitch> penalty = penaltyList.get(i);
+                Triplet<Pitch, Pitch, Pitch> penalty = penaltyList.get(i);
                 int transpose = 0;
-                if (prev != null && prev.equals(penalty)) {
+                if (prevPenalty != null && prevPenalty.equals(penalty)) {
                     int mod = prevCount++ % 3;
                     if (mod == 1) {
                         transpose = +1;
@@ -473,24 +495,28 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 } else {
                     prevCount = 0;
                 }
-                result.add(transposePitch(penalty.left, transpose, 0));
-                result.add(transposePitch(penalty.right, transpose, 0));
-                prev = penalty;
-                if (i >= 13) { // Enough is enough
+                List<Integer> selectedOctaves = getSelectedOctaves();
+                Pitch first = transposePitch(penalty.first, transpose, 0);
+                Pitch second = transposePitch(penalty.second, transpose, 0);
+                Pitch third = transposePitch(penalty.third, transpose, 0);
+                if (!selectedOctaves.contains(first.octave)) {
+                    first = penalty.first;
+                }
+                if (!selectedOctaves.contains(second.octave)) {
+                    second = penalty.second;
+                }
+                if (!selectedOctaves.contains(third.octave)) {
+                    third = penalty.third;
+                }
+                result.add(first);
+                result.add(second);
+                result.add(third);
+                prevPenalty = penalty;
+                if (i >= 7) { // Enough is enough
                     break;
                 }
             }
         }
-        result.addAll(shuffled);
-        debug(result + " are the new riddles with penalties");
-
-        Set<Pair<Pitch, Pitch>> reminders = new LinkedHashSet<>(penaltyReminders);
-        for (Pair<Pitch, Pitch> reminder : reminders) {
-            result.add(reminder.left);
-            result.add(reminder.right);
-        }
-        debug(result + " are the new riddles with penalties and reminders");
-
         return result;
     }
 
@@ -503,13 +529,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private List<Pitch> addOctaves(List<Tone> scale) {
         return scale.stream()
                 .map(tone -> {
-                    List<Integer> selectedOctaves = new ArrayList<>(ALL_OCTAVES.length);
-                    for (int i = 0; i < ALL_OCTAVES.length; i++) {
-                        JToggleButton octaveToggle = octaveToggles[i];
-                        if (octaveToggle.isSelected()) {
-                            selectedOctaves.add(ALL_OCTAVES[i]);
-                        }
-                    }
+                    List<Integer> selectedOctaves = getSelectedOctaves();
                     Pitch pitch;
                     String name = tone.name();
                     if (selectedOctaves.isEmpty()) {
@@ -523,6 +543,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     return pitch;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private List<Integer> getSelectedOctaves() {
+        List<Integer> selectedOctaves = new ArrayList<>(ALL_OCTAVES.length);
+        for (int i = 0; i < ALL_OCTAVES.length; i++) {
+            JToggleButton octaveToggle = octaveToggles[i];
+            if (octaveToggle.isSelected()) {
+                selectedOctaves.add(ALL_OCTAVES[i]);
+            }
+        }
+        return selectedOctaves;
     }
 
     private void fugue(MidiChannel midiChannel, Object[] fugue, boolean flashColors) {
@@ -1370,12 +1401,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             audioDispatcher.addAudioProcessor(new PitchProcessor(pitchAlgo, sampleRate, bufferSize, this));
             Runnable dispatch = () -> {
                 try {
-                    SwingUtilities.invokeLater(() -> out("Listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]"));
+                    SwingUtilities.invokeLater(() -> out("Listening to " + mixer.getMixerInfo().getName()));
                     audioDispatcher.run();
                 } catch (Throwable e) {
                     e.printStackTrace();
                 } finally {
-                    SwingUtilities.invokeLater(() -> out("Stopped listening to [" + mixer.getMixerInfo().getName() + "] with [" + pitchAlgo + "]"));
+                    SwingUtilities.invokeLater(() -> out("Stopped listening to " + mixer.getMixerInfo().getName()));
                 }
             };
             new Thread(dispatch, "pitchenga-mixer" + idCounter.incrementAndGet()).start();
@@ -1506,15 +1537,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         SharpsOnly("Sharps only - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
         LaDo("Step 1) La, Do", new Pitch[][]{{La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
         SoLaDo("Step 2) So, La, Do", new Pitch[][]{{So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        MiSoLaDo("Step 3) Mi*2, So, La, Do", new Pitch[][]{{Mi0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        FaMiSoLaDo("Step 4) Fa*2, Mi, So, La, Do", new Pitch[][]{{Fa0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        ReFaMiSoLaDo("Step 5) Re*2, Fa, Mi, So, La, Do", new Pitch[][]{{Re0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        SiReFaMiSoLaDo("Step 6) Si*2, Re, Fa, Mi, So, La, Do", new Pitch[][]{{Si0, Si0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusLe("Step 7) Diatonic + Le*2", new Pitch[][]{DIATONIC_SCALE, {Le0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusFiLe("Step 8) Diatonic + Fi*2, Le", new Pitch[][]{DIATONIC_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra*2, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se*2, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me*2, Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES);
+        MiSoLaDo("Step 3) Mi, So, La, Do", new Pitch[][]{{Mi0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        FaMiSoLaDo("Step 4) Fa, Mi, So, La, Do", new Pitch[][]{{Fa0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        ReFaMiSoLaDo("Step 5) Re, Fa, Mi, So, La, Do", new Pitch[][]{{Re0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        SiReFaMiSoLaDo("Step 6) Si, Re, Fa, Mi, So, La, Do", new Pitch[][]{{Si0, Si0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusLe("Step 7) Diatonic + Le", new Pitch[][]{DIATONIC_SCALE, {Le0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusFiLe("Step 8) Diatonic + Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me, Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES);
 
         private final String name;
         private final Pitch[][] scale;
@@ -1536,8 +1567,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum GuessRinger {
         Tune("Ring mnemonic tune on correct answer", pitch -> pitch.tone.getFugue().tune),
-        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.tone.getFugue().pitch, four}),
-        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getFugue().pitch, four}),
+        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.tone.getFugue().pitch, four, eight}),
+        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getFugue().pitch, four, four}),
         ToneAndDo("Ring tone and Do on correct answer", pitch -> new Object[]{pitch.tone.getFugue().pitch, Do.getFugue().pitch}),
         None("Ring nothing on correct answer", pitch -> new Object[]{}),
         Pause("Short pause on correct answer", pitch -> new Object[]{sixteen}),
@@ -1571,7 +1602,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
 
         private static Object[] transposeTune(Pitch pitch) {
-            pitch.tone.getFugue();
             int shift = pitch.octave - pitch.tone.getFugue().pitch.octave;
             return transposeFugue(pitch.tone.getFugue().tune, shift);
         }
