@@ -178,7 +178,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         frozen = true;
         try {
             if (!getHinter().equals(Hinter.Never)) {
-                circle.updateToneAndHint(guess.tone, guess.tone.color, riddle.tone);
+//                circle.updateToneAndHint(guess.tone, guess.tone.color, riddle.tone);
+                circle.updateHint(riddle.tone);
             }
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
             //fixme: Does not help since switched to midi, so the game plays with itself
@@ -295,16 +296,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
         }
         SwingUtilities.invokeLater(() -> {
-            if (frozen) {
-                circle.updateBackground(guessColor);
-            } else {
-                circle.updateTone(guess.tone, guessColor);
+            if (!frozen) {
                 updateSlider(guess, frequency);
             }
             frequencyLabel.setText(String.format("%07.2f", frequency));
             if (isPlaying()) {
+                circle.updateBackground(guessColor);
                 tuner.setBackground(guessColor);
             } else {
+                circle.updateTone(guess.tone, guessColor);
                 tuner.setBackground(pitchinessColor);
             }
         });
