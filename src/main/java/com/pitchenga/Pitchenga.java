@@ -80,7 +80,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JSpinner[] toneSpinners = Arrays.stream(TONES)
             .map(tone -> new JSpinner(new SpinnerNumberModel(0, 0, 9, 1)))
             .collect(Collectors.toList()).toArray(new JSpinner[0]);
-    private volatile boolean toneSpinnersFrozen = false; //fixme: Maybe use "frozen" instead
+    private volatile boolean toneSpinnersFrozen = false;
     private final JSpinner[] penaltySpinners = new JSpinner[TONES.length];
     private final List<List<Triplet<Pitch, Pitch, Pitch>>> penaltyLists = Arrays.stream(TONES).map(tone -> new ArrayList<Triplet<Pitch, Pitch, Pitch>>()).collect(Collectors.toList());
     private final Set<Triplet<Pitch, Pitch, Pitch>> penaltyReminders = new LinkedHashSet<>();
@@ -101,16 +101,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Profiling
     //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band.
     //fixme: Colored waveform visualization
-    //fixme: Solfege sound bank for midi
+    //fixme: Solfege sound bank for midi +Les Paul
     //fixme: Audio output as input +monitoring
     //fixme: MP3 player
     //fixme: Text editor +converter for chords from multi-line to single-line
     //fixme: Center the circle horizontally when the width is greater than the height
     //fixme: Midi instrument in
+    //fixme: Midi/gpx files as the riddle source
     //fixme: Colored notes in the transcribe log
     //fixme: Sliding mouse while holding the button over the piano should activate the keys
-    //fixme: Audio stops working sometimes
-    //fixme: Midi stops working sometimes
+    //fixme: Audio input stops working sometimes
+    //fixme: Midi stops working sometimes or gets delayed especially after waking up from sleep
+    //fixme: Load/save/reset; auto-save to home folder
+    //fixme: Port to iOS and Android
+    //fixme: Documentation / how to play
+    //fixme: Visualize chords - like this, but adjust the palette: https://glasses.withinmyworld.org/index.php/2012/08/18/chord-colors-perfect-pitch-and-synesthesia/#.XkVt9y2ZO24
+    //fixme: Alternative color schemes from config files. E.g. https://www.nature.com/articles/s41598-017-18150-y/figures/2;  .put("Do", new Color(253, 203, 3)).put("Ra", new Color(65, 3, 75)).put("Re", new Color(3, 179, 253)).put("Me", new Color(244, 56, 6)).put("Mi", new Color(250, 111, 252)).put("Fa", new Color(2, 252, 37)).put("Fi", new Color(3, 88, 69)).put("So", new Color(252, 2, 2)).put("Le", new Color(16, 24, 106)).put("La", new Color(251, 245, 173)).put("Se", new Color(2, 243, 252)).put("Si", new Color(219, 192, 244))
     public Pitchenga() {
         super("Pitchenga");
         this.circle = new Circle();
@@ -138,7 +144,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (success) {
                 correct(riddle);
             } else if (guess != null) {
-                incorrect(riddle, guess);
+                incorrect(riddle);
             }
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -174,18 +180,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         play(null);
     }
 
-    private void incorrect(Pitch riddle, Pitch guess) {
+    private void incorrect(Pitch riddle) {
         frozen = true;
         try {
             if (!getHinter().equals(Hinter.Never)) {
-//                circle.updateToneAndHint(guess.tone, guess.tone.color, riddle.tone);
                 circle.updateHint(riddle.tone);
             }
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
-            //fixme: Does not help since switched to midi, so the game plays with itself
-//            Thread.sleep(1000); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
+            playQueue.clear();
         } finally {
             frozen = false;
         }
@@ -215,10 +217,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 frozen = true;
                 try {
                     fugue(piano, getRiddleRinger().ring.apply(riddle), false);
-                    //fixme
-//                    Thread.sleep(1000); //Otherwise the mic picks up the "tail" of the riddle sound from the speakers.
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
+                    playQueue.clear();
                 } finally {
                     frozen = false;
                 }
@@ -1542,7 +1541,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public enum RiddleRinger {
         Tune("Riddle mnemonic tune", RiddleRinger::transposeTune),
         Tone("Riddle tone", pitch -> new Object[]{pitch, four}),
-        ToneAndDo("Riddle tone and Do", pitch -> new Object[]{pitch.tone.getFugue().pitch, Do.getFugue().pitch}),
+        ShortToneAndLongPause("Riddle shorter tone with longer pause (for acoustic instruments)", pitch -> new Object[]{pitch, eight, four, sixteen}), //Otherwise the game plays with itself through the microphone by picking up the "tail". This could probably be improved with a shorter midi decay.
+        ToneAndDo("Riddle tone and Do", pitch -> new Object[]{pitch.tone.getFugue().pitch, Do.getFugue().pitch, sixteen, four}),
         ;
         private final String name;
         private final Function<Pitch, Object[]> ring;
