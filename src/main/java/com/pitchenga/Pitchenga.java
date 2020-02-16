@@ -98,8 +98,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JTextArea textArea = new JTextArea();
     //    private final JTextPane text = new JTextPane();
 
+    //fixme: Slider interpolation seems wrong - need proper de-logarithmisation instead - most likely also same issue with the main color
+    //fixme: Change the slider knob color as well
     //fixme: Profiling
-    //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band.
+    //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band
     //fixme: Colored waveform visualization
     //fixme: Solfege sound bank for midi +Les Paul
     //fixme: Audio output as input +monitoring
@@ -238,7 +240,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     double rmsThreshold = 0.1;
                     if (guessQueue.size() < 2) {
                         guessQueue.add(new Pair<>(guess, rms));
-                    } else if (!frozen) {
+                    } else {
                         boolean same = true;
                         for (Pair<Pitch, Double> pitchRms : guessQueue) {
                             if (!guess.equals(pitchRms.left)) {
@@ -251,7 +253,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                             if (maxRms > rmsThreshold) {
                                 //fixme: +"Monitoring" mode with a toggle button
                                 transcribe(guess, false);
-                                playExecutor.execute(() -> play(guess));
+                                if (!frozen && getPacer() == Pacer.Answer) {
+                                    playExecutor.execute(() -> play(guess));
+                                }
                             }
                         } else {
                             guessQueue.clear();
@@ -310,7 +314,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void updateSlider(Pitch pitch, float frequency) {
-        //fixme: Change the slider knob color as well
         int value = convertPitchToSlider(pitch, frequency);
         pitchSlider.setValue(value);
     }
@@ -559,7 +562,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         midiChannel.noteOff(prev.midi);
                     }
                     Pitch pitch = (Pitch) next;
-                    if (pitch != None) {
+                    if (pitch == None) {
+                        Thread.sleep(sixteen);
+                    } else {
                         midiChannel.noteOn(pitch.midi, 127);
                     }
                     if (flashColors) {
@@ -1458,19 +1463,71 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
+    private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN = new Pitch[][]{
+            {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
+            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+            {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
+            {So4, Le4, La4, Se4, Si4, None, Do5, None},
+            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+            {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
+
+            {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+            {Do5, Si4, Se4, La4, Le4, None, So4, None},
+            {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+            {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
+    };
+
     private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
-            {Mi3, Fa3, Fi3, So3, Le3, None},
-            {La3, Se3, Si3, Do4, Ra4, None},
-            {Re4, Me4, Mi4, Fa4, Fi4, None},
-            {So4, Le4, La4, Se4, Si4, None},
-            {Si4, Do5, Ra5, Re5, Me5, None},
-            {Mi5, Fa5, Fi5, So5, Le5, None},
-            {Le5, So5, Fi5, Fa5, Mi5, None},
-            {Me5, Re5, Ra5, Do5, Si4, None},
-            {Si4, Se4, La4, Le4, So4, None},
-            {Fi4, Fa4, Mi4, Me4, Re4, None},
-            {Ra4, Do4, Si3, Se3, La3, None},
-            {Le3, So3, Fi3, Fa3, Mi3, None},
+            {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
+            {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
+            {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
+
+            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+
+            {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
+            {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+            {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
+
+            {So4, Le4, La4, Se4, Si4, None, Do5, None},
+            {Do5, Si4, Se4, La4, Le4, None, So4, None},
+            {So4, Le4, La4, Se4, Si4, None, Do5, None},
+
+            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+
+            {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
+            {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+            {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
+
+
+            {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+            {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
+            {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+
+            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+
+            {Do5, Si4, Se4, La4, Le4, None, So4, None},
+            {So4, Le4, La4, Se4, Si4, None, Do5, None},
+            {Do5, Si4, Se4, La4, Le4, None, So4, None},
+
+            {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+            {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
+            {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+
+            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+
+            {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
+            {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
+            {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
     };
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
