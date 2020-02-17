@@ -68,7 +68,15 @@ public class Circle extends JComponent {
         graphics.setColor(fillColor);
         graphics.fillRect(0, 0, bounds.width, bounds.height);
 
-        int fullSide = Math.min(bounds.height, bounds.width);
+        int offset;
+        int fullSide;
+        if (bounds.height < bounds.width) {
+            fullSide = bounds.height;
+            offset = (bounds.width - bounds.height) / 2;
+        } else {
+            fullSide = bounds.width;
+            offset = 0;
+        }
         int side = fullSide - fullSide / 4;
         int halfSide = side / 2;
         int diameter = (int) (side / 4.7);
@@ -78,7 +86,7 @@ public class Circle extends JComponent {
         graphics.setColor(Color.BLACK);
         int gap = halfRadius / 2;
         int outerDiameter = fullSide - halfRadius - gap / 2;
-        graphics.fillOval(gap, gap, outerDiameter, outerDiameter);
+        graphics.fillOval(gap + offset, gap, outerDiameter, outerDiameter);
 
         for (int i = 0; i < TONES.length; i++) {
             Tone myTone = TONES[i];
@@ -90,7 +98,7 @@ public class Circle extends JComponent {
                     || myTone == tone
                     || (hint != null && myTone == hint)) {
                 graphics.setColor(myTone.color);
-                graphics.fillOval(x, y, diameter, diameter);
+                graphics.fillOval(x + offset, y, diameter, diameter);
             }
         }
         super.paint(graphics);

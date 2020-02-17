@@ -32,7 +32,6 @@ import static com.pitchenga.Interval.*;
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.Do;
 
-//fixme: Split view and controller
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
@@ -96,6 +95,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JTextArea textArea = new JTextArea();
+    private final JLabel tunerLabel = new JLabel("    ");
     //    private final JTextPane text = new JTextPane();
 
     //fixme: Slider interpolation seems wrong - need proper de-logarithmisation instead - most likely also same issue with the main color
@@ -107,7 +107,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Audio output as input +monitoring
     //fixme: MP3 player
     //fixme: Text editor +converter for chords from multi-line to single-line
-    //fixme: Center the circle horizontally when the width is greater than the height
     //fixme: Midi instrument in
     //fixme: Midi/gpx files as the riddle source
     //fixme: Colored notes in the transcribe log
@@ -119,6 +118,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Documentation / how to play
     //fixme: Visualize chords - like this, but adjust the palette: https://glasses.withinmyworld.org/index.php/2012/08/18/chord-colors-perfect-pitch-and-synesthesia/#.XkVt9y2ZO24
     //fixme: Alternative color schemes from config files. E.g. https://www.nature.com/articles/s41598-017-18150-y/figures/2;  .put("Do", new Color(253, 203, 3)).put("Ra", new Color(65, 3, 75)).put("Re", new Color(3, 179, 253)).put("Me", new Color(244, 56, 6)).put("Mi", new Color(250, 111, 252)).put("Fa", new Color(2, 252, 37)).put("Fi", new Color(3, 88, 69)).put("So", new Color(252, 2, 2)).put("Le", new Color(16, 24, 106)).put("La", new Color(251, 245, 173)).put("Se", new Color(2, 243, 252)).put("Si", new Color(219, 192, 244))
+    //fixme: Split view and controller
     public Pitchenga() {
         super("Pitchenga");
         this.circle = new Circle();
@@ -287,7 +287,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Color toneColor = guess.tone.color;
         Color guessColor;
         Color pitchinessColor;
-        if (Math.abs(diff) < 0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000314159) {
+        if (Math.abs(diff) < 0.000000000042) {
             guessColor = pitchinessColor = toneColor;
         } else {
             //fixme: Unit test for interpolation, e.g. direction
@@ -310,6 +310,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 circle.updateTone(guess.tone, guessColor);
                 tuner.setBackground(pitchinessColor);
             }
+            tunerLabel.setText(guess.tone.label);
         });
     }
 
@@ -739,9 +740,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private JPanel initTuner() {
         tuner.setBackground(Color.DARK_GRAY);
-        JLabel strutLabel = new JLabel("    ");
-        strutLabel.setFont(COURIER);
-        tuner.add(strutLabel);
+        tunerLabel.setFont(COURIER);
+        tunerLabel.setBackground(Color.BLACK);
+        tunerLabel.setForeground(Color.LIGHT_GRAY);
+        tunerLabel.setOpaque(true);
+        tuner.add(tunerLabel);
         return tuner;
     }
 
@@ -1463,7 +1466,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN = new Pitch[][]{
+    private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
             {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
             {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
@@ -1479,7 +1482,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
     };
 
-    private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
+    private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP = new Pitch[][]{
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
@@ -1539,6 +1542,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
         ChromaticWithDoubledSharps("Chromatic with doubled sharps - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
         ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::order, new Integer[]{3, 4, 5}),
+        ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended", CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::order, new Integer[]{3, 4, 5}),
         //fixme: Add scales C, Am, D, etc
         //fixme: Add random within scales
         SharpsOnly("Sharps only - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
