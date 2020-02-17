@@ -102,9 +102,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Change the slider knob color as well
     //fixme: Profiling
     //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band
+    //fixme: Neither of the pitch detection algorithms seem to work for bass guitar. MPM does not seem to work below mi2.
     //fixme: Colored waveform visualization
-    //fixme: Solfege sound bank for midi +Les Paul
-    //fixme: Audio output as input +monitoring
+    //fixme: Solfege sound bank for midi +Les Paul +"monitoring" mode where it plays solfege on pitch detection
+    //fixme: Audio output as input +actual monitoring
     //fixme: MP3 player
     //fixme: Text editor +converter for chords from multi-line to single-line
     //fixme: Midi instrument in
@@ -154,6 +155,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void correct(Pitch riddle) {
+        Pitch prevRiddle = updatePenalties(riddle);
+        this.prevRiddle.set(riddle);
+        this.prevPrevRiddle.set(prevRiddle);
+        this.riddle.set(null);
+
+        fugue(guitar, getGuessRinger().ring.apply(riddle), true);
+        this.playQueue.clear();
+        //fixme: This will stack overflow in the auto-play mode
+        play(null);
+    }
+
+    private Pitch updatePenalties(Pitch riddle) {
         Pitch prevRiddle = this.prevRiddle.get();
         Pitch prevPrevRiddle = this.prevPrevRiddle.get();
         if (penaltyRiddleTimestampMs != riddleTimestampMs) {
@@ -172,21 +185,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             SwingUtilities.invokeLater(this::updatePenaltySpinners);
         }
-        this.prevRiddle.set(riddle);
-        this.prevPrevRiddle.set(prevRiddle);
-        this.riddle.set(null);
-
-        fugue(guitar, getGuessRinger().ring.apply(riddle), true);
-        this.playQueue.clear();
-        //fixme: This will stack overflow in the auto-play mode
-        play(null);
+        return prevRiddle;
     }
 
     private void incorrect(Pitch riddle) {
         frozen = true;
         try {
             if (!getHinter().equals(Hinter.Never)) {
-                circle.updateHint(riddle.tone);
+                circle.setTone(riddle.tone);
             }
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
             playQueue.clear();
@@ -213,8 +219,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
                 SwingUtilities.invokeLater(() -> {
                     Tone hint = getHinter().equals(Hinter.Always) ? riddle.tone : null;
-                    circle.updateToneAndHint(null, null, hint);
-                    tuner.setBackground(Color.GRAY);
+                    circle.setTone(hint);
                 });
                 frozen = true;
                 try {
@@ -251,8 +256,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         }
                         if (same) {
                             if (maxRms > rmsThreshold) {
-                                //fixme: +"Monitoring" mode with a toggle button
                                 transcribe(guess, false);
+                                SwingUtilities.invokeLater(() -> {
+                                    if (!isPlaying()) {
+                                        circle.setTone(guess.tone);
+                                    }
+                                    updatePianoButtons(guess.tone.getKey());
+                                });
                                 if (!frozen && getPacer() == Pacer.Answer) {
                                     playExecutor.execute(() -> play(guess));
                                 }
@@ -264,7 +274,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     }
                     if (maxRms > rmsThreshold) {
                         updatePitch(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms);
-                        SwingUtilities.invokeLater(() -> updatePianoButtons(guess.tone.getKey()));
                     }
                 }
             }
@@ -299,17 +308,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
         }
         SwingUtilities.invokeLater(() -> {
-            if (!frozen) {
-                updateSlider(guess, frequency);
-            }
+            updateSlider(guess, frequency);
             frequencyLabel.setText(String.format("%07.2f", frequency));
-            if (isPlaying()) {
-                circle.updateBackground(guessColor);
-                tuner.setBackground(guessColor);
-            } else {
-                circle.updateTone(guess.tone, guessColor);
-                tuner.setBackground(pitchinessColor);
-            }
+            circle.setBackground(guessColor);
+            tuner.setBackground(pitchinessColor);
+            tunerLabel.setBackground(Color.BLACK);
             tunerLabel.setText(guess.tone.label);
         });
     }
@@ -418,7 +421,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 Pitch riddle = this.riddle.get();
                 if (riddle != null) {
                     if (!hinter.equals(Hinter.Always)) {
-                        circle.updateHint(riddle.tone);
+                        circle.setTone(riddle.tone);
                     }
                     Pitch prevRiddle = this.prevRiddle.get();
                     Pitch prevPrevRiddle = this.prevPrevRiddle.get();
@@ -570,9 +573,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     }
                     if (flashColors) {
                         SwingUtilities.invokeLater(() -> {
-                            updateSlider(pitch, pitch.frequency);
                             updatePianoButton(pitch.tone.getKey(), true);
-                            circle.updateToneAndHint(pitch.tone, pitch.tone.color, null);
+                            circle.setTone(pitch.tone);
                         });
                     }
                     prev = pitch;
@@ -741,7 +743,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private JPanel initTuner() {
         tuner.setBackground(Color.DARK_GRAY);
         tunerLabel.setFont(COURIER);
-        tunerLabel.setBackground(Color.BLACK);
+        tunerLabel.setBackground(null);
         tunerLabel.setForeground(Color.LIGHT_GRAY);
         tunerLabel.setOpaque(true);
         tuner.add(tunerLabel);
@@ -806,9 +808,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 return false;
             }
             debug("Frozen=" + frozen + ", key=" + event + ";");
-
             if (pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
-                if (!playButton.hasFocus() /* && !otherButtons.haveFocus()*/) {
+                if (!playButton.hasFocus()) {
+                    playButton.requestFocus();
                     playButton.setSelected(!playButton.isSelected());
                     handlePlayButton();
                 }
@@ -833,6 +835,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             return;
         }
         updatePianoButton(key, pressed);
+        circle.setTone(key.pitch.tone);
         int midi = key.pitch.midi;
         if (fall) {
             midi -= TONES.length;
@@ -1253,7 +1256,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         boolean playing = isPlaying();
         debug("running=" + playing);
-        circle.updateToneAndHint(null, null, null);
+        executor.execute(() -> SwingUtilities.invokeLater(circle::clear));
+        tunerLabel.setText("    ");
+        tunerLabel.setBackground(null);
+        tuner.setBackground(null);
         if (playing) {
             resetGame();
             playButton.setText("Stop");
@@ -1580,7 +1586,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Tune("Ring mnemonic tune on correct answer", pitch -> pitch.tone.getFugue().tune),
         Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.tone.getFugue().pitch, four}),
         JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getFugue().pitch, four}),
-        ToneAndDo("Ring tone and Do on correct answer", pitch -> new Object[]{pitch.tone.getFugue().pitch, Do.getFugue().pitch}),
+        ToneAndDo("Ring tone and Do on correct answer", pitch -> new Object[]{pitch.tone.getFugue().pitch, eight, Do.getFugue().pitch, eight}),
         None("Ring nothing on correct answer", pitch -> new Object[]{}),
         Pause("Short pause on correct answer", pitch -> new Object[]{sixteen}),
         ;
@@ -1601,7 +1607,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum RiddleRinger {
         Tune("Riddle mnemonic tune", RiddleRinger::transposeTune),
-        Tone("Riddle tone", pitch -> new Object[]{pitch, four}),
+        Tone("Riddle tone", pitch -> new Object[]{pitch, eight}),
         ShortToneAndLongPause("Riddle shorter tone with longer pause (for acoustic instruments)", pitch -> new Object[]{pitch, eight, four, sixteen}), //Otherwise the game plays with itself through the microphone by picking up the "tail". This could probably be improved with a shorter midi decay.
         ToneAndDo("Riddle tone and Do", pitch -> new Object[]{pitch.tone.getFugue().pitch, Do.getFugue().pitch, sixteen, four}),
         ;
@@ -1647,11 +1653,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public enum Pacer {
         Answer("Answer to continue", Pacer::checkAnswer),
         Tempo20("Tempo 20", pair -> pace(20)),
+        Tempo30("Tempo 30", pair -> pace(30)),
         Tempo40("Tempo 40", pair -> pace(40)),
+        Tempo50("Tempo 50", pair -> pace(50)),
         Tempo60("Tempo 60", pair -> pace(60)),
+        Tempo70("Tempo 70", pair -> pace(70)),
         Tempo80("Tempo 80", pair -> pace(80)),
+        Tempo90("Tempo 90", pair -> pace(90)),
         Tempo100("Tempo 100", pair -> pace(100)),
+        Tempo110("Tempo 110", pair -> pace(110)),
         Tempo120("Tempo 120", pair -> pace(120)),
+        Tempo130("Tempo 130", pair -> pace(130)),
         Tempo140("Tempo 140", pair -> pace(140)),
         ;
 

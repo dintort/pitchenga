@@ -8,8 +8,7 @@ import static com.pitchenga.Tone.*;
 public class Circle extends JComponent {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private volatile Tone tone;
-    private volatile Color color;
-    private volatile Tone hint;
+    private volatile boolean isBlank = true;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Circle");
@@ -32,39 +31,24 @@ public class Circle extends JComponent {
         super();
     }
 
-    public void updateBackground(Color toneColor) {
-        this.color = toneColor;
-        repaint();
-    }
-
-    public void updateTone(Tone tone, Color background) {
+    public void setTone(Tone tone) {
         this.tone = tone;
-        this.color = background;
+        this.isBlank = false;
         repaint();
     }
 
-    public void updateHint(Tone hint) {
-        this.hint = hint;
-        if (this.tone == null) {
-            this.tone = hint;
-        }
-        repaint();
-    }
-
-    public void updateToneAndHint(Tone tone, Color background, Tone hint) {
-        this.tone = tone;
-        this.color = background;
-        this.hint = hint;
-        repaint();
+    public void clear() {
+        this.isBlank = true;
+        this.tone = null;
+        setBackground(null);
     }
 
     public void paint(Graphics graphics) {
         final Tone tone = Circle.this.tone;
-        final Tone hint = Circle.this.hint;
-        final Color color = Circle.this.color;
+        final Color background = getBackground();
 
         Rectangle bounds = graphics.getClipBounds();
-        Color fillColor = color != null ? color : Color.GRAY;
+        Color fillColor = background != null ? background : Color.GRAY;
         graphics.setColor(fillColor);
         graphics.fillRect(0, 0, bounds.width, bounds.height);
 
@@ -94,9 +78,7 @@ public class Circle extends JComponent {
             int x = (int) (halfSide * Math.sin(phi) + halfSide - halfRadius) + radius;
             int y = (int) (halfSide * Math.cos(phi) + halfSide - halfRadius) + radius;
 
-            if (tone == null
-                    || myTone == tone
-                    || (hint != null && myTone == hint)) {
+            if (isBlank || myTone == tone) {
                 graphics.setColor(myTone.color);
                 graphics.fillOval(x + offset, y, diameter, diameter);
             }
