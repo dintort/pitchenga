@@ -217,10 +217,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     this.riddle.set(riddle);
                     this.riddleTimestampMs = System.currentTimeMillis();
                 }
-                SwingUtilities.invokeLater(() -> {
-                    Tone hint = getHinter().equals(Hinter.Always) ? riddle.tone : null;
-                    circle.setTone(hint);
-                });
+                scheduleHint();
                 frozen = true;
                 try {
                     fugue(piano, getRiddleRinger().ring.apply(riddle), false);
@@ -228,7 +225,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 } finally {
                     frozen = false;
                 }
-                scheduleHint();
             }
         }
         return this.riddle.get();
@@ -410,6 +406,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void scheduleHint() {
         long riddleTimestampMs = System.currentTimeMillis();
         this.riddleTimestampMs = riddleTimestampMs;
+        SwingUtilities.invokeLater(() -> circle.setTone(null));
         Hinter hinter = getHinter();
         if (hinter == Hinter.Never) {
             return;
@@ -418,9 +415,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (isPlaying() && riddleTimestampMs == this.riddleTimestampMs) {
                 Pitch riddle = this.riddle.get();
                 if (riddle != null) {
-                    if (!hinter.equals(Hinter.Always)) {
-                        circle.setTone(riddle.tone);
-                    }
+                    circle.setTone(riddle.tone);
                     Pitch prevRiddle = this.prevRiddle.get();
                     Pitch prevPrevRiddle = this.prevPrevRiddle.get();
                     if (prevRiddle != null && prevPrevRiddle != null) {
@@ -438,7 +433,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     }
                 }
             }
-        }), 1000, TimeUnit.MILLISECONDS);
+        }), hinter.delayMs, TimeUnit.MILLISECONDS);
     }
 
     private List<Pitch> shuffle() {
@@ -1630,15 +1625,20 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Hinter {
-        Always("Hint: always"),
-        Delayed("Hint: delayed"),
-        //fixme: Implement
-        Never("Hint: never");
+        Always("Hint: immediately", 0),
+        Delayed100("Hint: after 100 ms", 100),
+        Delayed200("Hint: after 200 ms", 200),
+        Delayed300("Hint: after 300 ms", 300),
+        Delayed500("Hint: after 500 ms", 500),
+        Delayed1000("Hint: after 1 second", 1000),
+        Never("Hint: never", Integer.MAX_VALUE);
 
         private final String name;
+        private final int delayMs;
 
-        Hinter(String name) {
+        Hinter(String name, int delayMs) {
             this.name = name;
+            this.delayMs = delayMs;
         }
 
         @Override
