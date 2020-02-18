@@ -257,12 +257,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         if (same) {
                             if (maxRms > rmsThreshold) {
                                 transcribe(guess, false);
-                                SwingUtilities.invokeLater(() -> {
-                                    if (!isPlaying()) {
-                                        circle.setTone(guess.tone);
-                                    }
-                                    updatePianoButtons(guess.tone.getKey());
-                                });
                                 if (!frozen && getPacer() == Pacer.Answer) {
                                     playExecutor.execute(() -> play(guess));
                                 }
@@ -310,6 +304,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         SwingUtilities.invokeLater(() -> {
             updateSlider(guess, frequency);
             frequencyLabel.setText(String.format("%07.2f", frequency));
+            if (!isPlaying()) {
+                updatePianoButtons(guess.tone.getKey());
+                circle.setTone(guess.tone);
+            }
             circle.setBackground(guessColor);
             tuner.setBackground(pitchinessColor);
             tunerLabel.setBackground(Color.BLACK);
@@ -744,7 +742,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         tuner.setBackground(Color.DARK_GRAY);
         tunerLabel.setFont(COURIER);
         tunerLabel.setBackground(null);
-        tunerLabel.setForeground(Color.LIGHT_GRAY);
+        tunerLabel.setForeground(Color.WHITE);
         tunerLabel.setOpaque(true);
         tuner.add(tunerLabel);
         return tuner;

@@ -78,9 +78,11 @@ public class Circle extends JComponent {
             int x = (int) (halfSide * Math.sin(phi) + halfSide - halfRadius) + radius;
             int y = (int) (halfSide * Math.cos(phi) + halfSide - halfRadius) + radius;
 
+            graphics.setColor(myTone.color);
             if (isBlank || myTone == tone) {
-                graphics.setColor(myTone.color);
                 graphics.fillOval(x + offset, y, diameter, diameter);
+            } else {
+                graphics.drawOval(x + offset, y, diameter, diameter);
             }
         }
         super.paint(graphics);
