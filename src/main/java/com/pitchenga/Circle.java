@@ -2,13 +2,15 @@ package com.pitchenga;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
 
 import static com.pitchenga.Tone.*;
 
 public class Circle extends JComponent {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
-    private volatile Tone tone;
-    private volatile boolean isBlank = true;
+    private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Circle");
@@ -31,20 +33,18 @@ public class Circle extends JComponent {
         super();
     }
 
-    public void setTone(Tone tone) {
-        this.tone = tone;
-        this.isBlank = false;
+    public void setTones(Tone... tones) {
+        this.tones.clear();
+        this.tones.addAll(Arrays.asList(tones));
         repaint();
     }
 
     public void clear() {
-        this.isBlank = true;
-        this.tone = null;
+        this.tones.clear();
         setBackground(null);
     }
 
     public void paint(Graphics graphics) {
-        final Tone tone = Circle.this.tone;
         final Color background = getBackground();
 
         Rectangle bounds = graphics.getClipBounds();
@@ -79,7 +79,7 @@ public class Circle extends JComponent {
             int y = (int) (halfSide * Math.cos(phi) + halfSide - halfRadius) + radius;
 
             graphics.setColor(myTone.color);
-            if (isBlank || myTone == tone) {
+            if (tones.contains(myTone)) {
                 graphics.fillOval(x + offset, y, diameter, diameter);
             } else {
                 graphics.drawOval(x + offset, y, diameter, diameter);
