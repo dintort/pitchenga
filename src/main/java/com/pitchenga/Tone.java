@@ -55,13 +55,13 @@ public enum Tone {
         }
     }
 
-    public Key getKey() {
+    public Button getKey() {
         //fixme: Cache them same way as fugues
-        Key[] keys = Key.values();
-        for (int i = keys.length - 1; i >= 0; i--) {
-            Key key = keys[i];
-            if (key.pitch != null && key.pitch.tone == this) {
-                return key;
+        Button[] buttons = Button.values();
+        for (int i = buttons.length - 1; i >= 0; i--) {
+            Button button = buttons[i];
+            if (button.pitch != null && button.pitch.tone == this) {
+                return button;
             }
         }
         throw new IllegalArgumentException("Key not found for=" + this);

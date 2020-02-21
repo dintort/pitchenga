@@ -27,8 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.pitchenga.Default.*;
-import static com.pitchenga.Interval.*;
+import static com.pitchenga.Duration.*;
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.Do;
 
@@ -37,17 +36,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
     private static final Pitch[] PITCHES = Pitch.values();
     private static final Tone[] TONES = Tone.values();
-    private static final Key[] KEYS = Key.values();
+    private static final Button[] BUTTONS = Button.values();
     private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(pitch -> pitch.octave).filter(octave -> octave >= 0).distinct().toArray(Integer[]::new);
     private static final Pitch[] CHROMATIC_SCALE = Arrays.stream(TONES).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Pitch[] DIATONIC_SCALE = Arrays.stream(TONES).filter(tone -> tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
-    private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(key -> key.keyEventCode, key -> key));
+    private static final Map<Integer, Button> KEY_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
 
+    private final Setup setup = Setup.create();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor();
-    private final BlockingQueue<Runnable> playQueue = new ArrayBlockingQueue<>(1);
+    private final BlockingQueue<Runnable> playQueue = new ArrayBlockingQueue<>(13);
     private final ExecutorService playExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, playQueue, new ThreadPoolExecutor.DiscardOldestPolicy());
     private final Random random = new Random();
     private volatile AudioDispatcher audioDispatcher;
@@ -68,7 +68,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile long penaltyRiddleTimestampMs = System.currentTimeMillis();
     private volatile boolean frozen = false;
     private final AtomicInteger idCounter = new AtomicInteger(-1);
-    private final Map<Key, Integer> pressedKeyToMidi = new HashMap<>(); // To ignore OS's key repeating when holding and to remember the modified midi code to release
+    private final Map<Button, Integer> pressedKeyToMidi = new HashMap<>(); // To ignore OS's key repeating when holding and to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
 
@@ -91,12 +91,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JComboBox<Riddler> riddlerCombo = new JComboBox<>();
     private final JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
     private final JToggleButton playButton = new JToggleButton();
-    private final JToggleButton[] keyButtons = new JToggleButton[Key.values().length];
+    private final JToggleButton[] keyButtons = new JToggleButton[Button.values().length];
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JTextArea textArea = new JTextArea();
     private final JLabel tunerLabel = new JLabel("    ");
     //    private final JTextPane text = new JTextPane();
+
+    //fixme: Random within all scales - repeated  5 times, then switch to another random scale +blues scales
 
     //fixme: Change the slider knob color as well
     //fixme: Profiling
@@ -194,7 +196,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 circle.setTones(riddle.tone);
             }
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
-            playQueue.clear();
+//            playQueue.clear();
         } finally {
             frozen = false;
         }
@@ -412,7 +414,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void scheduleHint() {
         long riddleTimestampMs = System.currentTimeMillis();
         this.riddleTimestampMs = riddleTimestampMs;
-        SwingUtilities.invokeLater(circle::setTones);
+        SwingUtilities.invokeLater(() -> {
+            List<Tone> tonesList = getTones();
+            Set<Tone> tones = new HashSet<>(tonesList);
+            if (tones.size() > 0 && tones.size() != TONES.length) {
+                circle.setTones(tonesList.toArray(new Tone[]{}));
+            } else {
+                circle.setTones();
+            }
+        });
         Hinter hinter = getHinter();
         if (hinter == Hinter.Never) {
             return;
@@ -443,14 +453,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private List<Pitch> shuffle() {
-        List<Tone> tones = new ArrayList<>(toneSpinners.length * 2);
-        for (int i = 0; i < TONES.length; i++) {
-            int count = (int) toneSpinners[i].getValue();
-            for (int j = 0; j < count; j++) {
-                tones.add(TONES[i]);
-                tones.add(TONES[i]); // Better shuffling - allows the same note twice in a row
-            }
-        }
+        List<Tone> tones = getTones();
+        tones.addAll(tones); // Better shuffling - allows the same note twice in a row
         Collections.shuffle(tones);
         List<Pitch> shuffled = addOctaves(tones);
         debug(shuffled + " are the new riddles without penalties");
@@ -467,6 +471,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         debug(result + " are the new riddles with penalties and reminders");
         return result;
+    }
+
+    private List<Tone> getTones() {
+        List<Tone> tones = new ArrayList<>(toneSpinners.length * 2);
+        for (int i = 0; i < TONES.length; i++) {
+            int count = (int) toneSpinners[i].getValue();
+            for (int j = 0; j < count; j++) {
+                tones.add(TONES[i]);
+            }
+        }
+        return tones;
     }
 
     private List<Pitch> createPenalties() {
@@ -582,8 +597,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     if (prev != null) {
                         midiChannel.noteOff(prev.midi);
                         if (flashColors) {
-                            Key key = prev.tone.getKey();
-                            SwingUtilities.invokeLater(() -> updatePianoButton(key, false));
+                            Button button = prev.tone.getKey();
+                            SwingUtilities.invokeLater(() -> updatePianoButton(button, false));
                         }
                         prev = null;
                     }
@@ -595,8 +610,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 Thread.sleep(four);
                 midiChannel.noteOff(prev.midi);
                 if (flashColors) {
-                    Key key = prev.tone.getKey();
-                    SwingUtilities.invokeLater(() -> updatePianoButton(key, false));
+                    Button button = prev.tone.getKey();
+                    SwingUtilities.invokeLater(() -> updatePianoButton(button, false));
                 }
             }
         } catch (InterruptedException e) {
@@ -698,9 +713,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
             pitchenga.setLocation(screenSize.width - pitchenga.getSize().width - 10, screenSize.height / 2 - pitchenga.getSize().height / 2);
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
-            pitchenga.setVisible(MAIN_FRAME_VISIBLE);
+            pitchenga.setVisible(pitchenga.setup.mainFrameVisible);
 
-            if (!MAIN_FRAME_VISIBLE) {
+            if (!pitchenga.setup.mainFrameVisible) {
                 JFrame frame = new JFrame("Test");
                 frame.setVisible(true);
             }
@@ -727,8 +742,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         mainPanel.add(initPitchSlider(), BorderLayout.WEST);
         mainPanel.add(initTextArea(), BorderLayout.EAST);
 
-        for (Key key : Key.values()) {
-            keyButtons[key.ordinal()] = new JToggleButton(key.label);
+        for (Button button : Button.values()) {
+            keyButtons[button.ordinal()] = new JToggleButton(button.label);
         }
         JPanel pianoPanel = new JPanel(new BorderLayout());
         mainPanel.add(pianoPanel, BorderLayout.SOUTH);
@@ -831,62 +846,66 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (event.getKeyCode() == KeyEvent.VK_CONTROL) {
                 fall = pressed;
             }
-            Key key = KEY_BY_CODE.get(event.getKeyCode());
-            if (key == null) {
+            Button button = KEY_BY_CODE.get(event.getKeyCode());
+            if (button == null) {
                 return false;
             }
-            handleKey(key, pressed);
+            handleKey(button, pressed);
             return true;
         });
     }
 
-    private void handleKey(Key key, boolean pressed) {
-        if (key.pitch == null) {
+    private void handleKey(Button button, boolean pressed) {
+        if (button.pitch == null) {
             return;
         }
-        updatePianoButton(key, pressed);
-        Pitch pitch = key.pitch;
+//        if (pressed /* && isFuguePiano */) {
+//            fugue(guitar, button.pitch.tone.fugue.tune, true);
+//            return;
+//        }
+        updatePianoButton(button, pressed);
+        Pitch pitch = button.pitch;
         circle.setTones(pitch.tone);
         if (fall) {
-            pitch = transposePitch(key.pitch, -1, 0);
+            pitch = transposePitch(button.pitch, -1, 0);
         }
         if (lift) {
-            pitch = transposePitch(key.pitch, 1, 0);
+            pitch = transposePitch(button.pitch, 1, 0);
         }
         int midi = pitch.midi;
         if (pressed) {
             updatePitch(pitch, pitch.frequency, 1, 42, true);
-            if (!pressedKeyToMidi.containsKey(key)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
-                pressedKeyToMidi.put(key, midi);
+            if (!pressedKeyToMidi.containsKey(button)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
+                pressedKeyToMidi.put(button, midi);
                 transcribe(pitch, true);
                 brightPiano.noteOn(midi, 127);
             }
         } else {
-            Integer modifiedMidi = pressedKeyToMidi.remove(key);
+            Integer modifiedMidi = pressedKeyToMidi.remove(button);
             if (modifiedMidi != null) {
                 midi = modifiedMidi;
             }
             brightPiano.noteOff(midi);
-            playExecutor.execute(() -> play(key.pitch));
+            playExecutor.execute(() -> play(button.pitch));
         }
         Tone[] tones = pressedKeyToMidi.keySet().stream().map(k -> k.pitch.tone).toArray(Tone[]::new);
         circle.setTones(tones);
     }
 
-    private void updatePianoButton(Key key, boolean pressed) {
+    private void updatePianoButton(Button button, boolean pressed) {
         if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalMonitorStateException();
         }
-        keyButtons[key.ordinal()].setSelected(pressed);
+        keyButtons[button.ordinal()].setSelected(pressed);
     }
 
-    private void updatePianoButtons(Key key) {
+    private void updatePianoButtons(Button button) {
         if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalMonitorStateException();
         }
-        for (Key k : KEYS) {
+        for (Button k : BUTTONS) {
             JToggleButton keyButton = keyButtons[k.ordinal()];
-            keyButton.setSelected(k.pitch != null && k.pitch.tone.equals(key.pitch.tone));
+            keyButton.setSelected(k.pitch != null && k.pitch.tone.equals(button.pitch.tone));
         }
     }
 
@@ -917,7 +936,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         octavesPanel.add(penaltyFactorPanel);
         penaltyFactorPanel.add(new JLabel("Penalty Factor:"));
         penaltyFactorPanel.add(penaltyFactorSpinner);
-        penaltyFactorSpinner.setValue(DEFAULT_PENALTY_FACTOR);
+        penaltyFactorSpinner.setValue(setup.defaultPenaltyFactor);
 
         octavesPanel.add(new JLabel(" "));
         octavesPanel.add(new JLabel("Octaves:"));
@@ -927,7 +946,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             JToggleButton toggle = new JToggleButton("" + octave);
             octaveToggles[i] = toggle;
             octavesPanel.add(toggle);
-            toggle.setSelected(Arrays.asList(DEFAULT_OCTAVES).contains(octave));
+            toggle.setSelected(Arrays.asList(setup.defaultOctaves).contains(octave));
             toggle.addItemListener(event -> {
                 if (toneSpinnersFrozen) {
                     return;
@@ -989,32 +1008,32 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
             colorPanel.add(Box.createVerticalStrut(10));
 
-            Key key = null;
-            for (Key aKey : Key.values()) {
-                if (aKey.pitch != null
-                        && aKey.row == 0
-                        && aKey.pitch.tone.equals(tone)) {
-                    key = aKey;
+            Button button = null;
+            for (Button aButton : Button.values()) {
+                if (aButton.pitch != null
+                        && aButton.row == 0
+                        && aButton.pitch.tone.equals(tone)) {
+                    button = aButton;
                     break;
                 }
             }
-            if (key != null) {
-                Key theKey = key;
-                JToggleButton keyButton = keyButtons[key.ordinal()];
+            if (button != null) {
+                Button theButton = button;
+                JToggleButton keyButton = keyButtons[button.ordinal()];
                 colorPanel.add(keyButton);
                 keyButton.setAlignmentX(Component.CENTER_ALIGNMENT);
                 keyButton.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        handleKey(theKey, true);
+                        handleKey(theButton, true);
                     }
 
                     @Override
                     public void mouseReleased(MouseEvent e) {
-                        handleKey(theKey, false);
+                        handleKey(theButton, false);
                     }
                 });
-                keyButton.setForeground(key == Key.n05 ? Color.BLACK : Color.WHITE);
+                keyButton.setForeground(button == Button.n05 ? Color.BLACK : Color.WHITE);
                 keyButton.setBackground(Color.DARK_GRAY);
                 keyButton.setEnabled(false);
             }
@@ -1062,55 +1081,55 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         bottomPanel.setBackground(Color.DARK_GRAY);
         bottomPanel.setLayout(new GridLayout(1, 11));
 
-        Key[] keys = Key.values();
-        for (Key key : keys) {
-            if (key.row < 1) {
+        Button[] buttons = Button.values();
+        for (Button button : buttons) {
+            if (button.row < 1) {
                 continue;
             }
             JPanel colorPanel = new JPanel();
-            if (key.pitch == null) {
+            if (button.pitch == null) {
                 topPanel.add(colorPanel);
                 colorPanel.setBackground(Color.DARK_GRAY);
             }
-            if (key.pitch != null) {
-                if (key.row == 1) {
+            if (button.pitch != null) {
+                if (button.row == 1) {
                     topPanel.add(colorPanel);
                 } else {
                     bottomPanel.add(colorPanel);
                 }
             }
             colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.Y_AXIS));
-            Color color = key.pitch == null ? Color.DARK_GRAY : key.pitch.tone.color;
+            Color color = button.pitch == null ? Color.DARK_GRAY : button.pitch.tone.color;
             colorPanel.setBackground(color);
 
             colorPanel.add(Box.createVerticalStrut(5));
-            JLabel colorLabel = new JLabel(key.pitch == null ? "    " : key.pitch.tone.label);
+            JLabel colorLabel = new JLabel(button.pitch == null ? "    " : button.pitch.tone.label);
             colorPanel.add(colorLabel);
             colorLabel.setFont(COURIER);
             colorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             colorLabel.setForeground(Color.WHITE);
             colorLabel.setBackground(Color.BLACK);
-            colorLabel.setOpaque(key.pitch != null);
+            colorLabel.setOpaque(button.pitch != null);
             colorPanel.add(Box.createVerticalStrut(5));
 
-            if (key.label != null) {
-                JToggleButton keyButton = keyButtons[key.ordinal()];
+            if (button.label != null) {
+                JToggleButton keyButton = keyButtons[button.ordinal()];
                 colorPanel.add(keyButton);
                 keyButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-                if (key.pitch != null) {
+                if (button.pitch != null) {
                     keyButton.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mousePressed(MouseEvent e) {
-                            handleKey(key, true);
+                            handleKey(button, true);
                         }
 
                         @Override
                         public void mouseReleased(MouseEvent e) {
-                            handleKey(key, false);
+                            handleKey(button, false);
                         }
                     });
-                    keyButton.setForeground(key == Key.F || key == Key.J ? Color.BLACK : Color.WHITE);
+                    keyButton.setForeground(button == Button.F || button == Button.J ? Color.BLACK : Color.WHITE);
                     keyButton.setBackground(Color.DARK_GRAY);
                     keyButton.setEnabled(false);
                 }
@@ -1121,12 +1140,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             colorPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    handleKey(key, true);
+                    handleKey(button, true);
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    handleKey(key, false);
+                    handleKey(button, false);
                 }
             });
         }
@@ -1144,7 +1163,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 play(null);
             }
         }));
-        pacerCombo.setSelectedItem(DEFAULT_PACER);
+        pacerCombo.setSelectedItem(setup.defaultPacer);
         return pacerCombo;
     }
 
@@ -1162,7 +1181,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         try {
                             resetGame();
                             Riddler riddler = (Riddler) event.getItem();
-                            List<Integer> riddlerOctaves = Arrays.asList(riddler.octaves);
+                            Integer[] octaves = riddler.octaves;
+                            if (riddler.octaves == null) {
+                                octaves = setup.defaultOctaves;
+                            }
+                            List<Integer> riddlerOctaves = Arrays.asList(octaves);
                             for (int i = 0; i < ALL_OCTAVES.length; i++) {
                                 Integer octave = ALL_OCTAVES[i];
                                 octaveToggles[i].setSelected(riddlerOctaves.contains(octave));
@@ -1179,7 +1202,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 play(null);
             }
         }));
-        riddlerCombo.setSelectedItem(DEFAULT_RIDDLER);
+        riddlerCombo.setSelectedItem(setup.defaultRiddler);
         return riddlerCombo;
     }
 
@@ -1187,7 +1210,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (Hinter hinter : Hinter.values()) {
             hinterCombo.addItem(hinter);
         }
-        hinterCombo.setSelectedItem(DEFAULT_HINTER);
+        hinterCombo.setSelectedItem(setup.defaultHinter);
         hinterCombo.addItemListener(event -> scheduleHint());
         return hinterCombo;
     }
@@ -1196,7 +1219,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (GuessRinger guessRinger : GuessRinger.values()) {
             guessRingerCombo.addItem(guessRinger);
         }
-        guessRingerCombo.setSelectedItem(DEFAULT_GUESS_RINGER);
+        guessRingerCombo.setSelectedItem(setup.defaultGuessRinger);
         return guessRingerCombo;
     }
 
@@ -1204,7 +1227,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (RiddleRinger ringer : RiddleRinger.values()) {
             riddleRingerCombo.addItem(ringer);
         }
-        riddleRingerCombo.setSelectedItem(DEFAULT_RIDDLE_RINGER);
+        riddleRingerCombo.setSelectedItem(setup.defaultRiddleRinger);
         return riddleRingerCombo;
     }
 
@@ -1212,7 +1235,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (PitchEstimationAlgorithm pitchAlgo : PitchEstimationAlgorithm.values()) {
             pitchAlgoCombo.addItem(pitchAlgo);
         }
-        pitchAlgoCombo.setSelectedItem(DEFAULT_PITCH_ALGO);
+        pitchAlgoCombo.setSelectedItem(setup.defaultPitchAlgo);
         pitchAlgoCombo.addActionListener(event -> executor.execute(this::updateMixer));
         return pitchAlgoCombo;
     }
@@ -1312,8 +1335,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     @SuppressWarnings("RedundantSuppression")
     private Mixer.Info getDefaultInput(List<Mixer.Info> inputs) {
         //noinspection ConstantConditions
-        if (DEFAULT_AUDIO_INPUT != null) {
-            return DEFAULT_AUDIO_INPUT;
+        if (setup.defaultAudioInput != null) {
+            return setup.defaultAudioInput;
         }
         Mixer.Info defaultInput = null;
         if (inputs.size() > 0) {
@@ -1346,13 +1369,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 audioDispatcher.stop();
             }
             Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
-            if (mixerInfo == null || mixerInfo == NO_AUDIO_INPUT) {
+            if (mixerInfo == null || mixerInfo == setup.NO_AUDIO_INPUT) {
                 System.out.println("No audio input selected, play using keyboard or mouse");
                 System.out.println("To play using a musical instrument please select an audio input");
                 return;
             }
             PitchEstimationAlgorithm pitchAlgoOrNull = (PitchEstimationAlgorithm) pitchAlgoCombo.getSelectedItem();
-            PitchEstimationAlgorithm pitchAlgo = pitchAlgoOrNull == null ? DEFAULT_PITCH_ALGO : pitchAlgoOrNull;
+            PitchEstimationAlgorithm pitchAlgo = pitchAlgoOrNull == null ? setup.defaultPitchAlgo : pitchAlgoOrNull;
             Mixer mixer = AudioSystem.getMixer(mixerInfo);
             float sampleRate = 44100;
             int bufferSize = 1024;
@@ -1395,7 +1418,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     return targetLineInfo.length != 0;
                 })
                 .collect(Collectors.toList());
-        result.add(NO_AUDIO_INPUT);
+        result.add(setup.NO_AUDIO_INPUT);
         result.addAll(mixers);
         return result;
     }
@@ -1474,6 +1497,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
+    //fixme: Move to Scale
     private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
             {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
@@ -1543,28 +1567,28 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Riddler {
-        Chromatic("Chromatic - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        Chromatic("Chromatic - main octaves", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, null),
         ChromaticOneOctave("Chromatic - 1 octave", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        Diatonic("Diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{DIATONIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        Diatonic("Diatonic - main octaves", new Pitch[][]{DIATONIC_SCALE}, Pitchenga::shuffle, null),
         DiatonicOneOctave("Diatonic - 1 octave", new Pitch[][]{DIATONIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        ChromaticWithDoubledSharps("Chromatic with doubled sharps - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
+        ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - main octaves", new Pitch[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::shuffle, null),
+        ChromaticWithDoubledSharps("Chromatic with doubled sharps - main octaves", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, null),
         ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::order, new Integer[]{3, 4, 5}),
         ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended", CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::order, new Integer[]{3, 4, 5}),
         //fixme: Add scales C, Am, D, etc
         //fixme: Add random within scales
-        SharpsOnly("Sharps only - " + DEFAULT_OCTAVES.length + " octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        LaDo("Step 1) La, Do", new Pitch[][]{{La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        SoLaDo("Step 2) So, La, Do", new Pitch[][]{{So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        MiSoLaDo("Step 3) Mi, So, La, Do", new Pitch[][]{{Mi0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        FaMiSoLaDo("Step 4) Fa, Mi, So, La, Do", new Pitch[][]{{Fa0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        ReFaMiSoLaDo("Step 5) Re, Fa, Mi, So, La, Do", new Pitch[][]{{Re0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        SiReFaMiSoLaDo("Step 6) Si, Re, Fa, Mi, So, La, Do", new Pitch[][]{{Si0, Si0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusLe("Step 7) Diatonic + Le", new Pitch[][]{DIATONIC_SCALE, {Le0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusFiLe("Step 8) Diatonic + Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES),
-        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me, Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, DEFAULT_OCTAVES);
+        SharpsOnly("Sharps only - main octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, null),
+        LaDo("Step 1) La, Do", new Pitch[][]{{La0, Do0}}, Pitchenga::shuffle, null),
+        SoLaDo("Step 2) So, La, Do", new Pitch[][]{{So0, La0, Do0}}, Pitchenga::shuffle, null),
+        MiSoLaDo("Step 3) Mi, So, La, Do", new Pitch[][]{{Mi0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
+        FaMiSoLaDo("Step 4) Fa, Mi, So, La, Do", new Pitch[][]{{Fa0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
+        ReFaMiSoLaDo("Step 5) Re, Fa, Mi, So, La, Do", new Pitch[][]{{Re0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
+        SiReFaMiSoLaDo("Step 6) Si, Re, Fa, Mi, So, La, Do", new Pitch[][]{{Si0, Si0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
+        DiatonicPlusLe("Step 7) Diatonic + Le", new Pitch[][]{DIATONIC_SCALE, {Le0, Le0}}, Pitchenga::shuffle, null),
+        DiatonicPlusFiLe("Step 8) Diatonic + Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, null),
+        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null),
+        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null),
+        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me, Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null);
 
         private final String name;
         private final Pitch[][] scale;
@@ -1661,17 +1685,29 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public enum Pacer {
         Answer("Answer to continue", Pacer::checkAnswer),
         Tempo20("Tempo 20", pair -> pace(20)),
+        Tempo25("Tempo 25", pair -> pace(25)),
         Tempo30("Tempo 30", pair -> pace(30)),
+        Tempo35("Tempo 35", pair -> pace(35)),
         Tempo40("Tempo 40", pair -> pace(40)),
+        Tempo45("Tempo 45", pair -> pace(45)),
         Tempo50("Tempo 50", pair -> pace(50)),
+        Tempo55("Tempo 55", pair -> pace(55)),
         Tempo60("Tempo 60", pair -> pace(60)),
+        Tempo65("Tempo 65", pair -> pace(65)),
         Tempo70("Tempo 70", pair -> pace(70)),
+        Tempo75("Tempo 75", pair -> pace(75)),
         Tempo80("Tempo 80", pair -> pace(80)),
+        Tempo85("Tempo 85", pair -> pace(85)),
         Tempo90("Tempo 90", pair -> pace(90)),
+        Tempo95("Tempo 95", pair -> pace(95)),
         Tempo100("Tempo 100", pair -> pace(100)),
+        Tempo105("Tempo 105", pair -> pace(105)),
         Tempo110("Tempo 110", pair -> pace(110)),
+        Tempo115("Tempo 115", pair -> pace(115)),
         Tempo120("Tempo 120", pair -> pace(120)),
+        Tempo125("Tempo 125", pair -> pace(125)),
         Tempo130("Tempo 130", pair -> pace(130)),
+        Tempo135("Tempo 135", pair -> pace(135)),
         Tempo140("Tempo 140", pair -> pace(140)),
         ;
 

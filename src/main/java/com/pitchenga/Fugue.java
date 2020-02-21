@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.pitchenga.Interval.*;
+import static com.pitchenga.Duration.*;
 import static com.pitchenga.Pitch.*;
 
 public enum Fugue {

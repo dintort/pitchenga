@@ -11,6 +11,7 @@ import static com.pitchenga.Tone.*;
 public class Circle extends JComponent {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
+    private volatile boolean isBlank = true;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Circle");
@@ -36,11 +37,13 @@ public class Circle extends JComponent {
     public void setTones(Tone... tones) {
         this.tones.clear();
         this.tones.addAll(Arrays.asList(tones));
+        isBlank = false;
         repaint();
     }
 
     public void clear() {
         this.tones.clear();
+        isBlank = true;
         setBackground(null);
     }
 
@@ -79,7 +82,7 @@ public class Circle extends JComponent {
             int y = (int) (halfSide * Math.cos(phi) + halfSide - halfRadius) + radius;
 
             graphics.setColor(myTone.color);
-            if (tones.contains(myTone)) {
+            if (tones.contains(myTone) || isBlank) {
                 graphics.fillOval(x + offset, y, diameter, diameter);
             } else {
                 graphics.drawOval(x + offset, y, diameter, diameter);
