@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import static com.pitchenga.Duration.*;
 import static com.pitchenga.Pitch.*;
-import static com.pitchenga.Tone.Do;
+import static com.pitchenga.Tone.*;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
@@ -75,7 +75,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile boolean lift = false; // Shift - octave up
 
     private final Circle circle;
-    private final JPanel tuner = new JPanel();
     private final JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
     private final JToggleButton[] octaveToggles = new JToggleButton[ALL_OCTAVES.length];
     private final JSpinner[] toneSpinners = Arrays.stream(TONES)
@@ -97,7 +96,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JTextArea textArea = new JTextArea();
-    private final JLabel tunerLabel = new JLabel("    ");
     //    private final JTextPane text = new JTextPane();
 
     //fixme: Random within all scales - repeated  5 times, then switch to another random scale +blues scales
@@ -164,7 +162,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         this.prevPrevRiddle.set(prevRiddle);
         this.riddle.set(null);
 
-        fugue(guitar, getGuessRinger().ring.apply(riddle), true);
+        GuessRinger guessRinger = getGuessRinger();
+        transcribe(riddle, false);
+        fugue(guitar, guessRinger.ring.apply(riddle), true);
+
         this.playQueue.clear();
         //fixme: This will stack overflow in the auto-play mode
         //fixme: It keeps playing playing the old game after changing settings
@@ -196,9 +197,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void incorrect(Pitch riddle) {
         frozen = true;
         try {
-            if (!getHinter().equals(Hinter.Never)) {
-                circle.setTones(riddle.tone);
-            }
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
         } finally {
             frozen = false;
@@ -310,11 +308,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     circle.setTone(guess.tone, guessColor, pitchinessColor);
                 }
             }
-            circle.setBackground(guessColor);
-            //fixme: Remove the tuner panel
-//            tuner.setBackground(pitchinessColor);
-            tunerLabel.setBackground(Color.BLACK);
-            tunerLabel.setText(guess.tone.label);
+            circle.setFillColor(guessColor);
         });
     }
 
@@ -451,6 +445,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private List<Pitch> shuffle() {
         List<Tone> tones = getScaleTones();
+        //noinspection CollectionAddedToSelf
         tones.addAll(tones); // Better shuffling - allows the same note twice in a row
         Collections.shuffle(tones);
         List<Pitch> shuffled = addOctaves(tones);
@@ -735,7 +730,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         guessPanel.setLayout(new BorderLayout());
 
         guessPanel.add(circle, BorderLayout.CENTER);
-        guessPanel.add(initTuner(), BorderLayout.SOUTH);
 
         mainPanel.add(initPitchSlider(), BorderLayout.WEST);
         mainPanel.add(initTextArea(), BorderLayout.EAST);
@@ -750,16 +744,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pianoPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
 
         updateToneSpinners();
-    }
-
-    private JPanel initTuner() {
-        tuner.setBackground(Color.DARK_GRAY);
-        tunerLabel.setFont(COURIER);
-        tunerLabel.setBackground(null);
-        tunerLabel.setForeground(Color.WHITE);
-        tunerLabel.setOpaque(true);
-        tuner.add(tunerLabel);
-        return tuner;
     }
 
     private JScrollPane initTextArea() {
@@ -863,7 +847,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        }
         updatePianoButton(button, pressed);
         Pitch pitch = button.pitch;
-//        circle.setTones(pitch.tone);
         if (fall) {
             pitch = transposePitch(button.pitch, -1, 0);
         }
@@ -1211,6 +1194,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (Hinter hinter : Hinter.values()) {
             hinterCombo.addItem(hinter);
         }
+        hinterCombo.setMaximumRowCount(Hinter.values().length);
         hinterCombo.setSelectedItem(setup.defaultHinter);
         hinterCombo.addItemListener(event -> scheduleHint());
         return hinterCombo;
@@ -1220,6 +1204,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (GuessRinger guessRinger : GuessRinger.values()) {
             guessRingerCombo.addItem(guessRinger);
         }
+        guessRingerCombo.setMaximumRowCount(GuessRinger.values().length);
         guessRingerCombo.setSelectedItem(setup.defaultGuessRinger);
         return guessRingerCombo;
     }
@@ -1228,6 +1213,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (RiddleRinger ringer : RiddleRinger.values()) {
             riddleRingerCombo.addItem(ringer);
         }
+        riddleRingerCombo.setMaximumRowCount(RiddleRinger.values().length);
         riddleRingerCombo.setSelectedItem(setup.defaultRiddleRinger);
         return riddleRingerCombo;
     }
@@ -1236,6 +1222,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (PitchEstimationAlgorithm pitchAlgo : PitchEstimationAlgorithm.values()) {
             pitchAlgoCombo.addItem(pitchAlgo);
         }
+        pitchAlgoCombo.setMaximumRowCount(PitchEstimationAlgorithm.values().length);
         pitchAlgoCombo.setSelectedItem(setup.defaultPitchAlgo);
         pitchAlgoCombo.addActionListener(event -> executor.execute(this::updateMixer));
         return pitchAlgoCombo;
@@ -1283,9 +1270,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         boolean playing = isPlaying();
         debug("running=" + playing);
         executor.execute(() -> SwingUtilities.invokeLater(circle::clear));
-        tunerLabel.setText("    ");
-        tunerLabel.setBackground(null);
-        tuner.setBackground(null);
         if (playing) {
             resetGame();
             playButton.setText("Stop");
@@ -1370,7 +1354,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 audioDispatcher.stop();
             }
             Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
-            if (mixerInfo == null || mixerInfo == setup.NO_AUDIO_INPUT) {
+            if (mixerInfo == null || mixerInfo == Setup.NO_AUDIO_INPUT) {
                 System.out.println("No audio input selected, play using keyboard or mouse");
                 System.out.println("To play using a musical instrument please select an audio input");
                 return;
@@ -1419,7 +1403,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     return targetLineInfo.length != 0;
                 })
                 .collect(Collectors.toList());
-        result.add(setup.NO_AUDIO_INPUT);
+        result.add(Setup.NO_AUDIO_INPUT);
         result.addAll(mixers);
         return result;
     }
@@ -1610,12 +1594,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum GuessRinger {
-        Tune("Ring mnemonic tune on correct answer", pitch -> pitch.tone.getFugue().tune),
-        Tone("Ring tone on correct answer", pitch -> new Object[]{pitch.tone.getFugue().pitch, four}),
-        JustDo("Ring Do on correct answer", pitch -> new Object[]{Do.getFugue().pitch, four}),
-        ToneAndDo("Ring tone and Do on correct answer", pitch -> new Object[]{pitch.tone.getFugue().pitch, eight, Do.getFugue().pitch, eight}),
-        None("Ring nothing on correct answer", pitch -> new Object[]{}),
-        Pause("Short pause on correct answer", pitch -> new Object[]{sixteen}),
+        None("Ring nothing", pitch -> new Object[]{thirtyTwo}),
+        Tune("Ring mnemonic tune", pitch -> pitch.tone.getFugue().tune),
+        Tone("Ring tone", pitch -> new Object[]{pitch.tone.getFugue().pitch, sixteen, eight}),
+        ToneAndDo("Ring tone and Do", pitch -> new Object[]{pitch.tone.getFugue().pitch, eight, Do.getFugue().pitch, eight}),
+        JustDo("Ring Do", pitch -> new Object[]{Do.getFugue().pitch, thirtyTwo, sixteen}),
+        JustRa("Ring Ra", pitch -> new Object[]{Ra.getFugue().pitch, thirtyTwo, sixteen}),
+        JustRe("Ring Re", pitch -> new Object[]{Re.getFugue().pitch, thirtyTwo, sixteen}),
+        JustMe("Ring Me", pitch -> new Object[]{Me.getFugue().pitch, thirtyTwo, sixteen}),
+        JustMi("Ring Mi", pitch -> new Object[]{Mi.getFugue().pitch, thirtyTwo, sixteen}),
+        JustFa("Ring Fa", pitch -> new Object[]{Fa.getFugue().pitch, thirtyTwo, sixteen}),
+        JustFi("Ring Fi", pitch -> new Object[]{Fi.getFugue().pitch, thirtyTwo, sixteen}),
+        JustSo("Ring So", pitch -> new Object[]{So.getFugue().pitch, thirtyTwo, sixteen}),
+        JustLe("Ring Le", pitch -> new Object[]{Le.getFugue().pitch, thirtyTwo, sixteen}),
+        JustLa("Ring La", pitch -> new Object[]{La.getFugue().pitch, thirtyTwo, sixteen}),
+        JustSe("Ring Se", pitch -> new Object[]{Se.getFugue().pitch, thirtyTwo, sixteen}),
+        JustSi("Ring Si", pitch -> new Object[]{Si.getFugue().pitch, thirtyTwo, sixteen}),
         ;
         private final String name;
         private final Function<Pitch, Object[]> ring;

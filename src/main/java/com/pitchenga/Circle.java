@@ -9,13 +9,16 @@ import java.util.Set;
 
 import static com.pitchenga.Tone.*;
 
-public class Circle extends JComponent {
+public class Circle extends JPanel {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
     private final Set<Tone> scaleTones = EnumSet.noneOf(Tone.class);
+    private final JComponent[] labels;
+
     private volatile Tone tone;
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
+    private volatile Color fillColor;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Circle");
@@ -36,6 +39,15 @@ public class Circle extends JComponent {
 
     public Circle() {
         super();
+        labels = Arrays.stream(TONES).map(tone -> {
+            JLabel label = new JLabel(tone.label);
+            label.setFont(Pitchenga.COURIER);
+            label.setOpaque(true);
+            label.setBackground(Color.BLACK);
+            label.setForeground(Color.WHITE);
+            this.add(label);
+            return label;
+        }).toArray(JComponent[]::new);
     }
 
     public void setTone(Tone tone, Color toneColor, Color pitchinessColor) {
@@ -61,19 +73,27 @@ public class Circle extends JComponent {
         repaint();
     }
 
-    public void clear() {
-        setTones();
-        setBackground(null);
+    public void setFillColor(Color fillColor) {
+        this.fillColor = fillColor;
+        repaint();
     }
 
+    public void clear() {
+        setTones();
+        setFillColor(null);
+    }
+
+    @Override
     public void paint(Graphics graphics) {
-        Color background = getBackground();
         Tone tone = this.tone;
         Color toneColor = this.toneColor;
         Color pitchyColor = this.pitchinessColor;
+        Color fillColor = this.fillColor;
+        if (fillColor == null) {
+            fillColor = Color.DARK_GRAY;
+        }
 
         Rectangle bounds = graphics.getClipBounds();
-        Color fillColor = background != null ? background : Color.GRAY;
         graphics.setColor(fillColor);
         graphics.fillRect(0, 0, bounds.width, bounds.height);
 
@@ -91,10 +111,10 @@ public class Circle extends JComponent {
         int diameter = (int) (side / 4.7);
         int radius = diameter / 2;
         int halfRadius = radius / 2;
-
-        graphics.setColor(Color.BLACK);
         int gap = halfRadius / 2;
         int outerDiameter = fullSide - halfRadius - gap / 2;
+
+        graphics.setColor(Color.BLACK);
         graphics.fillOval(gap + offset, gap, outerDiameter, outerDiameter);
 
         for (int i = 0; i < TONES.length; i++) {
@@ -113,18 +133,23 @@ public class Circle extends JComponent {
                 graphics.fillOval(x + offset, y, diameter, diameter);
                 int thickness = 0;
                 if (!tones.contains(myTone)) {
-                    thickness = gap;
+                    thickness = gap / 2;
                 }
                 if (!scaleTones.contains(myTone)) {
-                    thickness = 1 + gap / 7;
+                    thickness = 1 + gap / 10;
                 }
                 if (thickness > 0) {
                     graphics.setColor(Color.BLACK);
-                    graphics.fillOval(x + offset + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
+                    graphics.fillOval(offset + x + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
                 }
             }
+
+            JComponent label = labels[i];
+            int width = label.getWidth();
+            int height = label.getHeight();
+            Graphics childGraphics = graphics.create(offset + x + radius - width / 2, y + radius - height / 2, width, height);
+            label.paint(childGraphics);
         }
-        super.paint(graphics);
     }
 
 }
