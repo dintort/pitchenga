@@ -3,6 +3,7 @@ package com.pitchenga;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -11,10 +12,10 @@ import static com.pitchenga.Tone.*;
 public class Circle extends JComponent {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
+    private final Set<Tone> scaleTones = EnumSet.noneOf(Tone.class);
     private volatile Tone tone;
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
-    private volatile boolean isBlank = true;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Circle");
@@ -40,7 +41,6 @@ public class Circle extends JComponent {
     public void setTone(Tone tone, Color toneColor, Color pitchinessColor) {
         this.tones.clear();
         this.tones.add(tone);
-        this.isBlank = false;
         this.tone = tone;
         this.toneColor = toneColor;
         this.pitchinessColor = pitchinessColor;
@@ -50,17 +50,19 @@ public class Circle extends JComponent {
     public void setTones(Tone... tones) {
         this.tones.clear();
         this.tones.addAll(Arrays.asList(tones));
-        this.isBlank = false;
         this.tone = null;
         this.pitchinessColor = null;
         repaint();
     }
 
+    public void setScaleTones(Collection<Tone> scaleTones) {
+        this.scaleTones.clear();
+        this.scaleTones.addAll(scaleTones);
+        repaint();
+    }
+
     public void clear() {
-        this.tones.clear();
-        this.isBlank = true;
-        this.tone = null;
-        this.pitchinessColor = null;
+        setTones();
         setBackground(null);
     }
 
@@ -101,21 +103,25 @@ public class Circle extends JComponent {
             int x = (int) (halfSide * Math.sin(phi) + halfSide - halfRadius) + radius;
             int y = (int) (halfSide * Math.cos(phi) + halfSide - halfRadius) + radius;
 
-            graphics.setColor(myTone.color);
-            if (tones.contains(myTone) || isBlank) {
-                if (tone != null && myTone == tone && pitchyColor != null) {
-                    graphics.setColor(pitchyColor);
-                    graphics.fillOval(x + offset, y, diameter, diameter);
-                    if (toneColor == null) {
-                        toneColor = tone.color;
-                    }
-                    graphics.setColor(toneColor);
-                    graphics.fillOval(x + offset + halfRadius / 2, y + halfRadius / 2, diameter - halfRadius, diameter - halfRadius);
-                } else {
-                    graphics.fillOval(x + offset, y, diameter, diameter);
-                }
+            if (myTone == tone && toneColor != null && pitchyColor != null) {
+                graphics.setColor(pitchyColor);
+                graphics.fillOval(x + offset, y, diameter, diameter);
+                graphics.setColor(toneColor);
+                graphics.fillOval(x + offset + gap, y + gap, diameter - halfRadius, diameter - halfRadius);
             } else {
-                graphics.drawOval(x + offset, y, diameter, diameter);
+                graphics.setColor(myTone.color);
+                graphics.fillOval(x + offset, y, diameter, diameter);
+                int thickness = 0;
+                if (!tones.contains(myTone)) {
+                    thickness = gap;
+                }
+                if (!scaleTones.contains(myTone)) {
+                    thickness = 1 + gap / 7;
+                }
+                if (thickness > 0) {
+                    graphics.setColor(Color.BLACK);
+                    graphics.fillOval(x + offset + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
+                }
             }
         }
         super.paint(graphics);

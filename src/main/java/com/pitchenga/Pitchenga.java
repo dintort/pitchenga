@@ -38,8 +38,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Tone[] TONES = Tone.values();
     private static final Button[] BUTTONS = Button.values();
     private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(pitch -> pitch.octave).filter(octave -> octave >= 0).distinct().toArray(Integer[]::new);
+    //fixme: Move to Scale
     private static final Pitch[] CHROMATIC_SCALE = Arrays.stream(TONES).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
-    private static final Pitch[] DIATONIC_SCALE = Arrays.stream(TONES).filter(tone -> tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
+    private static final Pitch[] DO_MAJ_SCALE = Arrays.stream(TONES).filter(tone -> tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Button> KEY_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
@@ -47,7 +48,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final Setup setup = Setup.create();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor();
-    private final BlockingQueue<Runnable> playQueue = new ArrayBlockingQueue<>(13);
+    //fixme: Bigger queue, but process them all in one go so that the buzzer goes off only once when multiple keys pressed
+    private final BlockingQueue<Runnable> playQueue = new ArrayBlockingQueue<>(1);
     private final ExecutorService playExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, playQueue, new ThreadPoolExecutor.DiscardOldestPolicy());
     private final Random random = new Random();
     private volatile AudioDispatcher audioDispatcher;
@@ -165,6 +167,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         fugue(guitar, getGuessRinger().ring.apply(riddle), true);
         this.playQueue.clear();
         //fixme: This will stack overflow in the auto-play mode
+        //fixme: It keeps playing playing the old game after changing settings
         play(null);
     }
 
@@ -197,7 +200,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 circle.setTones(riddle.tone);
             }
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
-//            playQueue.clear();
         } finally {
             frozen = false;
         }
@@ -310,7 +312,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             circle.setBackground(guessColor);
             //fixme: Remove the tuner panel
-            tuner.setBackground(pitchinessColor);
+//            tuner.setBackground(pitchinessColor);
             tunerLabel.setBackground(Color.BLACK);
             tunerLabel.setText(guess.tone.label);
         });
@@ -399,6 +401,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     }
                 }
             }
+            circle.setScaleTones(getScaleTones());
         } finally {
             toneSpinnersFrozen = false;
         }
@@ -416,15 +419,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void scheduleHint() {
         long riddleTimestampMs = System.currentTimeMillis();
         this.riddleTimestampMs = riddleTimestampMs;
-        SwingUtilities.invokeLater(() -> {
-            List<Tone> tonesList = getTones();
-            Set<Tone> tones = new HashSet<>(tonesList);
-            if (tones.size() > 0 && tones.size() != TONES.length) {
-                circle.setTones(tonesList.toArray(new Tone[]{}));
-            } else {
-                circle.setTones();
-            }
-        });
+        SwingUtilities.invokeLater(circle::setTones);
         Hinter hinter = getHinter();
         if (hinter == Hinter.Never) {
             return;
@@ -455,7 +450,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private List<Pitch> shuffle() {
-        List<Tone> tones = getTones();
+        List<Tone> tones = getScaleTones();
         tones.addAll(tones); // Better shuffling - allows the same note twice in a row
         Collections.shuffle(tones);
         List<Pitch> shuffled = addOctaves(tones);
@@ -475,7 +470,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return result;
     }
 
-    private List<Tone> getTones() {
+    private List<Tone> getScaleTones() {
         List<Tone> tones = new ArrayList<>(toneSpinners.length * 2);
         for (int i = 0; i < TONES.length; i++) {
             int count = (int) toneSpinners[i].getValue();
@@ -713,7 +708,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             //fixme: Should resize relatively + have a slider for the user to resize
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
 
-            pitchenga.setLocation(screenSize.width - pitchenga.getSize().width - 10, screenSize.height / 2 - pitchenga.getSize().height / 2);
+            pitchenga.setLocation(screenSize.width - pitchenga.getSize().width, screenSize.height / 2 - pitchenga.getSize().height / 2);
 //            pitchenga.setLocation(0, screenSize.height / 2 - pitchenga.getSize().height / 2);
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
             pitchenga.setVisible(pitchenga.setup.mainFrameVisible);
@@ -868,7 +863,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        }
         updatePianoButton(button, pressed);
         Pitch pitch = button.pitch;
-        circle.setTones(pitch.tone);
+//        circle.setTones(pitch.tone);
         if (fall) {
             pitch = transposePitch(button.pitch, -1, 0);
         }
@@ -978,8 +973,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             spinnerPanel.setOpaque(false);
             JSpinner toneSpinner = toneSpinners[tone.ordinal()];
             spinnerPanel.add(toneSpinner);
+            ((JSpinner.DefaultEditor) toneSpinner.getEditor()).getTextField().setEditable(false);
+            ((JSpinner.DefaultEditor) toneSpinner.getEditor()).getTextField().setFont(new Font("SansSerif", Font.PLAIN, 9));
             toneSpinner.setAlignmentX(Component.CENTER_ALIGNMENT);
             toneSpinner.addChangeListener(event -> {
+                circle.setScaleTones(getScaleTones());
                 if (!toneSpinnersFrozen) {
                     playExecutor.execute(() -> {
                         resetGame();
@@ -1572,9 +1570,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public enum Riddler {
         Chromatic("Chromatic - main octaves", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, null),
         ChromaticOneOctave("Chromatic - 1 octave", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        Diatonic("Diatonic - main octaves", new Pitch[][]{DIATONIC_SCALE}, Pitchenga::shuffle, null),
-        DiatonicOneOctave("Diatonic - 1 octave", new Pitch[][]{DIATONIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        ChromaticWithDoubledDiatonic("Chromatic with doubled diatonic - main octaves", new Pitch[][]{CHROMATIC_SCALE, DIATONIC_SCALE}, Pitchenga::shuffle, null),
+        DoMaj("Do maj - main octaves", new Pitch[][]{DO_MAJ_SCALE}, Pitchenga::shuffle, null),
+        DoMajOneOctave("Do maj - 1 octave", new Pitch[][]{DO_MAJ_SCALE}, Pitchenga::shuffle, new Integer[0]),
+        ChromaticWithDoubledDiatonic("Chromatic with doubled Do maj - main octaves", new Pitch[][]{CHROMATIC_SCALE, DO_MAJ_SCALE}, Pitchenga::shuffle, null),
         ChromaticWithDoubledSharps("Chromatic with doubled sharps - main octaves", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, null),
         ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::order, new Integer[]{3, 4, 5}),
         ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended", CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::order, new Integer[]{3, 4, 5}),
@@ -1587,11 +1585,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         FaMiSoLaDo("Step 4) Fa, Mi, So, La, Do", new Pitch[][]{{Fa0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
         ReFaMiSoLaDo("Step 5) Re, Fa, Mi, So, La, Do", new Pitch[][]{{Re0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
         SiReFaMiSoLaDo("Step 6) Si, Re, Fa, Mi, So, La, Do", new Pitch[][]{{Si0, Si0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
-        DiatonicPlusLe("Step 7) Diatonic + Le", new Pitch[][]{DIATONIC_SCALE, {Le0, Le0}}, Pitchenga::shuffle, null),
-        DiatonicPlusFiLe("Step 8) Diatonic + Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, null),
-        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null),
-        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null),
-        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me, Se, Ra, Fi, Le", new Pitch[][]{DIATONIC_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null);
+        DiatonicPlusLe("Step 7) Diatonic + Le", new Pitch[][]{DO_MAJ_SCALE, {Le0, Le0}}, Pitchenga::shuffle, null),
+        DiatonicPlusFiLe("Step 8) Diatonic + Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, null),
+        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null),
+        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se, Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null),
+        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me, Se, Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null);
 
         private final String name;
         private final Pitch[][] scale;
