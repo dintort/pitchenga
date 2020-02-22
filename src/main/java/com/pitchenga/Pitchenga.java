@@ -99,7 +99,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //    private final JTextPane text = new JTextPane();
 
     //fixme: Random within all scales - repeated  5 times, then switch to another random scale +blues scales
-
+    //fixme: Labels on the circle's circles
     //fixme: Change the slider knob color as well
     //fixme: Profiling
     //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band
@@ -712,6 +712,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
 
             pitchenga.setLocation(screenSize.width - pitchenga.getSize().width - 10, screenSize.height / 2 - pitchenga.getSize().height / 2);
+//            pitchenga.setLocation(0, screenSize.height / 2 - pitchenga.getSize().height / 2);
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
             pitchenga.setVisible(pitchenga.setup.mainFrameVisible);
 
