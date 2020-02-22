@@ -11,6 +11,9 @@ import static com.pitchenga.Tone.*;
 public class Circle extends JComponent {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
+    private volatile Tone tone;
+    private volatile Color toneColor;
+    private volatile Color pitchinessColor;
     private volatile boolean isBlank = true;
 
     public static void main(String[] args) {
@@ -34,21 +37,38 @@ public class Circle extends JComponent {
         super();
     }
 
+    public void setTone(Tone tone, Color toneColor, Color pitchinessColor) {
+        this.tones.clear();
+        this.tones.add(tone);
+        this.isBlank = false;
+        this.tone = tone;
+        this.toneColor = toneColor;
+        this.pitchinessColor = pitchinessColor;
+        repaint();
+    }
+
     public void setTones(Tone... tones) {
         this.tones.clear();
         this.tones.addAll(Arrays.asList(tones));
-        isBlank = false;
+        this.isBlank = false;
+        this.tone = null;
+        this.pitchinessColor = null;
         repaint();
     }
 
     public void clear() {
         this.tones.clear();
-        isBlank = true;
+        this.isBlank = true;
+        this.tone = null;
+        this.pitchinessColor = null;
         setBackground(null);
     }
 
     public void paint(Graphics graphics) {
-        final Color background = getBackground();
+        Color background = getBackground();
+        Tone tone = this.tone;
+        Color toneColor = this.toneColor;
+        Color pitchyColor = this.pitchinessColor;
 
         Rectangle bounds = graphics.getClipBounds();
         Color fillColor = background != null ? background : Color.GRAY;
@@ -83,7 +103,17 @@ public class Circle extends JComponent {
 
             graphics.setColor(myTone.color);
             if (tones.contains(myTone) || isBlank) {
-                graphics.fillOval(x + offset, y, diameter, diameter);
+                if (tone != null && myTone == tone && pitchyColor != null) {
+                    graphics.setColor(pitchyColor);
+                    graphics.fillOval(x + offset, y, diameter, diameter);
+                    if (toneColor == null) {
+                        toneColor = tone.color;
+                    }
+                    graphics.setColor(toneColor);
+                    graphics.fillOval(x + offset + halfRadius / 2, y + halfRadius / 2, diameter - halfRadius, diameter - halfRadius);
+                } else {
+                    graphics.fillOval(x + offset, y, diameter, diameter);
+                }
             } else {
                 graphics.drawOval(x + offset, y, diameter, diameter);
             }

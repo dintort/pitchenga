@@ -100,6 +100,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     //fixme: Random within all scales - repeated  5 times, then switch to another random scale +blues scales
     //fixme: Labels on the circle's circles
+    //fixme: Continuous gradient ring around the circle +slider
     //fixme: Change the slider knob color as well
     //fixme: Profiling
     //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band
@@ -304,10 +305,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (!isPlaying()) {
                 updatePianoButtons(guess.tone.getKey());
                 if (!isKeyboard) {
-                    circle.setTones(guess.tone);
+                    circle.setTone(guess.tone, guessColor, pitchinessColor);
                 }
             }
             circle.setBackground(guessColor);
+            //fixme: Remove the tuner panel
             tuner.setBackground(pitchinessColor);
             tunerLabel.setBackground(Color.BLACK);
             tunerLabel.setText(guess.tone.label);
