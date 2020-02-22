@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Pitchenga-my-debug" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.pitchenga.Pitchenga" />
+    <module name="pitchenga.main" />
+    <option name="PROGRAM_PARAMETERS" value="-NSRequiresAquaSystemAppearance False" />
+    <option name="VM_PARAMETERS" value="-Dcom.pitchenga.debug=true -Dcom.pitchenga.setup.class=com.pitchenga.MySetup -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=. -XX:+ExitOnOutOfMemoryError -DnotXloggc:/app-home/logs/gc-${app_name_env}.log -XX:+PrintGC -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintTenuringDistribution -XX:+PrintAdaptiveSizePolicy -DnotXX:+UseGCLogFileRotation -DnotXX:NumberOfGCLogFiles=10 -DnotXX:GCLogFileSize=10M" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.pitchenga.player.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

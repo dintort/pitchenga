@@ -3,7 +3,7 @@
     <option name="MAIN_CLASS_NAME" value="com.pitchenga.Pitchenga" />
     <module name="pitchenga.main" />
     <option name="PROGRAM_PARAMETERS" value="-NSRequiresAquaSystemAppearance False" />
-    <option name="VM_PARAMETERS" value="-Dcom.pitchenga.debug=true -Dcom.pitchenga.setup.class=com.pitchenga.MySetup" />
+    <option name="VM_PARAMETERS" value="-Dcom.pitchenga.debug=false -Dcom.pitchenga.setup.class=com.pitchenga.MySetup" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.pitchenga.player.*" />
