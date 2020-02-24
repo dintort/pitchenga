@@ -46,6 +46,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
 
     private final Setup setup = Setup.create();
+    private final boolean primary;
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor();
     //fixme: Bigger queue, but process them all in one go so that the buzzer goes off only once when multiple keys pressed
@@ -122,8 +123,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Visualize chords - like this, but adjust the palette: https://glasses.withinmyworld.org/index.php/2012/08/18/chord-colors-perfect-pitch-and-synesthesia/#.XkVt9y2ZO24
     //fixme: Alternative color schemes from config files. E.g. https://www.nature.com/articles/s41598-017-18150-y/figures/2;  .put("Do", new Color(253, 203, 3)).put("Ra", new Color(65, 3, 75)).put("Re", new Color(3, 179, 253)).put("Me", new Color(244, 56, 6)).put("Mi", new Color(250, 111, 252)).put("Fa", new Color(2, 252, 37)).put("Fi", new Color(3, 88, 69)).put("So", new Color(252, 2, 2)).put("Le", new Color(16, 24, 106)).put("La", new Color(251, 245, 173)).put("Se", new Color(2, 243, 252)).put("Si", new Color(219, 192, 244))
     //fixme: Split view and controller
-    public Pitchenga() {
+    public Pitchenga(boolean primary) {
         super("Pitchenga");
+        this.primary = primary;
         this.circle = new Circle();
         MidiChannel[] midiChannels = initMidi();
         piano = midiChannels[0];
@@ -423,6 +425,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 Pitch riddle = this.riddle.get();
                 if (riddle != null) {
                     circle.setTones(riddle.tone);
+                    pitchSlider.setValue(convertPitchToSlider(riddle, riddle.frequency));
+                    frequencyLabel.setText(String.format("%07.2f", riddle.frequency));
                     Pitch prevRiddle = this.prevRiddle.get();
                     Pitch prevPrevRiddle = this.prevPrevRiddle.get();
                     if (prevRiddle != null && prevPrevRiddle != null) {
@@ -657,7 +661,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    public static void main(String... strings) throws InterruptedException, InvocationTargetException {
+    static {
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pitchenga"); //fixme: Does not work
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
@@ -665,54 +669,34 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             throwable.printStackTrace();
         });
 
-        SwingUtilities.invokeAndWait(() -> {
-            UIManager.put("control", new Color(128, 128, 128));
-            UIManager.put("info", new Color(128, 128, 128));
-            UIManager.put("nimbusBase", new Color(18, 30, 49));
-            UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
-            UIManager.put("nimbusDisabledText", new Color(128, 128, 128));
-            UIManager.put("nimbusFocus", new Color(115, 164, 209));
-            UIManager.put("nimbusGreen", new Color(176, 179, 50));
-            UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
-            UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
-            UIManager.put("nimbusOrange", new Color(191, 98, 4));
-            UIManager.put("nimbusRed", new Color(169, 46, 34));
-            UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
-            UIManager.put("nimbusSelectionBackground", new Color(104, 93, 156));
-            UIManager.put("text", new Color(230, 230, 230));
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    try {
-                        UIManager.setLookAndFeel(info.getClassName());
-                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-                        e.printStackTrace();
-                    }
-                    break;
+        UIManager.put("control", new Color(128, 128, 128));
+        UIManager.put("info", new Color(128, 128, 128));
+        UIManager.put("nimbusBase", new Color(18, 30, 49));
+        UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
+        UIManager.put("nimbusDisabledText", new Color(128, 128, 128));
+        UIManager.put("nimbusFocus", new Color(115, 164, 209));
+        UIManager.put("nimbusGreen", new Color(176, 179, 50));
+        UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
+        UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
+        UIManager.put("nimbusOrange", new Color(191, 98, 4));
+        UIManager.put("nimbusRed", new Color(169, 46, 34));
+        UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
+        UIManager.put("nimbusSelectionBackground", new Color(104, 93, 156));
+        UIManager.put("text", new Color(230, 230, 230));
+        for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+            if ("Nimbus".equals(info.getName())) {
+                try {
+                    UIManager.setLookAndFeel(info.getClassName());
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+                    e.printStackTrace();
                 }
+                break;
             }
+        }
+    }
 
-            Pitchenga pitchenga = new Pitchenga();
-            pitchenga.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            pitchenga.pack();
-            Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-            //fixme: Change to center when saving to file is implemented
-//        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-            int width = 730;
-            pitchenga.setSize(width, (int) screenSize.getHeight());
-//        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
-            //fixme: Should resize relatively + have a slider for the user to resize
-//        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
-
-            pitchenga.setLocation(screenSize.width - pitchenga.getSize().width, screenSize.height / 2 - pitchenga.getSize().height / 2);
-//            pitchenga.setLocation(0, screenSize.height / 2 - pitchenga.getSize().height / 2);
-//        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
-            pitchenga.setVisible(pitchenga.setup.mainFrameVisible);
-
-            if (!pitchenga.setup.mainFrameVisible) {
-                JFrame frame = new JFrame("Test");
-                frame.setVisible(true);
-            }
-        });
+    public static void main(String... strings) throws InterruptedException, InvocationTargetException {
+        SwingUtilities.invokeAndWait(() -> new Pitchenga(true));
     }
 
     private void initGui() {
@@ -742,8 +726,28 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pianoPanel.add(initControlPanel(), BorderLayout.NORTH);
         pianoPanel.add(initChromaticPiano(), BorderLayout.CENTER);
         pianoPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
-
         updateToneSpinners();
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pack();
+        Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        //fixme: Change to center when saving to file is implemented
+//        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
+        int width = 730;
+        setSize(width, (int) screenSize.getHeight());
+//        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
+        //fixme: Should resize relatively + have a slider for the user to resize
+//        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
+
+//            setLocation(0, screenSize.height / 2 - getSize().height / 2);
+        setLocation(screenSize.width - getSize().width, screenSize.height / 2 - getSize().height / 2);
+//        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
+        setVisible(setup.mainFrameVisible);
+
+        if (!setup.mainFrameVisible) {
+            JFrame frame = new JFrame("Test");
+            frame.setVisible(true);
+        }
     }
 
     private JScrollPane initTextArea() {
@@ -805,6 +809,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private void initKeyboard() {
         KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        if (!primary) {
+            return;
+        }
         manager.addKeyEventPostProcessor(event -> {
             boolean pressed;
             if (event.getID() == KeyEvent.KEY_PRESSED) {
@@ -1323,12 +1330,23 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (setup.defaultAudioInput != null) {
             return setup.defaultAudioInput;
         }
+        String defaultInputName = System.getProperty("com.pitchenga.default.input");
         Mixer.Info defaultInput = null;
         if (inputs.size() > 0) {
-            for (Mixer.Info mixerInfo : inputs) {
-                if (mixerInfo.toString().toLowerCase().contains("default")) {
-                    defaultInput = mixerInfo;
-                    break;
+            if (defaultInputName != null) {
+                for (Mixer.Info mixerInfo : inputs) {
+                    if (defaultInputName.equals(mixerInfo.getName())) {
+                        defaultInput = mixerInfo;
+                        break;
+                    }
+                }
+            }
+            if (defaultInput == null) {
+                for (Mixer.Info mixerInfo : inputs) {
+                    if (mixerInfo.toString().toLowerCase().contains("default")) {
+                        defaultInput = mixerInfo;
+                        break;
+                    }
                 }
             }
             if (defaultInput == null) {
@@ -1596,7 +1614,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public enum GuessRinger {
         None("Ring nothing", pitch -> new Object[]{thirtyTwo}),
         Tune("Ring mnemonic tune", pitch -> pitch.tone.getFugue().tune),
-        Tone("Ring tone", pitch -> new Object[]{pitch.tone.getFugue().pitch, sixteen, eight}),
+        Tone("Ring tone", pitch -> new Object[]{pitch.tone.getFugue().pitch, sixteen, four}),
         ToneAndDo("Ring tone and Do", pitch -> new Object[]{pitch.tone.getFugue().pitch, eight, Do.getFugue().pitch, eight}),
         JustDo("Ring Do", pitch -> new Object[]{Do.getFugue().pitch, thirtyTwo, sixteen}),
         JustRa("Ring Ra", pitch -> new Object[]{Ra.getFugue().pitch, thirtyTwo, sixteen}),
@@ -1657,7 +1675,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Delayed100("Hint: after 100 ms", 100),
         Delayed200("Hint: after 200 ms", 200),
         Delayed300("Hint: after 300 ms", 300),
+        Delayed400("Hint: after 400 ms", 400),
         Delayed500("Hint: after 500 ms", 500),
+        Delayed600("Hint: after 600 ms", 600),
+        Delayed700("Hint: after 700 ms", 700),
+        Delayed800("Hint: after 800 ms", 800),
+        Delayed900("Hint: after 900 ms", 900),
         Delayed1000("Hint: after 1 second", 1000),
         Delayed2000("Hint: after 2 seconds", 2000),
         Never("Hint: never", Integer.MAX_VALUE);

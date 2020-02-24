@@ -13,13 +13,14 @@ public class MySetup extends Setup {
         defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
 
         defaultHinter = Pitchenga.Hinter.Always;
-        defaultHinter = Pitchenga.Hinter.Delayed500;
         defaultHinter = Pitchenga.Hinter.Delayed1000;
+        defaultHinter = Pitchenga.Hinter.Delayed500;
+        defaultHinter = Pitchenga.Hinter.Delayed700;
 
         defaultPacer = Pitchenga.Pacer.Tempo140;
         defaultPacer = Pitchenga.Pacer.Tempo55;
-        defaultPacer = Pitchenga.Pacer.Tempo30;
         defaultPacer = Pitchenga.Pacer.Answer;
+        defaultPacer = Pitchenga.Pacer.Tempo40;
 
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledDiatonic;
         defaultRiddler = Pitchenga.Riddler.ChromaticOneOctave;
@@ -28,9 +29,6 @@ public class MySetup extends Setup {
         defaultRiddler = Pitchenga.Riddler.DoMaj;
         defaultRiddler = Pitchenga.Riddler.Chromatic;
 
-        defaultGuessRinger = Pitchenga.GuessRinger.ToneAndDo;
-        defaultGuessRinger = Pitchenga.GuessRinger.Tone;
-        defaultGuessRinger = Pitchenga.GuessRinger.JustDo;
         defaultGuessRinger = Pitchenga.GuessRinger.JustRa;
         defaultGuessRinger = Pitchenga.GuessRinger.JustRe;
         defaultGuessRinger = Pitchenga.GuessRinger.JustMe;
@@ -42,6 +40,9 @@ public class MySetup extends Setup {
         defaultGuessRinger = Pitchenga.GuessRinger.JustSe;
         defaultGuessRinger = Pitchenga.GuessRinger.JustSi;
         defaultGuessRinger = Pitchenga.GuessRinger.JustLa;
+        defaultGuessRinger = Pitchenga.GuessRinger.ToneAndDo;
+        defaultGuessRinger = Pitchenga.GuessRinger.JustDo;
+        defaultGuessRinger = Pitchenga.GuessRinger.Tone;
 
         defaultRiddleRinger = Pitchenga.RiddleRinger.Tune;
         defaultRiddleRinger = Pitchenga.RiddleRinger.Tone;
