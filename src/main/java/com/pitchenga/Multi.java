@@ -10,15 +10,14 @@ public class Multi {
         System.setProperty("com.pitchenga.debug", "false");
         System.setProperty("com.pitchenga.setup.class", "com.pitchenga.MySetup");
 
-        SwingUtilities.invokeAndWait(() -> new Pitchenga(false));
-
-        System.setProperty("com.pitchenga.default.input", "pandora-agg");
         SwingUtilities.invokeAndWait(() -> {
-            Pitchenga pitchenga = new Pitchenga(true);
+            Pitchenga secondary = new Pitchenga(false, null);
+            System.setProperty("com.pitchenga.default.input", "PANDORA PX5D");
+            Pitchenga primary = new Pitchenga(true, secondary);
             Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-            int width = 1024;
-            pitchenga.setSize(width, (int) screenSize.getHeight());
-            pitchenga.setLocation(screenSize.width / 2 - pitchenga.getSize().width / 2, screenSize.height / 2 - pitchenga.getSize().height / 2);
+//            int width = 1024;
+//            primary.setSize(width, (int) screenSize.getHeight());
+            primary.setLocation(screenSize.width / 2 - primary.getSize().width / 2, screenSize.height / 2 - primary.getSize().height / 2);
         });
     }
 
