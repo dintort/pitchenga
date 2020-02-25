@@ -740,6 +740,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pianoPanel.add(initChromaticPiano(), BorderLayout.CENTER);
         pianoPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
         updateToneSpinners();
+        updateOctaveToggles(getRiddler());
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
@@ -1184,16 +1185,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         frozen = true;
                         try {
                             resetGame();
-                            Riddler riddler = (Riddler) event.getItem();
-                            Integer[] octaves = riddler.octaves;
-                            if (riddler.octaves == null) {
-                                octaves = setup.defaultOctaves;
-                            }
-                            List<Integer> riddlerOctaves = Arrays.asList(octaves);
-                            for (int i = 0; i < ALL_OCTAVES.length; i++) {
-                                Integer octave = ALL_OCTAVES[i];
-                                octaveToggles[i].setSelected(riddlerOctaves.contains(octave));
-                            }
+                            updateOctaveToggles((Riddler) event.getItem());
                             updateToneSpinners();
                         } finally {
                             frozen = false;
@@ -1208,6 +1200,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }));
         riddlerCombo.setSelectedItem(setup.defaultRiddler);
         return riddlerCombo;
+    }
+
+    private void updateOctaveToggles(Riddler riddler) {
+        Integer[] octaves = riddler.octaves;
+        if (riddler.octaves == null) {
+            octaves = setup.defaultOctaves;
+        }
+        List<Integer> riddlerOctaves = Arrays.asList(octaves);
+        for (int i = 0; i < ALL_OCTAVES.length; i++) {
+            Integer octave = ALL_OCTAVES[i];
+            octaveToggles[i].setSelected(riddlerOctaves.contains(octave));
+        }
     }
 
     private JComboBox<Hinter> initHinterCombo() {
@@ -1290,14 +1294,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         boolean playing = isPlaying();
         debug("running=" + playing);
-        executor.execute(() -> {
-            SwingUtilities.invokeLater(() -> {
-                circle.clear();
-                if (secondary != null) {
-                    secondary.setVisible(!playing);
-                }
-            });
-        });
+        executor.execute(() -> SwingUtilities.invokeLater(() -> {
+            circle.clear();
+            if (secondary != null) {
+                secondary.setVisible(!playing);
+            }
+        }));
         if (playing) {
             resetGame();
             playButton.setText("Stop");
@@ -1354,7 +1356,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         String defaultInputName = System.getProperty("com.pitchenga.default.input");
         Mixer.Info defaultInput = null;
         if (inputs.size() > 0) {
-            if (defaultInputName != null) {
+            if (defaultInputName != null && !defaultInputName.isEmpty()) {
                 for (Mixer.Info mixerInfo : inputs) {
                     if (defaultInputName.equals(mixerInfo.getName())) {
                         defaultInput = mixerInfo;
