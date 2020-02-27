@@ -41,7 +41,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Move to Scale
     private static final Pitch[] CHROMATIC_SCALE = Arrays.stream(TONES).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Pitch[] DO_MAJ_SCALE = Arrays.stream(TONES).filter(tone -> tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
-    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[] { Do3, Re3, Mi3, Fa3, So3, Le3, Si3 };
+    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3};
     private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Button> KEY_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
@@ -202,6 +202,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void incorrect(Pitch riddle) {
+        Hinter hinter = getHinter();
+        if (hinter != Hinter.Never && System.currentTimeMillis() - riddleTimestampMs >= hinter.delayMs) {
+            showHint(riddle);
+        }
         frozen = true;
         try {
             fugue(piano, getRiddleRinger().ring.apply(riddle), false);
@@ -434,12 +438,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (isPlaying() && riddleTimestampMs == this.riddleTimestampMs) {
                 Pitch riddle = this.riddle.get();
                 if (riddle != null) {
-                    circle.setTones(riddle.tone);
-                    if (getPacer() != Pacer.Answer) {
-                        circle.setFillColor(riddle.tone.color);
-                    }
-                    pitchSlider.setValue(convertPitchToSlider(riddle, riddle.frequency));
-                    frequencyLabel.setText(String.format("%07.2f", riddle.frequency));
+                    showHint(riddle);
                     Pitch prevRiddle = this.prevRiddle.get();
                     Pitch prevPrevRiddle = this.prevPrevRiddle.get();
                     if (prevRiddle != null && prevPrevRiddle != null) {
@@ -460,16 +459,43 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }), hinter.delayMs, TimeUnit.MILLISECONDS);
     }
 
+    private void showHint(Pitch riddle) {
+        circle.setTones(riddle.tone);
+        if (getPacer() != Pacer.Answer) {
+            circle.setFillColor(riddle.tone.color);
+        }
+        pitchSlider.setValue(convertPitchToSlider(riddle, riddle.frequency));
+        frequencyLabel.setText(String.format("%07.2f", riddle.frequency));
+    }
+
     private List<Pitch> shuffle() {
         List<Tone> tones = getScaleTones();
-        //noinspection CollectionAddedToSelf
-        tones.addAll(tones); // Better shuffling - allows the same note twice in a row
+        //fixme: +Spinner for series +Spinner for repeats? +Replace the i+n things with a loop
+        int series = 3;
+        while (tones.size() % series != 0) {
+            int index = random.nextInt(tones.size());
+            tones.add(tones.get(index));
+        }
         Collections.shuffle(tones);
         List<Pitch> shuffled = addOctaves(tones);
         debug(shuffled + " are the new riddles without penalties");
+        int size = shuffled.size();
+        List<Pitch> multi = new ArrayList<>(size * 2);
+        for (int i = 0; i < size; i += series) {
+            for (int j = 0; j < 2; j++) {
+                multi.add(shuffled.get(i));
+                if (size > i + 1) {
+                    multi.add(shuffled.get(i + 1));
+                    if (size > i + 2) {
+                        multi.add(shuffled.get(i + 2));
+                    }
+                }
+            }
+        }
+        debug(multi + " are the new riddles multiplied");
 
         List<Pitch> result = createPenalties();
-        result.addAll(shuffled);
+        result.addAll(multi);
         debug(result + " are the new riddles with penalties");
 
         Set<Triplet<Pitch, Pitch, Pitch>> reminders = new LinkedHashSet<>(penaltyReminders);
@@ -747,7 +773,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         //fixme: Change to center when saving to file is implemented
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-        int width = 730;
+        int width = 670;
         setSize(width, (int) screenSize.getHeight());
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
@@ -1641,21 +1667,23 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         SiMaj("Si maj - main octaves", new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 11)}, Pitchenga::shuffle, null),
         SiMajHarm("Si maj harm - main octaves", new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 11)}, Pitchenga::shuffle, null),
         ChromaticWithDoubledDiatonic("Chromatic with doubled Do maj - main octaves", new Pitch[][]{CHROMATIC_SCALE, DO_MAJ_SCALE}, Pitchenga::shuffle, null),
+        ChromaticWithDoubledDiatonicOneOctave("Chromatic with doubled Do maj - one octave", new Pitch[][]{CHROMATIC_SCALE, DO_MAJ_SCALE}, Pitchenga::shuffle, new Integer[0]),
         ChromaticWithDoubledSharps("Chromatic with doubled sharps - main octaves", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, null),
+        ChromaticWithDoubledSharpsOneOctave("Chromatic with doubled sharps - one octave", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, new Integer[0]),
         ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::order, new Integer[]{3, 4, 5}),
         ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended", CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::order, new Integer[]{3, 4, 5}),
         SharpsOnly("Sharps only - main octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, null),
-        LaDo("Step 1) La, Do", new Pitch[][]{{La0, Do0}}, Pitchenga::shuffle, null),
-        SoLaDo("Step 2) So, La, Do", new Pitch[][]{{So0, La0, Do0}}, Pitchenga::shuffle, null),
-        MiSoLaDo("Step 3) Mi, So, La, Do", new Pitch[][]{{Mi0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
-        FaMiSoLaDo("Step 4) Fa, Mi, So, La, Do", new Pitch[][]{{Fa0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
-        ReFaMiSoLaDo("Step 5) Re, Fa, Mi, So, La, Do", new Pitch[][]{{Re0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
-        SiReFaMiSoLaDo("Step 6) Si, Re, Fa, Mi, So, La, Do", new Pitch[][]{{Si0, Si0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, null),
-        DiatonicPlusLe("Step 7) Diatonic + Le", new Pitch[][]{DO_MAJ_SCALE, {Le0, Le0}}, Pitchenga::shuffle, null),
-        DiatonicPlusFiLe("Step 8) Diatonic + Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, null),
-        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null),
-        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se, Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null),
-        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me, Se, Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, null);
+        LaDo("Step 1) La, Do", new Pitch[][]{{La0, Do0}}, Pitchenga::shuffle, new Integer[0]),
+        SoLaDo("Step 2) So, La, Do", new Pitch[][]{{So0, La0, Do0}}, Pitchenga::shuffle, new Integer[0]),
+        MiSoLaDo("Step 3) Mi, So, La, Do", new Pitch[][]{{Mi0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, new Integer[0]),
+        FaMiSoLaDo("Step 4) Fa, Mi, So, La, Do", new Pitch[][]{{Fa0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, new Integer[0]),
+        ReFaMiSoLaDo("Step 5) Re, Fa, Mi, So, La, Do", new Pitch[][]{{Re0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, new Integer[0]),
+        SiReFaMiSoLaDo("Step 6) Si, Re, Fa, Mi, So, La, Do", new Pitch[][]{{Si0, Si0, Re0, Fa0, Mi0, So0, La0, Do0}}, Pitchenga::shuffle, new Integer[0]),
+        DiatonicPlusLe("Step 7) Diatonic + Le", new Pitch[][]{DO_MAJ_SCALE, {Le0, Le0}}, Pitchenga::shuffle, new Integer[0]),
+        DiatonicPlusFiLe("Step 8) Diatonic + Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Fi0, Fi0, Le0}}, Pitchenga::shuffle, new Integer[0]),
+        DiatonicPlusRaFiLe("Step 9) Diatonic + Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Ra0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, new Integer[0]),
+        DiatonicPlusSeRaFiLe("Step 10) Diatonic + Se, Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Se0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, new Integer[0]),
+        DiatonicPlusMeSeRaFiLe("Step 11) Diatonic + Me, Se, Ra, Fi, Le", new Pitch[][]{DO_MAJ_SCALE, {Me0, Me0, Se0, Ra0, Fi0, Le0}}, Pitchenga::shuffle, new Integer[0]);
 
         private final String name;
         private final Pitch[][] scale;
@@ -1680,18 +1708,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Tune("Ring mnemonic tune", pitch -> transposeFugue(pitch, pitch.tone.getFugue().tune)),
         Tone("Ring tone", pitch -> new Object[]{pitch, sixteen, four}),
         ToneAndDo("Riddle tone and Do", pitch -> transposeFugue(pitch, new Object[]{pitch.tone.getFugue().pitch, eight, Do.getFugue().pitch, eight})),
-        JustDo("Ring Do", pitch -> transposeFugue(pitch, new Object[]{Do.getFugue().pitch, thirtyTwo, eight})),
-        JustRa("Ring Ra", pitch -> transposeFugue(pitch, new Object[]{Ra.getFugue().pitch, thirtyTwo, eight})),
-        JustRe("Ring Re", pitch -> transposeFugue(pitch, new Object[]{Re.getFugue().pitch, thirtyTwo, eight})),
-        JustMe("Ring Me", pitch -> transposeFugue(pitch, new Object[]{Me.getFugue().pitch, thirtyTwo, eight})),
-        JustMi("Ring Mi", pitch -> transposeFugue(pitch, new Object[]{Mi.getFugue().pitch, thirtyTwo, eight})),
-        JustFa("Ring Fa", pitch -> transposeFugue(pitch, new Object[]{Fa.getFugue().pitch, thirtyTwo, eight})),
-        JustFi("Ring Fi", pitch -> transposeFugue(pitch, new Object[]{Fi.getFugue().pitch, thirtyTwo, eight})),
-        JustSo("Ring So", pitch -> transposeFugue(pitch, new Object[]{So.getFugue().pitch, thirtyTwo, eight})),
-        JustLe("Ring Le", pitch -> transposeFugue(pitch, new Object[]{Le.getFugue().pitch, thirtyTwo, eight})),
-        JustLa("Ring La", pitch -> transposeFugue(pitch, new Object[]{La.getFugue().pitch, thirtyTwo, eight})),
-        JustSe("Ring Se", pitch -> transposeFugue(pitch, new Object[]{Se.getFugue().pitch, thirtyTwo, eight})),
-        JustSi("Ring Si", pitch -> transposeFugue(pitch, new Object[]{Si.getFugue().pitch, thirtyTwo, eight})),
+        JustDo("Ring Do", pitch -> transposeFugue(pitch, new Object[]{Do.getFugue().pitch, thirtyTwo, four})),
+        JustRa("Ring Ra", pitch -> transposeFugue(pitch, new Object[]{Ra.getFugue().pitch, thirtyTwo, four})),
+        JustRe("Ring Re", pitch -> transposeFugue(pitch, new Object[]{Re.getFugue().pitch, thirtyTwo, four})),
+        JustMe("Ring Me", pitch -> transposeFugue(pitch, new Object[]{Me.getFugue().pitch, thirtyTwo, four})),
+        JustMi("Ring Mi", pitch -> transposeFugue(pitch, new Object[]{Mi.getFugue().pitch, thirtyTwo, four})),
+        JustFa("Ring Fa", pitch -> transposeFugue(pitch, new Object[]{Fa.getFugue().pitch, thirtyTwo, four})),
+        JustFi("Ring Fi", pitch -> transposeFugue(pitch, new Object[]{Fi.getFugue().pitch, thirtyTwo, four})),
+        JustSo("Ring So", pitch -> transposeFugue(pitch, new Object[]{So.getFugue().pitch, thirtyTwo, four})),
+        JustLe("Ring Le", pitch -> transposeFugue(pitch, new Object[]{Le.getFugue().pitch, thirtyTwo, four})),
+        JustLa("Ring La", pitch -> transposeFugue(pitch, new Object[]{La.getFugue().pitch, thirtyTwo, four})),
+        JustSe("Ring Se", pitch -> transposeFugue(pitch, new Object[]{Se.getFugue().pitch, thirtyTwo, four})),
+        JustSi("Ring Si", pitch -> transposeFugue(pitch, new Object[]{Si.getFugue().pitch, thirtyTwo, four})),
         ;
         private final String name;
         private final Function<Pitch, Object[]> ring;

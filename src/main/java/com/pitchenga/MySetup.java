@@ -13,17 +13,18 @@ public class MySetup extends Setup {
         defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
 
         defaultHinter = Pitchenga.Hinter.Delayed1000;
-        defaultHinter = Pitchenga.Hinter.Delayed700;
         defaultHinter = Pitchenga.Hinter.Delayed200;
         defaultHinter = Pitchenga.Hinter.Delayed100;
         defaultHinter = Pitchenga.Hinter.Always;
         defaultHinter = Pitchenga.Hinter.Delayed500;
+        defaultHinter = Pitchenga.Hinter.Delayed2000;
+        defaultHinter = Pitchenga.Hinter.Delayed700;
 
         defaultPacer = Pitchenga.Pacer.Tempo140;
-        defaultPacer = Pitchenga.Pacer.Answer;
         defaultPacer = Pitchenga.Pacer.Tempo30;
-        defaultPacer = Pitchenga.Pacer.Tempo55;
         defaultPacer = Pitchenga.Pacer.Tempo60;
+        defaultPacer = Pitchenga.Pacer.Answer;
+        defaultPacer = Pitchenga.Pacer.Tempo45;
         defaultPacer = Pitchenga.Pacer.Tempo40;
 
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledDiatonic;
@@ -31,6 +32,8 @@ public class MySetup extends Setup {
         defaultRiddler = Pitchenga.Riddler.ChromaticScaleUpDown;
         defaultRiddler = Pitchenga.Riddler.DoMaj;
         defaultRiddler = Pitchenga.Riddler.Chromatic;
+        defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledDiatonicOneOctave;
+        defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledSharpsOneOctave;
         defaultRiddler = Pitchenga.Riddler.ChromaticOneOctave;
 
         defaultGuessRinger = Pitchenga.GuessRinger.JustRa;
@@ -44,10 +47,10 @@ public class MySetup extends Setup {
         defaultGuessRinger = Pitchenga.GuessRinger.JustSe;
         defaultGuessRinger = Pitchenga.GuessRinger.JustSi;
         defaultGuessRinger = Pitchenga.GuessRinger.ToneAndDo;
-        defaultGuessRinger = Pitchenga.GuessRinger.Tone;
         defaultGuessRinger = Pitchenga.GuessRinger.JustLa;
         defaultGuessRinger = Pitchenga.GuessRinger.JustDo;
         defaultGuessRinger = Pitchenga.GuessRinger.ToneAndDo;
+        defaultGuessRinger = Pitchenga.GuessRinger.Tone;
         defaultGuessRinger = Pitchenga.GuessRinger.None;
 
         defaultRiddleRinger = Pitchenga.RiddleRinger.Tone;
@@ -55,8 +58,8 @@ public class MySetup extends Setup {
         defaultAudioInput = NO_AUDIO_INPUT;
         defaultAudioInput = null;
 
+        mainFrameVisible = false;
         mainFrameVisible = true;
-//        MAIN_FRAME_VISIBLE = false;
     }
 
 }
