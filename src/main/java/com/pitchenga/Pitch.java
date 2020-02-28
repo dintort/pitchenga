@@ -120,6 +120,7 @@ public enum Pitch {
     public final int octave;
     public final String note;
     public final String label;
+    private volatile Fugue fugue;
 
     Pitch(Tone tone, int octave, int midi, float frequency) {
         this.tone = tone;
@@ -128,6 +129,20 @@ public enum Pitch {
         this.frequency = frequency;
         this.note = tone.note + octave;
         this.label = name().toLowerCase();
+    }
+
+    public Fugue getFugue() {
+        if (this.fugue == null) {
+            for (Fugue aFugue : Fugue.values()) {
+                if (aFugue.pitch.equals(this)) {
+                    this.fugue = aFugue;
+                    return aFugue;
+                }
+            }
+            throw new IllegalArgumentException("Fugue not found for=" + this);
+        } else {
+            return this.fugue;
+        }
     }
 
 }

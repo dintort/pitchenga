@@ -12,25 +12,26 @@ import java.awt.*;
 public enum Tone {
 
     //fixme: Foreground colors don't work
+    Do("C", true, new Color(255, 0, 0), Color.DARK_GRAY),
+    Ra("Db", false, new Color(127, 0, 0), Color.DARK_GRAY),
+    Re("D", true, new Color(255, 127, 0), Color.DARK_GRAY),
+    Me("Eb", false, new Color(127, 127, 0), Color.DARK_GRAY),
+    Mi("E", true, new Color(255, 255, 0), Color.DARK_GRAY),
+    Fa("F", true, new Color(0, 255, 0), Color.DARK_GRAY),
     Fi("F#", false, new Color(0, 127, 127), Color.WHITE),
     So("G", true, new Color(0, 255, 255), Color.DARK_GRAY),
     Le("Ab", false, new Color(0, 0, 127), Color.DARK_GRAY),
     La("A", true, new Color(0, 0, 255), Color.DARK_GRAY),
     Se("Bb", false, new Color(127, 0, 255), Color.DARK_GRAY),
     Si("B", true, new Color(255, 0, 255), Color.DARK_GRAY),
-    Do("C", true, new Color(255, 0, 0), Color.DARK_GRAY),
-    Ra("Db", false, new Color(127, 0, 0), Color.DARK_GRAY),
-    Re("D", true, new Color(255, 127, 0), Color.DARK_GRAY),
-    Me("Eb", false, new Color(127, 127, 0), Color.DARK_GRAY),
-    Mi("E", true, new Color(255, 255, 0), Color.DARK_GRAY),
-    Fa("F", true, new Color(0, 255, 0), Color.DARK_GRAY);
+    ;
 
     public final String note;
     public final boolean diatonic;
     public final Color color;
     public final Color fontColor;
     public final String label;
-    public Fugue fugue;
+    public volatile Fugue fugue;
 
     Tone(String note, boolean diatonic, Color color, Color fontColor) {
         this.note = note;
@@ -41,8 +42,7 @@ public enum Tone {
     }
 
     public Fugue getFugue() {
-        Fugue fugue = this.fugue;
-        if (fugue == null) {
+        if (this.fugue == null) {
             for (Fugue aFugue : Fugue.values()) {
                 if (aFugue.pitch.tone.equals(this)) {
                     this.fugue = aFugue;
@@ -51,17 +51,17 @@ public enum Tone {
             }
             throw new IllegalArgumentException("Fugue not found for=" + this);
         } else {
-            return fugue;
+            return this.fugue;
         }
     }
 
-    public Button getKey() {
+    public Key getKey() {
         //fixme: Cache them same way as fugues
-        Button[] buttons = Button.values();
-        for (int i = buttons.length - 1; i >= 0; i--) {
-            Button button = buttons[i];
-            if (button.pitch != null && button.pitch.tone == this) {
-                return button;
+        Key[] keys = Key.values();
+        for (int i = keys.length - 1; i >= 0; i--) {
+            Key key = keys[i];
+            if (key.pitch != null && key.pitch.tone == this) {
+                return key;
             }
         }
         throw new IllegalArgumentException("Key not found for=" + this);

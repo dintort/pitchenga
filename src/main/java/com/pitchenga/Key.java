@@ -2,7 +2,7 @@ package com.pitchenga;
 
 import java.awt.event.KeyEvent;
 
-public enum Button {
+public enum Key {
     //fixme: +Alternative full-keyboard diatonic layout with sharps via shift?
     //fixme: +Fret-less sliding up and down with modifier keys
     //fixme: +Toggleable A B C D E etc button labels
@@ -22,18 +22,19 @@ public enum Button {
 //    np12(Pitch.Fa4, KeyEvent.VK_ , "=", false),
 
 
-    n01(Pitch.Fi3, KeyEvent.VK_1, 0,"1"),
-    n02(Pitch.So3, KeyEvent.VK_2, 0, "2"),
-    n03(Pitch.Le3, KeyEvent.VK_3, 0, "3"),
-    n04(Pitch.La3, KeyEvent.VK_4, 0, "4"),
-    n05(Pitch.Se3, KeyEvent.VK_5, 0, "5"),
-    n06(Pitch.Si3, KeyEvent.VK_6, 0, "6"),
-    n07(Pitch.Do4, KeyEvent.VK_7, 0, "7"),
-    n08(Pitch.Ra4, KeyEvent.VK_8, 0, "8"),
-    n09(Pitch.Re4, KeyEvent.VK_9, 0, "9"),
-    n10(Pitch.Me4, KeyEvent.VK_0, 0, "0"),
-    n11(Pitch.Mi4, KeyEvent.VK_MINUS, 0, "-"),
-    n12(Pitch.Fa4, KeyEvent.VK_EQUALS, 0, "="),
+    n00(Pitch.Do4, KeyEvent.VK_BACK_QUOTE, 0,"`"),
+    n01(Pitch.Ra4, KeyEvent.VK_1, 0,"1"),
+    n02(Pitch.Re4, KeyEvent.VK_2, 0, "2"),
+    n03(Pitch.Me4, KeyEvent.VK_3, 0, "3"),
+    n04(Pitch.Mi4, KeyEvent.VK_4, 0, "4"),
+    n05(Pitch.Fa4, KeyEvent.VK_5, 0, "5"),
+    n06(Pitch.Fi4, KeyEvent.VK_6, 0, "6"),
+    n07(Pitch.So4, KeyEvent.VK_7, 0, "7"),
+    n08(Pitch.Le4, KeyEvent.VK_8, 0, "8"),
+    n09(Pitch.La4, KeyEvent.VK_9, 0, "9"),
+    n10(Pitch.Se4, KeyEvent.VK_0, 0, "0"),
+    n11(Pitch.Si4, KeyEvent.VK_MINUS, 0, "-"),
+    n12(Pitch.Do5, KeyEvent.VK_EQUALS, 0, "="),
 
 //    do3(Pitch.Do3, -1, 1, null, false),
 //    ra3(Pitch.Ra3, -2, 1, null, false),
@@ -92,7 +93,7 @@ public enum Button {
     public final int row;
     public final String label;
 
-    Button(Pitch pitch, int keyEventCode, int row, String label) {
+    Key(Pitch pitch, int keyEventCode, int row, String label) {
         this.pitch = pitch;
         this.keyEventCode = keyEventCode;
         this.row = row;
