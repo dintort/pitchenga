@@ -1646,6 +1646,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public enum Riddler {
         ChromaticOneOctave("Chromatic - 1 octave", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
         Chromatic("Chromatic - main octaves", new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, null),
+        SharpsOnlyOneOctave("Sharps only - 1 octave", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, new Integer[0]),
         DoMajOneOctave("Do maj - 1 octave", new Pitch[][]{DO_MAJ_SCALE}, Pitchenga::shuffle, new Integer[0]),
         DoMaj("Do maj - main octaves", new Pitch[][]{DO_MAJ_SCALE}, Pitchenga::shuffle, null),
         DoMajHarm("Do maj harm - main octaves", new Pitch[][]{DO_MAJ_HARM_SCALE}, Pitchenga::shuffle, null),
