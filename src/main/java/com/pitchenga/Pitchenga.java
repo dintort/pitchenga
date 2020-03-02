@@ -641,7 +641,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     if (flashColors) {
                         SwingUtilities.invokeLater(() -> {
                             updatePianoButton(pitch.tone.getKey(), true);
-                            circle.setTones(pitch.tone);
+                            circle.setTone(pitch.tone, pitch.tone.color, pitch.tone.color);
                         });
                     }
                     prev = pitch;

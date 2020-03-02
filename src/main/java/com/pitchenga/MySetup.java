@@ -24,9 +24,9 @@ public class MySetup extends Setup {
         defaultPacer = Pitchenga.Pacer.Tempo30;
         defaultPacer = Pitchenga.Pacer.Tempo45;
         defaultPacer = Pitchenga.Pacer.Tempo60;
-        defaultPacer = Pitchenga.Pacer.Tempo40;
         defaultPacer = Pitchenga.Pacer.Answer;
         defaultPacer = Pitchenga.Pacer.Tempo70;
+        defaultPacer = Pitchenga.Pacer.Tempo40;
 
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledDiatonic;
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledSharps;
@@ -42,9 +42,9 @@ public class MySetup extends Setup {
         defaultGuessRinger = Pitchenga.GuessRinger.JustDo;
         defaultGuessRinger = Pitchenga.GuessRinger.ToneAndDo;
         defaultGuessRinger = Pitchenga.GuessRinger.ToneAndLa;
-        defaultGuessRinger = Pitchenga.GuessRinger.ToneAndRa;
         defaultGuessRinger = Pitchenga.GuessRinger.Tone;
         defaultGuessRinger = Pitchenga.GuessRinger.None;
+        defaultGuessRinger = Pitchenga.GuessRinger.ToneAndRa;
 
         defaultRiddleRinger = Pitchenga.RiddleRinger.Tone;
 
