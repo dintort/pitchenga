@@ -1679,14 +1679,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Step01("Step 01: Do, Fi                                        ", new Pitch[][]{{Do4, Do5, Fi4}}, Pitchenga::shuffle, new Integer[0]),
         Step02("Step 02: Do, Fi, La                                    ", new Pitch[][]{{Do4, Do5, Fi4, La4}}, Pitchenga::shuffle, new Integer[0]),
         Step03("Step 03: Do, Fi, La, Me                                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4}}, Pitchenga::shuffle, new Integer[0]),
-        Step04("Step 05: Do, Fi, La, Me, So                            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
-        Step05("Step 06: Do, Fi, La, Me, So, Mi                        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step06("Step 07: Do, Fi, La, Me, So, Mi, Se                    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
-        Step07("Step 08: Do, Fi, La, Me, So, Mi, Se, Ra                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
-        Step08("Step 09: Do, Fi, La, Me, So, Mi, Se, Ra, Le            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
-        Step09("Step 10: Do, Fi, La, Me, So, Mi, Se, Ra, Le, Re        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Le4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
-        Step10("Step 11: Do, Fi, La, Me, So, Mi, Se, Ra, Le, Re, Fa    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Le4, Re4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
-        Step11("Step 12: Do, Fi, La, Me, So, Mi, Se, Ra, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Le4, Re4, Fa4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
+        Step04("Step 04: Do, Fi, La, Me, So                            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
+        Step05("Step 05: Do, Fi, La, Me, So, Mi                        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
+        Step06("Step 06: Do, Fi, La, Me, So, Mi, Se                    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
+        Step07("Step 07: Do, Fi, La, Me, So, Mi, Se, Ra                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
+        Step08("Step 08: Do, Fi, La, Me, So, Mi, Se, Ra, Le            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
+        Step09("Step 09: Do, Fi, La, Me, So, Mi, Se, Ra, Le, Re        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Le4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
+        Step10("Step 10: Do, Fi, La, Me, So, Mi, Se, Ra, Le, Re, Fa    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Le4, Re4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
+        Step11("Step 11: Do, Fi, La, Me, So, Mi, Se, Ra, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, So4, Mi4, Se4, Ra4, Le4, Re4, Fa4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
         ;
 
         private final String name;
