@@ -139,6 +139,12 @@ public enum Pitch {
                     return aFugue;
                 }
             }
+            for (Fugue aFugue : Fugue.values()) {
+                if (aFugue.pitch.tone.equals(this.tone)) {
+                    this.fugue = aFugue;
+                    return aFugue;
+                }
+            }
             throw new IllegalArgumentException("Fugue not found for=" + this);
         } else {
             return this.fugue;

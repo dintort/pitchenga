@@ -136,7 +136,7 @@ public class Circle extends JPanel {
                     thickness = gap / 2;
                 }
                 if (!scaleTones.contains(myTone)) {
-                    thickness = 1 + gap / 10;
+                    thickness = 1 + gap / 12;
                 }
                 if (thickness > 0) {
                     graphics.setColor(Color.BLACK);
