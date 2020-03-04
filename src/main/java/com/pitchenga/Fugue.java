@@ -26,7 +26,7 @@ public enum Fugue {
 
     public final Pitch pitch;
     public final Object[] tune;
-    public final Object[] toneAndDo;
+    public final Object[][] intervals ;
 
     Fugue(Pitch pitch, Object... coda) {
         this.pitch = pitch;
@@ -34,11 +34,18 @@ public enum Fugue {
         tune.add(pitch);
         tune.addAll(Arrays.asList(coda));
         this.tune = tune.toArray();
-        this.toneAndDo = new Object[4];
-        toneAndDo[0] = pitch;
-        toneAndDo[1] = eight;
-        toneAndDo[2] = coda[coda.length - 2];
-        toneAndDo[3] = eight;
+        Pitch theDo = (Pitch) coda[coda.length - 2];
+        Tone[] tones = Tone.values();
+        intervals = new Object[tones.length][];
+        for (Tone tone : tones) {
+            Object[] interval = new Object[4];
+            this.intervals[tone.ordinal()] = interval;
+            Pitch end = Pitchenga.transposePitch(theDo, 0, tone.ordinal());
+            interval[0] = pitch;
+            interval[1] = eight;
+            interval[2] = end;
+            interval[3] = eight;
+        }
     }
 
 }

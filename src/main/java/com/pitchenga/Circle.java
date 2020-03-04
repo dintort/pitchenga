@@ -131,14 +131,13 @@ public class Circle extends JPanel {
             } else {
                 graphics.setColor(myTone.color);
                 graphics.fillOval(x + offset, y, diameter, diameter);
-                int thickness = 0;
                 if (!tones.contains(myTone)) {
-                    thickness = gap / 2;
-                }
-                if (!scaleTones.contains(myTone)) {
-                    thickness = 1 + gap / 12;
-                }
-                if (thickness > 0) {
+                    int thickness;
+                    if (scaleTones.contains(myTone)) {
+                        thickness = 1 + gap / 2;
+                    } else {
+                        thickness = 1 + gap / 12;
+                    }
                     graphics.setColor(Color.BLACK);
                     graphics.fillOval(offset + x + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
                 }
