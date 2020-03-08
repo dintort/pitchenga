@@ -493,8 +493,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private List<Pitch> shuffle() {
         List<Pitch> pitches = getScalePitches();
-        //fixme: +Spinner for series +Spinner for repeats? +Replace the i+n things with a loop
+        //fixme: +Spinner for series length +Spinner for repeats
         int series = 3;
+        int repeat = 3;
         while (pitches.size() % series != 0) {
             int index = random.nextInt(pitches.size());
             pitches.add(pitches.get(index));
@@ -503,15 +504,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         List<Pitch> shuffled = addOctaves(pitches);
         debug(shuffled + " are the new riddles without penalties");
         int size = shuffled.size();
-        List<Pitch> multi = new ArrayList<>(size * 2);
+        List<Pitch> multi = new ArrayList<>(size * repeat);
         for (int i = 0; i < size; i += series) {
-            for (int j = 0; j < 2; j++) {
-                multi.add(shuffled.get(i));
-                if (size > i + 1) {
-                    multi.add(shuffled.get(i + 1));
-                    if (size > i + 2) {
-                        multi.add(shuffled.get(i + 2));
-                    }
+            for (int j = 0; j < repeat; j++) {
+                for (int k = 0; k < series; k++) {
+                    multi.add(shuffled.get(i + k));
                 }
             }
         }
