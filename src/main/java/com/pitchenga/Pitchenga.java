@@ -868,6 +868,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             return;
         }
         manager.addKeyEventPostProcessor(event -> {
+            if (event.isMetaDown()) {
+                return false;
+            }
             boolean pressed;
             if (event.getID() == KeyEvent.KEY_PRESSED) {
                 pressed = true;
