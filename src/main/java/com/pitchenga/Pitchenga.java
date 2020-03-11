@@ -44,16 +44,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(key -> key.keyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
     public static final Font SERIF = new Font("SansSerif", Font.PLAIN, 11);
-    private static volatile long lastPacerTimestamp = System.currentTimeMillis();
+    public static final int SERIES = 3;
+    public static final int REPEAT = 3;
 
     private final Setup setup = Setup.create();
     private final boolean isPrimary;
     private final Pitchenga secondary;
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("pitchenga-async"));
     //fixme: Bigger queue, but process them all in one go so that the buzzer goes off only once when multiple keys pressed
     private final BlockingQueue<Runnable> playQueue = new ArrayBlockingQueue<>(1);
-    private final ExecutorService playExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, playQueue, new ThreadPoolExecutor.DiscardOldestPolicy());
+    private final ExecutorService playExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, playQueue, new MyThreadFactory("pitchenga-play"), new ThreadPoolExecutor.DiscardOldestPolicy());
     private final Random random = new Random();
     private volatile AudioDispatcher audioDispatcher;
     //fixme: +Selectors for instruments +Random instrument: 1) guitar/piano/sax 2) more 3) all
@@ -71,8 +71,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final AtomicReference<Pitch> prevPrevRiddle = new AtomicReference<>(null);
     private volatile long riddleTimestampMs = System.currentTimeMillis();
     private volatile long penaltyRiddleTimestampMs = System.currentTimeMillis();
+    private volatile long lastPacerTimestampMs = System.currentTimeMillis();
+    private volatile long lastBuzzTimestampMs;
     private volatile boolean frozen = false;
-    private final AtomicInteger idCounter = new AtomicInteger(-1);
+    private final AtomicInteger seriesCounter = new AtomicInteger(0);
     private final Map<Key, Integer> pressedKeyToMidi = new HashMap<>(); // To ignore OS's key repeating when holding and to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
@@ -88,8 +90,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JComboBox<PitchEstimationAlgorithm> pitchAlgoCombo = new JComboBox<>();
     private final JComboBox<Hinter> hinterCombo = new JComboBox<>();
     private final JComboBox<Pacer> pacerCombo = new JComboBox<>();
-    private final JComboBox<RiddleRinger> riddleRingerCombo = new JComboBox<>();
-    private final JComboBox<GuessRinger> guessRingerCombo = new JComboBox<>();
+    private final JComboBox<Buzzer> buzzerCombo = new JComboBox<>();
+    private final JComboBox<Ringer> ringerCombo = new JComboBox<>();
     private final JComboBox<Riddler> riddlerCombo = new JComboBox<>();
     private final JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
     private final JToggleButton playButton = new JToggleButton();
@@ -100,11 +102,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //    private final JTextPane text = new JTextPane();
 
     //fixme: Random within all scales - repeated  5 times, then switch to another random scale +blues scales
-    //fixme: Labels on the circle's circles
     //fixme: Continuous gradient ring around the circle +slider
     //fixme: Change the slider knob color as well
     //fixme: Profiling
-    //fixme: Korg PX5D is recognized, but no audio is coming - same problem in Pod Farm, but not in Garage Band
     //fixme: Neither of the pitch detection algorithms seem to work for bass guitar. MPM does not seem to work below mi2.
     //fixme: Colored waveform visualization
     //fixme: Solfege sound bank for midi +Les Paul +"monitoring" mode where it plays solfege on pitch detection
@@ -143,7 +143,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private void play(Pitch guess, boolean exact) {
         try {
-            lastPacerTimestamp = System.currentTimeMillis();
+            lastPacerTimestampMs = System.currentTimeMillis();
             if (frozen || !isPlaying()) {
                 return;
             }
@@ -175,9 +175,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         this.prevPrevRiddle.set(prevRiddle);
         this.riddle.set(null);
 
-        GuessRinger guessRinger = getGuessRinger();
+        Ringer ringer = getRinger();
         transcribe(riddle, false);
-        fugue(guitar, guessRinger.ring.apply(riddle), true);
+        fugue(guitar, ringer.ring.apply(riddle), true);
 
         this.playQueue.clear();
         //fixme: This will stack overflow in the auto-play mode
@@ -211,11 +211,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (hinter != Hinter.Never && System.currentTimeMillis() - riddleTimestampMs >= hinter.delayMs) {
             showHint(riddle);
         }
-        frozen = true;
-        try {
-            fugue(piano, getRiddleRinger().ring.apply(riddle), false);
-        } finally {
-            frozen = false;
+        long lastBuzzTimestampMs = this.lastBuzzTimestampMs;
+        this.lastBuzzTimestampMs = System.currentTimeMillis();
+        if (this.lastBuzzTimestampMs - lastBuzzTimestampMs > 500) {
+            frozen = true;
+            try {
+                fugue(piano, getBuzzer().buzz.apply(riddle), false);
+            } finally {
+                frozen = false;
+            }
         }
     }
 
@@ -223,7 +227,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         while (this.riddle.get() == null) {
             if (riddleQueue.size() == 0) {
                 Riddler riddler = getRiddler();
-                List<Pitch> riddles = riddler.riddleAction.apply(this);
+                List<Pitch> riddles = riddler.riddle.apply(this);
+                seriesCounter.set(0);
                 debug(" " + riddles + " are the next riddles, riddler=" + riddler);
                 riddleQueue.addAll(riddles);
             }
@@ -235,11 +240,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     this.riddle.set(riddle);
                     this.riddleTimestampMs = System.currentTimeMillis();
                 }
-                scheduleHint(riddle);
+                int seriesCount = seriesCounter.getAndIncrement();
+                scheduleHint(riddle, seriesCount);
                 frozen = true;
                 try {
                     boolean flashColors = getHinter() == Hinter.Always;
-                    fugue(piano, getRiddleRinger().ring.apply(riddle), flashColors);
+                    fugue(piano, getBuzzer().buzz.apply(riddle), flashColors);
                     playQueue.clear();
                 } finally {
                     frozen = false;
@@ -249,9 +255,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return this.riddle.get();
     }
 
-    private static void pace(int bpm) {
+    private void pace(int bpm) {
         long delay = 60_000 / bpm;
-        long prevTimestamp = lastPacerTimestamp;
+        long prevTimestamp = lastPacerTimestampMs;
         long elapsed = System.currentTimeMillis() - prevTimestamp;
         if (elapsed < delay) {
             long diff = delay - elapsed;
@@ -261,7 +267,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 e.printStackTrace();
             }
         }
-        lastPacerTimestamp = System.currentTimeMillis();
+        lastPacerTimestampMs = System.currentTimeMillis();
     }
 
     private boolean checkAnswer(Pitch riddle, Pitch guess, boolean exact) {
@@ -441,7 +447,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         circle.setScaleTones(getScaleTones());
     }
 
-    private void scheduleHint(Pitch riddle) {
+    private void scheduleHint(Pitch riddle, int seriesCount) {
         if (riddle == null) {
             return;
         }
@@ -450,6 +456,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Hinter hinter = getHinter();
         if (hinter == Hinter.Always) {
             SwingUtilities.invokeLater(() -> showHint(riddle));
+            return;
+        } else if (hinter == Hinter.Series) {
+            SwingUtilities.invokeLater(() -> {
+                if (isShowSeriesHint(seriesCount)) {
+                    showHint(riddle);
+                } else {
+                    circle.setTones();
+                    circle.setFillColor(null);
+                }
+            });
             return;
         } else if (hinter == Hinter.Never) {
             return;
@@ -482,6 +498,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }), hinter.delayMs, TimeUnit.MILLISECONDS);
     }
 
+    static boolean isShowSeriesHint(int seriesCount) {
+        int mod = seriesCount % (REPEAT * SERIES);
+        return mod >= SERIES;
+    }
+
     private void showHint(Pitch riddle) {
         circle.setTones(riddle.tone);
         if (getPacer() != Pacer.Answer) {
@@ -494,9 +515,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private List<Pitch> shuffle() {
         List<Pitch> pitches = getScalePitches();
         //fixme: +Spinner for series length +Spinner for repeats
-        int series = 3;
-        int repeat = 3;
-        while (pitches.size() % series != 0) {
+        while (pitches.size() % SERIES != 0) {
             int index = random.nextInt(pitches.size());
             pitches.add(pitches.get(index));
         }
@@ -504,10 +523,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         List<Pitch> shuffled = addOctaves(pitches);
         debug(shuffled + " are the new riddles without penalties");
         int size = shuffled.size();
-        List<Pitch> multi = new ArrayList<>(size * repeat);
-        for (int i = 0; i < size; i += series) {
-            for (int j = 0; j < repeat; j++) {
-                for (int k = 0; k < series; k++) {
+        List<Pitch> multi = new ArrayList<>(size * REPEAT);
+        for (int i = 0; i < size; i += SERIES) {
+            for (int j = 0; j < REPEAT; j++) {
+                for (int k = 0; k < SERIES; k++) {
                     multi.add(shuffled.get(i + k));
                 }
             }
@@ -969,8 +988,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         controlPanel.add(initPitchAlgoCombo());
         controlPanel.add(initHinterCombo());
         controlPanel.add(initPacerCombo());
-        controlPanel.add(initRiddleRingerCombo());
-        controlPanel.add(initGuessRingerCombo());
+        controlPanel.add(initBuzzerCombo());
+        controlPanel.add(initRingerCombo());
         JPanel octavesPanel = initOctavesPanel();
         controlPanel.add(initRiddlerCombo());
         controlPanel.add(octavesPanel);
@@ -1246,26 +1265,26 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return hinterCombo;
     }
 
-    private JComboBox<GuessRinger> initGuessRingerCombo() {
-        for (GuessRinger guessRinger : GuessRinger.values()) {
-            guessRingerCombo.addItem(guessRinger);
+    private JComboBox<Ringer> initRingerCombo() {
+        for (Ringer ringer : Ringer.values()) {
+            ringerCombo.addItem(ringer);
         }
-        guessRingerCombo.setFocusable(false);
-        guessRingerCombo.setMaximumRowCount(GuessRinger.values().length);
-        guessRingerCombo.setSelectedItem(setup.defaultGuessRinger);
-        guessRingerCombo.addItemListener(event -> stop());
-        return guessRingerCombo;
+        ringerCombo.setFocusable(false);
+        ringerCombo.setMaximumRowCount(Ringer.values().length);
+        ringerCombo.setSelectedItem(setup.defaultRinger);
+        ringerCombo.addItemListener(event -> stop());
+        return ringerCombo;
     }
 
-    private JComboBox<RiddleRinger> initRiddleRingerCombo() {
-        for (RiddleRinger ringer : RiddleRinger.values()) {
-            riddleRingerCombo.addItem(ringer);
+    private JComboBox<Buzzer> initBuzzerCombo() {
+        for (Buzzer ringer : Buzzer.values()) {
+            buzzerCombo.addItem(ringer);
         }
-        riddleRingerCombo.setFocusable(false);
-        riddleRingerCombo.setMaximumRowCount(RiddleRinger.values().length);
-        riddleRingerCombo.setSelectedItem(setup.defaultRiddleRinger);
-        riddleRingerCombo.addItemListener(event -> stop());
-        return riddleRingerCombo;
+        buzzerCombo.setFocusable(false);
+        buzzerCombo.setMaximumRowCount(Buzzer.values().length);
+        buzzerCombo.setSelectedItem(setup.defaultBuzzer);
+        buzzerCombo.addItemListener(event -> stop());
+        return buzzerCombo;
     }
 
     private JComboBox<PitchEstimationAlgorithm> initPitchAlgoCombo() {
@@ -1275,7 +1294,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchAlgoCombo.setFocusable(false);
         pitchAlgoCombo.setMaximumRowCount(PitchEstimationAlgorithm.values().length);
         pitchAlgoCombo.setSelectedItem(setup.defaultPitchAlgo);
-        pitchAlgoCombo.addActionListener(event -> executor.execute(this::updateMixer));
+        pitchAlgoCombo.addActionListener(event -> asyncExecutor.execute(this::updateMixer));
         return pitchAlgoCombo;
     }
 
@@ -1329,7 +1348,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (playing) {
             resetGame();
             playButton.setText("Stop");
-            executor.execute(() -> play(null, false));
+            playExecutor.execute(() -> play(null, false));
         } else {
             playButton.setText("Play");
         }
@@ -1349,12 +1368,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return (Riddler) riddlerCombo.getSelectedItem();
     }
 
-    private RiddleRinger getRiddleRinger() {
-        return (RiddleRinger) riddleRingerCombo.getSelectedItem();
+    private Buzzer getBuzzer() {
+        return (Buzzer) buzzerCombo.getSelectedItem();
     }
 
-    private GuessRinger getGuessRinger() {
-        return (GuessRinger) guessRingerCombo.getSelectedItem();
+    private Ringer getRinger() {
+        return (Ringer) ringerCombo.getSelectedItem();
     }
 
     private Pacer getPacer() {
@@ -1452,7 +1471,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     System.out.println("Stopped listening to " + mixer.getMixerInfo().getName());
                 }
             };
-            new Thread(dispatch, "pitchenga-mixer" + idCounter.incrementAndGet()).start();
+            new Thread(dispatch, "pitchenga-mixer" + MyThreadFactory.ID_COUNTER.incrementAndGet()).start();
         } catch (LineUnavailableException e) {
             e.printStackTrace();
         }
@@ -1500,7 +1519,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public static Pitch transposePitch(Pitch pitch, int octaves, int steps) {
         steps += TONES.length * octaves;
         int ordinal = pitch.ordinal() + steps;
-        while (ordinal < 0) {
+        while (ordinal < Do0.ordinal()) {
             ordinal += TONES.length;
         }
         while (ordinal >= PITCHES.length) {
@@ -1691,13 +1710,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
         private final String name;
         private final Pitch[][] scale;
-        private final Function<Pitchenga, List<Pitch>> riddleAction;
+        private final Function<Pitchenga, List<Pitch>> riddle;
         private final Integer[] octaves;
 
-        Riddler(String name, Pitch[][] scale, Function<Pitchenga, List<Pitch>> riddleAction, Integer[] octaves) {
+        Riddler(String name, Pitch[][] scale, Function<Pitchenga, List<Pitch>> riddle, Integer[] octaves) {
             this.name = name;
             this.scale = scale;
-            this.riddleAction = riddleAction;
+            this.riddle = riddle;
             this.octaves = octaves;
         }
 
@@ -1707,7 +1726,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
-    public enum GuessRinger {
+    public enum Ringer {
         None("Ring nothing", pitch -> new Object[]{thirtyTwo}),
         Tune("Ring mnemonic tune", pitch -> transposeFugue(pitch, pitch.tone.getFugue().tune)),
         Tone("Ring tone", pitch -> new Object[]{pitch, sixteen, four}),
@@ -1739,7 +1758,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         private final String name;
         private final Function<Pitch, Object[]> ring;
 
-        GuessRinger(String name, Function<Pitch, Object[]> ring) {
+        Ringer(String name, Function<Pitch, Object[]> ring) {
             this.name = name;
             this.ring = ring;
         }
@@ -1751,18 +1770,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
-    public enum RiddleRinger {
+    public enum Buzzer {
         Tune("Riddle mnemonic tune", Pitchenga::transposeTune),
         Tone("Riddle tone", pitch -> new Object[]{pitch, sixteen}),
         ShortToneAndLongPause("Riddle shorter tone with longer pause (for acoustic instruments)", pitch -> new Object[]{pitch, eight, four, sixteen}), //Otherwise the game plays with itself through the microphone by picking up the "tail". This could probably be improved with a shorter midi decay.
         ToneAndDo("Riddle tone and Do", pitch -> transposeFugue(pitch, new Object[]{pitch.tone.getFugue().pitch, Do.getFugue().pitch, sixteen, four})),
         ;
         private final String name;
-        private final Function<Pitch, Object[]> ring;
+        private final Function<Pitch, Object[]> buzz;
 
-        RiddleRinger(String name, Function<Pitch, Object[]> ring) {
+        Buzzer(String name, Function<Pitch, Object[]> buzz) {
             this.name = name;
-            this.ring = ring;
+            this.buzz = buzz;
         }
 
         @Override
@@ -1774,6 +1793,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Hinter {
         Always("Hint: immediately", 0),
+        Series("Hint: series", 0),
         Delayed100("Hint: after 100 ms", 100),
         Delayed200("Hint: after 200 ms", 200),
         Delayed300("Hint: after 300 ms", 300),

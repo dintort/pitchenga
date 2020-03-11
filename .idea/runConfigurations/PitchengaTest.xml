@@ -2,6 +2,7 @@
   <configuration default="false" name="PitchengaTest" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="com.pitchenga.PitchengaTest" />
     <module name="pitchenga.test" />
+    <option name="VM_PARAMETERS" value="-Dcom.pitchenga.debug=true" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.pitchenga.*" />

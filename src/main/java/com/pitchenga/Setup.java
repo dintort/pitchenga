@@ -14,8 +14,8 @@ public class Setup {
     public volatile PitchProcessor.PitchEstimationAlgorithm defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
     public volatile Pitchenga.Hinter defaultHinter = Pitchenga.Hinter.Always;
     public volatile Pitchenga.Riddler defaultRiddler = Pitchenga.Riddler.DoMaj;
-    public volatile Pitchenga.GuessRinger defaultGuessRinger = Pitchenga.GuessRinger.Tune;
-    public volatile Pitchenga.RiddleRinger defaultRiddleRinger = Pitchenga.RiddleRinger.Tune;
+    public volatile Pitchenga.Ringer defaultRinger = Pitchenga.Ringer.Tune;
+    public volatile Pitchenga.Buzzer defaultBuzzer = Pitchenga.Buzzer.Tune;
     public volatile Pitchenga.Pacer defaultPacer = Pitchenga.Pacer.Answer;
     public volatile boolean mainFrameVisible = true;
 
