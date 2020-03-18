@@ -12,7 +12,10 @@ import javax.sound.midi.*;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -44,8 +47,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(key -> key.keyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
     public static final Font SERIF = new Font("SansSerif", Font.PLAIN, 11);
-    public static final int SERIES = 3;
-    public static final int REPEAT = 3;
 
     private final Setup setup = Setup.create();
     private final boolean isPrimary;
@@ -57,9 +58,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final Random random = new Random();
     private volatile AudioDispatcher audioDispatcher;
     //fixme: +Selectors for instruments +Random instrument: 1) guitar/piano/sax 2) more 3) all
-    private final MidiChannel piano;
-    private final MidiChannel brightPiano;
-    private final MidiChannel guitar;
+    private final MidiChannel buzzInstrument;
+    private final MidiChannel keyboardInstrument;
+    private final MidiChannel ringInstrument;
 
     private final AtomicReference<Tone> lastGuess = new AtomicReference<>(null);
     private volatile Pitch lastPitch;
@@ -101,7 +102,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JTextArea textArea = new JTextArea();
     //    private final JTextPane text = new JTextPane();
 
-    //fixme: Random within all scales - repeated  5 times, then switch to another random scale +blues scales
+    //fixme: Load/save/reset; auto-save to home folder
+    //fixme: Random within all scales - repeat 5 times, then switch to another random scale +blues scales
     //fixme: Continuous gradient ring around the circle +slider
     //fixme: Change the slider knob color as well
     //fixme: Profiling
@@ -117,7 +119,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Sliding mouse while holding the button over the piano should activate the keys
     //fixme: Audio input stops working sometimes
     //fixme: Midi stops working sometimes or gets delayed especially after waking up from sleep
-    //fixme: Load/save/reset; auto-save to home folder
     //fixme: Port to iOS and Android
     //fixme: Documentation / how to play
     //fixme: Visualize chords - like this, but adjust the palette: https://glasses.withinmyworld.org/index.php/2012/08/18/chord-colors-perfect-pitch-and-synesthesia/#.XkVt9y2ZO24
@@ -131,11 +132,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             secondary.setAutoRequestFocus(false);
         }
         this.circle = new Circle();
-        MidiChannel[] midiChannels = initMidi();
-        piano = midiChannels[0];
-        brightPiano = midiChannels[1];
-        guitar = midiChannels[2];
 
+        try {
+            Synthesizer synthesizer = MidiSystem.getSynthesizer();
+            synthesizer.open();
+            MidiChannel[] channels = synthesizer.getChannels();
+            this.buzzInstrument = channels[0];
+            this.keyboardInstrument = channels[1];
+            this.ringInstrument = channels[2];
+            initMidiInstruments(synthesizer);
+        } catch (MidiUnavailableException e) {
+            throw new RuntimeException(e);
+        }
         initGui();
         initKeyboard();
         updateMixer();
@@ -177,11 +185,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
         Ringer ringer = getRinger();
         transcribe(riddle, false);
-        fugue(guitar, ringer.ring.apply(riddle), true);
+        fugue(ringInstrument, ringer.ring.apply(riddle), true);
 
         this.playQueue.clear();
         //fixme: This will stack overflow in the auto-play mode
-        //fixme: It keeps playing playing the old game after changing settings
         play(null, false);
     }
 
@@ -216,7 +223,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (this.lastBuzzTimestampMs - lastBuzzTimestampMs > 500) {
             frozen = true;
             try {
-                fugue(piano, getBuzzer().buzz.apply(riddle), false);
+                fugue(buzzInstrument, getBuzzer().buzz.apply(riddle), false);
             } finally {
                 frozen = false;
             }
@@ -245,7 +252,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 frozen = true;
                 try {
                     boolean flashColors = getHinter() == Hinter.Always;
-                    fugue(piano, getBuzzer().buzz.apply(riddle), flashColors);
+                    fugue(buzzInstrument, getBuzzer().buzz.apply(riddle), flashColors);
                     playQueue.clear();
                 } finally {
                     frozen = false;
@@ -498,9 +505,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }), hinter.delayMs, TimeUnit.MILLISECONDS);
     }
 
-    static boolean isShowSeriesHint(int seriesCount) {
-        int mod = seriesCount % (REPEAT * SERIES);
-        return mod >= SERIES;
+    private boolean isShowSeriesHint(int seriesCount) {
+        int mod = seriesCount % (setup.repeat * setup.series);
+        return mod >= setup.series;
     }
 
     private void showHint(Pitch riddle) {
@@ -515,7 +522,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private List<Pitch> shuffle() {
         List<Pitch> pitches = getScalePitches();
         //fixme: +Spinner for series length +Spinner for repeats
-        while (pitches.size() % SERIES != 0) {
+        while (pitches.size() % setup.series != 0) {
             int index = random.nextInt(pitches.size());
             pitches.add(pitches.get(index));
         }
@@ -523,10 +530,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         List<Pitch> shuffled = addOctaves(pitches);
         debug(shuffled + " are the new riddles without penalties");
         int size = shuffled.size();
-        List<Pitch> multi = new ArrayList<>(size * REPEAT);
-        for (int i = 0; i < size; i += SERIES) {
-            for (int j = 0; j < REPEAT; j++) {
-                for (int k = 0; k < SERIES; k++) {
+        List<Pitch> multi = new ArrayList<>(size * setup.repeat);
+        for (int i = 0; i < size; i += setup.series) {
+            for (int j = 0; j < setup.repeat; j++) {
+                for (int k = 0; k < setup.series; k++) {
                     multi.add(shuffled.get(i + k));
                 }
             }
@@ -943,14 +950,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (!pressedKeyToMidi.containsKey(key)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
                 pressedKeyToMidi.put(key, midi);
                 transcribe(pitch, true);
-                brightPiano.noteOn(midi, 127);
+                keyboardInstrument.noteOn(midi, 127);
             }
         } else {
             Integer modifiedMidi = pressedKeyToMidi.remove(key);
             if (modifiedMidi != null) {
                 midi = modifiedMidi;
             }
-            brightPiano.noteOff(midi);
+            keyboardInstrument.noteOff(midi);
             if (getPacer() == Pacer.Answer) {
                 playExecutor.execute(() -> play(pitch, true));
             }
@@ -1496,23 +1503,21 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return result;
     }
 
-    private MidiChannel[] initMidi() {
-        try {
-            Synthesizer synthesizer = MidiSystem.getSynthesizer();
-            synthesizer.open();
-            Instrument[] instruments = synthesizer.getDefaultSoundbank().getInstruments();
-            MidiChannel[] channels = synthesizer.getChannels();
-            Instrument brightPiano = instruments[2];
-            if (synthesizer.loadInstrument(brightPiano)) {
-                channels[1].programChange(brightPiano.getPatch().getProgram());
-            }
-            Instrument guitar = instruments[25];
-            if (synthesizer.loadInstrument(guitar)) {
-                channels[2].programChange(guitar.getPatch().getProgram());
-            }
-            return channels;
-        } catch (MidiUnavailableException e) {
-            throw new RuntimeException(e);
+    private void initMidiInstruments(Synthesizer synthesizer) {
+        Instrument instrument;
+        Instrument[] instruments = synthesizer.getDefaultSoundbank().getInstruments();
+
+        instrument = instruments[setup.buzzInstrument];
+        if (synthesizer.loadInstrument(instrument)) {
+            buzzInstrument.programChange(instrument.getPatch().getProgram());
+        }
+        instrument = instruments[setup.keyboardInstrument];
+        if (synthesizer.loadInstrument(instrument)) {
+            keyboardInstrument.programChange(instrument.getPatch().getProgram());
+        }
+        instrument = instruments[setup.ringInstrument];
+        if (synthesizer.loadInstrument(instrument)) {
+            ringInstrument.programChange(instrument.getPatch().getProgram());
         }
     }
 

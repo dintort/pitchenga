@@ -12,23 +12,31 @@ public class MySetup extends Setup {
 
         defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
 
+        buzzInstrument = GUITAR;
+        keyboardInstrument = GUITAR;
+        ringInstrument = PIANO;
+
+        series = 3;
+        repeat = 3;
+        repeat = 2;
+
         defaultHinter = Pitchenga.Hinter.Delayed200;
         defaultHinter = Pitchenga.Hinter.Delayed100;
         defaultHinter = Pitchenga.Hinter.Delayed700;
         defaultHinter = Pitchenga.Hinter.Delayed1000;
         defaultHinter = Pitchenga.Hinter.Always;
-        defaultHinter = Pitchenga.Hinter.Delayed2000;
         defaultHinter = Pitchenga.Hinter.Delayed500;
         defaultHinter = Pitchenga.Hinter.Series;
+        defaultHinter = Pitchenga.Hinter.Delayed2000;
 
         defaultPacer = Pitchenga.Pacer.Tempo140;
         defaultPacer = Pitchenga.Pacer.Tempo30;
         defaultPacer = Pitchenga.Pacer.Tempo45;
         defaultPacer = Pitchenga.Pacer.Tempo40;
-        defaultPacer = Pitchenga.Pacer.Answer;
         defaultPacer = Pitchenga.Pacer.Tempo60;
         defaultPacer = Pitchenga.Pacer.Tempo50;
         defaultPacer = Pitchenga.Pacer.Tempo70;
+        defaultPacer = Pitchenga.Pacer.Answer;
 
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledSharps;
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledDiatonic;
@@ -38,17 +46,17 @@ public class MySetup extends Setup {
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledSharpsOneOctave;
         defaultRiddler = Pitchenga.Riddler.Step03;
         defaultRiddler = Pitchenga.Riddler.Step05;
-        defaultRiddler = Pitchenga.Riddler.ChromaticOneOctave;
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledDiatonicOneOctave;
+        defaultRiddler = Pitchenga.Riddler.ChromaticOneOctave;
 
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
         defaultRinger = Pitchenga.Ringer.JustDo;
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
         defaultRinger = Pitchenga.Ringer.ToneAndLa;
-        defaultRinger = Pitchenga.Ringer.Tone;
         defaultRinger = Pitchenga.Ringer.JustRa;
         defaultRinger = Pitchenga.Ringer.ToneAndRa;
         defaultRinger = Pitchenga.Ringer.None;
+        defaultRinger = Pitchenga.Ringer.Tone;
 
         defaultBuzzer = Pitchenga.Buzzer.Tone;
 
