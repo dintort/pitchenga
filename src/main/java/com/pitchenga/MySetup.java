@@ -17,17 +17,17 @@ public class MySetup extends Setup {
         ringInstrument = PIANO;
 
         series = 3;
-        repeat = 3;
         repeat = 2;
+        repeat = 3;
 
         defaultHinter = Pitchenga.Hinter.Delayed200;
         defaultHinter = Pitchenga.Hinter.Delayed100;
         defaultHinter = Pitchenga.Hinter.Delayed700;
-        defaultHinter = Pitchenga.Hinter.Delayed1000;
-        defaultHinter = Pitchenga.Hinter.Always;
         defaultHinter = Pitchenga.Hinter.Delayed500;
-        defaultHinter = Pitchenga.Hinter.Series;
         defaultHinter = Pitchenga.Hinter.Delayed2000;
+        defaultHinter = Pitchenga.Hinter.Always;
+        defaultHinter = Pitchenga.Hinter.Series;
+        defaultHinter = Pitchenga.Hinter.Delayed1000;
 
         defaultPacer = Pitchenga.Pacer.Tempo140;
         defaultPacer = Pitchenga.Pacer.Tempo30;

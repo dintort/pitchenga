@@ -51,10 +51,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final Setup setup = Setup.create();
     private final boolean isPrimary;
     private final Pitchenga secondary;
-    private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("pitchenga-async"));
+    private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor(new Threads("pitchenga-async"));
     //fixme: Bigger queue, but process them all in one go so that the buzzer goes off only once when multiple keys pressed
     private final BlockingQueue<Runnable> playQueue = new ArrayBlockingQueue<>(1);
-    private final ExecutorService playExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, playQueue, new MyThreadFactory("pitchenga-play"), new ThreadPoolExecutor.DiscardOldestPolicy());
+    private final ExecutorService playExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, playQueue, new Threads("pitchenga-play"), new ThreadPoolExecutor.DiscardOldestPolicy());
     private final Random random = new Random();
     private volatile AudioDispatcher audioDispatcher;
     //fixme: +Selectors for instruments +Random instrument: 1) guitar/piano/sax 2) more 3) all
@@ -252,6 +252,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 frozen = true;
                 try {
                     boolean flashColors = getHinter() == Hinter.Always;
+                    this.lastBuzzTimestampMs = System.currentTimeMillis();
                     fugue(buzzInstrument, getBuzzer().buzz.apply(riddle), flashColors);
                     playQueue.clear();
                 } finally {
@@ -1478,7 +1479,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     System.out.println("Stopped listening to " + mixer.getMixerInfo().getName());
                 }
             };
-            new Thread(dispatch, "pitchenga-mixer" + MyThreadFactory.ID_COUNTER.incrementAndGet()).start();
+            new Thread(dispatch, "pitchenga-mixer" + Threads.ID_COUNTER.incrementAndGet()).start();
         } catch (LineUnavailableException e) {
             e.printStackTrace();
         }
@@ -1734,7 +1735,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public enum Ringer {
         None("Ring nothing", pitch -> new Object[]{thirtyTwo}),
         Tune("Ring mnemonic tune", pitch -> transposeFugue(pitch, pitch.tone.getFugue().tune)),
-        Tone("Ring tone", pitch -> new Object[]{pitch, sixteen, four}),
+        Tone("Ring tone", pitch -> new Object[]{pitch, eight, eight}),
         JustDo("Ring Do", pitch -> transposeFugue(pitch, new Object[]{Do.getFugue().pitch, eight, four})),
         JustRa("Ring Ra", pitch -> transposeFugue(pitch, new Object[]{Ra.getFugue().pitch, eight, four})),
         JustRe("Ring Re", pitch -> transposeFugue(pitch, new Object[]{Re.getFugue().pitch, eight, four})),

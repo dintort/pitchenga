@@ -3,12 +3,12 @@ package com.pitchenga;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class MyThreadFactory implements ThreadFactory {
+public class Threads implements ThreadFactory {
 
     public static final AtomicLong ID_COUNTER = new AtomicLong(-1);
     private final String prefix;
 
-    public MyThreadFactory(String prefix) {
+    public Threads(String prefix) {
         this.prefix = prefix;
     }
 
