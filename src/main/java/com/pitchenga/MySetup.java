@@ -5,8 +5,8 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 public class MySetup extends Setup {
 
     public MySetup() {
-        defaultPenaltyFactor = 1;
         defaultPenaltyFactor = 0;
+        defaultPenaltyFactor = 3;
 
         defaultOctaves = new Integer[]{2, 3, 4, 5, 6};
 
@@ -24,10 +24,10 @@ public class MySetup extends Setup {
         defaultHinter = Pitchenga.Hinter.Delayed100;
         defaultHinter = Pitchenga.Hinter.Delayed700;
         defaultHinter = Pitchenga.Hinter.Delayed500;
-        defaultHinter = Pitchenga.Hinter.Delayed2000;
         defaultHinter = Pitchenga.Hinter.Always;
         defaultHinter = Pitchenga.Hinter.Series;
         defaultHinter = Pitchenga.Hinter.Delayed1000;
+        defaultHinter = Pitchenga.Hinter.Delayed3000;
 
         defaultPacer = Pitchenga.Pacer.Tempo140;
         defaultPacer = Pitchenga.Pacer.Tempo30;

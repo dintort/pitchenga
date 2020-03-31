@@ -570,41 +570,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         List<Pitch> result = new ArrayList<>();
         for (List<Triplet<Pitch, Pitch, Pitch>> aPenaltyList : penaltyLists) {
             List<Triplet<Pitch, Pitch, Pitch>> penaltyList = new LinkedList<>(aPenaltyList);
-            Collections.shuffle(penaltyList);
-            Triplet<Pitch, Pitch, Pitch> prevPenalty = null;
-            int prevCount = 0;
             for (int i = 0; i < penaltyList.size(); i++) {
                 Triplet<Pitch, Pitch, Pitch> penalty = penaltyList.get(i);
-                int transpose = 0;
-                if (prevPenalty != null && prevPenalty.equals(penalty)) {
-                    int mod = prevCount++ % 3;
-                    if (mod == 1) {
-                        transpose = +1;
-                    } else if (mod == 2) {
-                        transpose = -1;
-                    }
-                    debug("Transpose penalty=" + transpose);
-                } else {
-                    prevCount = 0;
-                }
-                List<Integer> selectedOctaves = getSelectedOctaves();
-                Pitch first = transposePitch(penalty.first, transpose, 0);
-                Pitch second = transposePitch(penalty.second, transpose, 0);
-                Pitch third = transposePitch(penalty.third, transpose, 0);
-                if (!selectedOctaves.contains(first.octave)) {
-                    first = penalty.first;
-                }
-                if (!selectedOctaves.contains(second.octave)) {
-                    second = penalty.second;
-                }
-                if (!selectedOctaves.contains(third.octave)) {
-                    third = penalty.third;
-                }
-                result.add(first);
-                result.add(second);
-                result.add(third);
-                prevPenalty = penalty;
-                if (i >= 7) { // Enough is enough
+                result.add(penalty.first);
+                result.add(penalty.second);
+                result.add(penalty.third);
+                if (i >= 9) { // Enough is enough
                     break;
                 }
             }
@@ -1811,6 +1782,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Delayed900("Hint: after 900 ms", 900),
         Delayed1000("Hint: after 1 second", 1000),
         Delayed2000("Hint: after 2 seconds", 2000),
+        Delayed3000("Hint: after 3 seconds", 3000),
         Never("Hint: never", Integer.MAX_VALUE);
 
         private final String name;
