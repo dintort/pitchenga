@@ -583,7 +583,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return result;
     }
 
-    private List<Pitch> order() {
+    private List<Pitch> ordered() {
         return Arrays.stream(getRiddler().scale)
                 .flatMap(Arrays::stream)
                 .collect(Collectors.toList());
@@ -1669,8 +1669,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         ChromaticWithDoubledDiatonicOneOctave("Chromatic with doubled Do maj - one octave", new Pitch[][]{CHROMATIC_SCALE, DO_MAJ_SCALE}, Pitchenga::shuffle, new Integer[0]),
         ChromaticWithDoubledSharps("Chromatic with doubled sharps - main octaves", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, null),
         ChromaticWithDoubledSharpsOneOctave("Chromatic with doubled sharps - one octave", new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::order, new Integer[]{3, 4, 5}),
-        ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended", CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::order, new Integer[]{3, 4, 5}),
+        ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::ordered, new Integer[]{3, 4, 5}),
+        ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended", CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::ordered, new Integer[]{3, 4, 5}),
         SharpsOnly("Sharps only - main octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, null),
         Step01("Step 01: Do, Fi                                        ", new Pitch[][]{{Do4, Do5, Fi4}}, Pitchenga::shuffle, new Integer[0]),
         Step02("Step 02: Do, Fi, La                                    ", new Pitch[][]{{Do4, Do5, Fi4, La4}}, Pitchenga::shuffle, new Integer[0]),
