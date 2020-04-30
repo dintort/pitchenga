@@ -490,16 +490,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 showHint(riddle);
                 Pitch prevRiddle = this.prevRiddle.get();
                 Pitch prevPrevRiddle = this.prevPrevRiddle.get();
-                if (prevRiddle != null && prevPrevRiddle != null) {
-                    List<Triplet<Pitch, Pitch, Pitch>> penaltyList = penaltyLists.get(riddle.tone.ordinal());
-                    int penaltyFactor = (int) penaltyFactorSpinner.getValue();
-                    if (penaltyFactor > 0) {
-                        penaltyRiddleTimestampMs = riddleTimestampMs;
-                        Triplet<Pitch, Pitch, Pitch> penalty = new Triplet<>(prevPrevRiddle, prevRiddle, riddle);
-                        debug("New penalty: " + penalty + ", other penalties for " + riddle.tone + ": " + penaltyList);
-                        for (int i = 0; i < penaltyFactor; i++) {
-                            penaltyList.add(penalty);
-                        }
+                int penaltyFactor = (int) penaltyFactorSpinner.getValue();
+                if (prevRiddle != null && prevPrevRiddle != null && penaltyFactor > 0) {
+                    penaltyRiddleTimestampMs = riddleTimestampMs;
+                    List<Triplet<Pitch, Pitch, Pitch>> penaltyList = penaltyLists.get(riddle.getFugue().ordinal());
+                    Triplet<Pitch, Pitch, Pitch> penalty = new Triplet<>(prevPrevRiddle, prevRiddle, riddle);
+                    debug("New penalty: " + penalty + ", other penalties for " + riddle.getFugue() + ": " + penaltyList);
+                    for (int i = 0; i < penaltyFactor; i++) {
+                        penaltyList.add(penalty);
                     }
                 }
             }
@@ -568,16 +566,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private List<Pitch> createPenalties() {
         List<Pitch> result = new ArrayList<>();
-        for (List<Triplet<Pitch, Pitch, Pitch>> aPenaltyList : penaltyLists) {
-            List<Triplet<Pitch, Pitch, Pitch>> penaltyList = new LinkedList<>(aPenaltyList);
-            for (int i = 0; i < penaltyList.size(); i++) {
-                Triplet<Pitch, Pitch, Pitch> penalty = penaltyList.get(i);
+        for (List<Triplet<Pitch, Pitch, Pitch>> penaltyList : penaltyLists) {
+            for (Triplet<Pitch, Pitch, Pitch> penalty : penaltyList) {
                 result.add(penalty.first);
                 result.add(penalty.second);
                 result.add(penalty.third);
-                if (i >= 9) { // Enough is enough
-                    break;
-                }
             }
         }
         return result;
@@ -949,9 +942,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalMonitorStateException();
         }
-        for (Key k : KEYS) {
-            JToggleButton keyButton = keyButtons[k.ordinal()];
-            keyButton.setSelected(k.pitch != null && k.pitch.tone.equals(key.pitch.tone));
+        for (Key aKey : KEYS) {
+            JToggleButton keyButton = keyButtons[aKey.ordinal()];
+            keyButton.setSelected(aKey.pitch != null && aKey.pitch.tone.equals(key.pitch.tone));
         }
     }
 

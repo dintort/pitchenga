@@ -17,7 +17,6 @@ public class MySetup extends Setup {
         ringInstrument = GUITAR;
 
         series = 3;
-        repeat = 2;
         repeat = 3;
 
         defaultHinter = Pitchenga.Hinter.Delayed200;
