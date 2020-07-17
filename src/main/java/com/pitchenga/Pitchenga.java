@@ -76,7 +76,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile long lastBuzzTimestampMs;
     private volatile boolean frozen = false;
     private final AtomicInteger seriesCounter = new AtomicInteger(0);
-    private final Map<Key, Integer> pressedKeyToMidi = new HashMap<>(); // To ignore OS's key repeating when holding and to remember the modified midi code to release
+    private final Map<Key, Integer> pressedKeyToMidi = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
 
@@ -882,6 +882,19 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             if (event.getKeyCode() == KeyEvent.VK_CONTROL) {
                 fall = pressed;
+            }
+            if (pressed && (event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET
+                    || event.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET)) {
+                int index = pacerCombo.getSelectedIndex();
+                index = event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET ? index - 1 : index + 1;
+                if (index >= 0 && index < pacerCombo.getItemCount()) {
+                    boolean playing = isPlaying();
+                    pacerCombo.setSelectedIndex(index);
+                    if (playing) {
+                        playButton.setSelected(true);
+                    }
+                }
+                return true;
             }
             Key key = KEY_BY_CODE.get(event.getKeyCode());
             if (key == null) {
