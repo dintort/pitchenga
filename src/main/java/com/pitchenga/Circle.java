@@ -123,7 +123,6 @@ public class Circle extends JPanel {
             int x = (int) Math.round(halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
             int y = (int) Math.round(halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
 
-            triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, false);
             if (myTone == tone && toneColor != null && pitchyColor != null) {
                 triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, toneColor, true);
                 graphics.setColor(pitchyColor);
@@ -139,6 +138,7 @@ public class Circle extends JPanel {
                 } else {
                     int thickness;
                     if (scaleTones.contains(myTone)) {
+                        triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, false);
                         thickness = 1 + gap / 2;
                     } else {
                         thickness = 1 + gap / 12;
