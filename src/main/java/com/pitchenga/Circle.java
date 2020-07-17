@@ -124,6 +124,7 @@ public class Circle extends JPanel {
             int y = (int) (halfSide * Math.cos(phi) + halfSide - halfRadius) + radius;
 
             if (myTone == tone && toneColor != null && pitchyColor != null) {
+                triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, toneColor);
                 graphics.setColor(pitchyColor);
                 graphics.fillOval(x + offset, y, diameter, diameter);
                 graphics.setColor(toneColor);
@@ -131,7 +132,11 @@ public class Circle extends JPanel {
             } else {
                 graphics.setColor(myTone.color);
                 graphics.fillOval(x + offset, y, diameter, diameter);
-                if (!tones.contains(myTone)) {
+//                graphics.fillRect(x + offset, y, diameter, diameter);
+
+                if (tones.contains(myTone)) {
+                    triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color);
+                } else {
                     int thickness;
                     if (scaleTones.contains(myTone)) {
                         thickness = 1 + gap / 2;
@@ -146,9 +151,20 @@ public class Circle extends JPanel {
             JComponent label = labels[i];
             int width = label.getWidth();
             int height = label.getHeight();
-            Graphics childGraphics = graphics.create(offset + x + radius - width / 2, y + radius - height / 2, width, height);
-            label.paint(childGraphics);
+            Graphics labelGraphics = graphics.create(offset + x + radius - width / 2, y + radius - height / 2, width, height);
+            label.paint(labelGraphics);
         }
+    }
+
+    private void triangle(Graphics graphics, int offset, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color) {
+        double phi2 = ((i - 0.38) * Math.PI * 2) / TONES.length;
+        int x2 = (int) (halfSide * Math.sin(phi2) + halfSide + halfRadius) + radius;
+        int y2 = (int) (halfSide * Math.cos(phi2) + halfSide + halfRadius) + radius;
+        double phi3 = ((i + 0.38) * Math.PI * 2) / TONES.length;
+        int x3 = (int) (halfSide * Math.sin(phi3) + halfSide + halfRadius) + radius;
+        int y3 = (int) (halfSide * Math.cos(phi3) + halfSide + halfRadius) + radius;
+        graphics.setColor(color);
+//        graphics.fillPolygon(new int[]{x2 + offset, x3 + offset, fullSide / 2 + offset}, new int[]{y2, y3, fullSide / 2}, 3);
     }
 
 }

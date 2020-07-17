@@ -5,16 +5,16 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 public class MySetup extends Setup {
 
     public MySetup() {
-        defaultPenaltyFactor = 0;
         defaultPenaltyFactor = 3;
+        defaultPenaltyFactor = 0;
 
         defaultOctaves = new Integer[]{2, 3, 4, 5, 6};
 
         defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
 
-        buzzInstrument = PIANO;
-        keyboardInstrument = PIANO;
-        ringInstrument = GUITAR;
+        buzzInstrument = GUITAR;
+        keyboardInstrument = GUITAR;
+        ringInstrument = PIANO;
 
         series = 3;
         repeat = 3;
