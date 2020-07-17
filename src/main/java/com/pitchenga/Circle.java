@@ -120,11 +120,12 @@ public class Circle extends JPanel {
         for (int i = 0; i < TONES.length; i++) {
             Tone myTone = TONES[i];
             double phi = (i * Math.PI * 2) / TONES.length;
-            int x = (int) (halfSide * Math.sin(phi) + halfSide - halfRadius) + radius;
-            int y = (int) (halfSide * Math.cos(phi) + halfSide - halfRadius) + radius;
+            int x = (int) Math.round(halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
+            int y = (int) Math.round(halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
 
+            triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, false);
             if (myTone == tone && toneColor != null && pitchyColor != null) {
-                triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, toneColor);
+                triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, toneColor, true);
                 graphics.setColor(pitchyColor);
                 graphics.fillOval(x + offset, y, diameter, diameter);
                 graphics.setColor(toneColor);
@@ -132,10 +133,9 @@ public class Circle extends JPanel {
             } else {
                 graphics.setColor(myTone.color);
                 graphics.fillOval(x + offset, y, diameter, diameter);
-//                graphics.fillRect(x + offset, y, diameter, diameter);
 
                 if (tones.contains(myTone)) {
-                    triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color);
+                    triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, true);
                 } else {
                     int thickness;
                     if (scaleTones.contains(myTone)) {
@@ -156,15 +156,21 @@ public class Circle extends JPanel {
         }
     }
 
-    private void triangle(Graphics graphics, int offset, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color) {
-        double phi2 = ((i - 0.38) * Math.PI * 2) / TONES.length;
-        int x2 = (int) (halfSide * Math.sin(phi2) + halfSide + halfRadius) + radius;
-        int y2 = (int) (halfSide * Math.cos(phi2) + halfSide + halfRadius) + radius;
-        double phi3 = ((i + 0.38) * Math.PI * 2) / TONES.length;
-        int x3 = (int) (halfSide * Math.sin(phi3) + halfSide + halfRadius) + radius;
-        int y3 = (int) (halfSide * Math.cos(phi3) + halfSide + halfRadius) + radius;
+    private void triangle(Graphics graphics, int offset, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill) {
+        double phi2 = ((i - 0.3) * Math.PI * 2) / TONES.length;
+        int x2 = (int) Math.round(halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
+        int y2 = (int) Math.round(halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
+        double phi3 = ((i + 0.3) * Math.PI * 2) / TONES.length;
+        int x3 = (int) Math.round(halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
+        int y3 = (int) Math.round(halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
         graphics.setColor(color);
-//        graphics.fillPolygon(new int[]{x2 + offset, x3 + offset, fullSide / 2 + offset}, new int[]{y2, y3, fullSide / 2}, 3);
+        int[] xPoints = {x2 + offset, x3 + offset, fullSide / 2 + offset};
+        int[] yPoints = {y2, y3, fullSide / 2};
+        if (fill) {
+            graphics.fillPolygon(xPoints, yPoints, 3);
+        } else {
+            graphics.drawPolygon(xPoints, yPoints, 3);
+        }
     }
 
 }

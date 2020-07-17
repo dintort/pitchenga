@@ -1551,12 +1551,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         this.setIconImage(image);
         try {
             Class<?> clazz = Class.forName("com.apple.eawt.Application");
-            if (clazz != null) {
-                Method getApplication = clazz.getMethod("getApplication");
-                Object application = getApplication.invoke(null);
-                Method setDockIconImage = clazz.getMethod("setDockIconImage", Image.class);
-                setDockIconImage.invoke(application, image);
-            }
+            Method getApplication = clazz.getMethod("getApplication");
+            Object application = getApplication.invoke(null);
+            Method setDockIconImage = clazz.getMethod("setDockIconImage", Image.class);
+            setDockIconImage.invoke(application, image);
         } catch (Exception ignore) {
         }
     }
@@ -1665,17 +1663,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::ordered, new Integer[]{3, 4, 5}),
         ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended", CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::ordered, new Integer[]{3, 4, 5}),
         SharpsOnly("Sharps only - main octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, null),
-        Step01("Step 01: Do, Fi                                        ", new Pitch[][]{{Do4, Do5, Fi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step02("Step 02: Do, Fi, La                                    ", new Pitch[][]{{Do4, Do5, Fi4, La4}}, Pitchenga::shuffle, new Integer[0]),
-        Step03("Step 03: Do, Fi, La, Me                                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4}}, Pitchenga::shuffle, new Integer[0]),
-        Step04("Step 04: Do, Fi, La, Me, Ra                            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
-        Step05("Step 05: Do, Fi, La, Me, Ra, So                        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
-        Step06("Step 06: Do, Fi, La, Me, Ra, So, Se                    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
-        Step07("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step08("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
-        Step09("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
-        Step10("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
-        Step11("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
+        Step01DoFi("Step 01: Do, Fi                                        ", new Pitch[][]{{Do4, Do5, Fi4}}, Pitchenga::shuffle, new Integer[0]),
+        Step02DoFiLa("Step 02: Do, Fi, La                                    ", new Pitch[][]{{Do4, Do5, Fi4, La4}}, Pitchenga::shuffle, new Integer[0]),
+        Step03DoFiLaMe("Step 03: Do, Fi, La, Me                                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4}}, Pitchenga::shuffle, new Integer[0]),
+        Step04DoFiLaMeRa("Step 04: Do, Fi, La, Me, Ra                            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
+        Step05DoFiLaMeRaSo("Step 05: Do, Fi, La, Me, Ra, So                        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
+        Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se                    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
+        Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
+        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
+        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
+        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
+        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
         ;
 
         private final String name;
@@ -1830,8 +1828,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Tempo180("Tempo 180", 180),
         ;
 
-        private String name;
-        private int bpm;
+        private final String name;
+        private final int bpm;
 
         Pacer(String name, int bpm) {
             this.name = name;
