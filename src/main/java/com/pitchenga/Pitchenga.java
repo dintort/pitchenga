@@ -888,10 +888,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 int index = pacerCombo.getSelectedIndex();
                 index = event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET ? index - 1 : index + 1;
                 if (index >= 0 && index < pacerCombo.getItemCount()) {
-                    boolean playing = isPlaying();
-                    pacerCombo.setSelectedIndex(index);
-                    if (playing) {
-                        playButton.setSelected(true);
+                    frozen = true;
+                    try {
+                        pacerCombo.setSelectedIndex(index);
+                    } finally {
+                        frozen = false;
                     }
                 }
                 return true;
@@ -1205,7 +1206,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         pacerCombo.setFocusable(false);
         pacerCombo.setMaximumRowCount(Pacer.values().length);
-        pacerCombo.addItemListener(event -> stop());
+        pacerCombo.addItemListener(event -> {
+            if (!frozen) {
+                stop();
+            }
+        });
         pacerCombo.setSelectedItem(setup.defaultPacer);
         return pacerCombo;
     }
@@ -1679,14 +1684,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Step01DoFi("Step 01: Do, Fi                                        ", new Pitch[][]{{Do4, Do5, Fi4}}, Pitchenga::shuffle, new Integer[0]),
         Step02DoFiLa("Step 02: Do, Fi, La                                    ", new Pitch[][]{{Do4, Do5, Fi4, La4}}, Pitchenga::shuffle, new Integer[0]),
         Step03DoFiLaMe("Step 03: Do, Fi, La, Me                                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4}}, Pitchenga::shuffle, new Integer[0]),
-        Step04DoFiLaMeRa("Step 04: Do, Fi, La, Me, Ra                            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
-        Step05DoFiLaMeRaSo("Step 05: Do, Fi, La, Me, Ra, So                        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
-        Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se                    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
-        Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
-        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
-        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
-        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
+        Step04DoFiLaMeRa("Step 04: Do, Fi, La, Me, Ra                            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
+        Step05DoFiLaMeRaSo("Step 05: Do, Fi, La, Me, Ra, So                        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4}}, Pitchenga::shuffle, new Integer[0]),
+        Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se                    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4}}, Pitchenga::shuffle, new Integer[0]),
+        Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
+        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4}}, Pitchenga::shuffle, new Integer[0]),
+        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4}}, Pitchenga::shuffle, new Integer[0]),
+        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
+        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Si4}}, Pitchenga::shuffle, new Integer[0]),
         ;
 
         private final String name;
