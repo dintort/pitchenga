@@ -45,7 +45,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
     private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(key -> key.keyEventCode, key -> key));
-    public static final Font COURIER = new Font("Courier", Font.BOLD, 16);
+    public static final Font COURIER = new Font("Courier", Font.BOLD, 20);
     public static final Font SERIF = new Font("SansSerif", Font.PLAIN, 11);
 
     private final Setup setup = Setup.create();
@@ -100,6 +100,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JTextArea textArea = new JTextArea();
+    private final JPanel bottomPanel;
     //    private final JTextPane text = new JTextPane();
 
     //fixme: Load/save/reset; auto-save to home folder
@@ -132,6 +133,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             secondary.setAutoRequestFocus(false);
         }
         this.circle = new Circle();
+        this.bottomPanel = new JPanel(new BorderLayout());
 
         try {
             Synthesizer synthesizer = MidiSystem.getSynthesizer();
@@ -184,12 +186,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         this.riddle.set(null);
 
         Ringer ringer = getRinger();
-        transcribe(riddle, false);
+        if (getPacer() == Pacer.Answer) {
+            transcribe(riddle, false);
+        }
         fugue(ringInstrument, ringer.ring.apply(riddle), true);
 
         this.playQueue.clear();
-        //fixme: This will stack overflow in the auto-play mode
-        play(null, false);
+        playExecutor.execute(() -> play(null, false));
     }
 
     private Pitch updatePenalties(Pitch riddle) {
@@ -673,6 +676,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
 //                String text = "<span style=\"background-color: #FFFF00\">This text is highlighted in yellow.</span>";
 //                text(text);
+                text("  ");
                 text(guess.tone.label);
 //                text(guess.getTone().name().toLowerCase(), Color.LIGHT_GRAY, guess.getTone().getColor());
                 text("\n");
@@ -766,11 +770,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (Key key : Key.values()) {
             keyButtons[key.ordinal()] = new JToggleButton(key.label);
         }
-        JPanel pianoPanel = new JPanel(new BorderLayout());
-        mainPanel.add(pianoPanel, BorderLayout.SOUTH);
-        pianoPanel.add(initControlPanel(), BorderLayout.NORTH);
-        pianoPanel.add(initChromaticPiano(), BorderLayout.CENTER);
-        pianoPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
+
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        bottomPanel.add(initControlPanel(), BorderLayout.NORTH);
+        bottomPanel.add(initChromaticPiano(), BorderLayout.CENTER);
+        bottomPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
         updateToneSpinners();
         updateOctaveToggles(getRiddler());
 
@@ -809,7 +813,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         textArea.setBorder(null);
 //        text("<html>");
         for (int i = 0; i < 500; i++) { //There must be a better way
-            text("    \n");
+            text("        \n");
         }
         return scroll;
     }
@@ -888,12 +892,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 int index = pacerCombo.getSelectedIndex();
                 index = event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET ? index - 1 : index + 1;
                 if (index >= 0 && index < pacerCombo.getItemCount()) {
-                    frozen = true;
-                    try {
-                        pacerCombo.setSelectedIndex(index);
-                    } finally {
-                        frozen = false;
-                    }
+                    pacerCombo.setSelectedIndex(index);
+                    text("   ");
+                    text(String.valueOf(getPacer().bpm));
+                    text("\n");
                 }
                 return true;
             }
@@ -1206,11 +1208,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         pacerCombo.setFocusable(false);
         pacerCombo.setMaximumRowCount(Pacer.values().length);
-        pacerCombo.addItemListener(event -> {
-            if (!frozen) {
-                stop();
-            }
-        });
         pacerCombo.setSelectedItem(setup.defaultPacer);
         return pacerCombo;
     }
@@ -1339,8 +1336,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             resetGame();
             playButton.setText("Stop");
             playExecutor.execute(() -> play(null, false));
+            bottomPanel.setVisible(false);
         } else {
             playButton.setText("Play");
+            bottomPanel.setVisible(true);
         }
         debug("running=" + playing);
     }
@@ -1681,17 +1680,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         ChromaticScaleUpDown("Chromatic scale Mi3-Le5-Mi3", CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::ordered, new Integer[]{3, 4, 5}),
         ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended", CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::ordered, new Integer[]{3, 4, 5}),
         SharpsOnly("Sharps only - main octaves", new Pitch[][]{SHARPS_SCALE}, Pitchenga::shuffle, null),
-        Step01DoFi("Step 01: Do, Fi                                        ", new Pitch[][]{{Do4, Do5, Fi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step02DoFiLa("Step 02: Do, Fi, La                                    ", new Pitch[][]{{Do4, Do5, Fi4, La4}}, Pitchenga::shuffle, new Integer[0]),
-        Step03DoFiLaMe("Step 03: Do, Fi, La, Me                                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4}}, Pitchenga::shuffle, new Integer[0]),
-        Step04DoFiLaMeRa("Step 04: Do, Fi, La, Me, Ra                            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
-        Step05DoFiLaMeRaSo("Step 05: Do, Fi, La, Me, Ra, So                        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4}}, Pitchenga::shuffle, new Integer[0]),
-        Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se                    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4}}, Pitchenga::shuffle, new Integer[0]),
-        Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi                ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le            ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4}}, Pitchenga::shuffle, new Integer[0]),
-        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re        ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4}}, Pitchenga::shuffle, new Integer[0]),
-        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa    ", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
-        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Si4}}, Pitchenga::shuffle, new Integer[0]),
+        Step01DoFi("Step 01: Do, Fi", new Pitch[][]{{Do4, Do5, Fi4, Fi4}}, Pitchenga::shuffle, new Integer[0]),
+        Step02DoFiLa("Step 02: Do, Fi, La", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, La4}}, Pitchenga::shuffle, new Integer[0]),
+        Step03DoFiLaMe("Step 03: Do, Fi, La, Me", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4}}, Pitchenga::shuffle, new Integer[0]),
+        Step04DoFiLaMeRa("Step 04: Do, Fi, La, Me, Ra", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
+        Step05DoFiLaMeRaSo("Step 05: Do, Fi, La, Me, Ra, So", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Ra4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
+        Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
+        Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
+        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
+        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
+        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
+        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4, Mi4, Le4, Re4, Fa4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
         ;
 
         private final String name;

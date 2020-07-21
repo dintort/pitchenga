@@ -157,10 +157,10 @@ public class Circle extends JPanel {
     }
 
     private void triangle(Graphics graphics, int offset, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill) {
-        double phi2 = ((i - 0.3) * Math.PI * 2) / TONES.length;
+        double phi2 = ((i - 0.2) * Math.PI * 2) / TONES.length;
         int x2 = (int) Math.round(halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
         int y2 = (int) Math.round(halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
-        double phi3 = ((i + 0.3) * Math.PI * 2) / TONES.length;
+        double phi3 = ((i + 0.2) * Math.PI * 2) / TONES.length;
         int x3 = (int) Math.round(halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
         int y3 = (int) Math.round(halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
         graphics.setColor(color);
