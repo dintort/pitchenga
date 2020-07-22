@@ -522,6 +522,30 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private List<Pitch> shuffle() {
+        List<Pitch> pitches;
+        int attempts = 1024;
+        while (true) {
+            attempts--;
+            debug("Shuffling, attempts=" + attempts);
+            pitches = doShuffle();
+            if (!hasDuplicates(pitches) || attempts < 0) {
+                return pitches;
+            }
+        }
+    }
+
+    private boolean hasDuplicates(List<Pitch> pitches) {
+        Pitch previous = null;
+        for (Pitch pitch : pitches) {
+            if (pitch.equals(previous)) {
+                return true;
+            }
+            previous = pitch;
+        }
+        return false;
+    }
+
+    private List<Pitch> doShuffle() {
         List<Pitch> pitches = getScalePitches();
         //fixme: +Spinner for series length +Spinner for repeats
         while (pitches.size() % setup.series != 0) {
