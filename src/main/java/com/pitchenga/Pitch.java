@@ -119,7 +119,6 @@ public enum Pitch {
     public final float frequency;
     public final int octave;
     public final String note;
-    public final String label;
     private volatile Fugue fugue;
 
     Pitch(Tone tone, int octave, int midi, float frequency) {
@@ -128,7 +127,6 @@ public enum Pitch {
         this.midi = midi;
         this.frequency = frequency;
         this.note = tone.note + octave;
-        this.label = name().toLowerCase();
     }
 
     public Fugue getFugue() {

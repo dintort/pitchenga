@@ -48,6 +48,7 @@ public class MySetup extends Setup {
         defaultRiddler = Pitchenga.Riddler.Step04DoFiLaMeRa;
         defaultRiddler = Pitchenga.Riddler.Step05DoFiLaMeRaSo;
         defaultRiddler = Pitchenga.Riddler.Step06DoFiLaMeRaSoSe;
+        defaultRiddler = Pitchenga.Riddler.Step07DoFiLaMeRaSoSeMi;
 
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
         defaultRinger = Pitchenga.Ringer.JustDo;
@@ -65,6 +66,7 @@ public class MySetup extends Setup {
 
         mainFrameVisible = false;
         mainFrameVisible = true;
+        hideBottomPanel = true;
     }
 
 }

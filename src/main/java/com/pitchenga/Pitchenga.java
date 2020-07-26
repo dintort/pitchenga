@@ -864,8 +864,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Hashtable<Integer, JLabel> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
-                    String text = pitch.label;
-                    JLabel label = new JLabel(text);
+                    JLabel label = new JLabel(pitch.name());
                     label.setFont(COURIER);
                     label.setOpaque(true);
 //                    label.setForeground(pitch.tone.fontColor);
@@ -1360,10 +1359,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             resetGame();
             playButton.setText("Stop");
             playExecutor.execute(() -> play(null, false));
-            bottomPanel.setVisible(false);
+            if (setup.hideBottomPanel) {
+                bottomPanel.setVisible(false);
+            }
         } else {
             playButton.setText("Play");
-            bottomPanel.setVisible(true);
+            if (setup.hideBottomPanel) {
+                bottomPanel.setVisible(true);
+            }
         }
         debug("running=" + playing);
     }

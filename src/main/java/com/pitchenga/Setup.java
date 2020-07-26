@@ -25,6 +25,7 @@ public class Setup {
     public volatile int ringInstrument = GUITAR;
     public volatile int series = 3;
     public volatile int repeat = 3;
+    public volatile boolean hideBottomPanel = false;
 
     public static Setup create() {
         String className = System.getProperty("com.pitchenga.setup.class");

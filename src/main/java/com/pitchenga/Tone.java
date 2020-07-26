@@ -38,7 +38,7 @@ public enum Tone {
         this.diatonic = diatonic;
         this.color = color;
         this.fontColor = fontColor;
-        this.label = " " + name().toLowerCase() + " ";
+        this.label = " " + name() + " ";
     }
 
     public Fugue getFugue() {

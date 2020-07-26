@@ -136,9 +136,9 @@ public class Circle extends JPanel {
                 if (tones.contains(myTone)) {
                     triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, true);
                 } else {
+                    triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, false);
                     int thickness;
                     if (scaleTones.contains(myTone)) {
-                        triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, false);
                         thickness = 1 + gap / 2;
                     } else {
                         thickness = 1 + gap / 12;
