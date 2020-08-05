@@ -7,23 +7,22 @@ import java.awt.*;
  * major: do di re ri mi fa fi so se la li si
  * minor: do di re me mi fa fi so le la se si
  * lowrd: do ra re me mi fa se so le la se si - this one, but F# instead of Gb
- * Colors are roughly based on Isaac Newton's color wheel and https://www.nature.com/articles/s41598-017-18150-y/figures/2 but only using round numbers 127 and 255 (circle.png).
+ * Colors are roughly based on Isaac Newton's color wheel and https://www.nature.com/articles/s41598-017-18150-y/figures/2 but only using round numbers (circle.png).
  */
 public enum Tone {
 
-    //fixme: Foreground colors don't work
     Do("C", true, new Color(255, 0, 0), Color.DARK_GRAY),
     Ra("Db", false, new Color(127, 0, 0), Color.DARK_GRAY),
     Re("D", true, new Color(255, 127, 0), Color.DARK_GRAY),
-    Me("Eb", false, new Color(127, 127, 0), Color.DARK_GRAY),
+    Me("Eb", false, new Color(159, 127, 0), Color.DARK_GRAY),
     Mi("E", true, new Color(255, 255, 0), Color.DARK_GRAY),
     Fa("F", true, new Color(0, 255, 0), Color.DARK_GRAY),
     Fi("F#", false, new Color(0, 127, 127), Color.WHITE),
     So("G", true, new Color(0, 255, 255), Color.DARK_GRAY),
     Le("Ab", false, new Color(0, 0, 127), Color.DARK_GRAY),
     La("A", true, new Color(0, 0, 255), Color.DARK_GRAY),
-    Se("Bb", false, new Color(127, 0, 255), Color.DARK_GRAY),
-    Si("B", true, new Color(255, 0, 255), Color.DARK_GRAY),
+    Te("Bb", false, new Color(127, 0, 255), Color.DARK_GRAY),
+    Ti("B", true, new Color(255, 0, 255), Color.DARK_GRAY),
     ;
 
     public final String note;

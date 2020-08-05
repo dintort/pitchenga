@@ -10,7 +10,7 @@ import java.util.Set;
 import static com.pitchenga.Tone.*;
 
 public class Circle extends JPanel {
-    private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
+    private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Ti, Te, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
     private final Set<Tone> scaleTones = EnumSet.noneOf(Tone.class);
     private final JComponent[] labels;

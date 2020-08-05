@@ -36,6 +36,7 @@ public class MySetup extends Setup {
         defaultPacer = Pitchenga.Pacer.Tempo50;
         defaultPacer = Pitchenga.Pacer.Tempo60;
         defaultPacer = Pitchenga.Pacer.Tempo80;
+        defaultPacer = Pitchenga.Pacer.Tempo90;
 
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledSharps;
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledDiatonic;
@@ -49,6 +50,8 @@ public class MySetup extends Setup {
         defaultRiddler = Pitchenga.Riddler.Step05DoFiLaMeRaSo;
         defaultRiddler = Pitchenga.Riddler.Step06DoFiLaMeRaSoSe;
         defaultRiddler = Pitchenga.Riddler.Step07DoFiLaMeRaSoSeMi;
+        defaultRiddler = Pitchenga.Riddler.Step08DoFiLaMeRaSoSeMiLe;
+        defaultRiddler = Pitchenga.Riddler.Step09DoFiLaMeRaSoSeMiLeRe;
 
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
         defaultRinger = Pitchenga.Ringer.JustDo;
