@@ -25,12 +25,12 @@ public class Setup {
     public volatile int ringInstrument = GUITAR;
     public volatile int series = 3;
     public volatile int repeat = 3;
-    public volatile boolean hideBottomPanel = false;
+    public volatile boolean hideBottomPanelWhenPlaying = false;
 
     public static Setup create() {
         String className = System.getProperty("com.pitchenga.setup.class");
         if (className == null) {
-            className = Setup.class.getName();
+            return new Setup();
         }
         try {
             Class<?> clazz = Class.forName(className);

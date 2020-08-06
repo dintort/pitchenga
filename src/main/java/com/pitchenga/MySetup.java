@@ -37,6 +37,7 @@ public class MySetup extends Setup {
         defaultPacer = Pitchenga.Pacer.Tempo60;
         defaultPacer = Pitchenga.Pacer.Tempo80;
         defaultPacer = Pitchenga.Pacer.Tempo90;
+        defaultPacer = Pitchenga.Pacer.Tempo100;
 
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledSharps;
         defaultRiddler = Pitchenga.Riddler.ChromaticWithDoubledDiatonic;
@@ -69,7 +70,7 @@ public class MySetup extends Setup {
 
         mainFrameVisible = false;
         mainFrameVisible = true;
-        hideBottomPanel = true;
+        hideBottomPanelWhenPlaying = true;
     }
 
 }
