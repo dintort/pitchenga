@@ -16,11 +16,11 @@ public enum Fugue {
     Mi(Mi4, four, Re4, sixteen, Do4, four),
     Fa(Fa4, eight, Mi4, sixteen, Re4, sixteen, Do4, four),
     Fi(Fi4, eight, So4, sixteen, Do5, four),
-    So(So4, eight, La4, sixteen, Ti4, sixteen, Do5, four),
+    So(So4, eight, La4, sixteen, Si4, sixteen, Do5, four),
     Le(Le4, four, So4, sixteen, Do5, four),
-    La(La4, four, Ti4, sixteen, Do5, four),
-    Se(Te4, four, sixteen, Do5, four),
-    Si(Ti4, four, Do5, four),
+    La(La4, four, Si4, sixteen, Do5, four),
+    Se(Se4, four, sixteen, Do5, four),
+    Si(Si4, four, Do5, four),
     DoDo(Do5, eight, Do5, eight, Do5, four),
     ;
 

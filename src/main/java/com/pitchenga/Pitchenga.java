@@ -42,7 +42,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Move to Scale
     private static final Pitch[] CHROMATIC_SCALE = Arrays.stream(FUGUES).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
     private static final Pitch[] DO_MAJ_SCALE = Arrays.stream(FUGUES).filter(fugue -> fugue.pitch.tone.diatonic).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
-    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Ti3, Do4};
+    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
     private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(key -> key.keyEventCode, key -> key));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 20);
@@ -1610,17 +1610,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Move to Scale
     private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
-            {La3, Te3, Ti3, Do4, Ra4, None, Re4, None},
+            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
             {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
-            {So4, Le4, La4, Te4, Ti4, None, Do5, None},
-            {Ti4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+            {So4, Le4, La4, Se4, Si4, None, Do5, None},
+            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
             {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
 
             {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
-            {Mi5, Me5, Re5, Ra5, Do5, None, Ti4, None},
-            {Do5, Ti4, Te4, La4, Le4, None, So4, None},
+            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+            {Do5, Si4, Se4, La4, Le4, None, So4, None},
             {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
-            {Re4, Ra4, Do4, Ti3, Te3, None, La3, None},
+            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
     };
 
@@ -1629,21 +1629,21 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
 
-            {La3, Te3, Ti3, Do4, Ra4, None, Re4, None},
-            {Re4, Ra4, Do4, Ti3, Te3, None, La3, None},
-            {La3, Te3, Ti3, Do4, Ra4, None, Re4, None},
+            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
 
             {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
             {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
             {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
 
-            {So4, Le4, La4, Te4, Ti4, None, Do5, None},
-            {Do5, Ti4, Te4, La4, Le4, None, So4, None},
-            {So4, Le4, La4, Te4, Ti4, None, Do5, None},
+            {So4, Le4, La4, Se4, Si4, None, Do5, None},
+            {Do5, Si4, Se4, La4, Le4, None, So4, None},
+            {So4, Le4, La4, Se4, Si4, None, Do5, None},
 
-            {Ti4, Do5, Ra5, Re5, Me5, None, Mi5, None},
-            {Mi5, Me5, Re5, Ra5, Do5, None, Ti4, None},
-            {Ti4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
 
             {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
             {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
@@ -1654,21 +1654,21 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
             {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
 
-            {Mi5, Me5, Re5, Ra5, Do5, None, Ti4, None},
-            {Ti4, Do5, Ra5, Re5, Me5, None, Mi5, None},
-            {Mi5, Me5, Re5, Ra5, Do5, None, Ti4, None},
+            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
 
-            {Do5, Ti4, Te4, La4, Le4, None, So4, None},
-            {So4, Le4, La4, Te4, Ti4, None, Do5, None},
-            {Do5, Ti4, Te4, La4, Le4, None, So4, None},
+            {Do5, Si4, Se4, La4, Le4, None, So4, None},
+            {So4, Le4, La4, Se4, Si4, None, Do5, None},
+            {Do5, Si4, Se4, La4, Le4, None, So4, None},
 
             {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
             {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
             {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
 
-            {Re4, Ra4, Do4, Ti3, Te3, None, La3, None},
-            {La3, Te3, Ti3, Do4, Ra4, None, Re4, None},
-            {Re4, Ra4, Do4, Ti3, Te3, None, La3, None},
+            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
@@ -1716,12 +1716,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Step03DoFiLaMe("Step 03: Do, Fi, La, Me", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4}}, Pitchenga::shuffle, new Integer[0]),
         Step04DoFiLaMeRa("Step 04: Do, Fi, La, Me, Ra", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
         Step05DoFiLaMeRaSo("Step 05: Do, Fi, La, Me, Ra, So", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Ra4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
-        Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, Te4, Te4}}, Pitchenga::shuffle, new Integer[0]),
-        Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, So4, Te4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, So4, Te4, Mi4, Le4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
-        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, Ra4, So4, Te4, Mi4, Le4, Re4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
-        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Me4, Ra4, So4, Te4, Mi4, Le4, Re4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
-        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Te4, Te4, Mi4, Le4, Re4, Fa4, Ti4, Ti4, Ti4}}, Pitchenga::shuffle, new Integer[0]),
+        Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
+        Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
+        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, So4, Se4, Mi4, Le4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
+        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
+        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
+        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4, Mi4, Le4, Re4, Fa4, Si4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
         ;
 
         private final String name;
