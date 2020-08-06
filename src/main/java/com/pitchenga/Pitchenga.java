@@ -105,6 +105,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
+    //fixme: Triangles are a bit uneven
     //fixme: Load/save/reset; auto-save to home folder
     //fixme: Random within all scales - repeat 5 times, then switch to another random scale +blues scales
     //fixme: Continuous gradient ring around the circle +slider

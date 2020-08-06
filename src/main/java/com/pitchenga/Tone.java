@@ -14,7 +14,7 @@ public enum Tone {
     Do("C", true, new Color(255, 0, 0), Color.DARK_GRAY),
     Ra("Db", false, new Color(127, 0, 0), Color.DARK_GRAY),
     Re("D", true, new Color(255, 127, 0), Color.DARK_GRAY),
-    Me("Eb", false, new Color(159, 127, 0), Color.DARK_GRAY),
+    Me("Eb", false, new Color(171, 127, 0), Color.DARK_GRAY),
     Mi("E", true, new Color(255, 255, 0), Color.DARK_GRAY),
     Fa("F", true, new Color(0, 255, 0), Color.DARK_GRAY),
     Fi("F#", false, new Color(0, 127, 127), Color.WHITE),
