@@ -2,7 +2,7 @@ package com.pitchenga;
 
 import java.awt.event.KeyEvent;
 
-public enum Key {
+public enum Button {
     //fixme: +Alternative full-keyboard diatonic layout with sharps via shift?
     //fixme: +Fret-less sliding up and down with modifier keys
     //fixme: +Toggleable A B C D E etc button labels
@@ -93,7 +93,7 @@ public enum Key {
     public final int row;
     public final String label;
 
-    Key(Pitch pitch, int keyEventCode, int row, String label) {
+    Button(Pitch pitch, int keyEventCode, int row, String label) {
         this.pitch = pitch;
         this.keyEventCode = keyEventCode;
         this.row = row;

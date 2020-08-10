@@ -37,14 +37,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Pitch[] PITCHES = Pitch.values();
     private static final Tone[] TONES = Tone.values();
     private static final Fugue[] FUGUES = Fugue.values();
-    private static final Key[] KEYS = Key.values();
+    private static final Button[] BUTTONS = Button.values();
     private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(pitch -> pitch.octave).filter(octave -> octave >= 0).distinct().toArray(Integer[]::new);
     //fixme: Move to Scale
     private static final Pitch[] CHROMATIC_SCALE = Arrays.stream(FUGUES).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
     private static final Pitch[] DO_MAJ_SCALE = Arrays.stream(FUGUES).filter(fugue -> fugue.pitch.tone.diatonic).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
     private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
     private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
-    private static final Map<Integer, Key> KEY_BY_CODE = Arrays.stream(Key.values()).collect(Collectors.toMap(key -> key.keyEventCode, key -> key));
+    private static final Map<Integer, Button> BUTTON_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
     public static final Font COURIER = new Font("Courier", Font.BOLD, 20);
     public static final Font SERIF = new Font("SansSerif", Font.PLAIN, 11);
 
@@ -76,7 +76,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile long lastBuzzTimestampMs;
     private volatile boolean frozen = false;
     private final AtomicInteger seriesCounter = new AtomicInteger(0);
-    private final Map<Key, Integer> pressedKeyToMidi = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
+    private final Map<Button, Integer> pressedButtonToMidi = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
 
@@ -96,7 +96,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JComboBox<Riddler> riddlerCombo = new JComboBox<>();
     private final JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
     private final JToggleButton playButton = new JToggleButton();
-    private final JToggleButton[] keyButtons = new JToggleButton[Key.values().length];
+    private final JToggleButton[] keyButtons = new JToggleButton[Button.values().length];
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JTextArea textArea = new JTextArea();
@@ -368,7 +368,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             updateSlider(guess, frequency, isKeyboard);
             frequencyLabel.setText(String.format("%07.2f", frequency));
             if (!isPlaying()) {
-                updatePianoButtons(guess.tone.getKey());
+                updatePianoButtons(guess.tone.getButton());
                 if (!isKeyboard) {
                     circle.setTone(guess.tone, guessColor, pitchinessColor);
                 }
@@ -659,7 +659,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     }
                     if (flashColors) {
                         SwingUtilities.invokeLater(() -> {
-                            updatePianoButton(pitch.tone.getKey(), true);
+                            updatePianoButton(pitch.tone.getButton(), true);
                             circle.setTone(pitch.tone, pitch.tone.color, pitch.tone.color);
                         });
                     }
@@ -669,8 +669,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     if (prev != null) {
                         midiChannel.noteOff(prev.midi);
                         if (flashColors) {
-                            Key key = prev.tone.getKey();
-                            SwingUtilities.invokeLater(() -> updatePianoButton(key, false));
+                            Button button = prev.tone.getButton();
+                            SwingUtilities.invokeLater(() -> updatePianoButton(button, false));
                         }
                         prev = null;
                     }
@@ -682,8 +682,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 Thread.sleep(four);
                 midiChannel.noteOff(prev.midi);
                 if (flashColors) {
-                    Key key = prev.tone.getKey();
-                    SwingUtilities.invokeLater(() -> updatePianoButton(key, false));
+                    Button button = prev.tone.getButton();
+                    SwingUtilities.invokeLater(() -> updatePianoButton(button, false));
                 }
             }
         } catch (InterruptedException e) {
@@ -795,8 +795,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         mainPanel.add(initPitchSlider(), BorderLayout.WEST);
         mainPanel.add(initTextArea(), BorderLayout.EAST);
 
-        for (Key key : Key.values()) {
-            keyButtons[key.ordinal()] = new JToggleButton(key.label);
+        for (Button button : Button.values()) {
+            keyButtons[button.ordinal()] = new JToggleButton(button.label);
         }
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
@@ -868,7 +868,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Hashtable<Integer, JLabel> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
-                    JLabel label = new JLabel(pitch.name());
+                    JLabel label = new JLabel(pitch.label);
                     label.setFont(COURIER);
                     label.setOpaque(true);
 //                    label.setForeground(pitch.tone.fontColor);
@@ -926,42 +926,42 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
                 return true;
             }
-            Key key = KEY_BY_CODE.get(event.getKeyCode());
-            if (key == null) {
+            Button button = BUTTON_BY_CODE.get(event.getKeyCode());
+            if (button == null) {
                 return false;
             }
-            handleKey(key, pressed);
+            handleButton(button, pressed);
             return true;
         });
     }
 
-    private void handleKey(Key key, boolean pressed) {
-        if (key.pitch == null) {
+    private void handleButton(Button button, boolean pressed) {
+        if (button.pitch == null) {
             return;
         }
 //        if (pressed /* && isFuguePiano */) {
 //            fugue(guitar, button.pitch.tone.fugue.tune, true);
 //            return;
 //        }
-        updatePianoButton(key, pressed);
-        Pitch thePitch = key.pitch;
+        updatePianoButton(button, pressed);
+        Pitch thePitch = button.pitch;
         if (fall) {
-            thePitch = transposePitch(key.pitch, -1, 0);
+            thePitch = transposePitch(button.pitch, -1, 0);
         }
         if (lift) {
-            thePitch = transposePitch(key.pitch, 1, 0);
+            thePitch = transposePitch(button.pitch, 1, 0);
         }
         Pitch pitch = thePitch;
         int midi = pitch.midi;
         if (pressed) {
             updatePitch(pitch, pitch.frequency, 1, 42, true);
-            if (!pressedKeyToMidi.containsKey(key)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
-                pressedKeyToMidi.put(key, midi);
+            if (!pressedButtonToMidi.containsKey(button)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
+                pressedButtonToMidi.put(button, midi);
                 transcribe(pitch, true);
                 keyboardInstrument.noteOn(midi, 127);
             }
         } else {
-            Integer modifiedMidi = pressedKeyToMidi.remove(key);
+            Integer modifiedMidi = pressedButtonToMidi.remove(button);
             if (modifiedMidi != null) {
                 midi = modifiedMidi;
             }
@@ -970,24 +970,24 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 playExecutor.execute(() -> play(pitch, true));
             }
         }
-        Tone[] tones = pressedKeyToMidi.keySet().stream().map(k -> k.pitch.tone).toArray(Tone[]::new);
+        Tone[] tones = pressedButtonToMidi.keySet().stream().map(k -> k.pitch.tone).toArray(Tone[]::new);
         circle.setTones(tones);
     }
 
-    private void updatePianoButton(Key key, boolean pressed) {
+    private void updatePianoButton(Button button, boolean pressed) {
         if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalMonitorStateException();
         }
-        keyButtons[key.ordinal()].setSelected(pressed);
+        keyButtons[button.ordinal()].setSelected(pressed);
     }
 
-    private void updatePianoButtons(Key key) {
+    private void updatePianoButtons(Button button) {
         if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalMonitorStateException();
         }
-        for (Key aKey : KEYS) {
-            JToggleButton keyButton = keyButtons[aKey.ordinal()];
-            keyButton.setSelected(aKey.pitch != null && aKey.pitch.tone.equals(key.pitch.tone));
+        for (Button aButton : BUTTONS) {
+            JToggleButton keyButton = keyButtons[aButton.ordinal()];
+            keyButton.setSelected(aButton.pitch != null && aButton.pitch.tone.equals(button.pitch.tone));
         }
     }
 
@@ -1079,29 +1079,29 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
             colorPanel.add(Box.createVerticalStrut(10));
 
-            Key key = null;
-            for (Key aKey : Key.values()) {
-                if (aKey.pitch != null
-                        && aKey.row == 0
-                        && aKey.pitch.equals(fugue.pitch)) {
-                    key = aKey;
+            Button button = null;
+            for (Button aButton : Button.values()) {
+                if (aButton.pitch != null
+                        && aButton.row == 0
+                        && aButton.pitch.equals(fugue.pitch)) {
+                    button = aButton;
                     break;
                 }
             }
-            if (key != null) {
-                Key theKey = key;
-                JToggleButton keyButton = keyButtons[key.ordinal()];
+            if (button != null) {
+                Button theButton = button;
+                JToggleButton keyButton = keyButtons[button.ordinal()];
                 colorPanel.add(keyButton);
                 keyButton.setAlignmentX(Component.CENTER_ALIGNMENT);
                 keyButton.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        handleKey(theKey, true);
+                        handleButton(theButton, true);
                     }
 
                     @Override
                     public void mouseReleased(MouseEvent e) {
-                        handleKey(theKey, false);
+                        handleButton(theButton, false);
                     }
                 });
                 keyButton.setForeground(Color.WHITE);
@@ -1111,12 +1111,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 colorPanel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        handleKey(theKey, true);
+                        handleButton(theButton, true);
                     }
 
                     @Override
                     public void mouseReleased(MouseEvent e) {
-                        handleKey(theKey, false);
+                        handleButton(theButton, false);
                     }
                 });
 
@@ -1158,55 +1158,55 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         bottomPanel.setBackground(Color.DARK_GRAY);
         bottomPanel.setLayout(new GridLayout(1, 11));
 
-        Key[] keys = Key.values();
-        for (Key key : keys) {
-            if (key.row < 1) {
+        Button[] buttons = Button.values();
+        for (Button button : buttons) {
+            if (button.row < 1) {
                 continue;
             }
             JPanel colorPanel = new JPanel();
-            if (key.pitch == null) {
+            if (button.pitch == null) {
                 topPanel.add(colorPanel);
                 colorPanel.setBackground(Color.DARK_GRAY);
             }
-            if (key.pitch != null) {
-                if (key.row == 1) {
+            if (button.pitch != null) {
+                if (button.row == 1) {
                     topPanel.add(colorPanel);
                 } else {
                     bottomPanel.add(colorPanel);
                 }
             }
             colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.Y_AXIS));
-            Color color = key.pitch == null ? Color.DARK_GRAY : key.pitch.tone.color;
+            Color color = button.pitch == null ? Color.DARK_GRAY : button.pitch.tone.color;
             colorPanel.setBackground(color);
 
             colorPanel.add(Box.createVerticalStrut(5));
-            JLabel colorLabel = new JLabel(key.pitch == null ? "    " : key.pitch.tone.label);
+            JLabel colorLabel = new JLabel(button.pitch == null ? "    " : button.pitch.tone.label);
             colorPanel.add(colorLabel);
             colorLabel.setFont(COURIER);
             colorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             colorLabel.setForeground(Color.WHITE);
             colorLabel.setBackground(Color.BLACK);
-            colorLabel.setOpaque(key.pitch != null);
+            colorLabel.setOpaque(button.pitch != null);
             colorPanel.add(Box.createVerticalStrut(5));
 
-            if (key.label != null) {
-                JToggleButton keyButton = keyButtons[key.ordinal()];
+            if (button.label != null) {
+                JToggleButton keyButton = keyButtons[button.ordinal()];
                 colorPanel.add(keyButton);
                 keyButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-                if (key.pitch != null) {
+                if (button.pitch != null) {
                     keyButton.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mousePressed(MouseEvent e) {
-                            handleKey(key, true);
+                            handleButton(button, true);
                         }
 
                         @Override
                         public void mouseReleased(MouseEvent e) {
-                            handleKey(key, false);
+                            handleButton(button, false);
                         }
                     });
-                    keyButton.setForeground(key == Key.F || key == Key.J ? Color.BLACK : Color.WHITE);
+                    keyButton.setForeground(button == Button.F || button == Button.J ? Color.BLACK : Color.WHITE);
                     keyButton.setBackground(Color.DARK_GRAY);
                     keyButton.setEnabled(false);
                 }
@@ -1217,12 +1217,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             colorPanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    handleKey(key, true);
+                    handleButton(button, true);
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    handleKey(key, false);
+                    handleButton(button, false);
                 }
             });
         }
@@ -1718,9 +1718,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Step05DoFiLaMeRaSo("Step 05: Do, Fi, La, Me, Ra, So", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Ra4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
         Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
         Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, So4, Se4, Mi4, Le4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
-        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
-        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
+        Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, So4, Se4, Mi4, Mi4, Le4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
+        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, Ra4, So4, Se4, Mi4, Le4, Le4, Re4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
+        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
         Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4, Mi4, Le4, Re4, Fa4, Si4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
         ;
 

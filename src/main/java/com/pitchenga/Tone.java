@@ -30,6 +30,7 @@ public enum Tone {
     public final Color color;
     public final Color fontColor;
     public final String label;
+    public volatile Button button;
     public volatile Fugue fugue;
 
     Tone(String note, boolean diatonic, Color color, Color fontColor) {
@@ -37,7 +38,7 @@ public enum Tone {
         this.diatonic = diatonic;
         this.color = color;
         this.fontColor = fontColor;
-        this.label = " " + name() + " ";
+        this.label = " " + name().toLowerCase() + " ";
     }
 
     public Fugue getFugue() {
@@ -54,16 +55,20 @@ public enum Tone {
         }
     }
 
-    public Key getKey() {
-        //fixme: Cache them same way as fugues
-        Key[] keys = Key.values();
-        for (int i = keys.length - 1; i >= 0; i--) {
-            Key key = keys[i];
-            if (key.pitch != null && key.pitch.tone == this) {
-                return key;
+    public Button getButton() {
+        if (this.button == null) {
+            Button[] buttons = Button.values();
+            for (int i = buttons.length - 1; i >= 0; i--) {
+                Button aButton = buttons[i];
+                if (aButton.pitch != null && aButton.pitch.tone == this) {
+                    this.button = aButton;
+                    return aButton;
+                }
             }
+        } else {
+            return this.button;
         }
-        throw new IllegalArgumentException("Key not found for=" + this);
+        throw new IllegalArgumentException("Button not found for=" + this);
     }
 
 }
