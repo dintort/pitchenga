@@ -42,9 +42,8 @@ public class Circle extends JPanel {
         labels = Arrays.stream(TONES).map(tone -> {
             JLabel label = new JLabel(tone.label);
             label.setFont(Pitchenga.COURIER);
-            label.setOpaque(true);
-            label.setBackground(Color.BLACK);
             label.setForeground(Color.WHITE);
+            label.setPreferredSize(new Dimension((int) label.getPreferredSize().getWidth(), (int) label.getPreferredSize().getWidth()));
             this.add(label);
             return label;
         }).toArray(JComponent[]::new);
@@ -152,6 +151,8 @@ public class Circle extends JPanel {
             int width = label.getWidth();
             int height = label.getHeight();
             Graphics labelGraphics = graphics.create(offset + x + radius - width / 2, y + radius - height / 2, width, height);
+            labelGraphics.setColor(Color.BLACK);
+            labelGraphics.fillOval(0, 0, width, height);
             label.paint(labelGraphics);
         }
     }

@@ -53,7 +53,7 @@ public class MySetup extends Setup {
         defaultRiddler = Pitchenga.Riddler.Step07DoFiLaMeRaSoSeMi;
         defaultRiddler = Pitchenga.Riddler.Step08DoFiLaMeRaSoSeMiLe;
         defaultRiddler = Pitchenga.Riddler.Step09DoFiLaMeRaSoSeMiLeRe;
-        defaultRiddler = Pitchenga.Riddler.Step10DoFiLaMeRaSoSeMiLeReFa;
+        defaultRiddler = Pitchenga.Riddler.Step11DoFiLaMeRaSoSeMiLeReFaSi;
 
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
         defaultRinger = Pitchenga.Ringer.JustDo;

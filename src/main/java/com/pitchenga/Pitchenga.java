@@ -105,6 +105,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
+    //fixme: Adjust the font size based on window dimaensions
     //fixme: Triangles are a bit uneven
     //fixme: Load/save/reset; auto-save to home folder
     //fixme: Random within all scales - repeat 5 times, then switch to another random scale +blues scales
@@ -1719,9 +1720,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Step06DoFiLaMeRaSoSe("Step 06: Do, Fi, La, Me, Ra, So, Se", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
         Step07DoFiLaMeRaSoSeMi("Step 07: Do, Fi, La, Me, Ra, So, Se, Mi", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
         Step08DoFiLaMeRaSoSeMiLe("Step 08: Do, Fi, La, Me, Ra, So, Se, Mi, Le", new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, So4, Se4, Mi4, Mi4, Le4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
-        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, Ra4, So4, Se4, Mi4, Le4, Le4, Re4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
-        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
-        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4, Mi4, Le4, Re4, Fa4, Si4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
+        Step09DoFiLaMeRaSoSeMiLeRe("Step 09: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re", new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, Ra4, So4, Se4, Mi4, Le4, Le4, Re4, Re4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
+        Step10DoFiLaMeRaSoSeMiLeReFa("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa", new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Le4, Re4, Re4, Fa4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
+        Step11DoFiLaMeRaSoSeMiLeReFaSi("Step 11: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si", new Pitch[][]{{Do4, Do5, Do5, Fi4, Fi4, La4, Me4, Me4, Ra4, Ra4, So4, Se4, Se4, Mi4, Le4, Le4, Re4, Fa4, Fa4, Fa4, Fa4, Fa4, Si4, Si4, Si4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
         ;
 
         private final String name;
