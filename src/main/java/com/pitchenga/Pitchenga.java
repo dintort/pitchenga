@@ -105,7 +105,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
-    //fixme: Adjust the font size based on window dimaensions
+    //fixme: Adjust the font size based on window dimensions
     //fixme: Triangles are a bit uneven
     //fixme: Load/save/reset; auto-save to home folder
     //fixme: Random within all scales - repeat 5 times, then switch to another random scale +blues scales
@@ -1675,7 +1675,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
     };
 
-    @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Riddler {
         ChromaticOneOctave("Chromatic - 1 octave",
                 new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
@@ -1762,9 +1761,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Step08DoFiLaMeRaSoSeMiLeRe("Step 8: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re",
                 new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Me4, Ra4, Ra4, Ra4, So4, Se4, Mi4, Le4, Le4, Re4, Re4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
         Step09DoFiLaMeRaSoSeMiLeReFa("Step 9: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa",
-                new Pitch[][]{{Do4, Do5, Fi4, Fi4, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Mi4, Mi4, Le4, Re4, Re4, Fa4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
+                new Pitch[][]{{Do4, Do5, Fi4, Fi4, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Mi4, Mi4, Le4, Re4, Re4, Fa4, Fa4, Fa4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
         Step10DoFiLaMeRaSoSeMiLeReFaSi("Step 10: Do, Fi, La, Me, Ra, So, Se, Mi, Le, Re, Fa, Si",
-                new Pitch[][]{{Do4, Do5, Do5, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4, Se4, Mi4, Mi4, Mi4, Le4, Re4, Fa4, Fa4, Si4, Si4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
+                new Pitch[][]{{Do4, Do5, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4, Se4, Mi4, Le4, Re4, Fa4, Fa4, Si4, Si4, Si4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
         ;
 
         private final String name;
@@ -1784,7 +1783,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Ringer {
         None("Ring nothing", pitch -> new Object[]{thirtyTwo}),
         Tune("Ring mnemonic tune", pitch -> transposeFugue(pitch, pitch.tone.getFugue().tune)),
@@ -1828,7 +1826,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Buzzer {
         Tune("Riddle mnemonic tune", Pitchenga::transposeTune),
         Tone("Riddle tone", pitch -> new Object[]{pitch, sixteen}),
@@ -1849,7 +1846,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Hinter {
         Always("Hint: immediately", 0),
         Series("Hint: series", 0),
@@ -1881,7 +1877,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    @SuppressWarnings("unused") //fixme: They are all used in the combo box!
     public enum Pacer {
         Answer("Answer to continue", 0),
         Tempo20("Tempo 20", 20),
