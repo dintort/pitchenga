@@ -174,4 +174,11 @@ public class Circle extends JPanel {
         }
     }
 
+    public void setLabelsFont(Font font) {
+        for (JComponent label : labels) {
+            label.setFont(font);
+            Dimension size = new Dimension((int) label.getMinimumSize().getWidth(), (int) label.getMinimumSize().getWidth());
+            label.setPreferredSize(size);
+        }
+    }
 }

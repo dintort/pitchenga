@@ -12,10 +12,7 @@ import javax.sound.midi.*;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -105,7 +102,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
-    //fixme: Adjust the font size based on window dimensions
+    //fixme: Adjust the font size based on window dimensions for the remaining labels
     //fixme: Triangles are a bit uneven
     //fixme: Load/save/reset; auto-save to home folder
     //fixme: Random within all scales - repeat 5 times, then switch to another random scale +blues scales
@@ -779,6 +776,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private void initGui() {
         initIcon();
+        initFontScaling();
         this.setLayout(new BorderLayout());
 
         JPanel mainPanel = new JPanel();
@@ -827,6 +825,26 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             JFrame frame = new JFrame("Test");
             frame.setVisible(true);
         }
+    }
+
+    private void initFontScaling() {
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                super.componentResized(e);
+                scaleFont();
+            }
+        });
+        scaleFont();
+    }
+
+    private void scaleFont() {
+        Dimension size = this.getSize();
+        int min = Math.min(size.height, size.width);
+        int fontSize = min / 60;
+        Font font = COURIER.deriveFont((float) fontSize);
+        circle.setLabelsFont(font);
+        circle.repaint();
     }
 
     private JScrollPane initTextArea() {
