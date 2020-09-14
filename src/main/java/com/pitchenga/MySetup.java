@@ -12,9 +12,9 @@ public class MySetup extends Setup {
 
         defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
 
-        buzzInstrument = GUITAR;
-        keyboardInstrument = GUITAR;
-        ringInstrument = PIANO;
+        buzzInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
+        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
+        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
         series = 3;
         repeat = 3;

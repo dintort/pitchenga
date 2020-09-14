@@ -7,8 +7,6 @@ import javax.sound.sampled.Mixer;
 public class Setup {
     public static final Mixer.Info NO_AUDIO_INPUT = new Mixer.Info("No audio input", "", "", "1") {
     };
-    public static final int PIANO = 0;
-    public static final int GUITAR = 25;
 
     public volatile Mixer.Info defaultAudioInput = NO_AUDIO_INPUT;
     public volatile int defaultPenaltyFactor = 0;
@@ -20,9 +18,9 @@ public class Setup {
     public volatile Pitchenga.Buzzer defaultBuzzer = Pitchenga.Buzzer.Tune;
     public volatile Pitchenga.Pacer defaultPacer = Pitchenga.Pacer.Answer;
     public volatile boolean mainFrameVisible = true;
-    public volatile int buzzInstrument = PIANO;
-    public volatile int keyboardInstrument = PIANO;
-    public volatile int ringInstrument = GUITAR;
+    public volatile int buzzInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
+    public volatile int keyboardInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
+    public volatile int ringInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
     public volatile int series = 3;
     public volatile int repeat = 3;
     public volatile boolean hideBottomPanelWhenPlaying = false;

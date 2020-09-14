@@ -841,7 +841,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void scaleFont() {
         Dimension size = this.getSize();
         int min = Math.min(size.height, size.width);
-        int fontSize = min / 60;
+        int fontSize = min / 50;
         Font font = COURIER.deriveFont((float) fontSize);
         circle.setLabelsFont(font);
         circle.repaint();
@@ -1536,10 +1536,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void initMidiInstruments(Synthesizer synthesizer) {
-        Instrument instrument;
-        Instrument[] instruments = synthesizer.getDefaultSoundbank().getInstruments();
-
-        instrument = instruments[setup.buzzInstrument];
+        javax.sound.midi.Instrument[] instruments = synthesizer.getDefaultSoundbank().getInstruments();
+        javax.sound.midi.Instrument instrument = instruments[setup.buzzInstrument];
         if (synthesizer.loadInstrument(instrument)) {
             buzzInstrument.programChange(instrument.getPatch().getProgram());
         }
