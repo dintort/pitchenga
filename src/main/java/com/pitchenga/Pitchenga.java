@@ -966,10 +966,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        }
         updatePianoButton(button, pressed);
         Pitch thePitch = button.pitch;
-        if (fall) {
+        if (fall && lift) {
+            thePitch = transposePitch(button.pitch, 2, 0);
+        } else if (fall) {
             thePitch = transposePitch(button.pitch, -1, 0);
-        }
-        if (lift) {
+        } else if (lift) {
             thePitch = transposePitch(button.pitch, 1, 0);
         }
         Pitch pitch = thePitch;
