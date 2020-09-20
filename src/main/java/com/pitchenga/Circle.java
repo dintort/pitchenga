@@ -83,7 +83,7 @@ public class Circle extends JPanel {
     }
 
     @Override
-    public void paint(Graphics graphics) {
+    protected void paintComponent(Graphics graphics) {
         Tone tone = this.tone;
         Color toneColor = this.toneColor;
         Color pitchyColor = this.pitchinessColor;
@@ -92,7 +92,7 @@ public class Circle extends JPanel {
             fillColor = Color.DARK_GRAY;
         }
 
-        Rectangle bounds = graphics.getClipBounds();
+        Dimension bounds = this.getSize();
         graphics.setColor(fillColor);
         graphics.fillRect(0, 0, bounds.width, bounds.height);
 
@@ -181,4 +181,13 @@ public class Circle extends JPanel {
             label.setPreferredSize(size);
         }
     }
+
+    @Override
+    protected void paintBorder(Graphics g) {
+    }
+
+    @Override
+    protected void paintChildren(Graphics g) {
+    }
+
 }
