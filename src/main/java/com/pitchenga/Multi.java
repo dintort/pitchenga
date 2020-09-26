@@ -12,7 +12,7 @@ public class Multi {
 
         SwingUtilities.invokeAndWait(() -> {
             Pitchenga secondary = new Pitchenga(false, null);
-            System.setProperty("com.pitchenga.default.input", "PANDORA PX5D");
+            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
             Pitchenga primary = new Pitchenga(true, secondary);
             Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
 //            primary.setLocation(screenSize.width / 2 - primary.getSize().width / 2, screenSize.height / 2 - primary.getSize().height / 2);

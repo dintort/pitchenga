@@ -12,18 +12,17 @@ public class Setup {
     public volatile int defaultPenaltyFactor = 0;
     public volatile Integer[] defaultOctaves = new Integer[]{2, 3, 4, 5, 6};
     public volatile PitchProcessor.PitchEstimationAlgorithm defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
-    public volatile Pitchenga.Hinter defaultHinter = Pitchenga.Hinter.Always;
-    public volatile Pitchenga.Riddler defaultRiddler = Pitchenga.Riddler.DoMaj;
-    public volatile Pitchenga.Ringer defaultRinger = Pitchenga.Ringer.Tune;
-    public volatile Pitchenga.Buzzer defaultBuzzer = Pitchenga.Buzzer.Tune;
-    public volatile Pitchenga.Pacer defaultPacer = Pitchenga.Pacer.Answer;
+    public volatile Pitchenga.Hinter defaultHinter = Pitchenga.Hinter.Series;
+    public volatile Pitchenga.Riddler defaultRiddler = Pitchenga.Riddler.Step01Do4Do5Fi4La4;
+    public volatile Pitchenga.Buzzer defaultBuzzer = Pitchenga.Buzzer.Tone;
+    public volatile Pitchenga.Ringer defaultRinger = Pitchenga.Ringer.None;
+    public volatile Pitchenga.Pacer defaultPacer = Pitchenga.Pacer.Tempo90;
     public volatile boolean mainFrameVisible = true;
     public volatile int buzzInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
     public volatile int keyboardInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
     public volatile int ringInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
     public volatile int series = 3;
     public volatile int repeat = 3;
-    public volatile boolean hideBottomPanelWhenPlaying = false;
 
     public static Setup create() {
         String className = System.getProperty("com.pitchenga.setup.class");

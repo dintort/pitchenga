@@ -1385,14 +1385,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             resetGame();
             playButton.setText("Stop");
             playExecutor.execute(() -> play(null, false));
-            if (setup.hideBottomPanelWhenPlaying) {
+            if (!getPacer().equals(Pacer.Answer)) {
                 bottomPanel.setVisible(false);
             }
         } else {
             playButton.setText("Play");
-            if (setup.hideBottomPanelWhenPlaying) {
-                bottomPanel.setVisible(true);
-            }
+            bottomPanel.setVisible(true);
         }
         debug("running=" + playing);
     }
@@ -1443,6 +1441,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             return setup.defaultAudioInput;
         }
         String defaultInputName = System.getProperty("com.pitchenga.default.input");
+        if ("NO_AUDIO_INPUT".equals(defaultInputName)) {
+            return null;
+        }
         Mixer.Info defaultInput = null;
         if (inputs.size() > 0) {
             if (defaultInputName != null && !defaultInputName.isEmpty()) {
