@@ -76,6 +76,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final Map<Button, Integer> pressedButtonToMidi = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
+    private volatile Integer octaveShift = 0;
 
     private final Circle circle;
     private final JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
@@ -935,6 +936,25 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (event.getKeyCode() == KeyEvent.VK_CONTROL) {
                 fall = pressed;
             }
+            if (event.getKeyCode() == KeyEvent.VK_Z) {
+                octaveShift = -4;
+            } else if (event.getKeyCode() == KeyEvent.VK_X) {
+                octaveShift = -3;
+            } else if (event.getKeyCode() == KeyEvent.VK_C) {
+                octaveShift = -2;
+            } else if (event.getKeyCode() == KeyEvent.VK_V) {
+                octaveShift = -1;
+            } else if (event.getKeyCode() == KeyEvent.VK_B) {
+                octaveShift = 0;
+            } else if (event.getKeyCode() == KeyEvent.VK_N) {
+                octaveShift = 1;
+            } else if (event.getKeyCode() == KeyEvent.VK_M) {
+                octaveShift = 2;
+            } else if (event.getKeyCode() == KeyEvent.VK_COMMA) {
+                octaveShift = 3;
+            } else if (event.getKeyCode() == KeyEvent.VK_PERIOD) {
+                octaveShift = 4;
+            }
             if (pressed && (event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET
                     || event.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET)) {
                 int index = pacerCombo.getSelectedIndex();
@@ -966,13 +986,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        }
         updatePianoButton(button, pressed);
         Pitch thePitch = button.pitch;
-        if (fall && lift) {
-            thePitch = transposePitch(button.pitch, 2, 0);
-        } else if (fall) {
-            thePitch = transposePitch(button.pitch, -1, 0);
-        } else if (lift) {
-            thePitch = transposePitch(button.pitch, 1, 0);
+        if (octaveShift != 0) {
+            thePitch = transposePitch(button.pitch, octaveShift, 0);
         }
+        if (fall && lift) {
+            thePitch = transposePitch(thePitch, 2, 0);
+        } else if (fall) {
+            thePitch = transposePitch(thePitch, -1, 0);
+        } else if (lift) {
+            thePitch = transposePitch(thePitch, 1, 0);
+        }
+        debug("octaveShift=" + octaveShift + ", fall=" + fall + ", lift=" + lift + ", pitch=" + button.pitch + ", transposed=" + thePitch);
         Pitch pitch = thePitch;
         int midi = pitch.midi;
         if (pressed) {
