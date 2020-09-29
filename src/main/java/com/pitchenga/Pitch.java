@@ -1,5 +1,7 @@
 package com.pitchenga;
 
+import java.net.URL;
+
 import static com.pitchenga.Tone.*;
 
 public enum Pitch {
@@ -120,6 +122,7 @@ public enum Pitch {
     public final int octave;
     public final String note;
     public final String label;
+    public final Player player;
     private volatile Fugue fugue;
 
     Pitch(Tone tone, int octave, int midi, float frequency) {
@@ -129,6 +132,12 @@ public enum Pitch {
         this.frequency = frequency;
         this.note = tone.note + octave;
         this.label = name().toLowerCase();
+        URL resource = getClass().getResource("/wav/" + midi + ".wav");
+        if (resource == null) {
+            player = null;
+        } else {
+            player = new Player(resource);
+        }
     }
 
     public Fugue getFugue() {

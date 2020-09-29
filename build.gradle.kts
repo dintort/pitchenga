@@ -14,9 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation(files("lib/jfugue-5.0.9.jar"))
     implementation(files("lib/TarsosDSP-2.4.jar"))
-    implementation(files("lib/tinysound-1.1.1.jar"))
 }
 
 application {
