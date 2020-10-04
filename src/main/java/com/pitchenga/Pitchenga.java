@@ -930,6 +930,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     playButton.requestFocus();
                 }
             }
+            if (pressed && event.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                playButton.setSelected(false);
+                playButton.requestFocus();
+            }
             if (event.getKeyCode() == KeyEvent.VK_SHIFT) {
                 lift = pressed;
             }
@@ -1728,7 +1732,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 new Pitch[][]{DO_MAJ_SCALE}, Pitchenga::shuffle, new Integer[0]),
         DoMaj("Do maj - main octaves",
                 new Pitch[][]{DO_MAJ_SCALE}, Pitchenga::shuffle, null),
-//        DoMajHarm("Do maj harm - main octaves",
+        //        DoMajHarm("Do maj harm - main octaves",
 //                new Pitch[][]{DO_MAJ_HARM_SCALE}, Pitchenga::shuffle, null),
 //        RaMaj("Ra maj - main octaves",
 //                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 1)}, Pitchenga::shuffle, null),

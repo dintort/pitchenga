@@ -41,7 +41,7 @@ public class MySetup extends Setup {
 
         defaultRiddler = Pitchenga.Riddler.Chromatic;
         defaultRiddler = Pitchenga.Riddler.Step10Fa4;
-        defaultRiddler = Pitchenga.Riddler.Step15Re3;
+        defaultRiddler = Pitchenga.Riddler.Step16Le3;
         defaultRiddler = Pitchenga.Riddler.ChromaticOneOctave;
 
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
