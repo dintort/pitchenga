@@ -2,9 +2,9 @@ package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
 
-public class MySetup extends Setup {
+public class My extends Setup {
 
-    public MySetup() {
+    public My() {
         defaultPenaltyFactor = 3;
         defaultPenaltyFactor = 0;
 
@@ -18,31 +18,32 @@ public class MySetup extends Setup {
 
         series = 3;
         repeat = 3;
+//        series = 1;
+//        repeat = 1;
 
         defaultHinter = Pitchenga.Hinter.Delayed200;
         defaultHinter = Pitchenga.Hinter.Delayed100;
         defaultHinter = Pitchenga.Hinter.Delayed700;
-        defaultHinter = Pitchenga.Hinter.Delayed500;
         defaultHinter = Pitchenga.Hinter.Always;
-        defaultHinter = Pitchenga.Hinter.Delayed1000;
         defaultHinter = Pitchenga.Hinter.Delayed3000;
+        defaultHinter = Pitchenga.Hinter.Delayed500;
+        defaultHinter = Pitchenga.Hinter.Delayed1000;
         defaultHinter = Pitchenga.Hinter.Series;
+        //fixme: Delay proportionally to the tempo
 
         defaultPacer = Pitchenga.Pacer.Tempo140;
         defaultPacer = Pitchenga.Pacer.Tempo45;
         defaultPacer = Pitchenga.Pacer.Answer;
         defaultPacer = Pitchenga.Pacer.Tempo30;
         defaultPacer = Pitchenga.Pacer.Tempo40;
-        defaultPacer = Pitchenga.Pacer.Tempo50;
         defaultPacer = Pitchenga.Pacer.Tempo60;
         defaultPacer = Pitchenga.Pacer.Tempo80;
         defaultPacer = Pitchenga.Pacer.Tempo90;
+        defaultPacer = Pitchenga.Pacer.Tempo50;
         defaultPacer = Pitchenga.Pacer.Tempo100;
 
-        defaultRiddler = Pitchenga.Riddler.Chromatic;
-        defaultRiddler = Pitchenga.Riddler.Step10Fa4;
-        defaultRiddler = Pitchenga.Riddler.Step16Le3;
-        defaultRiddler = Pitchenga.Riddler.ChromaticOneOctave;
+        defaultRiddler = Pitchenga.Riddler.Step22Octave5;
+        defaultRiddler = Pitchenga.Riddler.Step21Octaves3And4;
 
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
         defaultRinger = Pitchenga.Ringer.JustDo;

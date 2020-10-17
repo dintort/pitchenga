@@ -2,6 +2,8 @@ package com.pitchenga;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -47,6 +49,28 @@ public class Circle extends JPanel {
             this.add(label);
             return label;
         }).toArray(JComponent[]::new);
+        initFontScaling();
+    }
+
+
+    private void initFontScaling() {
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                super.componentResized(e);
+                scaleFont();
+            }
+        });
+        scaleFont();
+    }
+
+    private void scaleFont() {
+        Dimension size = getSize();
+        int min = Math.min(size.height, size.width);
+        int fontSize = min / 35;
+        Font font = Pitchenga.COURIER.deriveFont((float) fontSize);
+        setLabelsFont(font);
+        repaint();
     }
 
     public void setTone(Tone tone, Color toneColor, Color pitchinessColor) {

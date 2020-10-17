@@ -22,6 +22,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.pitchenga.Duration.*;
@@ -524,13 +525,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         frequencyLabel.setText(String.format("%07.2f", riddle.frequency));
     }
 
-    private List<Pitch> shuffle() {
+    private List<Pitch> deduplicate(Supplier<List<Pitch>> supplier) {
         List<Pitch> pitches;
         int attempts = 1024;
         while (true) {
             attempts--;
-            debug("Shuffling, attempts=" + attempts);
-            pitches = doShuffle();
+            debug("De-duplicating, attempts=" + attempts);
+            pitches = supplier.get();
             if (!hasDuplicates(pitches) || attempts < 0) {
                 return pitches;
             }
@@ -548,41 +549,85 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return false;
     }
 
-    private List<Pitch> doShuffle() {
-        //fixme: Restore the manual scales
+    private List<Pitch> shuffle() {
+        return deduplicate(() -> {
+            //fixme: Restore the manual scales
 //        List<Pitch> pitches = getScalePitches();
-        List<Pitch> pitches = ordered();
-        //fixme: +Spinner for series length +Spinner for repeats
-        while (pitches.size() % setup.series != 0) {
-            int index = random.nextInt(pitches.size());
-            pitches.add(pitches.get(index));
-        }
-        Collections.shuffle(pitches);
-        List<Pitch> shuffled = addOctaves(pitches);
-        debug(shuffled + " are the new riddles without penalties");
-        int size = shuffled.size();
-        List<Pitch> multi = new ArrayList<>(size * setup.repeat);
-        for (int i = 0; i < size; i += setup.series) {
-            for (int j = 0; j < setup.repeat; j++) {
-                for (int k = 0; k < setup.series; k++) {
-                    multi.add(shuffled.get(i + k));
+            List<Pitch> pitches = ordered();
+            //fixme: +Spinner for series length +Spinner for repeats
+            while (pitches.size() % setup.series != 0) {
+                int index = random.nextInt(pitches.size());
+                pitches.add(pitches.get(index));
+            }
+            Collections.shuffle(pitches);
+            List<Pitch> shuffled = addOctaves(pitches);
+            debug(shuffled + " are the new riddles without penalties");
+            int size = shuffled.size();
+            List<Pitch> multi = new ArrayList<>(size * setup.repeat);
+            for (int i = 0; i < size; i += setup.series) {
+                for (int j = 0; j < setup.repeat; j++) {
+                    for (int k = 0; k < setup.series; k++) {
+                        multi.add(shuffled.get(i + k));
+                    }
                 }
             }
-        }
-        debug(multi + " are the new riddles multiplied");
+            debug(multi + " are the new riddles multiplied");
 
-        List<Pitch> result = createPenalties();
-        result.addAll(multi);
-        debug(result + " are the new riddles with penalties");
+            List<Pitch> result = createPenalties();
+            result.addAll(multi);
+            debug(result + " are the new riddles with penalties");
 
-        Set<Triplet<Pitch, Pitch, Pitch>> reminders = new LinkedHashSet<>(penaltyReminders);
-        for (Triplet<Pitch, Pitch, Pitch> reminder : reminders) {
-            result.add(reminder.first);
-            result.add(reminder.second);
-            result.add(reminder.third);
-        }
-        debug(result + " are the new riddles with penalties and reminders");
-        return result;
+            Set<Triplet<Pitch, Pitch, Pitch>> reminders = new LinkedHashSet<>(penaltyReminders);
+            for (Triplet<Pitch, Pitch, Pitch> reminder : reminders) {
+                result.add(reminder.first);
+                result.add(reminder.second);
+                result.add(reminder.third);
+            }
+            debug(result + " are the new riddles with penalties and reminders");
+            return result;
+        });
+    }
+
+    private List<Pitch> shuffleGroupSeries() {
+        return deduplicate(() -> {
+            Pitch[][] scale = getRiddler().scale;
+            List<List<Pitch>> listLists = Arrays.stream(scale)
+                    .flatMap(group -> {
+                        List<Pitch> pitches = new LinkedList<>(Arrays.asList(group));
+                        Collections.shuffle(pitches);
+                        while (pitches.size() % setup.series != 0) {
+                            int index = random.nextInt(pitches.size());
+                            pitches.add(pitches.get(index));
+                        }
+                        List<List<Pitch>> lists = new ArrayList<>(pitches.size());
+                        List<Pitch> list = null;
+                        for (int i = 0; i < pitches.size(); i++) {
+                            Pitch pitch = pitches.get(i);
+                            if (list == null || i % setup.series == 0) {
+                                list = new ArrayList<>(setup.series * setup.repeat);
+                                lists.add(list);
+                            }
+                            list.add(pitch);
+                        }
+                        return lists.stream();
+                    })
+                    .collect(Collectors.toList());
+            Collections.shuffle(listLists);
+            debug(listLists);
+            List<Pitch> result = listLists.stream()
+                    .map(list -> {
+                        List<List<Pitch>> multi = new ArrayList<>();
+                        for (int i = 0; i < setup.repeat; i++) {
+                            multi.add(list);
+                        }
+                        return multi;
+                    })
+                    .flatMap(Collection::stream)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+            debug(result + " are the new riddles multiplied");
+            return result;
+        });
     }
 
     private List<Pitch> getScalePitches() {
@@ -779,7 +824,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private void initGui() {
         initIcon();
-        initFontScaling();
         this.setLayout(new BorderLayout());
 
         JPanel mainPanel = new JPanel();
@@ -830,25 +874,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    private void initFontScaling() {
-        this.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                super.componentResized(e);
-                scaleFont();
-            }
-        });
-        scaleFont();
-    }
-
-    private void scaleFont() {
-        Dimension size = this.getSize();
-        int min = Math.min(size.height, size.width);
-        int fontSize = min / 50;
-        Font font = COURIER.deriveFont((float) fontSize);
-        circle.setLabelsFont(font);
-        circle.repaint();
-    }
 
     private JScrollPane initTextArea() {
         JScrollPane scroll = new JScrollPane(textArea);
@@ -1778,18 +1803,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 11)}, Pitchenga::shuffle, null),
 //        SiMajHarm("Si maj harm - main octaves",
 //                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 11)}, Pitchenga::shuffle, null),
-//        ChromaticWithDoubledDiatonic("Chromatic with doubled Do maj - main octaves",
-//                new Pitch[][]{CHROMATIC_SCALE, DO_MAJ_SCALE}, Pitchenga::shuffle, null),
-//        ChromaticWithDoubledDiatonicOneOctave("Chromatic with doubled Do maj - one octave",
-//                new Pitch[][]{CHROMATIC_SCALE, DO_MAJ_SCALE}, Pitchenga::shuffle, new Integer[0]),
-//        ChromaticWithDoubledSharps("Chromatic with doubled sharps - main octaves",
-//                new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, null),
-//        ChromaticWithDoubledSharpsOneOctave("Chromatic with doubled sharps - one octave",
-//                new Pitch[][]{CHROMATIC_SCALE, SHARPS_SCALE}, Pitchenga::shuffle, new Integer[0]),
-//        ChromaticScaleUpDown("Chromatic scale Mi3-La5-Mi3",
-//                CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::ordered, new Integer[]{3, 4, 5}),
-//        ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended",
-//                CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::ordered, new Integer[]{3, 4, 5}),
+        ChromaticScaleUpDown("Chromatic scale Mi3-La5-Mi3",
+                CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::ordered, new Integer[]{3, 4, 5}),
+        ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended",
+                CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::ordered, new Integer[]{3, 4, 5}),
         Step01Do4Do5Fi4La4("Step 1: Do4, Do5, Fi4, La4",
                 new Pitch[][]{{Do4, Do5, Fi4, La4}}, Pitchenga::shuffle, new Integer[0]),
         Step02Me4("Step 2: Me4",
@@ -1828,8 +1845,57 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 new Pitch[][]{{Do3, Do4, Fi3, La3, La3, La3, Me3, Fa3, Si3, Si3, Si3, Re3, Le3, Mi3, Se3, Se3, Se3, Se3, Se3}}, Pitchenga::shuffle, new Integer[0]),
         Step19So3("Step 19: So3",
                 new Pitch[][]{{Do3, Do4, Fi3, Fi3, Fi3, La3, Me3, Fa3, Si3, Re3, Le3, Le3, Le3, Mi3, Se3, So3, So3, So3, So3, So3}}, Pitchenga::shuffle, new Integer[0]),
-        Step19Ra3("Step 20: Ra3",
-                new Pitch[][]{{Do3, Do3, Do4, Fi3, La3, Me3, Fa3, Si3, Re3, Re3, Re3, Le3, Mi3, Se3, So3, Ra3, Ra3, Ra3, Ra3, Ra3, Ra3}}, Pitchenga::shuffle, new Integer[0]),
+        Step20Ra3("Step 20: Ra3",
+                new Pitch[][]{{Do3, Do4, Fi3, La3, Me3, Fa3, Si3, Re3, Le3, Mi3, Se3, So3, Ra3}}, Pitchenga::shuffle, new Integer[0]),
+        Step21Octaves3And4("Step 21: Octaves 3 and 4", new Pitch[][]{
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        Step22Octave5("Step 22: Octave 5",
+                new Pitch[][]{{Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6}}, Pitchenga::shuffle, new Integer[0]),
+        Step23Octaves3And4And5("Step 23: Octaves 3, 4, 5", new Pitch[][]{
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        Step24Octave2("Step 24: Octave 2",
+                new Pitch[][]{{Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3}}, Pitchenga::shuffle, new Integer[0]),
+        Step25Octaves2And3And4And5("Step 23: Octaves 2, 3, 4, 5", new Pitch[][]{
+                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        Step26Octave2("Step 26: Octave 6",
+                new Pitch[][]{{Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6}}, Pitchenga::shuffle, new Integer[0]),
+        Step27Octaves2And3And4And5And6("Step 23: Octaves 2, 3, 4, 5, 6", new Pitch[][]{
+                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+                {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
+        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        Step28Octave2("Step 28: Octave 1",
+                new Pitch[][]{{Do1, Ra1, Re1, Me1, Mi1, Fa1, Fi1, So1, Le1, La1, Se1, Si1, Do2}}, Pitchenga::shuffle, new Integer[0]),
+        Step29Octaves1And2And3And4And5And6("Step 20: Octaves 1, 2, 3, 4, 5, 6", new Pitch[][]{
+                {Do1, Ra1, Re1, Me1, Mi1, Fa1, Fi1, So1, Le1, La1, Se1, Si1, Do2},
+                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+                {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
+        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        Step30Octave7("Step 30: Octave 7",
+                new Pitch[][]{{Do7, Ra7, Re7, Me7, Mi7, Fa7, Fi7, So7, Le7, La7, Se7, Si7, Do8}}, Pitchenga::shuffle, new Integer[0]),
+        Step31Octaves1And2And3And4And5And6And7("Step 31: Octaves 1, 2, 3, 4, 5, 6, 7", new Pitch[][]{
+                {Do1, Ra1, Re1, Me1, Mi1, Fa1, Fi1, So1, Le1, La1, Se1, Si1, Do2},
+                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+                {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
+                {Do7, Ra7, Re7, Me7, Mi7, Fa7, Fi7, So7, Le7, La7, Se7, Si7, Do8},
+        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
         ;
 
         private final String name;
