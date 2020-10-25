@@ -44,6 +44,7 @@ public class My extends Setup {
 
         defaultRiddler = Pitchenga.Riddler.Step22Octave5;
         defaultRiddler = Pitchenga.Riddler.Step21Octaves3And4;
+        defaultRiddler = Pitchenga.Riddler.Step20Ra3;
 
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
         defaultRinger = Pitchenga.Ringer.JustDo;
