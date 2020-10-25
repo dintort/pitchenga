@@ -819,6 +819,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     public static void main(String... strings) throws InterruptedException, InvocationTargetException {
+        System.setProperty("sun.java2d.opengl", "true");
         SwingUtilities.invokeAndWait(() -> new Pitchenga(true, null));
     }
 
@@ -948,7 +949,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             } else {
                 return false;
             }
-            debug("Frozen=" + frozen + ", key=" + event + ";");
+//            debug("Frozen=" + frozen + ", key=" + event + ";");
             if (pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
                 if (!playButton.hasFocus()) {
                     playButton.setSelected(!playButton.isSelected());
