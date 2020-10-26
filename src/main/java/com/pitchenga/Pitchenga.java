@@ -12,7 +12,11 @@ import javax.sound.midi.*;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -140,14 +144,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         this.bottomPanel = new JPanel(new BorderLayout());
 
         try {
+            Soundbank soundfont = MidiSystem.getSoundbank(this.getClass().getResourceAsStream("/FluidR3_GM.sf2"));
             Synthesizer synthesizer = MidiSystem.getSynthesizer();
             synthesizer.open();
+            synthesizer.loadAllInstruments(soundfont);
             MidiChannel[] channels = synthesizer.getChannels();
             this.buzzInstrument = channels[0];
             this.keyboardInstrument = channels[1];
             this.ringInstrument = channels[2];
             initMidiInstruments(synthesizer);
-        } catch (MidiUnavailableException e) {
+        } catch (MidiUnavailableException | InvalidMidiDataException | IOException e) {
             throw new RuntimeException(e);
         }
         initGui();
@@ -1595,7 +1601,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void initMidiInstruments(Synthesizer synthesizer) {
-        javax.sound.midi.Instrument[] instruments = synthesizer.getDefaultSoundbank().getInstruments();
+        javax.sound.midi.Instrument[] instruments = synthesizer.getLoadedInstruments();
         javax.sound.midi.Instrument instrument = instruments[setup.buzzInstrument];
         if (synthesizer.loadInstrument(instrument)) {
             buzzInstrument.programChange(instrument.getPatch().getProgram());

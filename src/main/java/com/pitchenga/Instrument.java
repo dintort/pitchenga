@@ -1,6 +1,7 @@
 package com.pitchenga;
 
 @SuppressWarnings({"unused", "RedundantSuppression"})
+//fixme: Update according to Fluid R3
 public class Instrument {
     public static final int ACOUSTIC_GRAND_PIANO = 0;
     public static final int BRIGHT_ACOUSTIC_PIANO = 1;

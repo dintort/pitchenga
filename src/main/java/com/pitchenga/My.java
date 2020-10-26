@@ -2,6 +2,7 @@ package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
 
+@SuppressWarnings("unused")
 public class My extends Setup {
 
     public My() {
