@@ -51,8 +51,6 @@ public class My extends Setup {
         defaultRinger = Pitchenga.Ringer.JustDo;
         defaultRinger = Pitchenga.Ringer.ToneAndDo;
         defaultRinger = Pitchenga.Ringer.ToneAndLa;
-        defaultRinger = Pitchenga.Ringer.JustRa;
-        defaultRinger = Pitchenga.Ringer.ToneAndRa;
         defaultRinger = Pitchenga.Ringer.Tone;
         defaultRinger = Pitchenga.Ringer.None;
 
