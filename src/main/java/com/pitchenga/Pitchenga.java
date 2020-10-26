@@ -43,8 +43,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
     private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Button> BUTTON_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
-    public static final Font COURIER = new Font("Courier", Font.BOLD, 20);
-    public static final Font SERIF = new Font("SansSerif", Font.PLAIN, 11);
+    public static final Font COURIER = new Font(Font.MONOSPACED, Font.BOLD, 20);
+    public static final Font SERIF = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
 
     private final Setup setup = Setup.create();
     private final boolean isPrimary;
@@ -820,6 +820,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     public static void main(String... strings) throws InterruptedException, InvocationTargetException {
         System.setProperty("sun.java2d.opengl", "true");
+        System.setProperty("sun.java2d.xrender","f");
         SwingUtilities.invokeAndWait(() -> new Pitchenga(true, null));
     }
 
