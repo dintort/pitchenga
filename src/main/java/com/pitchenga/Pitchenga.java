@@ -44,8 +44,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Move to Scale
     private static final Pitch[] CHROMATIC_SCALE = Arrays.stream(FUGUES).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
     private static final Pitch[] DO_MAJ_SCALE = Arrays.stream(FUGUES).filter(fugue -> fugue.pitch.tone.diatonic).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
-    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
-    private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
+    //    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
+    //    private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Button> BUTTON_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
     public static final Font COURIER = new Font(Font.MONOSPACED, Font.BOLD, 20);
     public static final Font SERIF = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
@@ -594,7 +594,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         });
     }
 
-    private List<Pitch> shuffleGroupSeries() {
+    private List<Pitch> shuffleGroupSeries(boolean shuffleGroups) {
         return deduplicate(() -> {
             Pitch[][] scale = getRiddler().scale;
             List<List<Pitch>> listLists = Arrays.stream(scale)
@@ -618,7 +618,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         return lists.stream();
                     })
                     .collect(Collectors.toList());
-            Collections.shuffle(listLists);
+            if (shuffleGroups) {
+                Collections.shuffle(listLists);
+            }
             debug(listLists);
             List<Pitch> result = listLists.stream()
                     .map(list -> {
@@ -826,7 +828,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     public static void main(String... strings) throws InterruptedException, InvocationTargetException {
         System.setProperty("sun.java2d.opengl", "true");
-        System.setProperty("sun.java2d.xrender","f");
+        System.setProperty("sun.java2d.xrender", "f");
         SwingUtilities.invokeAndWait(() -> new Pitchenga(true, null));
     }
 
@@ -1629,16 +1631,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     //fixme: Extract duplication
-    @SuppressWarnings("SameParameterValue")
-    public static Pitch[] transposeScale(Pitch[] scale, int shiftOctaves, int shiftSteps) {
-        List<Pitch> transposed = new ArrayList<>(scale.length);
-        for (Pitch next : scale) {
-            next = transposePitch(next, shiftOctaves, shiftSteps);
-            transposed.add(next);
-        }
-        debug("Transposed scale: " + transposed);
-        return transposed.toArray(new Pitch[0]);
-    }
+//    @SuppressWarnings("SameParameterValue")
+//    public static Pitch[] transposeScale(Pitch[] scale, int shiftOctaves, int shiftSteps) {
+//        List<Pitch> transposed = new ArrayList<>(scale.length);
+//        for (Pitch next : scale) {
+//            next = transposePitch(next, shiftOctaves, shiftSteps);
+//            transposed.add(next);
+//        }
+//        debug("Transposed scale: " + transposed);
+//        return transposed.toArray(new Pitch[0]);
+//    }
 
     public static Object[] transposeFugue(Object[] fugue, int shiftOctaves) {
         List<Object> transposed = new ArrayList<>(fugue.length);
@@ -1855,17 +1857,27 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 new Pitch[][]{{Do3, Do4, Fi3, Fi3, Fi3, La3, Me3, Fa3, Si3, Re3, Le3, Le3, Le3, Mi3, Se3, So3, So3, So3, So3, So3}}, Pitchenga::shuffle, new Integer[0]),
         Step20Ra3("Step 20: Ra3",
                 new Pitch[][]{{Do3, Do4, Fi3, La3, Me3, Fa3, Si3, Re3, Le3, Mi3, Se3, So3, Ra3}}, Pitchenga::shuffle, new Integer[0]),
-        Step21Octaves3And4("Step 21: Octaves 3 and 4", new Pitch[][]{
+        Step21Octaves3And4Grouped("Step 21a: Octaves 3 and 4 grouped", new Pitch[][]{
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+        }, pitchenga -> pitchenga.shuffleGroupSeries(false), new Integer[0]),
+        Step21Octaves3And4("Step 21b: Octaves 3 and 4 shuffled", new Pitch[][]{
                 {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
                 {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
         Step22Octave5("Step 22: Octave 5",
                 new Pitch[][]{{Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6}}, Pitchenga::shuffle, new Integer[0]),
         Step23Octaves3And4And5("Step 23: Octaves 3, 4, 5", new Pitch[][]{
                 {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
                 {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
                 {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
-        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
         Step24Octave2("Step 24: Octave 2",
                 new Pitch[][]{{Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3}}, Pitchenga::shuffle, new Integer[0]),
         Step25Octaves2And3And4And5("Step 23: Octaves 2, 3, 4, 5", new Pitch[][]{
@@ -1873,7 +1885,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
                 {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
                 {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
-        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
         Step26Octave2("Step 26: Octave 6",
                 new Pitch[][]{{Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6}}, Pitchenga::shuffle, new Integer[0]),
         Step27Octaves2And3And4And5And6("Step 23: Octaves 2, 3, 4, 5, 6", new Pitch[][]{
@@ -1882,7 +1894,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
                 {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
                 {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
-        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
         Step28Octave2("Step 28: Octave 1",
                 new Pitch[][]{{Do1, Ra1, Re1, Me1, Mi1, Fa1, Fi1, So1, Le1, La1, Se1, Si1, Do2}}, Pitchenga::shuffle, new Integer[0]),
         Step29Octaves1And2And3And4And5And6("Step 20: Octaves 1, 2, 3, 4, 5, 6", new Pitch[][]{
@@ -1892,7 +1904,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
                 {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
                 {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
-        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
         Step30Octave7("Step 30: Octave 7",
                 new Pitch[][]{{Do7, Ra7, Re7, Me7, Mi7, Fa7, Fi7, So7, Le7, La7, Se7, Si7, Do8}}, Pitchenga::shuffle, new Integer[0]),
         Step31Octaves1And2And3And4And5And6And7("Step 31: Octaves 1, 2, 3, 4, 5, 6, 7", new Pitch[][]{
@@ -1903,7 +1915,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
                 {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
                 {Do7, Ra7, Re7, Me7, Mi7, Fa7, Fi7, So7, Le7, La7, Se7, Si7, Do8},
-        }, Pitchenga::shuffleGroupSeries, new Integer[0]),
+        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
         ;
 
         private final String name;
