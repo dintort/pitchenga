@@ -595,47 +595,48 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private List<Pitch> shuffleGroupSeries(boolean shuffleGroups) {
-        return deduplicate(() -> {
-            Pitch[][] scale = getRiddler().scale;
-            List<List<Pitch>> listLists = Arrays.stream(scale)
-                    .flatMap(group -> {
-                        List<Pitch> pitches = new LinkedList<>(Arrays.asList(group));
-                        Collections.shuffle(pitches);
-                        while (pitches.size() % setup.series != 0) {
-                            int index = random.nextInt(pitches.size());
-                            pitches.add(pitches.get(index));
+        Pitch[][] scale = getRiddler().scale;
+        List<List<Pitch>> listLists = Arrays.stream(scale)
+                .flatMap(group -> {
+                    List<Pitch> pitches = deduplicate(() -> {
+                        List<Pitch> list = new LinkedList<>(Arrays.asList(group));
+                        Collections.shuffle(list);
+                        while (list.size() % setup.series != 0) {
+                            int index = random.nextInt(list.size());
+                            list.add(list.get(index));
                         }
-                        List<List<Pitch>> lists = new ArrayList<>(pitches.size());
-                        List<Pitch> list = null;
-                        for (int i = 0; i < pitches.size(); i++) {
-                            Pitch pitch = pitches.get(i);
-                            if (list == null || i % setup.series == 0) {
-                                list = new ArrayList<>(setup.series * setup.repeat);
-                                lists.add(list);
-                            }
-                            list.add(pitch);
+                        return list;
+                    });
+                    List<List<Pitch>> lists = new ArrayList<>(pitches.size());
+                    List<Pitch> list = null;
+                    for (int i = 0; i < pitches.size(); i++) {
+                        Pitch pitch = pitches.get(i);
+                        if (list == null || i % setup.series == 0) {
+                            list = new ArrayList<>(setup.series * setup.repeat);
+                            lists.add(list);
                         }
-                        return lists.stream();
-                    })
-                    .collect(Collectors.toList());
-            if (shuffleGroups) {
-                Collections.shuffle(listLists);
-            }
-            debug(listLists);
-            List<Pitch> result = listLists.stream()
-                    .map(list -> {
-                        List<List<Pitch>> multi = new ArrayList<>();
-                        for (int i = 0; i < setup.repeat; i++) {
-                            multi.add(list);
-                        }
-                        return multi;
-                    })
-                    .flatMap(Collection::stream)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toList());
-            debug(result + " are the new riddles multiplied");
-            return result;
-        });
+                        list.add(pitch);
+                    }
+                    return lists.stream();
+                })
+                .collect(Collectors.toList());
+        if (shuffleGroups) {
+            Collections.shuffle(listLists);
+        }
+        debug(listLists);
+        List<Pitch> result = listLists.stream()
+                .map(list -> {
+                    List<List<Pitch>> multi = new ArrayList<>();
+                    for (int i = 0; i < setup.repeat; i++) {
+                        multi.add(list);
+                    }
+                    return multi;
+                })
+                .flatMap(Collection::stream)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        debug(result + " are the new riddles multiplied");
+        return result;
     }
 
     private List<Pitch> getScalePitches() {
@@ -1862,6 +1863,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
                 {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
                 {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
                 {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
                 {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
                 {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
