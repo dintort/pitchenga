@@ -3,6 +3,7 @@ package com.pitchenga;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
 import javax.sound.sampled.Mixer;
+import java.lang.reflect.InvocationTargetException;
 
 public class Setup {
     public static final Mixer.Info NO_AUDIO_INPUT = new Mixer.Info("No audio input", "", "", "1") {
@@ -31,9 +32,9 @@ public class Setup {
         }
         try {
             Class<?> clazz = Class.forName(className);
-            Object setup = clazz.newInstance();
+            Object setup = clazz.getDeclaredConstructor().newInstance();
             return (Setup) setup;
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
