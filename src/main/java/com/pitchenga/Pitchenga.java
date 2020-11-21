@@ -25,13 +25,11 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.pitchenga.Duration.*;
 import static com.pitchenga.Pitch.*;
-import static com.pitchenga.Tone.*;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
@@ -42,8 +40,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Button[] BUTTONS = Button.values();
     private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(pitch -> pitch.octave).filter(octave -> octave >= 0).distinct().toArray(Integer[]::new);
     //fixme: Move to Scale
-    private static final Pitch[] CHROMATIC_SCALE = Arrays.stream(FUGUES).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
-    private static final Pitch[] DO_MAJ_SCALE = Arrays.stream(FUGUES).filter(fugue -> fugue.pitch.tone.diatonic).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
+    public static final Pitch[] CHROMATIC_SCALE = Arrays.stream(FUGUES).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
+    public static final Pitch[] DO_MAJ_SCALE = Arrays.stream(FUGUES).filter(fugue -> fugue.pitch.tone.diatonic).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
     //    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
     //    private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Button> BUTTON_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
@@ -555,7 +553,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return false;
     }
 
-    private List<Pitch> shuffle() {
+    public List<Pitch> shuffle() {
         return deduplicate(() -> {
             //fixme: Restore the manual scales
 //        List<Pitch> pitches = getScalePitches();
@@ -594,7 +592,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         });
     }
 
-    private List<Pitch> shuffleGroupSeries(boolean shuffleGroups) {
+    public List<Pitch> shuffleGroupSeries(boolean shuffleGroups) {
         Pitch[][] scale = getRiddler().scale;
         List<List<Pitch>> listLists = Arrays.stream(scale)
                 .flatMap(group -> {
@@ -662,7 +660,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return result;
     }
 
-    private List<Pitch> ordered() {
+    public List<Pitch> ordered() {
         return Arrays.stream(getRiddler().scale)
                 .flatMap(Arrays::stream)
                 .collect(Collectors.toList());
@@ -1661,7 +1659,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return transposeFugue(fugue, shiftOctaves);
     }
 
-    private static Object[] transposeTune(Pitch pitch) {
+    public static Object[] transposeTune(Pitch pitch) {
         return transposeFugue(pitch, pitch.tone.getFugue().tune);
     }
 
@@ -1693,7 +1691,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     //fixme: Move to Scale
-    private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
+    public static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
             {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
             {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
@@ -1709,7 +1707,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
     };
 
-    private static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP = new Pitch[][]{
+    public static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP = new Pitch[][]{
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
             {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
@@ -1759,341 +1757,4 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
     };
 
-    public enum Riddler {
-        ChromaticOneOctave("Chromatic - 1 octave",
-                new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        Chromatic("Chromatic - main octaves",
-                new Pitch[][]{CHROMATIC_SCALE}, Pitchenga::shuffle, null),
-        DoMajOneOctave("Do maj - 1 octave",
-                new Pitch[][]{DO_MAJ_SCALE}, Pitchenga::shuffle, new Integer[0]),
-        DoMaj("Do maj - main octaves",
-                new Pitch[][]{DO_MAJ_SCALE}, Pitchenga::shuffle, null),
-        //        DoMajHarm("Do maj harm - main octaves",
-//                new Pitch[][]{DO_MAJ_HARM_SCALE}, Pitchenga::shuffle, null),
-//        RaMaj("Ra maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 1)}, Pitchenga::shuffle, null),
-//        RaMajHarm("Ra maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 1)}, Pitchenga::shuffle, null),
-//        ReMaj("Re maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 2)}, Pitchenga::shuffle, null),
-//        ReMajHarm("Re maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 2)}, Pitchenga::shuffle, null),
-//        MeMaj("Me maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 3)}, Pitchenga::shuffle, null),
-//        MeMajHarm("Me maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 3)}, Pitchenga::shuffle, null),
-//        MiMaj("Mi maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 4)}, Pitchenga::shuffle, null),
-//        MiMajHarm("Mi maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 4)}, Pitchenga::shuffle, null),
-//        FaMaj("Fa maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 5)}, Pitchenga::shuffle, null),
-//        FaMajHarm("Fa maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 5)}, Pitchenga::shuffle, null),
-//        FiMaj("Fi maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 6)}, Pitchenga::shuffle, null),
-//        FiMajHarm("Fi maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 6)}, Pitchenga::shuffle, null),
-//        SoMaj("So maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 7)}, Pitchenga::shuffle, null),
-//        SoMajHarm("So maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 7)}, Pitchenga::shuffle, null),
-//        LeMaj("Le maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 8)}, Pitchenga::shuffle, null),
-//        LeMajHarm("Le maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 8)}, Pitchenga::shuffle, null),
-//        LaMaj("La maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 9)}, Pitchenga::shuffle, null),
-//        LaMajHarm("La maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 9)}, Pitchenga::shuffle, null),
-//        SeMaj("Se maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 10)}, Pitchenga::shuffle, null),
-//        SeMajHarm("Se maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 10)}, Pitchenga::shuffle, null),
-//        SiMaj("Si maj - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_SCALE, 0, 11)}, Pitchenga::shuffle, null),
-//        SiMajHarm("Si maj harm - main octaves",
-//                new Pitch[][]{transposeScale(DO_MAJ_HARM_SCALE, 0, 11)}, Pitchenga::shuffle, null),
-        ChromaticScaleUpDown("Chromatic scale Mi3-La5-Mi3",
-                CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::ordered, new Integer[]{3, 4, 5}),
-        ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended",
-                CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::ordered, new Integer[]{3, 4, 5}),
-        Step01Do4Do5Fi4La4("Step 1: Do4, Do5, Fi4, La4",
-                new Pitch[][]{{Do4, Do5, Fi4, La4}}, Pitchenga::shuffle, new Integer[0]),
-        Step02Me4("Step 2: Me4",
-                new Pitch[][]{{Do4, Do5, Fi4, La4, Me4}}, Pitchenga::shuffle, new Integer[0]),
-        Step03Ra4("Step 3: Ra4",
-                new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Ra4}}, Pitchenga::shuffle, new Integer[0]),
-        Step04So4("Step 4: So4",
-                new Pitch[][]{{Do4, Do5, Fi4, Fi4, La4, Me4, Ra4, So4, So4}}, Pitchenga::shuffle, new Integer[0]),
-        Step05Se4("Step 5: Se4",
-                new Pitch[][]{{Do4, Do5, Fi4, La4, La4, Me4, Ra4, So4, Se4, Se4, Se4}}, Pitchenga::shuffle, new Integer[0]),
-        Step06Mi4("Step 6: Mi4",
-                new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Ra4, So4, Se4, Mi4, Mi4, Mi4}}, Pitchenga::shuffle, new Integer[0]),
-        Step07Le4("Step 7: Le4",
-                new Pitch[][]{{Do4, Do5, Fi4, La4, La4, La4, Me4, Ra4, So4, So4, So4, Se4, Mi4, Mi4, Le4, Le4, Le4, Le4}}, Pitchenga::shuffle, new Integer[0]),
-        Step08Re4("Step 8: Re4",
-                new Pitch[][]{{Do4, Do5, Fi4, La4, Me4, Me4, Me4, Ra4, Ra4, Ra4, So4, Se4, Mi4, Le4, Le4, Re4, Re4, Re4, Re4, Re4}}, Pitchenga::shuffle, new Integer[0]),
-        Step09Si4("Step 9: Si4",
-                new Pitch[][]{{Do4, Do5, Do5, Fi4, La4, Me4, Ra4, So4, Se4, Se4, Se4, Mi4, Le4, Re4, Re4, Si4, Si4, Si4, Si4, Si4}}, Pitchenga::shuffle, new Integer[0]),
-        Step10Fa4("Step 10: Fa4",
-                new Pitch[][]{{Do4, Do5, Fi4, Fi4, Fi4, La4, Me4, Ra4, So4, Se4, Mi4, Mi4, Mi4, Le4, Re4, Si4, Si4, Fa4, Fa4, Fa4, Fa4, Fa4, Fa4}}, Pitchenga::shuffle, new Integer[0]),
-        Step11Do3Do4Fi3La3("Step 11: Do3, Do4, Fi3, La3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3}}, Pitchenga::shuffle, new Integer[0]),
-        Step12Me3("Step 12: Me3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3, Me3}}, Pitchenga::shuffle, new Integer[0]),
-        Step13Fa3("Step 13: Fa3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3, Me3, Fa3}}, Pitchenga::shuffle, new Integer[0]),
-        Step14Si3("Step 14: Si3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3, Me3, Fa3, Si3, Si3}}, Pitchenga::shuffle, new Integer[0]),
-        Step15Re3("Step 15: Re3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3, Me3, Me3, Fa3, Si3, Re3, Re3}}, Pitchenga::shuffle, new Integer[0]),
-        Step16Le3("Step 16: Le3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3, La3, Me3, Fa3, Si3, Re3, Le3, Le3, Le3}}, Pitchenga::shuffle, new Integer[0]),
-        Step17Mi3("Step 17: Mi3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3, Me3, Me3, Me3, Fa3, Fa3, Fa3, Si3, Re3, Le3, Mi3, Mi3, Mi3, Mi3}}, Pitchenga::shuffle, new Integer[0]),
-        Step18Se3("Step 18: Se3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3, La3, La3, Me3, Fa3, Si3, Si3, Si3, Re3, Le3, Mi3, Se3, Se3, Se3, Se3, Se3}}, Pitchenga::shuffle, new Integer[0]),
-        Step19So3("Step 19: So3",
-                new Pitch[][]{{Do3, Do4, Fi3, Fi3, Fi3, La3, Me3, Fa3, Si3, Re3, Le3, Le3, Le3, Mi3, Se3, So3, So3, So3, So3, So3}}, Pitchenga::shuffle, new Integer[0]),
-        Step20Ra3("Step 20: Ra3",
-                new Pitch[][]{{Do3, Do4, Fi3, La3, Me3, Fa3, Si3, Re3, Le3, Mi3, Se3, So3, Ra3}}, Pitchenga::shuffle, new Integer[0]),
-        Step21Octaves3And4Grouped("Step 21a: Octaves 3 and 4 grouped", new Pitch[][]{
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-        }, pitchenga -> pitchenga.shuffleGroupSeries(false), new Integer[0]),
-        Step21Octaves3And4("Step 21b: Octaves 3 and 4 shuffled", new Pitch[][]{
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
-        Step22Octave5("Step 22: Octave 5",
-                new Pitch[][]{{Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6}}, Pitchenga::shuffle, new Integer[0]),
-        Step23Octaves3And4And5("Step 23: Octaves 3, 4, 5", new Pitch[][]{
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
-        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
-        Step24Octave2("Step 24: Octave 2",
-                new Pitch[][]{{Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3}}, Pitchenga::shuffle, new Integer[0]),
-        Step25Octaves2And3And4And5("Step 23: Octaves 2, 3, 4, 5", new Pitch[][]{
-                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
-        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
-        Step26Octave2("Step 26: Octave 6",
-                new Pitch[][]{{Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6}}, Pitchenga::shuffle, new Integer[0]),
-        Step27Octaves2And3And4And5And6("Step 23: Octaves 2, 3, 4, 5, 6", new Pitch[][]{
-                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
-                {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
-        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
-        Step28Octave2("Step 28: Octave 1",
-                new Pitch[][]{{Do1, Ra1, Re1, Me1, Mi1, Fa1, Fi1, So1, Le1, La1, Se1, Si1, Do2}}, Pitchenga::shuffle, new Integer[0]),
-        Step29Octaves1And2And3And4And5And6("Step 20: Octaves 1, 2, 3, 4, 5, 6", new Pitch[][]{
-                {Do1, Ra1, Re1, Me1, Mi1, Fa1, Fi1, So1, Le1, La1, Se1, Si1, Do2},
-                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
-                {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
-        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
-        Step30Octave7("Step 30: Octave 7",
-                new Pitch[][]{{Do7, Ra7, Re7, Me7, Mi7, Fa7, Fi7, So7, Le7, La7, Se7, Si7, Do8}}, Pitchenga::shuffle, new Integer[0]),
-        Step31Octaves1And2And3And4And5And6And7("Step 31: Octaves 1, 2, 3, 4, 5, 6, 7", new Pitch[][]{
-                {Do1, Ra1, Re1, Me1, Mi1, Fa1, Fi1, So1, Le1, La1, Se1, Si1, Do2},
-                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
-                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
-                {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do6},
-                {Do7, Ra7, Re7, Me7, Mi7, Fa7, Fi7, So7, Le7, La7, Se7, Si7, Do8},
-        }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
-        ;
-
-        private final String name;
-        private final Pitch[][] scale;
-        private final Function<Pitchenga, List<Pitch>> riddle;
-        private final Integer[] octaves;
-
-        Riddler(String name, Pitch[][] scale, Function<Pitchenga, List<Pitch>> riddle, Integer[] octaves) {
-            this.name = name;
-            this.scale = scale;
-            this.riddle = riddle;
-            this.octaves = octaves;
-        }
-
-        public String toString() {
-            return name;
-        }
-    }
-
-    public enum Ringer {
-        None("Ring nothing", pitch -> new Object[]{thirtyTwo}),
-        Tune("Ring mnemonic tune", pitch -> transposeFugue(pitch, pitch.tone.getFugue().tune)),
-        Tone("Ring tone", pitch -> new Object[]{pitch, eight, eight}),
-        JustDo("Ring Do", pitch -> transposeFugue(pitch, new Object[]{Do.getFugue().pitch, eight, four})),
-        JustRa("Ring Ra", pitch -> transposeFugue(pitch, new Object[]{Ra.getFugue().pitch, eight, four})),
-        JustRe("Ring Re", pitch -> transposeFugue(pitch, new Object[]{Re.getFugue().pitch, eight, four})),
-        JustMe("Ring Me", pitch -> transposeFugue(pitch, new Object[]{Me.getFugue().pitch, eight, four})),
-        JustMi("Ring Mi", pitch -> transposeFugue(pitch, new Object[]{Mi.getFugue().pitch, eight, four})),
-        JustFa("Ring Fa", pitch -> transposeFugue(pitch, new Object[]{Fa.getFugue().pitch, eight, four})),
-        JustFi("Ring Fi", pitch -> transposeFugue(pitch, new Object[]{Fi.getFugue().pitch, eight, four})),
-        JustSo("Ring So", pitch -> transposeFugue(pitch, new Object[]{So.getFugue().pitch, eight, four})),
-        JustLe("Ring Le", pitch -> transposeFugue(pitch, new Object[]{Le.getFugue().pitch, eight, four})),
-        JustLa("Ring La", pitch -> transposeFugue(pitch, new Object[]{La.getFugue().pitch, eight, four})),
-        JustSe("Ring Se", pitch -> transposeFugue(pitch, new Object[]{Se.getFugue().pitch, eight, four})),
-        JustSi("Ring Si", pitch -> transposeFugue(pitch, new Object[]{Si.getFugue().pitch, eight, four})),
-        ToneAndDo("Ring tone and Do", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Do.ordinal()])),
-        ToneAndRa("Ring tone and Ra", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Ra.ordinal()])),
-        ToneAndRe("Ring tone and Re", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Re.ordinal()])),
-        ToneAndMe("Ring tone and Me", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Me.ordinal()])),
-        ToneAndMi("Ring tone and Mi", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Mi.ordinal()])),
-        ToneAndFa("Ring tone and Fa", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Fa.ordinal()])),
-        ToneAndFi("Ring tone and Fi", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Fi.ordinal()])),
-        ToneAndSo("Ring tone and So", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[So.ordinal()])),
-        ToneAndLe("Ring tone and Le", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Le.ordinal()])),
-        ToneAndLa("Ring tone and La", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[La.ordinal()])),
-        ToneAndSe("Ring tone and Se", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Se.ordinal()])),
-        ToneAndSi("Ring tone and Si", pitch -> transposeFugue(pitch, pitch.tone.getFugue().intervals[Si.ordinal()])),
-        ;
-        private final String name;
-        private final Function<Pitch, Object[]> ring;
-
-        Ringer(String name, Function<Pitch, Object[]> ring) {
-            this.name = name;
-            this.ring = ring;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
-    public enum Buzzer {
-        Tune("Riddle mnemonic tune", Pitchenga::transposeTune),
-        Tone("Riddle tone", pitch -> new Object[]{pitch, sixteen}),
-        ShortToneAndLongPause("Riddle shorter tone with longer pause (for acoustic instruments)", pitch -> new Object[]{pitch, eight, four, sixteen}), //Otherwise the game plays with itself through the microphone by picking up the "tail". This could probably be improved with a shorter midi decay.
-        ToneAndDo("Riddle tone and Do", pitch -> transposeFugue(pitch, new Object[]{pitch.tone.getFugue().pitch, Do.getFugue().pitch, sixteen, four})),
-        ;
-        private final String name;
-        private final Function<Pitch, Object[]> buzz;
-
-        Buzzer(String name, Function<Pitch, Object[]> buzz) {
-            this.name = name;
-            this.buzz = buzz;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
-    public enum Hinter {
-        Always("Hint: immediately", 0),
-        Series("Hint: series", 0),
-        Delayed100("Hint: after 100 ms", 100),
-        Delayed200("Hint: after 200 ms", 200),
-        Delayed300("Hint: after 300 ms", 300),
-        Delayed400("Hint: after 400 ms", 400),
-        Delayed500("Hint: after 500 ms", 500),
-        Delayed600("Hint: after 600 ms", 600),
-        Delayed700("Hint: after 700 ms", 700),
-        Delayed800("Hint: after 800 ms", 800),
-        Delayed900("Hint: after 900 ms", 900),
-        Delayed1000("Hint: after 1 second", 1000),
-        Delayed2000("Hint: after 2 seconds", 2000),
-        Delayed3000("Hint: after 3 seconds", 3000),
-        Never("Hint: never", Integer.MAX_VALUE);
-
-        private final String name;
-        private final int delayMs;
-
-        Hinter(String name, int delayMs) {
-            this.name = name;
-            this.delayMs = delayMs;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
-    public enum Pacer {
-        Answer("Answer to continue", 0),
-        Tempo20("Tempo 20", 20),
-        Tempo25("Tempo 25", 25),
-        Tempo30("Tempo 30", 30),
-        Tempo35("Tempo 35", 35),
-        Tempo40("Tempo 40", 40),
-        Tempo45("Tempo 45", 45),
-        Tempo50("Tempo 50", 50),
-        Tempo55("Tempo 55", 55),
-        Tempo60("Tempo 60", 60),
-        Tempo65("Tempo 65", 65),
-        Tempo70("Tempo 70", 70),
-        Tempo75("Tempo 75", 75),
-        Tempo80("Tempo 80", 80),
-        Tempo85("Tempo 85", 85),
-        Tempo90("Tempo 90", 90),
-        Tempo95("Tempo 95", 95),
-        Tempo100("Tempo 100", 100),
-        Tempo105("Tempo 105", 105),
-        Tempo110("Tempo 110", 110),
-        Tempo115("Tempo 115", 115),
-        Tempo120("Tempo 120", 120),
-        Tempo125("Tempo 125", 125),
-        Tempo130("Tempo 130", 130),
-        Tempo135("Tempo 135", 135),
-        Tempo140("Tempo 140", 140),
-        Tempo145("Tempo 145", 145),
-        Tempo150("Tempo 150", 150),
-        Tempo155("Tempo 155", 155),
-        Tempo160("Tempo 160", 160),
-        Tempo165("Tempo 165", 165),
-        Tempo170("Tempo 170", 170),
-        Tempo175("Tempo 175", 175),
-        Tempo180("Tempo 180", 180),
-        ;
-
-        private final String name;
-        private final int bpm;
-
-        Pacer(String name, int bpm) {
-            this.name = name;
-            this.bpm = bpm;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
 }

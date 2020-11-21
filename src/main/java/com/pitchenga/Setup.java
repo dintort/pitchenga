@@ -13,11 +13,11 @@ public class Setup {
     public volatile int defaultPenaltyFactor = 0;
     public volatile Integer[] defaultOctaves = new Integer[]{2, 3, 4, 5, 6};
     public volatile PitchProcessor.PitchEstimationAlgorithm defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
-    public volatile Pitchenga.Hinter defaultHinter = Pitchenga.Hinter.Series;
-    public volatile Pitchenga.Riddler defaultRiddler = Pitchenga.Riddler.Step01Do4Do5Fi4La4;
-    public volatile Pitchenga.Buzzer defaultBuzzer = Pitchenga.Buzzer.Tone;
-    public volatile Pitchenga.Ringer defaultRinger = Pitchenga.Ringer.None;
-    public volatile Pitchenga.Pacer defaultPacer = Pitchenga.Pacer.Tempo90;
+    public volatile Hinter defaultHinter = Hinter.Series;
+    public volatile Riddler defaultRiddler = Riddler.Step01Do4Do5Fi4La4;
+    public volatile Buzzer defaultBuzzer = Buzzer.Tone;
+    public volatile Ringer defaultRinger = Ringer.None;
+    public volatile Pacer defaultPacer = Pacer.Tempo90;
     public volatile boolean mainFrameVisible = true;
     public volatile int buzzInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
     public volatile int keyboardInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
