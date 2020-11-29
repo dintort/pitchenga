@@ -19,8 +19,8 @@ public class Multi {
             Pitchenga primary = new Pitchenga(true, null);
 //            secondary.requestFocus();
             Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-            //noinspection SuspiciousNameCombination
-            primary.setSize(screenSize.height, screenSize.height);
+            int side = Math.min(screenSize.height, screenSize.width);
+            primary.setSize(side, side);
             primary.setLocation(screenSize.width / 2 - primary.getSize().width / 2, screenSize.height / 2 - primary.getSize().height / 2);
 //            primary.setLocation(0, 0);
 //            primary.setSize(screenSize.width, screenSize.height);

@@ -209,7 +209,7 @@ public class Circle extends JPanel {
             int radius = diameter / 2;
             int halfRadius = radius / 2;
             int gap = halfRadius / 2;
-            int outerDiameter = fullSide - halfRadius - gap / 2;
+            int outerDiameter = fullSide - gap * 2;
 
             graphics.setColor(Color.BLACK);
             graphics.fillOval(gap + offset, gap, outerDiameter, outerDiameter);
@@ -217,8 +217,8 @@ public class Circle extends JPanel {
             for (int i = 0; i < TONES.length; i++) {
                 Tone myTone = TONES[i];
                 double phi = (i * Math.PI * 2) / TONES.length;
-                int x = (int) Math.round(halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
-                int y = (int) Math.round(halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
+                int x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
+                int y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
 
                 if (myTone == tone && toneColor != null && pitchyColor != null) {
                     triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, toneColor, true);

@@ -18,8 +18,7 @@ public class My extends Setup {
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
         series = 3;
-//        repeat = 3;
-        repeat = 2;
+        repeat = 3;
 //        series = 1;
 //        repeat = 1;
 
