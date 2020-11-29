@@ -18,7 +18,8 @@ public class My extends Setup {
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
         series = 3;
-        repeat = 3;
+//        repeat = 3;
+        repeat = 2;
 //        series = 1;
 //        repeat = 1;
 
@@ -43,16 +44,14 @@ public class My extends Setup {
         defaultPacer = Pacer.Tempo50;
         defaultPacer = Pacer.Tempo100;
 
-        defaultRiddler = Riddler.Step22Octave5;
-        defaultRiddler = Riddler.Step21Octaves3And4;
-        defaultRiddler = Riddler.Step10Fa4;
-        defaultRiddler = Riddler.Step21Octaves3And4Grouped;
-        defaultRiddler = Riddler.Step20Ra3;
         defaultRiddler = Riddler.ChromaticOneOctave;
         defaultRiddler = Riddler.Step18Se3;
         defaultRiddler = Riddler.Step17Mii3;
         defaultRiddler = Riddler.Step19So3;
         defaultRiddler = Riddler.Step21Octave3;
+        defaultRiddler = Riddler.Step25Si2;
+        defaultRiddler = Riddler.Step26Re2;
+        defaultRiddler = Riddler.Step27Le2;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;

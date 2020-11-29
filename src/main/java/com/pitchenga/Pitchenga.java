@@ -45,7 +45,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
     //    private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Button> BUTTON_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
-    public static final Font COURIER = new Font(Font.MONOSPACED, Font.BOLD, 20);
+    public static final Font MONOSPACED = new Font(Font.MONOSPACED, Font.BOLD, 20);
     public static final Font SERIF = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
 
     private final Setup setup = Setup.create();
@@ -100,9 +100,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JToggleButton[] keyButtons = new JToggleButton[Button.values().length];
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
-    private final JTextArea textArea = new JTextArea();
+    private final JComponent pitchSliderPanel = new JPanel(new BorderLayout());
     private final JPanel bottomPanel;
-    //    private final JTextPane text = new JTextPane();
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
@@ -753,42 +752,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 long previousTimestampMs = lastGuessTimestampMs;
                 lastGuessTimestampMs = System.currentTimeMillis();
                 if (lastGuessTimestampMs - previousTimestampMs > 500) {
-                    text("\n");
+                    circle.text("\n");
                 }
 //                String text = "<span style=\"background-color: #FFFF00\">This text is highlighted in yellow.</span>";
 //                text(text);
-                text("  ");
-                text(guess.tone.label);
+                circle.text("  ");
+                circle.text(guess.tone.label);
 //                text(guess.getTone().name().toLowerCase(), Color.LIGHT_GRAY, guess.getTone().getColor());
-                text("\n");
+                circle.text("\n");
             }
         });
-    }
-
-    private void text(String message) {
-//        text(message, null, null);
-//    }
-//
-//    private void text(String message, Color foreground, Color background) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            //fixme: Discard oldest when becomes too big
-//            StyledDocument document = text.getStyledDocument();
-//            SimpleAttributeSet attributes = new SimpleAttributeSet();
-//            if (foreground != null) {
-//                StyleConstants.setForeground(attributes, foreground);
-//            }
-//            if (background != null) {
-//                StyleConstants.setBackground(attributes, background);
-//            }
-//            StyleConstants.setBold(attributes, false);
-//            try {
-//                document.insertString(document.getLength(), message, attributes);
-//            } catch (BadLocationException e) {
-//                e.printStackTrace();
-//            }
-            textArea.append(message);
-            textArea.setCaretPosition(textArea.getDocument().getLength());
-        }
     }
 
     static {
@@ -840,15 +813,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         mainPanel.setBackground(Color.DARK_GRAY);
         mainPanel.setLayout(new BorderLayout());
 
-        JPanel guessPanel = new JPanel();
-        mainPanel.add(guessPanel, BorderLayout.CENTER);
-        guessPanel.setBackground(Color.DARK_GRAY);
-        guessPanel.setLayout(new BorderLayout());
+        JPanel circlePanel = new JPanel();
+        mainPanel.add(circlePanel, BorderLayout.CENTER);
+        circlePanel.setBackground(Color.DARK_GRAY);
+        circlePanel.setLayout(new BorderLayout());
+        circlePanel.add(circle, BorderLayout.CENTER);
 
-        guessPanel.add(circle, BorderLayout.CENTER);
-
-        mainPanel.add(initPitchSlider(), BorderLayout.WEST);
-        mainPanel.add(initTextArea(), BorderLayout.EAST);
+        initPitchSlider();
+        mainPanel.add(pitchSliderPanel, BorderLayout.WEST);
 
         for (Button button : Button.values()) {
             keyButtons[button.ordinal()] = new JToggleButton(button.label);
@@ -884,37 +856,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
 
-    private JScrollPane initTextArea() {
-        JScrollPane scroll = new JScrollPane(textArea);
-        scroll.setBorder(null);
-        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-//        text.setContentType("text/html");
-        textArea.setFont(COURIER);
-        textArea.setEditable(false);
-        textArea.setForeground(Color.LIGHT_GRAY);
-        textArea.setBackground(Color.DARK_GRAY);
-        textArea.setBorder(null);
-//        text("<html>");
-        for (int i = 0; i < 500; i++) { //There must be a better way
-            text("        \n");
-        }
-        return scroll;
-    }
-
-    private JComponent initPitchSlider() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setOpaque(false);
+    private void initPitchSlider() {
+        pitchSliderPanel.setOpaque(false);
 
         JPanel frequencyPanel = new JPanel();
-        panel.add(frequencyPanel, BorderLayout.SOUTH);
+        pitchSliderPanel.add(frequencyPanel, BorderLayout.SOUTH);
         frequencyPanel.setOpaque(false);
         frequencyPanel.add(frequencyLabel);
-        frequencyLabel.setFont(COURIER);
+        frequencyLabel.setFont(MONOSPACED);
         frequencyLabel.setHorizontalAlignment(SwingConstants.CENTER);
         frequencyLabel.setForeground(Color.LIGHT_GRAY);
 
-        panel.add(pitchSlider, BorderLayout.CENTER);
+        pitchSliderPanel.add(pitchSlider, BorderLayout.CENTER);
         pitchSlider.setEnabled(false);
         pitchSlider.setValue(0);
         pitchSlider.getModel().setMinimum(convertPitchToSlider(Pitch.Do1, 0f));
@@ -925,7 +878,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
                     JLabel label = new JLabel(pitch.label);
-                    label.setFont(COURIER);
+                    label.setFont(MONOSPACED);
                     label.setOpaque(true);
 //                    label.setForeground(pitch.tone.fontColor);
                     label.setBackground(pitch.tone.color);
@@ -937,7 +890,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchSlider.setPaintLabels(true);
         //fixme: Scroll without bars
 //        JScrollPane scroll = new JScrollPane(pitchSlider);
-        return panel;
     }
 
     private void initKeyboard() {
@@ -999,9 +951,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 index = event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET ? index - 1 : index + 1;
                 if (index >= 0 && index < pacerCombo.getItemCount()) {
                     pacerCombo.setSelectedIndex(index);
-                    text("   ");
-                    text(String.valueOf(getPacer().bpm));
-                    text("\n");
+                    circle.text("   ");
+                    circle.text(String.valueOf(getPacer().bpm));
+                    circle.text("\n");
                 }
                 return true;
             }
@@ -1155,7 +1107,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
             JLabel toneLabel = new JLabel(tone.label);
             colorPanel.add(toneLabel);
-            toneLabel.setFont(COURIER);
+            toneLabel.setFont(MONOSPACED);
             toneLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             toneLabel.setForeground(Color.WHITE);
             toneLabel.setBackground(Color.BLACK);
@@ -1266,7 +1218,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             colorPanel.add(Box.createVerticalStrut(5));
             JLabel colorLabel = new JLabel(button.pitch == null ? "    " : button.pitch.tone.label);
             colorPanel.add(colorLabel);
-            colorLabel.setFont(COURIER);
+            colorLabel.setFont(MONOSPACED);
             colorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             colorLabel.setForeground(Color.WHITE);
             colorLabel.setBackground(Color.BLACK);
@@ -1449,10 +1401,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playExecutor.execute(() -> play(null, false));
             if (!getPacer().equals(Pacer.Answer)) {
                 bottomPanel.setVisible(false);
+                pitchSliderPanel.setVisible(false);
             }
         } else {
             playButton.setText("Play");
             bottomPanel.setVisible(true);
+            pitchSliderPanel.setVisible(true);
         }
         debug("running=" + playing);
     }

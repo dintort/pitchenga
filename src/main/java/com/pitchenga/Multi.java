@@ -13,14 +13,17 @@ public class Multi {
         System.setProperty("com.pitchenga.setup.class", "com.pitchenga.My");
 
         SwingUtilities.invokeAndWait(() -> {
-            Pitchenga secondary = new Pitchenga(false, null);
+//            Pitchenga secondary = new Pitchenga(false, null);
             System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
-            Pitchenga primary = new Pitchenga(true, secondary);
-            secondary.requestFocus();
+//            Pitchenga primary = new Pitchenga(true, secondary);
+            Pitchenga primary = new Pitchenga(true, null);
+//            secondary.requestFocus();
             Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-//            primary.setLocation(screenSize.width / 2 - primary.getSize().width / 2, screenSize.height / 2 - primary.getSize().height / 2);
-            primary.setLocation(0, 0);
-            primary.setSize(screenSize.width, screenSize.height);
+            //noinspection SuspiciousNameCombination
+            primary.setSize(screenSize.height, screenSize.height);
+            primary.setLocation(screenSize.width / 2 - primary.getSize().width / 2, screenSize.height / 2 - primary.getSize().height / 2);
+//            primary.setLocation(0, 0);
+//            primary.setSize(screenSize.width, screenSize.height);
 //            primary.setExtendedState(primary.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         });
     }
