@@ -208,7 +208,7 @@ public class Circle extends JPanel {
             int diameter = (int) (side / 4.7);
             int radius = diameter / 2;
             int halfRadius = radius / 2;
-            int gap = halfRadius / 2;
+            int gap = (int) (halfRadius / 1.5);
             int outerDiameter = fullSide - gap * 2;
 
             graphics.setColor(Color.BLACK);
@@ -221,7 +221,7 @@ public class Circle extends JPanel {
                 int y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
 
                 if (myTone == tone && toneColor != null && pitchyColor != null) {
-                    triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, toneColor, true);
+                    triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, toneColor, true);
                     graphics.setColor(pitchyColor);
                     graphics.fillOval(x + offset, y, diameter, diameter);
                     graphics.setColor(toneColor);
@@ -231,9 +231,9 @@ public class Circle extends JPanel {
                     graphics.fillOval(x + offset, y, diameter, diameter);
 
                     if (tones.contains(myTone)) {
-                        triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, true);
+                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, true);
                     } else {
-                        triangle(graphics, offset, fullSide, halfSide, radius, halfRadius, i, myTone.color, false);
+                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false);
                         int thickness;
                         if (scaleTones.contains(myTone)) {
                             thickness = 1 + gap / 2;
@@ -255,13 +255,13 @@ public class Circle extends JPanel {
             }
         }
 
-        private void triangle(Graphics graphics, int offset, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill) {
+        private void triangle(Graphics graphics, int offset, int gap, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill) {
             double phi2 = ((i - 0.2) * Math.PI * 2) / TONES.length;
-            int x2 = (int) Math.round(halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
-            int y2 = (int) Math.round(halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
+            int x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
+            int y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
             double phi3 = ((i + 0.2) * Math.PI * 2) / TONES.length;
-            int x3 = (int) Math.round(halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
-            int y3 = (int) Math.round(halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
+            int x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
+            int y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
             graphics.setColor(color);
             int[] xPoints = {x2 + offset, x3 + offset, fullSide / 2 + offset};
             int[] yPoints = {y2, y3, fullSide / 2};
