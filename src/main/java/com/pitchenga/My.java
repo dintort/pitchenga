@@ -43,18 +43,13 @@ public class My extends Setup {
         defaultPacer = Pacer.Tempo50;
         defaultPacer = Pacer.Tempo100;
 
-        defaultRiddler = Riddler.ChromaticOneOctave;
-        defaultRiddler = Riddler.Step18Se3;
-        defaultRiddler = Riddler.Step19So3;
-        defaultRiddler = Riddler.Step21Octave3;
-        defaultRiddler = Riddler.Step25Si2;
-        defaultRiddler = Riddler.Step26Re2;
-        defaultRiddler = Riddler.Step27Le2;
-        defaultRiddler = Riddler.Step28Mi2;
-        defaultRiddler = Riddler.Step29Se2;
-        defaultRiddler = Riddler.Step30So2;
-        defaultRiddler = Riddler.Step32Octaves2And3;
         defaultRiddler = Riddler.Step33Octaves2And3RaRe;
+        defaultRiddler = Riddler.Warmup;
+        defaultRiddler = Riddler.Step34Octaves2And3MeMi;
+        defaultRiddler = Riddler.Step35Octaves2And3FaFi;
+        defaultRiddler = Riddler.Step36Octaves2And3SoLe;
+        defaultRiddler = Riddler.Step37Octaves2And3LaSe;
+        defaultRiddler = Riddler.Step38Octaves2And3SiDo;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;

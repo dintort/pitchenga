@@ -14,7 +14,7 @@ public class Setup {
     public volatile Integer[] defaultOctaves = new Integer[]{2, 3, 4, 5, 6};
     public volatile PitchProcessor.PitchEstimationAlgorithm defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
     public volatile Hinter defaultHinter = Hinter.Series;
-    public volatile Riddler defaultRiddler = Riddler.Step01Do4Do5Fi4La4;
+    public volatile Riddler defaultRiddler = Riddler.Chromatic;
     public volatile Buzzer defaultBuzzer = Buzzer.Tone;
     public volatile Ringer defaultRinger = Ringer.None;
     public volatile Pacer defaultPacer = Pacer.Tempo90;
