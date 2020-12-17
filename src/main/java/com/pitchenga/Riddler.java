@@ -603,20 +603,24 @@ public enum Riddler {
     }, pitchenga -> pitchenga.shuffleGroupSeries(false), new Integer[0]),
     Step44Octaves2And3And4SeSiDo("Step 344: Octaves 2, 3, 4 shuffled - Se, Si, Do", new Pitch[][]{
             {Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Se4, Se4, Se4, Se4, Se4, Si4, Si4, Si4, Si4, Si4, Si4, Do5, Do5, Do5, Do5, Do5, Do5},
+            {Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Se4, Se4, Se4, Se4, Se4, Si4, Si4, Si4, Si4, Si4, Si4, Do5, Do5, Do5, Do5, Do5, Do5},
             {Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4, Do4, Do4, Do4, Do4, Do4},
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3},
     }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
     Step45Octaves2And3And4SoLeLao("Step 45: Octaves 2, 3, 4 shuffled - So, Le, La", new Pitch[][]{
+            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, So4, So4, So4, So4, So4, Le4, Le4, Le4, Le4, Le4, Le4, La4, La4, La4, La4, La4, La4, Se4, Si4, Do5},
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, So4, So4, So4, So4, So4, Le4, Le4, Le4, Le4, Le4, Le4, La4, La4, La4, La4, La4, La4, Se4, Si4, Do5},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, So3, So3, So3, So3, So3, Le3, Le3, Le3, Le3, Le3, Le3, La3, La3, La3, La3, La3, La3, Se3, Si3, Do4},
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, So2, So2, So2, So2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2},
     }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
     Step46Octaves2And3And4MiFaFi("Step 41: Octaves 2, 3, 4 shuffled - Mi, Fa, Fi", new Pitch[][]{
             {Do4, Ra4, Re4, Me4, Mi4, Mi4, Mi4, Mi4, Mi4, Mi4, Fa4, Fa4, Fa4, Fa4, Fa4, Fa4, Fi4, Fi4, Fi4, Fi4, Fi4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+            {Do4, Ra4, Re4, Me4, Mi4, Mi4, Mi4, Mi4, Mi4, Mi4, Fa4, Fa4, Fa4, Fa4, Fa4, Fa4, Fi4, Fi4, Fi4, Fi4, Fi4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
             {Do3, Ra3, Re3, Me3, Mi3, Mi3, Mi3, Mi3, Mi3, Mi3, Fa3, Fa3, Fa3, Fa3, Fa3, Fa3, Fi3, Fi3, Fi3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
             {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, Le2, La2, Se2, Si2},
     }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
     Step47Octaves2And3And4RaReMe("Step 47: Octaves 2, 3, 4 shuffled - Ra, Re, Me", new Pitch[][]{
+            {Do4, Ra4, Ra4, Ra4, Ra4, Ra4, Ra4, Re4, Re4, Re4, Re4, Re4, Re4, Me4, Me4, Me4, Me4, Me4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
             {Do4, Ra4, Ra4, Ra4, Ra4, Ra4, Ra4, Re4, Re4, Re4, Re4, Re4, Re4, Me4, Me4, Me4, Me4, Me4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
             {Do3, Ra3, Ra3, Ra3, Ra3, Ra3, Ra3, Re3, Re3, Re3, Re3, Re3, Re3, Me3, Me3, Me3, Me3, Me3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
             {Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2},
