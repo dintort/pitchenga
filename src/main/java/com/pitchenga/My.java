@@ -53,6 +53,7 @@ public class My extends Setup {
         defaultRiddler = Riddler.Step39Octaves2And3SeSiDo;
         defaultRiddler = Riddler.Step40Octaves2And3SoLeLao;
         defaultRiddler = Riddler.Step43Octave4;
+        defaultRiddler = Riddler.Step44Octaves2And3And4SeSiDo;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;

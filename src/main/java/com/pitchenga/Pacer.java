@@ -35,6 +35,18 @@ public enum Pacer {
     Tempo170("Tempo 170", 170),
     Tempo175("Tempo 175", 175),
     Tempo180("Tempo 180", 180),
+    Tempo190("Tempo 190", 190),
+    Tempo200("Tempo 200", 200),
+    Tempo210("Tempo 210", 210),
+    Tempo220("Tempo 220", 220),
+    Tempo230("Tempo 230", 230),
+    Tempo240("Tempo 240", 240),
+    Tempo250("Tempo 250", 250),
+    Tempo260("Tempo 260", 260),
+    Tempo270("Tempo 270", 270),
+    Tempo280("Tempo 280", 280),
+    Tempo290("Tempo 290", 290),
+    Tempo300("Tempo 300", 300),
     ;
 
     private final String name;

@@ -173,7 +173,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (pacer == Pacer.Answer) {
                 success = checkAnswer(riddle, guess, exact);
             } else {
-                pace(pacer.bpm);
+                pace(pacer.bpm, getRinger().ring.apply(riddle));
             }
             debug(String.format("Play: [%s] %s [%.2fHz] : %s", riddle, guess, riddle.frequency, success));
             if (success) {
@@ -192,11 +192,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         this.prevPrevRiddle.set(prevRiddle);
         this.riddle.set(null);
 
-        Ringer ringer = getRinger();
         if (getPacer() == Pacer.Answer) {
             transcribe(riddle, false);
         }
-        fugue(ringInstrument, ringer.ring.apply(riddle), true);
+        fugue(ringInstrument, getRinger().ring.apply(riddle), true);
 
         this.playQueue.clear();
         playExecutor.execute(() -> play(null, false));
@@ -273,16 +272,23 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return this.riddle.get();
     }
 
-    private void pace(int bpm) {
+    private void pace(int bpm, Object[] fugue) {
         long delay = 60_000 / bpm;
         long prevTimestamp = lastPacerTimestampMs;
         long elapsed = System.currentTimeMillis() - prevTimestamp;
         if (elapsed < delay) {
             long diff = delay - elapsed;
-            try {
-                Thread.sleep(diff);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            int fugueLength = Arrays.stream(fugue)
+                    .mapToInt(item -> item instanceof Integer ? (int) item : 0)
+                    .sum();
+            diff = diff - fugueLength;
+            System.out.println(diff);
+            if (diff > 0) {
+                try {
+                    Thread.sleep(diff);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
         lastPacerTimestampMs = System.currentTimeMillis();
