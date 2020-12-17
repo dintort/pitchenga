@@ -282,7 +282,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     .mapToInt(item -> item instanceof Integer ? (int) item : 0)
                     .sum();
             diff = diff - fugueLength;
-            System.out.println(diff);
             if (diff > 0) {
                 try {
                     Thread.sleep(diff);
