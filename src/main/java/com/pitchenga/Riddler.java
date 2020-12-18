@@ -607,7 +607,7 @@ public enum Riddler {
             {Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4, Do4, Do4, Do4, Do4, Do4},
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3},
     }, pitchenga -> pitchenga.shuffleGroupSeries(true), new Integer[0]),
-    Step45Octaves2And3And4SoLeLao("Step 45: Octaves 2, 3, 4 shuffled - So, Le, La", new Pitch[][]{
+    Step45Octaves2And3And4SoLeLa("Step 45: Octaves 2, 3, 4 shuffled - So, Le, La", new Pitch[][]{
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, So4, So4, So4, So4, So4, Le4, Le4, Le4, Le4, Le4, Le4, La4, La4, La4, La4, La4, La4, Se4, Si4, Do5},
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, So4, So4, So4, So4, So4, Le4, Le4, Le4, Le4, Le4, Le4, La4, La4, La4, La4, La4, La4, Se4, Si4, Do5},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, So3, So3, So3, So3, So3, Le3, Le3, Le3, Le3, Le3, Le3, La3, La3, La3, La3, La3, La3, Se3, Si3, Do4},
