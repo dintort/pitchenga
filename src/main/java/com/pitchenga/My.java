@@ -5,6 +5,7 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 @SuppressWarnings("unused")
 public class My extends Setup {
 
+
     public My() {
         defaultPenaltyFactor = 3;
         defaultPenaltyFactor = 0;
@@ -56,7 +57,8 @@ public class My extends Setup {
         defaultRiddler = Riddler.Step44Octaves2And3And4SeSiDo;
         defaultRiddler = Riddler.Step45Octaves2And3And4SoLeLa;
         defaultRiddler = Riddler.Step46Octaves2And3And4MiFaFi;
-        defaultRiddler = Riddler.Step49Octaves1And2And3And4And5SeSiDo;
+        defaultRiddler = Riddler.Step49Octaves2And3And4And5And6SiDo;
+        defaultRiddler = Riddler.Step50Octaves2And3And4And5And6LaSe;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;
