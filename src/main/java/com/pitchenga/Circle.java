@@ -79,6 +79,10 @@ public class Circle extends JPanel {
         textArea.setBackground(new Color(0, 0, 0, 0.0f));
         textArea.setBorder(null);
         //        text("<html>");
+        clearText();
+    }
+
+    public void clearText() {
         for (int i = 0; i < 500; i++) { //There must be a better way
             text("        \n");
         }
