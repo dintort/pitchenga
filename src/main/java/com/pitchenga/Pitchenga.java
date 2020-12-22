@@ -935,6 +935,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 playButton.setSelected(false);
                 playButton.requestFocus();
             }
+            if (!pressed && event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                circle.clearText();
+            }
+            //fixme: Media keys not recognized :(
+            if (!pressed && event.getKeyCode() == 0) {
+                nextTempo(true);
+            }
             if (event.getKeyCode() == KeyEvent.VK_SHIFT) {
                 lift = pressed;
             }
@@ -959,19 +966,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 octaveShift = 3;
             } else if (event.getKeyCode() == KeyEvent.VK_PERIOD) {
                 octaveShift = 4;
-            } else if (!pressed && event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                circle.clearText();
             }
             if (pressed && (event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET
                     || event.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET)) {
-                int index = pacerCombo.getSelectedIndex();
-                index = event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET ? index - 1 : index + 1;
-                if (index >= 0 && index < pacerCombo.getItemCount()) {
-                    pacerCombo.setSelectedIndex(index);
-                    circle.text("   ");
-                    circle.text(String.valueOf(getPacer().bpm));
-                    circle.text("\n");
-                }
+                nextTempo(event.getKeyCode() != KeyEvent.VK_OPEN_BRACKET);
                 return true;
             }
             Button button = BUTTON_BY_CODE.get(event.getKeyCode());
@@ -981,6 +979,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             handleButton(button, pressed);
             return true;
         });
+    }
+
+    private void nextTempo(boolean up) {
+        int index = pacerCombo.getSelectedIndex();
+        index = up ? index + 1 : index - 1;
+        if (index >= 0 && index < pacerCombo.getItemCount()) {
+            pacerCombo.setSelectedIndex(index);
+            circle.text("   ");
+            circle.text(String.valueOf(getPacer().bpm));
+            circle.text("\n");
+        }
     }
 
     private void handleButton(Button button, boolean pressed) {
