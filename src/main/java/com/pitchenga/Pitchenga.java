@@ -456,14 +456,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             new IllegalMonitorStateException().printStackTrace();
         }
         Arrays.asList(toneSpinners).forEach(spinner -> spinner.setValue(0));
-        Pitch[][] scale = getRiddler().scale;
+        Pitch[][][] scale = getRiddler().scale;
         //fixme: Duplicated Do will act weird when multiple octaves
-        for (Pitch[] row : scale) {
-            for (Pitch pitch : row) {
-                if (pitch != null && pitch != None) {
-                    JSpinner spinner = toneSpinners[pitch.getFugue().ordinal()];
-                    int value = (int) spinner.getValue();
-                    spinner.setValue(value + 1);
+        for (Pitch[][] rowRow : scale) {
+            for (Pitch[] row : rowRow) {
+                for (Pitch pitch : row) {
+                    if (pitch != null && pitch != None) {
+                        JSpinner spinner = toneSpinners[pitch.getFugue().ordinal()];
+                        int value = (int) spinner.getValue();
+                        spinner.setValue(value + 1);
+                    }
                 }
             }
         }
@@ -597,48 +599,55 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     public List<Pitch> shuffleGroupSeries(boolean shuffleGroups) {
-        Pitch[][] scale = getRiddler().scale;
-        List<List<Pitch>> listLists = Arrays.stream(scale)
-                .flatMap(group -> {
-                    List<Pitch> pitches = deduplicate(() -> {
-                        List<Pitch> list = new LinkedList<>(Arrays.asList(group));
-                        Collections.shuffle(list);
-                        while (list.size() % setup.series != 0) {
-                            int index = random.nextInt(list.size());
-                            list.add(list.get(index));
+        Pitch[][][] scales = getRiddler().scale;
+        List<Pitch[][]> shuffled = Arrays.asList(scales);
+        Collections.shuffle(shuffled);
+        List<Pitch> results = new LinkedList<>();
+        for (Pitch[][] scale : shuffled) {
+            List<List<Pitch>> listLists = Arrays.stream(scale)
+                    .flatMap(group -> {
+                        List<Pitch> pitches = deduplicate(() -> {
+                            List<Pitch> list = new LinkedList<>(Arrays.asList(group));
+                            Collections.shuffle(list);
+                            while (list.size() % setup.series != 0) {
+                                int index = random.nextInt(list.size());
+                                list.add(list.get(index));
+                            }
+                            return list;
+                        });
+                        List<List<Pitch>> lists = new ArrayList<>(pitches.size());
+                        List<Pitch> list = null;
+                        for (int i = 0; i < pitches.size(); i++) {
+                            Pitch pitch = pitches.get(i);
+                            if (list == null || i % setup.series == 0) {
+                                list = new ArrayList<>(setup.series * setup.repeat);
+                                lists.add(list);
+                            }
+                            list.add(pitch);
                         }
-                        return list;
-                    });
-                    List<List<Pitch>> lists = new ArrayList<>(pitches.size());
-                    List<Pitch> list = null;
-                    for (int i = 0; i < pitches.size(); i++) {
-                        Pitch pitch = pitches.get(i);
-                        if (list == null || i % setup.series == 0) {
-                            list = new ArrayList<>(setup.series * setup.repeat);
-                            lists.add(list);
+                        return lists.stream();
+                    })
+                    .collect(Collectors.toList());
+            if (shuffleGroups) {
+                Collections.shuffle(listLists);
+            }
+            debug(listLists);
+            List<Pitch> result = listLists.stream()
+                    .map(list -> {
+                        List<List<Pitch>> multi = new ArrayList<>();
+                        for (int i = 0; i < setup.repeat; i++) {
+                            multi.add(list);
                         }
-                        list.add(pitch);
-                    }
-                    return lists.stream();
-                })
-                .collect(Collectors.toList());
-        if (shuffleGroups) {
-            Collections.shuffle(listLists);
+                        return multi;
+                    })
+                    .flatMap(Collection::stream)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+            //fixme: Refactor?
+            results.addAll(result);
         }
-        debug(listLists);
-        List<Pitch> result = listLists.stream()
-                .map(list -> {
-                    List<List<Pitch>> multi = new ArrayList<>();
-                    for (int i = 0; i < setup.repeat; i++) {
-                        multi.add(list);
-                    }
-                    return multi;
-                })
-                .flatMap(Collection::stream)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-        debug(result + " are the new riddles multiplied");
-        return result;
+        debug(results + " are the new riddles multiplied");
+        return results;
     }
 
     private List<Pitch> getScalePitches() {
@@ -666,6 +675,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     public List<Pitch> ordered() {
         return Arrays.stream(getRiddler().scale)
+                .flatMap(Arrays::stream)
                 .flatMap(Arrays::stream)
                 .collect(Collectors.toList());
     }
@@ -949,6 +959,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 octaveShift = 3;
             } else if (event.getKeyCode() == KeyEvent.VK_PERIOD) {
                 octaveShift = 4;
+            } else if (!pressed && event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                circle.clearText();
             }
             if (pressed && (event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET
                     || event.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET)) {
