@@ -20,7 +20,7 @@ build
 .idea/caches
 
 # Compiled class file
-*.class
+#*.class
 #out
 
 # Log file
