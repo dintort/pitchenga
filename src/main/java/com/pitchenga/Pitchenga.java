@@ -601,7 +601,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public List<Pitch> shuffleGroupSeries(boolean shuffleGroups) {
         Pitch[][][] scales = getRiddler().scale;
         List<Pitch[][]> shuffled = Arrays.asList(scales);
-        Collections.shuffle(shuffled);
+        if (shuffleGroups) {
+            Collections.shuffle(shuffled);
+        }
         List<Pitch> results = new LinkedList<>();
         for (Pitch[][] scale : shuffled) {
             List<List<Pitch>> listLists = Arrays.stream(scale)
