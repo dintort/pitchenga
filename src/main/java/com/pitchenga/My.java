@@ -44,20 +44,8 @@ public class My extends Setup {
         defaultPacer = Pacer.Tempo50;
         defaultPacer = Pacer.Tempo100;
 
-        defaultRiddler = Riddler.Step33Octaves2And3RaRe;
-        defaultRiddler = Riddler.Warmup;
-        defaultRiddler = Riddler.Step34Octaves2And3MeMi;
-        defaultRiddler = Riddler.Step35Octaves2And3FaFi;
-        defaultRiddler = Riddler.Step36Octaves2And3SoLe;
-        defaultRiddler = Riddler.Step37Octaves2And3LaSe;
-        defaultRiddler = Riddler.Step38Octaves2And3SiDo;
-        defaultRiddler = Riddler.Step39Octaves2And3SeSiDo;
-        defaultRiddler = Riddler.Step40Octaves2And3SoLeLao;
-        defaultRiddler = Riddler.Step43Octave4;
-        defaultRiddler = Riddler.Step44Octaves2And3And4SeSiDo;
-        defaultRiddler = Riddler.Step45Octaves2And3And4SoLeLa;
-        defaultRiddler = Riddler.Step46Octaves2And3And4MiFaFi;
-        defaultRiddler = Riddler.Step48Octave5;
+        defaultRiddler = Riddler.Step44Fa4;
+        defaultRiddler = Riddler.Step32Octaves2And3;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;

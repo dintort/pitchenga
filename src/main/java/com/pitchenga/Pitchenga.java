@@ -598,10 +598,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         });
     }
 
-    public List<Pitch> shuffleGroupSeries(boolean shuffleGroups) {
+    public List<Pitch> shuffleGroupSeries(boolean shuffleMacroGroups, boolean shuffleGroups) {
         Pitch[][][] scales = getRiddler().scale;
         List<Pitch[][]> shuffled = Arrays.asList(scales);
-        if (shuffleGroups) {
+        if (shuffleMacroGroups) {
             Collections.shuffle(shuffled);
         }
         List<Pitch> results = new LinkedList<>();
