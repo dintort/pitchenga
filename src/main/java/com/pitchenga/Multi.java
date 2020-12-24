@@ -8,13 +8,16 @@ public class Multi {
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
         System.setProperty("sun.java2d.opengl", "true");
-        System.setProperty("sun.java2d.xrender","f");
+        System.setProperty("sun.java2d.xrender", "f");
         System.setProperty("com.pitchenga.debug", "true");
         System.setProperty("com.pitchenga.setup.class", "com.pitchenga.My");
 
         SwingUtilities.invokeAndWait(() -> {
 //            Pitchenga secondary = new Pitchenga(false, null);
-            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
+//            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
+            System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
+            //fixme: Multiple JFrames collapse into tabs on mac
+            //fixme: Pitchy circles are broken
 //            Pitchenga primary = new Pitchenga(true, secondary);
             Pitchenga primary = new Pitchenga(true, null);
 //            secondary.requestFocus();

@@ -155,7 +155,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         initGui();
         initKeyboard();
-        updateMixer();
+        asyncExecutor.execute(() -> {
+            updateMixer();
+            //fixme: Does not work the first time
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            updateMixer();
+        });
     }
 
     private void play(Pitch guess, boolean exact) {
@@ -327,7 +336,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         }
                         if (same) {
                             if (maxRms > rmsThreshold) {
-                                transcribe(guess, false);
+                                if (!isPlaying()) {
+                                    transcribe(guess, false);
+                                }
                                 if (!frozen && getPacer() == Pacer.Answer) {
                                     playExecutor.execute(() -> play(guess, false));
                                 }
@@ -337,7 +348,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                             guessQueue.add(new Pair<>(guess, rms));
                         }
                     }
-                    if (maxRms > rmsThreshold) {
+                    if (maxRms > rmsThreshold && !isPlaying()) {
                         updatePitch(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms, false);
                     }
                 }
@@ -1435,6 +1446,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playButton.setText("Play");
             bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
+            circle.clearText();
         }
         debug("running=" + playing);
     }
