@@ -487,18 +487,14 @@ public enum Riddler {
     }}, pitchenga -> pitchenga.shuffleGroupSeries(false, false), new Integer[0]),
     Step33Octaves2And3Shuffled("Step 33: Octaves 2 and 3 shuffled", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
-            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
             {/* */Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4, Do4, Do4, Do4, Do4, Do4,},
     }, {
-            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, So2, So2, So2, So2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, So2, So2, So2, So2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
             {/* */Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, So3, So3, So3, So3, So3, Le3, Le3, Le3, Le3, Le3, Le3, La3, La3, La3, La3, La3, La3, Se3, Si3, Do4,},
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
-            {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
             {/* */Ra3, Re3, Me3, Mi3, Mi3, Mi3, Mi3, Mi3, Mi3, Fa3, Fa3, Fa3, Fa3, Fa3, Fa3, Fi3, Fi3, Fi3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3, Do4,},
     }, {
-            {Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
             {Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
             {/* */Ra3, Ra3, Ra3, Ra3, Ra3, Ra3, Re3, Re3, Re3, Re3, Re3, Re3, Me3, Me3, Me3, Me3, Me3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4,},
     }}, pitchenga -> pitchenga.shuffleGroupSeries(true, true), new Integer[0]),
