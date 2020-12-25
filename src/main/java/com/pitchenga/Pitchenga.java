@@ -102,8 +102,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JComponent pitchSliderPanel = new JPanel(new BorderLayout());
     private final JPanel bottomPanel;
-    private volatile Dimension previousSize;
-    private volatile Point previousLocation;
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
@@ -169,7 +167,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         });
     }
 
-    private void play(Pitch guess, boolean exact) {
+    private void guess(Pitch guess, boolean exact) {
         try {
             lastPacerTimestampMs = System.currentTimeMillis();
             if (frozen || !isPlaying()) {
@@ -184,9 +182,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (pacer == Pacer.Answer) {
                 success = checkAnswer(riddle, guess, exact);
             } else {
-                pace(pacer.bpm, getRinger().ring.apply(riddle));
+                pace(pacer.bpm, getBuzzer().buzz.apply(riddle));
             }
-            debug(String.format("Play: [%s] %s [%.2fHz] : %s", riddle, guess, riddle.frequency, success));
+            debug(String.format("Guess: [%s] %s [%.2fHz] : %s", riddle, guess, riddle.frequency, success));
             if (success) {
                 correct(riddle);
             } else if (guess != null) {
@@ -209,7 +207,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         fugue(ringInstrument, getRinger().ring.apply(riddle), true);
 
         this.playQueue.clear();
-        playExecutor.execute(() -> play(null, false));
+        playExecutor.execute(() -> guess(null, false));
     }
 
     private Pitch updatePenalties(Pitch riddle) {
@@ -263,10 +261,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             Pitch riddle = riddleQueue.poll();
             if (riddle != null) {
                 debug(" [" + riddle + "] is the new riddle");
-                if (riddle != None) {
-                    this.riddle.set(riddle);
-                    this.riddleTimestampMs = System.currentTimeMillis();
-                }
+                this.riddle.set(riddle);
+                this.riddleTimestampMs = System.currentTimeMillis();
                 int seriesCount = seriesCounter.getAndIncrement();
                 scheduleHint(riddle, seriesCount);
                 frozen = true;
@@ -305,6 +301,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private boolean checkAnswer(Pitch riddle, Pitch guess, boolean exact) {
+        if (riddle == None) {
+            return true;
+        }
         if (riddle == null || guess == null) {
             return false;
         }
@@ -342,7 +341,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                                     transcribe(guess, false);
                                 }
                                 if (!frozen && getPacer() == Pacer.Answer) {
-                                    playExecutor.execute(() -> play(guess, false));
+                                    playExecutor.execute(() -> guess(guess, false));
                                 }
                             }
                         } else {
@@ -350,7 +349,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                             guessQueue.add(new Pair<>(guess, rms));
                         }
                     }
-                    if (maxRms > rmsThreshold && !isPlaying()) {
+                    if (maxRms > rmsThreshold) {
                         updatePitch(guess, pitchDetectionResult.getPitch(), pitchDetectionResult.getProbability(), rms, false);
                     }
                 }
@@ -393,8 +392,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 if (!isKeyboard) {
                     circle.setTone(guess.tone, guessColor, pitchinessColor);
                 }
+                circle.setFillColor(guessColor);
+                circle.repaint();
             }
-            circle.setFillColor(guessColor);
         });
     }
 
@@ -483,17 +483,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
         }
         circle.setScaleTones(getScaleTones());
+        circle.repaint();
     }
 
     private void scheduleHint(Pitch riddle, int seriesCount) {
-        if (riddle == null) {
+        if (riddle == null || riddle == None) {
             return;
         }
         long riddleTimestampMs = System.currentTimeMillis();
         this.riddleTimestampMs = riddleTimestampMs;
         Hinter hinter = getHinter();
         if (hinter == Hinter.Always) {
-            SwingUtilities.invokeLater(() -> showHint(riddle));
             return;
         } else if (hinter == Hinter.Series) {
             SwingUtilities.invokeLater(() -> {
@@ -502,6 +502,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 } else {
                     circle.setTones();
                     circle.setFillColor(null);
+                    circle.repaint();
                 }
             });
             return;
@@ -513,6 +514,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 if (getPacer() != Pacer.Answer) {
                     circle.setFillColor(null);
                 }
+                circle.repaint();
             });
         }
         asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> {
@@ -540,10 +542,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void showHint(Pitch riddle) {
+        debug("hint=" + riddle);
+        if (riddle == None) {
+            return;
+        }
+        debug("tone=" + riddle.tone);
         circle.setTones(riddle.tone);
         if (getPacer() != Pacer.Answer) {
             circle.setFillColor(riddle.tone.color);
         }
+        circle.repaint();
         pitchSlider.setValue(convertPitchToSlider(riddle, riddle.frequency));
         frequencyLabel.setText(String.format("%07.2f", riddle.frequency));
     }
@@ -723,7 +731,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void fugue(MidiChannel midiChannel, Object[] fugue, boolean flashColors) {
         frozen = true;
         try {
-            debug("Fugue=" + Arrays.toString(fugue));
             Pitch prev = null;
             for (Object next : fugue) {
                 if (next == null) {
@@ -734,16 +741,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         midiChannel.noteOff(prev.midi);
                     }
                     Pitch pitch = (Pitch) next;
-                    if (pitch == None) {
-                        Thread.sleep(sixteen);
-                    } else {
+                    if (pitch != None) {
                         midiChannel.noteOn(pitch.midi, 127);
-                    }
-                    if (flashColors) {
-                        SwingUtilities.invokeLater(() -> {
-                            updatePianoButton(pitch.tone.getButton(), true);
-                            circle.setTone(pitch.tone, pitch.tone.color, pitch.tone.color);
-                        });
+                        if (flashColors) {
+                            SwingUtilities.invokeLater(() -> {
+                                updatePianoButton(pitch.tone.getButton(), true);
+                                circle.setTone(pitch.tone, pitch.tone.color, pitch.tone.color);
+                                circle.repaint();
+                            });
+                        }
                     }
                     prev = pitch;
                 } else if (next instanceof Integer) {
@@ -1047,7 +1053,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             keyboardInstrument.noteOff(midi);
             if (getPacer() == Pacer.Answer) {
-                playExecutor.execute(() -> play(pitch, true));
+                playExecutor.execute(() -> guess(pitch, true));
             }
         }
         Tone[] tones = pressedButtonToMidi.keySet().stream().map(k -> k.pitch.tone).toArray(Tone[]::new);
@@ -1442,7 +1448,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (playing) {
             resetGame();
             playButton.setText("Stop");
-            playExecutor.execute(() -> play(null, false));
+            playExecutor.execute(() -> guess(null, false));
             if (!getPacer().equals(Pacer.Answer)) {
                 bottomPanel.setVisible(false);
                 pitchSliderPanel.setVisible(false);
@@ -1468,6 +1474,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private Hinter getHinter() {
+        Hinter hinter = getRiddler().hinter;
+        if (hinter != null) {
+            return hinter;
+        }
         return (Hinter) hinterCombo.getSelectedItem();
     }
 
@@ -1694,72 +1704,5 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         } catch (Exception ignore) {
         }
     }
-
-    //fixme: Move to Scale
-    public static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3 = new Pitch[][]{
-            {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
-            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
-            {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
-            {So4, Le4, La4, Se4, Si4, None, Do5, None},
-            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
-            {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
-
-            {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
-            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
-            {Do5, Si4, Se4, La4, Le4, None, So4, None},
-            {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
-            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
-            {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
-    };
-
-    public static final Pitch[][] CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP = new Pitch[][]{
-            {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
-            {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
-            {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
-
-            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
-            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
-            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
-
-            {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
-            {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
-            {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
-
-            {So4, Le4, La4, Se4, Si4, None, Do5, None},
-            {Do5, Si4, Se4, La4, Le4, None, So4, None},
-            {So4, Le4, La4, Se4, Si4, None, Do5, None},
-
-            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
-            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
-            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
-
-            {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
-            {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
-            {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
-
-
-            {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
-            {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
-            {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
-
-            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
-            {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
-            {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
-
-            {Do5, Si4, Se4, La4, Le4, None, So4, None},
-            {So4, Le4, La4, Se4, Si4, None, Do5, None},
-            {Do5, Si4, Se4, La4, Le4, None, So4, None},
-
-            {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
-            {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
-            {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
-
-            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
-            {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
-            {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
-            {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
-            {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
-            {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
-    };
 
 }

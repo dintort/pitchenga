@@ -7,10 +7,10 @@ import static com.pitchenga.Pitch.*;
 
 public enum Riddler {
     ChromaticOneOctave("Chromatic - octave 4",
-            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0]),
+            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null),
     Chromatic("Chromatic - main octaves",
-            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null),
-//    DoMajOneOctave("Do maj - octave 4",
+            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null),
+    //    DoMajOneOctave("Do maj - octave 4",
 //            new Pitch[][][]{{Pitchenga.DO_MAJ_SCALE}}, Pitchenga::shuffle, new Integer[0]),
 //    DoMaj("Do maj - main octaves",
 //            new Pitch[][][]{{Pitchenga.DO_MAJ_SCALE}}, Pitchenga::shuffle, null),
@@ -60,11 +60,80 @@ public enum Riddler {
 //                new Pitch[][][]{{transposeScale(DO_MAJ_SCALE, 0, 11)}}, Pitchenga::shuffle, null),
 //        SiMajHarm("Si maj harm - main octaves",
 //                new Pitch[][][]{{transposeScale(DO_MAJ_HARM_SCALE, 0, 11)}}, Pitchenga::shuffle, null),
-//    ChromaticScaleUpDown("Chromatic scale Mi3-La5-Mi3",
-//            Pitchenga.CHROMATIC_SCALE_MI3_LA5_MI3, Pitchenga::ordered, new Integer[]{3, 4, 5}),
-//    ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended",
-//            Pitchenga.CHROMATIC_SCALE_MI3_LA5_MI3_UP_DOWN_UP, Pitchenga::ordered, new Integer[]{3, 4, 5}),
+    ChromaticScaleDown("Chromatic scale La5-Mi3",
+            new Pitch[][][]{new Pitch[][]{
+                    {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+                    {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+                    {Do5, Si4, Se4, La4, Le4, None, So4, None},
+                    {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+                    {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+                    {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
+            }}, Pitchenga::ordered, null, Hinter.Always),
+    ChromaticScaleUpDown("Chromatic scale Mi3-La5-Mi3",
+            new Pitch[][][]{new Pitch[][]{
+                    {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
+                    {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+                    {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
+                    {So4, Le4, La4, Se4, Si4, None, Do5, None},
+                    {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+                    {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
 
+                    {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+                    {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+                    {Do5, Si4, Se4, La4, Le4, None, So4, None},
+                    {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+                    {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+                    {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
+            }}, Pitchenga::ordered, null, Hinter.Always),
+    ChromaticScaleUpDownUp("Chromatic scale Mi3-Le5-Mi3 extended",
+            new Pitch[][][]{new Pitch[][]{
+                    {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
+                    {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
+                    {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
+
+                    {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+                    {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+                    {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+
+                    {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
+                    {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+                    {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
+
+                    {So4, Le4, La4, Se4, Si4, None, Do5, None},
+                    {Do5, Si4, Se4, La4, Le4, None, So4, None},
+                    {So4, Le4, La4, Se4, Si4, None, Do5, None},
+
+                    {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+                    {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+                    {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+
+                    {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
+                    {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+                    {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
+
+                    {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+                    {Mi5, Fa5, Fi5, So5, Le5, None, La5, None},
+                    {La5, Le5, So5, Fi5, Fa5, None, Mi5, None},
+
+                    {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+                    {Si4, Do5, Ra5, Re5, Me5, None, Mi5, None},
+                    {Mi5, Me5, Re5, Ra5, Do5, None, Si4, None},
+
+                    {Do5, Si4, Se4, La4, Le4, None, So4, None},
+                    {So4, Le4, La4, Se4, Si4, None, Do5, None},
+                    {Do5, Si4, Se4, La4, Le4, None, So4, None},
+
+                    {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+                    {Re4, Me4, Mi4, Fa4, Fi4, None, So4, None},
+                    {So4, Fi4, Fa4, Mi4, Me4, None, Re4, None},
+
+                    {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+                    {La3, Se3, Si3, Do4, Ra4, None, Re4, None},
+                    {Re4, Ra4, Do4, Si3, Se3, None, La3, None},
+                    {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
+                    {Mi3, Fa3, Fi3, So3, Le3, None, La3, None},
+                    {La3, Le3, So3, Fi3, Fa3, None, Mi3, None},
+            }}, Pitchenga::ordered, null, Hinter.Always),
     Warmup("Warmup", new Pitch[][][]{{
             {Do3, Ra3, Re3, Me3},
             {Si2, Do3, Ra3, Re3},
@@ -116,7 +185,7 @@ public enum Riddler {
             {Me3, Mi3, Fa3, Fi3},
             {Re3, Me3, Mi3, Fa3},
             {Ra3, Re3, Me3, Mi3},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, false), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, false), new Integer[0], null),
     //    Step01Do4Do5Fi4La4("Step 1: Do4, Do5, Fi4, La4",
 //            new Pitch[][][]{{{Do4, Do5, Fi4, La4}}}, pitchenga::shuffle, new Integer[0]),
 //    Step02Me4("Step 2: Me4",
@@ -484,7 +553,7 @@ public enum Riddler {
             {Do3, Do4, Do4, Do4, Do4, Do4, Do4, Fi3, La3, Me3, Fa3, Si3, Si3, Si3, Si3, Si3, Si3, Re3, Le3, Mi3, Se3, Se3, Se3, Se3, Se3, Se3, So3, Ra3},
             {Do3, Ra3, Ra3, Ra3, Ra3, Ra3, Ra3, Re3, Re3, Re3, Re3, Re3, Re3, Me3, Me3, Me3, Me3, Me3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, So3, So3, So3, So3, So3, Le3, Le3, Le3, Le3, Le3, Le3, La3, La3, La3, La3, La3, La3, Se3, Si3, Do4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, false), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, false), new Integer[0], null),
     Step33Octaves2And3Shuffled("Step 33: Octaves 2 and 3 shuffled", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
@@ -501,7 +570,7 @@ public enum Riddler {
             {Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
             {Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
             {/* */Ra3, Ra3, Ra3, Ra3, Ra3, Ra3, Re3, Re3, Re3, Re3, Re3, Re3, Me3, Me3, Me3, Me3, Me3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4,},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(true, true), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(true, true), new Integer[0], null),
     Step44Fa4("Step 44: Fa4", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
             {/* */Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4, Do4, Do4, Do4, Do4, Do4,},
@@ -535,7 +604,7 @@ public enum Riddler {
             {Do4, Do5, Fi4, La4, Me4, Fa4},
             {Do4, Do5, Fi4, La4, Me4, Fa4},
             {Do4, Do5, Fi4, La4, Me4, Fa4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
     Step45Si4("Step 45: Si4", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
@@ -560,7 +629,7 @@ public enum Riddler {
             {Do4, Do5, Fi4, Fi4, La4, Me4, Fa4, Fa4, Si4, Si4},
             {Do4, Do5, Fi4, Fi4, La4, Me4, Fa4, Fa4, Si4, Si4},
             {Do4, Do5, Fi4, Fi4, La4, Me4, Fa4, Fa4, Si4, Si4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
     Step46Re4("Step 46: Re4", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
@@ -585,7 +654,7 @@ public enum Riddler {
             {Do4, Do5, Fi4, La4, Me4, Me4, Fa4, Si4, Re4, Re4},
             {Do4, Do5, Fi4, La4, Me4, Me4, Fa4, Si4, Re4, Re4},
             {Do4, Do5, Fi4, La4, Me4, Me4, Fa4, Si4, Re4, Re4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
     Step47Le4("Step 47: Le4", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
@@ -620,7 +689,7 @@ public enum Riddler {
             {Do4, Do5, Fi4, Fi4, La4, La4, Me4, Fa4, Fa4, Si4, Re4, Le4, Le4, Le4},
             {Do4, Do5, Fi4, Fi4, La4, La4, Me4, Fa4, Fa4, Si4, Re4, Le4, Le4, Le4},
             {Do4, Do5, Fi4, Fi4, La4, La4, Me4, Fa4, Fa4, Si4, Re4, Le4, Le4, Le4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
     Step48Mi4("Step 48: Mi4", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
@@ -654,7 +723,7 @@ public enum Riddler {
             {Do4, Do5, Fi4, La4, Me4, Me4, Me4, Fa4, Fa4, Fa4, Si4, Re4, Le4, Mi4, Mi4, Mi4, Mi4},
             {Do4, Do5, Fi4, La4, Me4, Me4, Me4, Fa4, Fa4, Fa4, Si4, Re4, Le4, Mi4, Mi4, Mi4, Mi4},
             {Do4, Do5, Fi4, La4, Me4, Me4, Me4, Fa4, Fa4, Fa4, Si4, Re4, Le4, Mi4, Mi4, Mi4, Mi4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
     Step49Se4("Step 49: Se4", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
@@ -689,7 +758,7 @@ public enum Riddler {
             {Do4, Do5, Fi4, La4, La4, La4, Me4, Fa4, Si4, Si4, Si4, Re4, Le4, Mi4, Se4, Se4, Se4, Se4, Se4},
             {Do4, Do5, Fi4, La4, La4, La4, Me4, Fa4, Si4, Si4, Si4, Re4, Le4, Mi4, Se4, Se4, Se4, Se4, Se4},
             {Do4, Do5, Fi4, La4, La4, La4, Me4, Fa4, Si4, Si4, Si4, Re4, Le4, Mi4, Se4, Se4, Se4, Se4, Se4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
     Step50So4("Step 50: So4", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
@@ -724,7 +793,7 @@ public enum Riddler {
             {Do4, Do5, Fi4, Fi4, Fi4, La4, Me4, Fa4, Si4, Re4, Le4, Le4, Le4, Mi4, Se4, So4, So4, So4, So4, So4},
             {Do4, Do5, Fi4, Fi4, Fi4, La4, Me4, Fa4, Si4, Re4, Le4, Le4, Le4, Mi4, Se4, So4, So4, So4, So4, So4},
             {Do4, Do5, Fi4, Fi4, Fi4, La4, Me4, Fa4, Si4, Re4, Le4, Le4, Le4, Mi4, Se4, So4, So4, So4, So4, So4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
     Step51Ra4("Step 51: Ra4", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
@@ -759,7 +828,7 @@ public enum Riddler {
             {Do4, Do4, Do4, Do5, Fi4, La4, Me4, Fa4, Si4, Re4, Re4, Re4, Re4, Le4, Mi4, Se4, So4, Ra4, Ra4, Ra4, Ra4, Ra4, Ra4},
             {Do4, Do4, Do4, Do5, Fi4, La4, Me4, Fa4, Si4, Re4, Re4, Re4, Re4, Le4, Mi4, Se4, So4, Ra4, Ra4, Ra4, Ra4, Ra4, Ra4},
             {Do4, Do4, Do4, Do5, Fi4, La4, Me4, Fa4, Si4, Re4, Re4, Re4, Re4, Le4, Mi4, Se4, So4, Ra4, Ra4, Ra4, Ra4, Ra4, Ra4},
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, false), new Integer[0]),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, false), new Integer[0], null),
 
 
 //    Step43Octave4("Step 43: Octave 4", new Pitch[][][]{{
@@ -1016,12 +1085,14 @@ public enum Riddler {
     public final Pitch[][][] scale;
     public final Function<Pitchenga, List<Pitch>> riddle;
     public final Integer[] octaves;
+    public final Hinter hinter;
 
-    Riddler(String name, Pitch[][][] scale, Function<Pitchenga, List<Pitch>> riddle, Integer[] octaves) {
+    Riddler(String name, Pitch[][][] scale, Function<Pitchenga, List<Pitch>> riddle, Integer[] octaves, Hinter hinter) {
         this.name = name;
         this.scale = scale;
         this.riddle = riddle;
         this.octaves = octaves;
+        this.hinter = hinter;
     }
 
     public String toString() {

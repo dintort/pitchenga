@@ -93,13 +93,13 @@ public class Circle extends JPanel {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                scaleFont();
+                scaleFontAndRepaint();
             }
         });
-        scaleFont();
+        scaleFontAndRepaint();
     }
 
-    private void scaleFont() {
+    private void scaleFontAndRepaint() {
         Dimension size = getSize();
         int min = Math.min(size.height, size.width);
         int fontSize = min / 35;
@@ -122,7 +122,6 @@ public class Circle extends JPanel {
         this.tone = tone;
         this.toneColor = toneColor;
         this.pitchinessColor = pitchinessColor;
-        repaint();
     }
 
     public void setTones(Tone... tones) {
@@ -130,18 +129,15 @@ public class Circle extends JPanel {
         this.tones.addAll(Arrays.asList(tones));
         this.tone = null;
         this.pitchinessColor = null;
-        repaint();
     }
 
     public void setScaleTones(Collection<Tone> scaleTones) {
         this.scaleTones.clear();
         this.scaleTones.addAll(scaleTones);
-        repaint();
     }
 
     public void setFillColor(Color fillColor) {
         this.fillColor = fillColor;
-        repaint();
     }
 
     public void clear() {
