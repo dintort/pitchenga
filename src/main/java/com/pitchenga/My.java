@@ -64,7 +64,7 @@ public class My extends Setup {
 
         mainFrameVisible = false;
         mainFrameVisible = true;
-        maximizeWhenPlaying = true;
+        fullScreenWhenPlaying = true;
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {

@@ -41,7 +41,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(pitch -> pitch.octave).filter(octave -> octave >= 0).distinct().toArray(Integer[]::new);
     //fixme: Move to Scale
     public static final Pitch[] CHROMATIC_SCALE = Arrays.stream(FUGUES).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
-//    public static final Pitch[] DO_MAJ_SCALE = Arrays.stream(FUGUES).filter(fugue -> fugue.pitch.tone.diatonic).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
+    //    public static final Pitch[] DO_MAJ_SCALE = Arrays.stream(FUGUES).filter(fugue -> fugue.pitch.tone.diatonic).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
     //    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
     //    private static final Pitch[] SHARPS_SCALE = Arrays.stream(TONES).filter(tone -> !tone.diatonic).map(tone -> tone.getFugue().pitch).toArray(Pitch[]::new);
     private static final Map<Integer, Button> BUTTON_BY_CODE = Arrays.stream(Button.values()).collect(Collectors.toMap(button -> button.keyEventCode, button -> button));
@@ -889,26 +889,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
     }
 
-    private void autoResize() {
-        if (setup.maximizeWhenPlaying) {
-            if (isPlaying()) {
-                this.previousSize = getSize();
-                this.previousLocation = getLocation();
-                Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-                int side = Math.min(screenSize.height, screenSize.width);
-                setSize(side, side);
-                setLocation(screenSize.width / 2 - getSize().width / 2, screenSize.height / 2 - getSize().height / 2);
-            } else {
-                if (previousSize != null && previousLocation != null) {
-                    setSize(previousSize);
-                    setLocation(previousLocation);
-                } else {
-                    sideSize();
-                }
-            }
-        }
-    }
-
     private void initPitchSlider() {
         pitchSliderPanel.setOpaque(false);
 
@@ -1468,12 +1448,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 pitchSliderPanel.setVisible(false);
             }
             circle.clearText();
+            if (setup.fullScreenWhenPlaying) {
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
+            }
         } else {
             playButton.setText("Play");
             bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
+            if (setup.fullScreenWhenPlaying) {
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
+            }
         }
-        autoResize();
         debug("running=" + playing);
     }
 

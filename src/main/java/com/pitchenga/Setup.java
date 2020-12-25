@@ -24,7 +24,7 @@ public class Setup {
     public volatile int ringInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
     public volatile int series = 3;
     public volatile int repeat = 3;
-    public volatile boolean maximizeWhenPlaying = false;
+    public volatile boolean fullScreenWhenPlaying = false;
 
     public static Setup create() {
         String className = System.getProperty("com.pitchenga.setup.class");
