@@ -2,6 +2,9 @@ package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
 
+import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
+
 @SuppressWarnings("unused")
 public class My extends Setup {
 
@@ -45,7 +48,7 @@ public class My extends Setup {
         defaultPacer = Pacer.Tempo100;
 
         defaultRiddler = Riddler.Step44Fa4;
-        defaultRiddler = Riddler.Step32Octaves2And3;
+        defaultRiddler = Riddler.Step33Octaves2And3Shuffled;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;
@@ -61,6 +64,32 @@ public class My extends Setup {
 
         mainFrameVisible = false;
         mainFrameVisible = true;
+        maximizeWhenPlaying = true;
     }
 
+    public static void main(String[] args) throws InvocationTargetException, InterruptedException {
+        System.setProperty("sun.java2d.opengl", "true");
+        System.setProperty("sun.java2d.xrender", "f");
+        System.setProperty("com.pitchenga.debug", "true");
+        System.setProperty("com.pitchenga.setup.class", "com.pitchenga.My");
+
+        SwingUtilities.invokeAndWait(() -> {
+//            Pitchenga secondary = new Pitchenga(false, null);
+//            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
+            System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
+            //fixme: Multiple JFrames collapse into tabs on mac
+            //fixme: Pitchy circles are broken
+//            Pitchenga primary = new Pitchenga(true, secondary);
+            Pitchenga primary = new Pitchenga(true, null);
+
+//            secondary.requestFocus();
+//            Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+//            int side = Math.min(screenSize.height, screenSize.width);
+//            primary.setSize(side, side);
+//            primary.setLocation(screenSize.width / 2 - primary.getSize().width / 2, screenSize.height / 2 - primary.getSize().height / 2);
+//            primary.setLocation(0, 0);
+//            primary.setSize(screenSize.width, screenSize.height);
+//            primary.setExtendedState(primary.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        });
+    }
 }
