@@ -269,7 +269,7 @@ public class Display extends JPanel {
             Color pitchyColor = Display.this.pitchinessColor;
             Color fillColor = Display.this.fillColor;
             if (fillColor == null) {
-                fillColor = Color.BLACK;
+                fillColor = Color.DARK_GRAY;
             }
             setBackground(fillColor);
 
