@@ -4,18 +4,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
+import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.*;
 
-public class Circle extends JPanel {
+public class Display extends JPanel {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
     private final Set<Tone> scaleTones = EnumSet.noneOf(Tone.class);
-    private final JComponent[] labels;
+    private JComponent[] labels;
     private final JTextArea textArea = new JTextArea();
     private final JScrollPane textPane = new JScrollPane(textArea);
 
@@ -25,25 +24,26 @@ public class Circle extends JPanel {
     private volatile Color fillColor;
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Circle");
-        Image image = Toolkit.getDefaultToolkit().getImage(com.pitchenga.Circle.class.getResource("/pitchenga.png"));
+        JFrame frame = new JFrame("Display");
+        Image image = Toolkit.getDefaultToolkit().getImage(Display.class.getResource("/pitchenga.png"));
         frame.setIconImage(image);
 
-        Circle circle = new Circle();
+        Display display = new Display();
         int mySide = 700;
-        circle.setSize(mySide, mySide);
-        circle.setPreferredSize(new Dimension(mySide, mySide));
+        display.setSize(mySide, mySide);
+        display.setPreferredSize(new Dimension(mySide, mySide));
 
-        frame.add(circle);
+        frame.add(display);
         Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         frame.setLocation(screenSize.width / 2 - frame.getSize().width / 2, screenSize.height / 2 - frame.getSize().height / 2);
         frame.setVisible(true);
         frame.pack();
     }
 
-    public Circle() {
+    public Display() {
         super();
 
+        //fixme
         labels = Arrays.stream(TONES).map(tone -> {
             JLabel label = new JLabel(tone.label);
             label.setFont(Pitchenga.MONOSPACED);
@@ -60,8 +60,10 @@ public class Circle extends JPanel {
         this.add(textLayer);
         textLayer.add(textPane, BorderLayout.EAST);
 
-        TheCircle circle = new TheCircle();
-        this.add(circle);
+        JPanel displayPanel;
+        displayPanel = new Circle();
+        displayPanel = new Frets();
+        this.add(displayPanel);
 
         initFontScaling();
     }
@@ -73,6 +75,8 @@ public class Circle extends JPanel {
         textPane.setBackground(new Color(0, 0, 0, 0.0f));
         textPane.getViewport().setBackground(new Color(0, 0, 0, 0.0f));
 
+        //fixme: Restore textArea
+        textArea.setVisible(false);
         textArea.setFont(Pitchenga.MONOSPACED);
         textArea.setEditable(false);
         textArea.setForeground(Color.LIGHT_GRAY);
@@ -172,9 +176,119 @@ public class Circle extends JPanel {
         }
     }
 
-    private class TheCircle extends JPanel {
+    public static Pitch[][] FRETS = {
+            {Mi5, Fa5, Fi5, So5, Le5, La5},
+            {Si4, Do5, Ra5, Re5, Me5, Mi5},
+            {So4, Le4, La4, Se4, Si4, Do5},
+            {Re4, Me4, Mi4, Fa4, Fi4, So4},
+            {La3, Se3, Si3, Do4, Ra4, Re4},
+            {Mi3, Fa3, Fi3, So3, Le3, La3},
+    };
 
-        public TheCircle() {
+    private class Frets extends JPanel {
+
+        private JPanel[][] panels = new JPanel[FRETS.length][];
+
+        public Frets() {
+            super(new GridLayout(FRETS[0].length, FRETS.length));
+            this.setBackground(Color.DARK_GRAY);
+            List<JComponent> labelsList = new LinkedList<>();
+            for (int i = 0; i < FRETS.length; i++) {
+                Pitch[] row = FRETS[i];
+                panels[i] = new JPanel[row.length];
+                for (int j = 0; j < row.length; j++) {
+                    Pitch pitch = row[j];
+                    Tone tone = pitch.tone;
+                    JPanel panel = new JPanel();
+                    panels[i][j] = panel;
+                    this.add(panel);
+                    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+//                    panel.setLayout(new BorderLayout());
+                    panel.setBackground(Color.BLACK);
+                    panel.setBorder(BorderFactory.createLineBorder(tone.color, getBorderThickness(panel)));
+
+//                    JPanel labelPanel = new JPanel();
+//                    labelPanel.setBackground(null);
+//                    panel.add(labelPanel, BorderLayout.CENTER);
+//                    labelPanel.setBorder(BorderFactory.createLineBorder(Color.GREEN));
+
+                    panel.add(Box.createVerticalGlue());
+                    JLabel toneLabel = new JLabel(tone.label);
+                    labelsList.add(toneLabel);
+                    panel.add(toneLabel, BorderLayout.CENTER);
+//                    labelPanel.add(toneLabel, BorderLayout.CENTER);
+                    toneLabel.setFont(Pitchenga.MONOSPACED);
+                    toneLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                    toneLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
+                    toneLabel.setForeground(Color.WHITE);
+                    toneLabel.setBackground(Color.BLACK);
+                    toneLabel.setOpaque(true);
+                    toneLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+                    panel.add(Box.createVerticalGlue());
+
+
+                    //fixme: Handle clicks
+//                colorPanel.addMouseListener(new MouseAdapter() {
+//                    @Override
+//                    public void mousePressed(MouseEvent e) {
+//                        handleButton(theButton, true);
+//                    }
+//                    @Override
+//                    public void mouseReleased(MouseEvent e) {
+//                        handleButton(theButton, false);
+//                    }
+//                });
+                }
+                labels = labelsList.toArray(new JComponent[0]);
+            }
+        }
+
+        private int getBorderThickness(JPanel panel) {
+            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 12;
+            if (thickness == 0) {
+                thickness = 1;
+            }
+            return thickness;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+
+            Tone tone = Display.this.tone;
+            Color toneColor = Display.this.toneColor;
+            Color pitchyColor = Display.this.pitchinessColor;
+            setBackground(toneColor);
+
+            //fixme: use a separate method instead of abusing repaint. new Exception().printStackTrace();
+            if (panels == null || panels[0] == null) {
+                return;
+            }
+            for (int i = 0; i < FRETS.length; i++) {
+                Pitch[] row = FRETS[i];
+                for (int j = 0; j < row.length; j++) {
+                    Pitch pitch = row[j];
+                    Tone myTone = pitch.tone;
+                    JPanel panel = panels[i][j];
+                    if (myTone == tone && toneColor != null && pitchyColor != null) {
+                        panel.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness(panel)));
+                        panel.setBackground(toneColor);
+                    } else {
+                        if (tones.contains(myTone)) {
+                            panel.setBackground(myTone.color);
+                        } else {
+                            panel.setBorder(BorderFactory.createLineBorder(myTone.color, getBorderThickness(panel)));
+                            panel.setBackground(Color.BLACK);
+                        }
+                    }
+                }
+            }
+            super.paintComponent(g);
+        }
+    }
+
+    private class Circle extends JPanel {
+
+        public Circle() {
             for (JComponent label : labels) {
                 this.add(label);
             }
@@ -182,10 +296,10 @@ public class Circle extends JPanel {
 
         @Override
         protected void paintComponent(Graphics graphics) {
-            Tone tone = Circle.this.tone;
-            Color toneColor = Circle.this.toneColor;
-            Color pitchyColor = Circle.this.pitchinessColor;
-            Color fillColor = Circle.this.fillColor;
+            Tone tone = Display.this.tone;
+            Color toneColor = Display.this.toneColor;
+            Color pitchyColor = Display.this.pitchinessColor;
+            Color fillColor = Display.this.fillColor;
             if (fillColor == null) {
                 fillColor = Color.DARK_GRAY;
             }
