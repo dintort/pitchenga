@@ -301,7 +301,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private boolean checkAnswer(Pitch riddle, Pitch guess, boolean exact) {
-        if (riddle == None) {
+        if (riddle == Non) {
             return true;
         }
         if (riddle == null || guess == null) {
@@ -474,7 +474,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (Pitch[][] rowRow : scale) {
             for (Pitch[] row : rowRow) {
                 for (Pitch pitch : row) {
-                    if (pitch != null && pitch != None) {
+                    if (pitch != null && pitch != Non) {
                         JSpinner spinner = toneSpinners[pitch.getFugue().ordinal()];
                         int value = (int) spinner.getValue();
                         spinner.setValue(value + 1);
@@ -487,7 +487,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void scheduleHint(Pitch riddle, int seriesCount) {
-        if (riddle == null || riddle == None) {
+        if (riddle == null || riddle == Non) {
             return;
         }
         long riddleTimestampMs = System.currentTimeMillis();
@@ -543,7 +543,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private void showHint(Pitch riddle) {
         debug("hint=" + riddle);
-        if (riddle == None) {
+        if (riddle == Non) {
             return;
         }
         debug("tone=" + riddle.tone);
@@ -741,7 +741,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         midiChannel.noteOff(prev.midi);
                     }
                     Pitch pitch = (Pitch) next;
-                    if (pitch != None) {
+                    if (pitch != Non) {
                         midiChannel.noteOn(pitch.midi, 127);
                         if (flashColors) {
                             SwingUtilities.invokeLater(() -> {

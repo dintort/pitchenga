@@ -3,7 +3,7 @@ package com.pitchenga;
 import static com.pitchenga.Tone.*;
 
 public enum Pitch {
-    None(Do, -1, -1, -1f),
+    Non(Do, -1, -1, -1f),
     Do0(Do, 0, 12, 16.35f),
     Ra0(Ra, 0, 13, 17.32f),
     Re0(Re, 0, 14, 18.35f),
