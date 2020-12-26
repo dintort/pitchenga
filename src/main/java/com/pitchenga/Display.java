@@ -292,7 +292,7 @@ public class Display extends JPanel {
                     JPanel panel = panels[i][j];
                     if (isBase != null || !Pitchenga.playButton.isSelected()) {
                         if (myTone == tone && toneColor != null && pitchyColor != null) {
-                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 2));
+                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 5));
                             panel.setBackground(toneColor);
                         } else {
                             if (tones.contains(myTone)) {
