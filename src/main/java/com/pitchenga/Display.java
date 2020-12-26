@@ -254,7 +254,7 @@ public class Display extends JPanel {
         }
 
         private int getBorderThickness(JPanel panel) {
-            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 12;
+            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 32;
             if (thickness == 0) {
                 thickness = 1;
             }
@@ -278,6 +278,10 @@ public class Display extends JPanel {
             if (panels == null || panels[0] == null) {
                 return;
             }
+
+            int borderThickness = getBorderThickness(panels[0][0]);
+            setLayout(new GridLayout(FRETS[0].length, FRETS.length, borderThickness, borderThickness));
+
             for (int i = 0; i < FRETS.length; i++) {
                 Pitch[] row = FRETS[i];
                 Pitch[] baseRow = BASE_FRETS[i];
@@ -288,13 +292,13 @@ public class Display extends JPanel {
                     JPanel panel = panels[i][j];
                     if (isBase != null || !Pitchenga.playButton.isSelected()) {
                         if (myTone == tone && toneColor != null && pitchyColor != null) {
-                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness(panel) * 2));
+                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 2));
                             panel.setBackground(toneColor);
                         } else {
                             if (tones.contains(myTone)) {
                                 panel.setBackground(myTone.color);
                             } else {
-                                panel.setBorder(BorderFactory.createLineBorder(myTone.color, getBorderThickness(panel)));
+                                panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
                                 panel.setBackground(Color.BLACK);
                             }
                         }
