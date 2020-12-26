@@ -96,7 +96,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JComboBox<Ringer> ringerCombo = new JComboBox<>();
     private final JComboBox<Riddler> riddlerCombo = new JComboBox<>();
     private final JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
-    private final JToggleButton playButton = new JToggleButton();
+//    private final JToggleButton playButton = new JToggleButton();
+    //fixme: Un-hack
+    public static final JToggleButton playButton = new JToggleButton();
     private final JToggleButton[] keyButtons = new JToggleButton[Button.values().length];
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);

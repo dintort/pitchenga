@@ -184,14 +184,24 @@ public class Display extends JPanel {
             {La3, Se3, Si3, Do4, Ra4, Re4},
             {Mi3, Fa3, Fi3, So3, Le3, La3},
     };
+    //fixme: Prettify
+    public static Pitch[][] BASE_FRETS = {
+            {null, null, null, null, null, null},
+            {Si4, Do5, null, null, null, null},
+            {So4, Le4, La4, Se4, null, null},
+            {Re4, Me4, Mi4, Fa4, Fi4, null},
+            {null, null, null, Do4, Ra4, null},
+            {null, null, null, null, null, null},
+    };
 
     private class Frets extends JPanel {
 
-        private JPanel[][] panels = new JPanel[FRETS.length][];
+        private final JPanel[][] panels = new JPanel[FRETS.length][];
 
         public Frets() {
-            super(new GridLayout(FRETS[0].length, FRETS.length));
-            this.setBackground(Color.DARK_GRAY);
+            //fixme: Scale gaps?
+            super(new GridLayout(FRETS[0].length, FRETS.length, 4, 4));
+            this.setBackground(Color.BLACK);
             List<JComponent> labelsList = new LinkedList<>();
             for (int i = 0; i < FRETS.length; i++) {
                 Pitch[] row = FRETS[i];
@@ -257,7 +267,12 @@ public class Display extends JPanel {
             Tone tone = Display.this.tone;
             Color toneColor = Display.this.toneColor;
             Color pitchyColor = Display.this.pitchinessColor;
-            setBackground(toneColor);
+            Color fillColor = Display.this.fillColor;
+            if (fillColor == null) {
+                fillColor = Color.BLACK;
+            }
+            setBackground(fillColor);
+
 
             //fixme: use a separate method instead of abusing repaint. new Exception().printStackTrace();
             if (panels == null || panels[0] == null) {
@@ -265,20 +280,29 @@ public class Display extends JPanel {
             }
             for (int i = 0; i < FRETS.length; i++) {
                 Pitch[] row = FRETS[i];
+                Pitch[] baseRow = BASE_FRETS[i];
                 for (int j = 0; j < row.length; j++) {
                     Pitch pitch = row[j];
+                    Pitch isBase = baseRow[j];
                     Tone myTone = pitch.tone;
                     JPanel panel = panels[i][j];
-                    if (myTone == tone && toneColor != null && pitchyColor != null) {
-                        panel.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness(panel) * 2));
-                        panel.setBackground(toneColor);
-                    } else {
-                        if (tones.contains(myTone)) {
-                            panel.setBackground(myTone.color);
+                    if (isBase != null || !Pitchenga.playButton.isSelected()) {
+                        if (myTone == tone && toneColor != null && pitchyColor != null) {
+                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness(panel) * 2));
+                            panel.setBackground(toneColor);
                         } else {
-                            panel.setBorder(BorderFactory.createLineBorder(myTone.color, getBorderThickness(panel)));
-                            panel.setBackground(Color.BLACK);
+                            if (tones.contains(myTone)) {
+                                panel.setBackground(myTone.color);
+                            } else {
+                                panel.setBorder(BorderFactory.createLineBorder(myTone.color, getBorderThickness(panel)));
+                                panel.setBackground(Color.BLACK);
+                            }
                         }
+//                        panel.setOpaque(true);
+                    } else {
+//                        panel.setOpaque(false);
+                        panel.setBackground(Color.BLACK);
+                        panel.setBorder(null);
                     }
                 }
             }
