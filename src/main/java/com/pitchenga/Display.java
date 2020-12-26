@@ -270,7 +270,7 @@ public class Display extends JPanel {
                     Tone myTone = pitch.tone;
                     JPanel panel = panels[i][j];
                     if (myTone == tone && toneColor != null && pitchyColor != null) {
-                        panel.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness(panel)));
+                        panel.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness(panel) * 2));
                         panel.setBackground(toneColor);
                     } else {
                         if (tones.contains(myTone)) {

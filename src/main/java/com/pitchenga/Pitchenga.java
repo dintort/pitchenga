@@ -952,15 +952,27 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 return false;
             }
 //            debug("Frozen=" + frozen + ", key=" + event + ";");
-            if (pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
+            if (!pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
                 if (!playButton.hasFocus()) {
                     playButton.setSelected(!playButton.isSelected());
                     playButton.requestFocus();
                 }
             }
+            if (!pressed && event.getKeyCode() == KeyEvent.VK_ENTER) {
+                GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
+                if (screenDevice.getFullScreenWindow() == this) {
+                    bottomPanel.setVisible(true);
+                    screenDevice.setFullScreenWindow(null);
+                } else {
+                    bottomPanel.setVisible(false);
+                    screenDevice.setFullScreenWindow(this);
+                }
+
+            }
             if (pressed && event.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 playButton.setSelected(false);
                 playButton.requestFocus();
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
             }
             if (!pressed && event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                 display.clearText();
@@ -1453,6 +1465,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playButton.setText("Stop");
             playExecutor.execute(() -> guess(null, false));
             if (!getPacer().equals(Pacer.Answer)) {
+                //fixme: Hide only the control panel, but not the piano
                 bottomPanel.setVisible(false);
                 pitchSliderPanel.setVisible(false);
             }
