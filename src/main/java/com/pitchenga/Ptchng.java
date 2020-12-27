@@ -6,10 +6,10 @@ import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings("unused")
-public class My extends Setup {
+public class Ptchng extends Setup {
 
 
-    public My() {
+    public Ptchng() {
         defaultPenaltyFactor = 3;
         defaultPenaltyFactor = 0;
 
@@ -32,13 +32,13 @@ public class My extends Setup {
         defaultHinter = Hinter.Delayed3000;
         defaultHinter = Hinter.Delayed500;
         defaultHinter = Hinter.Delayed1000;
+        defaultHinter = Hinter.Series;
         defaultHinter = Hinter.Always;
         defaultHinter = Hinter.Delayed1000;
         defaultHinter = Hinter.Never;
-        defaultHinter = Hinter.Series;
-        //fixme: Delay hinter proportionally to the tempo
+        //fixme: Separate profile for interactive training
 
-        defaultPacer = Pacer.Answer;
+        //fixme: Delay proportionally to the tempo
         defaultPacer = Pacer.Tempo140;
         defaultPacer = Pacer.Tempo45;
         defaultPacer = Pacer.Tempo30;
@@ -48,6 +48,7 @@ public class My extends Setup {
         defaultPacer = Pacer.Tempo90;
         defaultPacer = Pacer.Tempo50;
         defaultPacer = Pacer.Tempo100;
+        defaultPacer = Pacer.Answer;
 
         defaultRiddler = Riddler.Step44Fa4;
         defaultRiddler = Riddler.ChromaticScaleUpDownUp;
@@ -58,10 +59,11 @@ public class My extends Setup {
         defaultRinger = Ringer.JustDo;
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.ToneAndLa;
-        defaultRinger = Ringer.Tone;
         defaultRinger = Ringer.None;
+        defaultRinger = Ringer.Tone;
 
         defaultBuzzer = Buzzer.Tone;
+        defaultBuzzer = Buzzer.ShortToneAndLongPause;
 
         defaultAudioInput = NO_AUDIO_INPUT;
         defaultAudioInput = null;
@@ -75,7 +77,7 @@ public class My extends Setup {
         System.setProperty("sun.java2d.opengl", "true");
         System.setProperty("sun.java2d.xrender", "f");
         System.setProperty("com.pitchenga.debug", "true");
-        System.setProperty("com.pitchenga.setup.class", "com.pitchenga.My");
+        System.setProperty("com.pitchenga.setup.class", "com.pitchenga.Ptchng");
 
         SwingUtilities.invokeAndWait(() -> {
 //            Pitchenga secondary = new Pitchenga(false, null);

@@ -1466,21 +1466,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             resetGame();
             playButton.setText("Stop");
             playExecutor.execute(() -> guess(null, false));
-            if (!getPacer().equals(Pacer.Answer)) {
+//            if (!getPacer().equals(Pacer.Answer)) {
                 //fixme: Hide only the control panel, but not the piano
                 bottomPanel.setVisible(false);
                 pitchSliderPanel.setVisible(false);
-            }
+//            }
             display.clearText();
             if (setup.fullScreenWhenPlaying) {
-                //fixme: When going from full screen it shrinks to side
-//                this.previousSize = getSize();
-//                this.previousLocation = getLocation();
-//                System.out.println("size=" + previousSize + ",location=" + previousLocation);
-//                Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-//                int side = Math.min(screenSize.height, screenSize.width);
-//                setSize(side, side);
-//                setLocation(screenSize.width / 2 - getSize().width / 2, screenSize.height / 2 - getSize().height / 2);
+                this.previousSize = getSize();
+                this.previousLocation = getLocation();
+                System.out.println("size=" + previousSize + ",location=" + previousLocation);
                 GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
             }
         } else {
@@ -1489,18 +1484,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             pitchSliderPanel.setVisible(true);
             if (setup.fullScreenWhenPlaying) {
                 GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
-//                if (previousSize != null && previousLocation != null) {
-//                    setSize(previousSize);
-//                    setLocation(previousLocation);
-//                    System.out.println("size=" + previousSize + ",location=" + previousLocation);
-//                    this.previousSize = getSize();
-//                    this.previousLocation = getLocation();
-//                    System.out.println("size=" + previousSize + ",location=" + previousLocation);
-//                }
+                if (previousSize != null && previousLocation != null) {
+                    setSize(previousSize);
+                    setLocation(previousLocation);
+                    this.previousSize = getSize();
+                    this.previousLocation = getLocation();
+                }
             }
         }
-//        size=java.awt.Dimension[width=3840,height=2078],location=java.awt.Point[x=0,y=25]
-//        size=java.awt.Dimension[width=3840,height=2078],location=java.awt.Point[x=0,y=25]
 
         debug("running=" + playing);
     }
