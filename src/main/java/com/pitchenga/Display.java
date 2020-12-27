@@ -187,10 +187,10 @@ public class Display extends JPanel {
     //fixme: Prettify
     public static Pitch[][] BASE_FRETS = {
             {null, null, null, null, null, null},
-            {Si4, Do5, null, null, null, null},
-            {So4, Le4, La4, Se4, null, null},
-            {Re4, Me4, Mi4, Fa4, Fi4, null},
-            {null, null, null, Do4, Ra4, null},
+            {null, null, null, null, null, null},
+            {null, Le4, La4, Se4, Si4, Do5},
+            {null, Me4, Mi4, Fa4, Fi4, So4},
+            {null, null, null, Do4, Ra4, Re4},
             {null, null, null, null, null, null},
     };
 
