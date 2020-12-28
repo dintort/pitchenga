@@ -199,7 +199,6 @@ public class Display extends JPanel {
         private final JPanel[][] panels = new JPanel[FRETS.length][];
 
         public Frets() {
-            //fixme: Scale gaps?
             super(new GridLayout(FRETS[0].length, FRETS.length, 4, 4));
             this.setBackground(Color.BLACK);
             List<JComponent> labelsList = new LinkedList<>();
@@ -254,7 +253,7 @@ public class Display extends JPanel {
         }
 
         private int getBorderThickness(JPanel panel) {
-            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 32;
+            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 16;
             if (thickness == 0) {
                 thickness = 1;
             }
@@ -292,7 +291,7 @@ public class Display extends JPanel {
                     JPanel panel = panels[i][j];
                     if (isBase != null || !Pitchenga.playButton.isSelected()) {
                         if (myTone == tone && toneColor != null && pitchyColor != null) {
-                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 5));
+                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 3));
                             panel.setBackground(toneColor);
                         } else {
                             if (tones.contains(myTone)) {

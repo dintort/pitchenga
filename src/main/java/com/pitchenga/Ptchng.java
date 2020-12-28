@@ -29,13 +29,12 @@ public class Ptchng extends Setup {
         defaultHinter = Hinter.Delayed200;
         defaultHinter = Hinter.Delayed100;
         defaultHinter = Hinter.Delayed700;
-        defaultHinter = Hinter.Delayed3000;
         defaultHinter = Hinter.Delayed500;
-        defaultHinter = Hinter.Delayed1000;
         defaultHinter = Hinter.Series;
         defaultHinter = Hinter.Always;
-        defaultHinter = Hinter.Never;
         defaultHinter = Hinter.Delayed1000;
+        defaultHinter = Hinter.Delayed3000;
+        defaultHinter = Hinter.Never;
 
         //fixme: Delay proportionally to the tempo
         defaultPacer = Pacer.Tempo140;

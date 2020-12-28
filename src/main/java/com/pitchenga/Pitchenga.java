@@ -384,22 +384,26 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             guessColor = interpolateColor(accuracy, toneColor, pitchy.tone.color);
             pitchinessColor = interpolateColor(pitchiness, toneColor, pitchy.tone.color);
         }
-        if (debug && !isPlaying() && isPrimary) {
+        boolean playing = isPlaying();
+        if (debug && !playing && isPrimary) {
             debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
                     guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
         }
-        SwingUtilities.invokeLater(() -> {
-            updateSlider(guess, frequency, isKeyboard);
-            frequencyLabel.setText(String.format("%07.2f", frequency));
-            if (!isPlaying()) {
-                updatePianoButtons(guess.tone.getButton());
-                if (!isKeyboard) {
-                    display.setTone(guess.tone, guessColor, pitchinessColor);
+        if (!frozen) {
+            SwingUtilities.invokeLater(() -> {
+                updateSlider(guess, frequency, isKeyboard);
+                frequencyLabel.setText(String.format("%07.2f", frequency));
+                boolean answer = getPacer() == Pacer.Answer;
+                if (!playing || answer) {
+                    updatePianoButtons(guess.tone.getButton());
+                    if (!isKeyboard || (!playing && !answer)) {
+                        display.setTone(guess.tone, guessColor, pitchinessColor);
+                    }
+                    display.setFillColor(guessColor);
+                    display.repaint();
                 }
-                display.setFillColor(guessColor);
-                display.repaint();
-            }
-        });
+            });
+        }
     }
 
     private void updateSlider(Pitch pitch, float frequency, boolean isKeyboard) {
@@ -574,12 +578,28 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private boolean hasDuplicates(List<Pitch> pitches) {
+        pitches = new ArrayList<>(pitches);
         Pitch previous = null;
         for (Pitch pitch : pitches) {
             if (pitch.equals(previous)) {
+                debug(pitches);
                 return true;
             }
             previous = pitch;
+        }
+
+        Pitch firstInSeries = null;
+        for (int i = 0; i < pitches.size(); i++) {
+            Pitch pitch = pitches.get(i);
+            int mod = i % setup.series;
+            if (mod == 0) {
+                firstInSeries = pitch;
+            }
+            if (mod == setup.series - 1) {
+                if (pitch.equals(firstInSeries)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -868,9 +888,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         bottomPanel.add(initControlPanel(), BorderLayout.NORTH);
-        //fixme: configurable
-//        bottomPanel.add(initChromaticPiano(), BorderLayout.CENTER);
-//        bottomPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
+        bottomPanel.add(initChromaticPiano(), BorderLayout.CENTER);
+        bottomPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
         updateToneSpinners();
         updateOctaveToggles(getRiddler());
 
@@ -1467,9 +1486,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playButton.setText("Stop");
             playExecutor.execute(() -> guess(null, false));
 //            if (!getPacer().equals(Pacer.Answer)) {
-                //fixme: Hide only the control panel, but not the piano
-                bottomPanel.setVisible(false);
-                pitchSliderPanel.setVisible(false);
+            //fixme: Hide only the control panel, but not the piano
+            bottomPanel.setVisible(false);
+            pitchSliderPanel.setVisible(false);
 //            }
             display.clearText();
             if (setup.fullScreenWhenPlaying) {
