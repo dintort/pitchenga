@@ -52,16 +52,18 @@ public class Display extends JPanel {
             return label;
         }).toArray(JComponent[]::new);
 
-        this.setLayout(new OverlayLayout(this));
+//        this.setLayout(new OverlayLayout(this));
+        this.setLayout(new BorderLayout());
 
         initTextPane();
-        JPanel textLayer = new JPanel(new BorderLayout());
-        textLayer.setOpaque(false);
-        this.add(textLayer);
-        textLayer.add(textPane, BorderLayout.EAST);
+//        JPanel textLayer = new JPanel(new BorderLayout());
+//        textLayer.setOpaque(false);
+//        this.add(textLayer);
+//        textLayer.add(textPane, BorderLayout.EAST);
+        this.add(textPane, BorderLayout.EAST);
 
         JPanel displayPanel;
-        displayPanel = new Circle();
+//        displayPanel = new Circle();
         displayPanel = new Frets();
         this.add(displayPanel);
 
@@ -72,23 +74,61 @@ public class Display extends JPanel {
         textPane.setBorder(null);
         textPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         textPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        textPane.setBackground(new Color(0, 0, 0, 0.0f));
-        textPane.getViewport().setBackground(new Color(0, 0, 0, 0.0f));
+//        textPane.setBackground(new Color(0, 0, 0, 0.0f));
+        textPane.setBackground(Color.BLACK);
+//        textPane.setBackground(null);
+//        textPane.setOpaque(false);
+//        textPane.getViewport().setBackground(new Color(0, 0, 0, 0.0f));
+        textPane.getViewport().setBackground(Color.BLACK);
+//        textPane.getViewport().setBackground(null);
+//        textPane.getViewport().setOpaque(false);
 
-        //fixme: Restore textArea
-        textArea.setVisible(false);
+        //fixme: Copy text to clipboard does not work on mac
+//        textArea.setVisible(false);
         textArea.setFont(Pitchenga.MONOSPACED);
         textArea.setEditable(false);
         textArea.setForeground(Color.LIGHT_GRAY);
-        textArea.setBackground(new Color(0, 0, 0, 0.0f));
+        textArea.setBackground(Color.BLACK);
+//        textArea.setBackground(new Color(0, 0, 0, 0.0f));
+//        textArea.setBackground(null);
+//        textArea.setOpaque(false);
         textArea.setBorder(null);
         //        text("<html>");
         clearText();
     }
 
     public void clearText() {
+        textArea.setText("");
         for (int i = 0; i < 500; i++) { //There must be a better way
-            text("        \n");
+//            text("        \n");
+            text("   \n");
+        }
+    }
+
+
+    public void text(String message) {
+//        text(message, null, null);
+//    }
+//
+//    private void text(String message, Color foreground, Color background) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            //fixme: Discard oldest when becomes too big
+//            StyledDocument document = text.getStyledDocument();
+//            SimpleAttributeSet attributes = new SimpleAttributeSet();
+//            if (foreground != null) {
+//                StyleConstants.setForeground(attributes, foreground);
+//            }
+//            if (background != null) {
+//                StyleConstants.setBackground(attributes, background);
+//            }
+//            StyleConstants.setBold(attributes, false);
+//            try {
+//                document.insertString(document.getLength(), message, attributes);
+//            } catch (BadLocationException e) {
+//                e.printStackTrace();
+//            }
+            textArea.append(message);
+            textArea.setCaretPosition(textArea.getDocument().getLength());
         }
     }
 
@@ -147,33 +187,6 @@ public class Display extends JPanel {
     public void clear() {
         setTones();
         setFillColor(null);
-    }
-
-
-    public void text(String message) {
-//        text(message, null, null);
-//    }
-//
-//    private void text(String message, Color foreground, Color background) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            //fixme: Discard oldest when becomes too big
-//            StyledDocument document = text.getStyledDocument();
-//            SimpleAttributeSet attributes = new SimpleAttributeSet();
-//            if (foreground != null) {
-//                StyleConstants.setForeground(attributes, foreground);
-//            }
-//            if (background != null) {
-//                StyleConstants.setBackground(attributes, background);
-//            }
-//            StyleConstants.setBold(attributes, false);
-//            try {
-//                document.insertString(document.getLength(), message, attributes);
-//            } catch (BadLocationException e) {
-//                e.printStackTrace();
-//            }
-            textArea.append(message);
-            textArea.setCaretPosition(textArea.getDocument().getLength());
-        }
     }
 
     public static Pitch[][] FRETS = {
