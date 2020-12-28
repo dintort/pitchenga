@@ -816,8 +816,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
 //                String text = "<span style=\"background-color: #FFFF00\">This text is highlighted in yellow.</span>";
 //                text(text);
-                display.text("  ");
-                display.text(guess.tone.label);
+//                display.text("  ");
+//                display.text(guess.tone.label);
+                display.text(guess.tone.name().toLowerCase());
 //                text(guess.getTone().name().toLowerCase(), Color.LIGHT_GRAY, guess.getTone().getColor());
                 display.text("\n");
             }
@@ -1046,7 +1047,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         index = up ? index + 1 : index - 1;
         if (index >= 0 && index < pacerCombo.getItemCount()) {
             pacerCombo.setSelectedIndex(index);
-            display.text("   ");
+//            display.text("   ");
             display.text(String.valueOf(getPacer().bpm));
             display.text("\n");
         }
@@ -1490,7 +1491,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             bottomPanel.setVisible(false);
             pitchSliderPanel.setVisible(false);
 //            }
-            display.clearText();
             if (setup.fullScreenWhenPlaying) {
                 this.previousSize = getSize();
                 this.previousLocation = getLocation();
