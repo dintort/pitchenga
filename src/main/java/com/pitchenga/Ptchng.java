@@ -34,9 +34,8 @@ public class Ptchng extends Setup {
         defaultHinter = Hinter.Delayed1000;
         defaultHinter = Hinter.Series;
         defaultHinter = Hinter.Always;
-        defaultHinter = Hinter.Delayed1000;
         defaultHinter = Hinter.Never;
-        //fixme: Separate profile for interactive training
+        defaultHinter = Hinter.Delayed1000;
 
         //fixme: Delay proportionally to the tempo
         defaultPacer = Pacer.Tempo140;
