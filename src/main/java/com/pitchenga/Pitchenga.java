@@ -16,7 +16,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -33,6 +33,7 @@ import static com.pitchenga.Pitch.*;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
+    private static final PrintStream log;
     private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
     private static final Pitch[] PITCHES = Pitch.values();
     private static final Tone[] TONES = Tone.values();
@@ -96,7 +97,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JComboBox<Ringer> ringerCombo = new JComboBox<>();
     private final JComboBox<Riddler> riddlerCombo = new JComboBox<>();
     private final JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
-//    private final JToggleButton playButton = new JToggleButton();
+    //    private final JToggleButton playButton = new JToggleButton();
     //fixme: Un-hack
     public static final JToggleButton playButton = new JToggleButton();
     private final JToggleButton[] keyButtons = new JToggleButton[Button.values().length];
@@ -106,6 +107,27 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JPanel bottomPanel;
     private volatile Dimension previousSize;
     private volatile Point previousLocation;
+
+    static {
+        try {
+            //fixme: Configurable log path
+            File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/logs/");
+            //noinspection ResultOfMethodCallIgnored
+            logDir.mkdirs();
+            File logFile = new File(logDir, "pitchenga.log");
+            if (logFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                logFile.delete();
+            }
+            boolean newFile = logFile.createNewFile();
+            if (!newFile) {
+                throw new RuntimeException("Failed creating log file=" + logFile.getCanonicalPath());
+            }
+            log = new PrintStream(new FileOutputStream(logFile));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
@@ -565,8 +587,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private List<Pitch> deduplicate(Supplier<List<Pitch>> supplier) {
+        //fixme: This can be done better, e.g. move the conflicting items forward or something
         List<Pitch> pitches;
-        int attempts = 1024;
+        int attempts = 2048;
         while (true) {
             attempts--;
             debug("De-duplicating, attempts=" + attempts);
@@ -588,16 +611,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             previous = pitch;
         }
 
-        Pitch firstInSeries = null;
-        for (int i = 0; i < pitches.size(); i++) {
-            Pitch pitch = pitches.get(i);
-            int mod = i % setup.series;
-            if (mod == 0) {
-                firstInSeries = pitch;
-            }
-            if (mod == setup.series - 1) {
-                if (pitch.equals(firstInSeries)) {
-                    return true;
+        if (setup.repeat > 0) {
+            Pitch firstInSeries = null;
+            for (int i = 0; i < pitches.size(); i++) {
+                Pitch pitch = pitches.get(i);
+                int mod = i % setup.series;
+                if (mod == 0) {
+                    firstInSeries = pitch;
+                }
+                if (mod == setup.series - 1) {
+                    if (pitch.equals(firstInSeries)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -1741,11 +1766,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             return;
         }
         if (messages == null || messages.length == 0) {
-            System.out.println(Thread.currentThread().getName());
+            String toPrint = Thread.currentThread().getName();
+            System.out.println(toPrint);
+            log.println(toPrint);
+            log.flush();
         }
         if (messages != null) {
             for (Object message : messages) {
-                System.out.println(Thread.currentThread().getName() + ": " + message);
+                String toPrint = Thread.currentThread().getName() + ": " + message;
+                System.out.println(toPrint);
+                log.println(toPrint);
+                log.flush();
             }
         }
     }
