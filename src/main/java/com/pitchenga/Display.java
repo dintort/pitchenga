@@ -22,6 +22,7 @@ public class Display extends JPanel {
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
     private volatile Color fillColor;
+    private volatile Updatable displayPanel;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Display");
@@ -62,11 +63,13 @@ public class Display extends JPanel {
 //        textLayer.add(textPane, BorderLayout.EAST);
         this.add(textPane, BorderLayout.EAST);
 
-        JPanel displayPanel;
-//        displayPanel = new Circle();
-        displayPanel = new Frets();
-        this.add(displayPanel);
-
+        //fixme: Make them switchable
+//        Circle circle = new Circle();
+//        this.add(circle);
+//        this.displayPanel = circle;
+        Frets frets = new Frets();
+        this.add(frets);
+        this.displayPanel = frets;
         initFontScaling();
     }
 
@@ -149,7 +152,7 @@ public class Display extends JPanel {
         int fontSize = min / 35;
         Font font = Pitchenga.MONOSPACED.deriveFont((float) fontSize);
         setLabelsFont(font);
-        repaint();
+        update();
     }
 
     public void setLabelsFont(Font font) {
@@ -189,6 +192,11 @@ public class Display extends JPanel {
         setFillColor(null);
     }
 
+    public void update() {
+//        displayPanel.update();
+        repaint();
+    }
+
     public static Pitch[][] FRETS = {
             {Mi5, Fa5, Fi5, So5, Le5, La5},
             {Si4, Do5, Ra5, Re5, Me5, Mi5},
@@ -197,6 +205,7 @@ public class Display extends JPanel {
             {La3, Se3, Si3, Do4, Ra4, Re4},
             {Mi3, Fa3, Fi3, So3, Le3, La3},
     };
+
     //fixme: Prettify
     public static Pitch[][] BASE_FRETS = {
             {null, null, null, null, null, null},
@@ -207,13 +216,22 @@ public class Display extends JPanel {
             {null, null, null, null, null, null},
     };
 
-    private class Frets extends JPanel {
+    private class Frets extends JPanel implements Updatable {
 
         private final JPanel[][] panels = new JPanel[FRETS.length][];
 
         public Frets() {
             super(new GridLayout(FRETS[0].length, FRETS.length, 4, 4));
             this.setBackground(Color.BLACK);
+
+            this.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    int borderThickness = getBorderThickness(panels[0][0]);
+                    setLayout(new GridLayout(FRETS[0].length, FRETS.length, borderThickness, borderThickness));
+                }
+            });
+
             List<JComponent> labelsList = new LinkedList<>();
             for (int i = 0; i < FRETS.length; i++) {
                 Pitch[] row = FRETS[i];
@@ -266,7 +284,7 @@ public class Display extends JPanel {
         }
 
         private int getBorderThickness(JPanel panel) {
-            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 16;
+            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 8;
             if (thickness == 0) {
                 thickness = 1;
             }
@@ -274,8 +292,12 @@ public class Display extends JPanel {
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
+        public void update() {
+            this.repaint();
+        }
 
+        @Override
+        protected void paintComponent(Graphics g) {
             Tone tone = Display.this.tone;
             Color toneColor = Display.this.toneColor;
             Color pitchyColor = Display.this.pitchinessColor;
@@ -285,15 +307,11 @@ public class Display extends JPanel {
             }
             setBackground(fillColor);
 
-
-            //fixme: use a separate method instead of abusing repaint. new Exception().printStackTrace();
             if (panels == null || panels[0] == null) {
                 return;
             }
 
             int borderThickness = getBorderThickness(panels[0][0]);
-            setLayout(new GridLayout(FRETS[0].length, FRETS.length, borderThickness, borderThickness));
-
             for (int i = 0; i < FRETS.length; i++) {
                 Pitch[] row = FRETS[i];
                 Pitch[] baseRow = BASE_FRETS[i];
@@ -304,7 +322,7 @@ public class Display extends JPanel {
                     JPanel panel = panels[i][j];
                     if (isBase != null || !Pitchenga.playButton.isSelected()) {
                         if (myTone == tone && toneColor != null && pitchyColor != null) {
-                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 3));
+                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 2));
                             panel.setBackground(toneColor);
                         } else {
                             if (tones.contains(myTone)) {
@@ -326,7 +344,7 @@ public class Display extends JPanel {
         }
     }
 
-    private class Circle extends JPanel {
+    private class Circle extends JPanel implements Updatable {
 
         public Circle() {
             for (JComponent label : labels) {
@@ -433,5 +451,16 @@ public class Display extends JPanel {
         @Override
         protected void paintChildren(Graphics g) {
         }
+
+
+        @Override
+        public void update() {
+            repaint();
+        }
     }
+
+    private static interface Updatable {
+        public void update();
+    }
+
 }

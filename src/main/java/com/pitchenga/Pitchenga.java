@@ -400,7 +400,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         display.setTone(guess.tone, guessColor, pitchinessColor);
                     }
                     display.setFillColor(guessColor);
-                    display.repaint();
+                    display.update();
                 }
             });
         }
@@ -491,7 +491,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
         }
         display.setScaleTones(getScaleTones());
-        display.repaint();
+        display.update();
     }
 
     private void scheduleHint(Pitch riddle, int seriesCount) {
@@ -510,7 +510,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 } else {
                     display.setTones();
                     display.setFillColor(null);
-                    display.repaint();
+                    display.update();
                 }
             });
             return;
@@ -522,7 +522,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 if (getPacer() != Pacer.Answer) {
                     display.setFillColor(null);
                 }
-                display.repaint();
+                display.update();
             });
         }
         asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> {
@@ -559,7 +559,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (getPacer() != Pacer.Answer) {
             display.setFillColor(riddle.tone.color);
         }
-        display.repaint();
+        display.update();
         pitchSlider.setValue(convertPitchToSlider(riddle, riddle.frequency));
         frequencyLabel.setText(String.format("%07.2f", riddle.frequency));
     }
@@ -771,7 +771,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                             SwingUtilities.invokeLater(() -> {
                                 updatePianoButton(pitch.tone.getButton(), true);
                                 display.setTone(pitch.tone, pitch.tone.color, pitch.tone.color);
-                                display.repaint();
+                                display.update();
                             });
                         }
                     }
@@ -999,10 +999,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (!pressed && event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                 display.clearText();
             }
-            //fixme: Media keys not recognized :(
-            if (!pressed && event.getKeyCode() == 0) {
-                nextTempo(true);
+            if (!pressed && event.getKeyCode() == KeyEvent.VK_SLASH) {
+                display.text("RST\n");
+                updateMixer();
             }
+//            //fixme: Media keys not recognized :(
+//            if (!pressed && event.getKeyCode() == 0) {
+//                nextTempo(true);
+//            }
             if (event.getKeyCode() == KeyEvent.VK_SHIFT) {
                 lift = pressed;
             }
@@ -1465,6 +1469,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         JButton resetButton = new JButton("Reset");
         panel.add(resetButton);
         resetButton.addActionListener(event -> {
+            display.text("RST\n");
             updateMixer();
             playButton.requestFocus();
         });
