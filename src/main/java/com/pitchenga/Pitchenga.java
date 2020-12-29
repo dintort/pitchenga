@@ -1460,7 +1460,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         //fixme
 //        playButton.setEnabled(isPrimary);
         playButton.setEnabled(true);
-//        playButton.addItemListener(event -> handlePlayButton());
+        playButton.addItemListener(event -> handlePlayButton());
 
         JButton resetButton = new JButton("Reset");
         panel.add(resetButton);
