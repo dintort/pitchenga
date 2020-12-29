@@ -193,8 +193,7 @@ public class Display extends JPanel {
     }
 
     public void update() {
-//        displayPanel.update();
-        repaint();
+        displayPanel.update();
     }
 
     public static Pitch[][] FRETS = {
