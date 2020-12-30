@@ -283,7 +283,7 @@ public class Display extends JPanel {
         }
 
         private int getBorderThickness(JPanel panel) {
-            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 8;
+            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 12;
             if (thickness == 0) {
                 thickness = 1;
             }

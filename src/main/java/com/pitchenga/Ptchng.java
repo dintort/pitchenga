@@ -72,8 +72,6 @@ public class Ptchng extends Setup {
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
-        System.setProperty("sun.java2d.opengl", "true");
-        System.setProperty("sun.java2d.xrender", "f");
         System.setProperty("com.pitchenga.debug", "true");
         System.setProperty("com.pitchenga.setup.class", "com.pitchenga.Ptchng");
 

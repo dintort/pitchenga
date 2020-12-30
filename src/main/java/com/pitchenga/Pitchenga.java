@@ -62,6 +62,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final MidiChannel buzzInstrument;
     private final MidiChannel keyboardInstrument;
     private final MidiChannel ringInstrument;
+    private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
 
     private final AtomicReference<Tone> lastGuess = new AtomicReference<>(null);
     private volatile Pitch lastPitch;
@@ -108,27 +109,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile Dimension previousSize;
     private volatile Point previousLocation;
 
-    static {
-        try {
-            //fixme: Configurable log path
-            File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/logs/");
-            //noinspection ResultOfMethodCallIgnored
-            logDir.mkdirs();
-            File logFile = new File(logDir, "pitchenga.log");
-            if (logFile.exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                logFile.delete();
-            }
-            boolean newFile = logFile.createNewFile();
-            if (!newFile) {
-                throw new RuntimeException("Failed creating log file=" + logFile.getCanonicalPath());
-            }
-            log = new PrintStream(new FileOutputStream(logFile));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
     //fixme: Adjust the font size based on window dimensions for the remaining labels
@@ -158,6 +138,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Customizable note names
     public Pitchenga(boolean isPrimary, Pitchenga secondary) {
         super("Pitchenga");
+        try {
+            Class<?> fullScreenUtilities = Class.forName("com.apple.eawt.FullScreenUtilities");
+            fullScreenUtilities.getMethod("setWindowCanFullScreen", Window.class, Boolean.TYPE).invoke(null, this, true);
+        } catch (Exception ignore) {
+        }
+
         this.isPrimary = isPrimary;
         this.secondary = secondary;
         if (secondary != null) {
@@ -852,6 +838,27 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     static {
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pitchenga"); //fixme: Does not work
+        System.setProperty("sun.java2d.opengl", "true");
+        System.setProperty("sun.java2d.xrender", "f");
+
+        try {
+            //fixme: Configurable log path
+            File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/logs/");
+            //noinspection ResultOfMethodCallIgnored
+            logDir.mkdirs();
+            File logFile = new File(logDir, "pitchenga.log");
+            if (logFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                logFile.delete();
+            }
+            boolean newFile = logFile.createNewFile();
+            if (!newFile) {
+                throw new RuntimeException("Failed creating log file=" + logFile.getCanonicalPath());
+            }
+            log = new PrintStream(new FileOutputStream(logFile));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             System.out.println("Thread=" + thread.getName() + ", error=" + throwable);
@@ -885,8 +892,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     public static void main(String... strings) throws InterruptedException, InvocationTargetException {
-        System.setProperty("sun.java2d.opengl", "true");
-        System.setProperty("sun.java2d.xrender", "f");
         SwingUtilities.invokeAndWait(() -> new Pitchenga(true, null));
     }
 
@@ -1006,15 +1011,19 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
             }
             if (!pressed && event.getKeyCode() == KeyEvent.VK_ENTER) {
-                GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-                if (screenDevice.getFullScreenWindow() == this) {
-                    bottomPanel.setVisible(true);
-                    screenDevice.setFullScreenWindow(null);
+                if (nativeFullScreenAvailable) {
+                    bottomPanel.setVisible(!bottomPanel.isVisible());
+                    toggleNativeFullScreen();
                 } else {
-                    bottomPanel.setVisible(false);
-                    screenDevice.setFullScreenWindow(this);
+                    GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
+                    if (screenDevice.getFullScreenWindow() == this) {
+                        bottomPanel.setVisible(true);
+                        screenDevice.setFullScreenWindow(null);
+                    } else {
+                        bottomPanel.setVisible(false);
+                        screenDevice.setFullScreenWindow(this);
+                    }
                 }
-
             }
             if (pressed && event.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 playButton.setSelected(false);
@@ -1528,22 +1537,29 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             pitchSliderPanel.setVisible(false);
 //            }
             if (setup.fullScreenWhenPlaying) {
-                this.previousSize = getSize();
-                this.previousLocation = getLocation();
-                System.out.println("size=" + previousSize + ",location=" + previousLocation);
-                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
+                if (nativeFullScreenAvailable) {
+                    toggleNativeFullScreen();
+                } else {
+                    this.previousSize = getSize();
+                    this.previousLocation = getLocation();
+                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
+                }
             }
         } else {
             playButton.setText("Play");
             bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
             if (setup.fullScreenWhenPlaying) {
-                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
-                if (previousSize != null && previousLocation != null) {
-                    setSize(previousSize);
-                    setLocation(previousLocation);
-                    this.previousSize = getSize();
-                    this.previousLocation = getLocation();
+                if (nativeFullScreenAvailable) {
+                    toggleNativeFullScreen();
+                } else {
+                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
+                    if (previousSize != null && previousLocation != null) {
+                        setSize(previousSize);
+                        setLocation(previousLocation);
+                        this.previousSize = getSize();
+                        this.previousLocation = getLocation();
+                    }
                 }
             }
         }
@@ -1792,6 +1808,27 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             setDockIconImage.invoke(application, image);
         } catch (Exception ignore) {
         }
+    }
+
+    //fixme: This works wrong when the window was put to full screen manually
+    public void toggleNativeFullScreen() {
+        try {
+            Class<?> app = Class.forName("com.apple.eawt.Application");
+            Object getApp = app.getMethod("getApplication").invoke(null);
+            getApp.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(getApp, this);
+        } catch (Exception ignore) {
+        }
+    }
+
+    public static boolean isNativeFullScreenAvailable() {
+        try {
+            Class.forName("com.apple.eawt.FullScreenUtilities");
+            Class.forName("com.apple.eawt.Application");
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+        return true;
+
     }
 
 }
