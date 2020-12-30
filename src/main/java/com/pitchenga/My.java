@@ -53,6 +53,7 @@ public class My extends Setup {
         defaultRiddler = Riddler.ChromaticScaleUpDownUp;
         defaultRiddler = Riddler.ChromaticScaleDownUpDown;
         defaultRiddler = Riddler.Step33Octaves2And3Shuffled;
+        defaultRiddler = Riddler.Step32Octaves2And3;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;

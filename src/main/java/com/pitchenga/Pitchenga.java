@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -63,6 +64,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final MidiChannel keyboardInstrument;
     private final MidiChannel ringInstrument;
     private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
+    private volatile AtomicBoolean isInNativeFullScreen = new AtomicBoolean(false);
 
     private final AtomicReference<Tone> lastGuess = new AtomicReference<>(null);
     private volatile Pitch lastPitch;
@@ -1012,6 +1014,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
             if (!pressed && event.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (nativeFullScreenAvailable) {
+                    boolean current = isInNativeFullScreen.get();
+                    isInNativeFullScreen.compareAndSet(current, !current);
                     bottomPanel.setVisible(!bottomPanel.isVisible());
                     toggleNativeFullScreen();
                 } else {
@@ -1538,7 +1542,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //            }
             if (setup.fullScreenWhenPlaying) {
                 if (nativeFullScreenAvailable) {
-                    toggleNativeFullScreen();
+                    boolean current = isInNativeFullScreen.get();
+                    if (!current) {
+                        boolean set = isInNativeFullScreen.compareAndSet(current, true);
+                        if (set) {
+                            toggleNativeFullScreen();
+                        }
+                    }
                 } else {
                     this.previousSize = getSize();
                     this.previousLocation = getLocation();
@@ -1551,7 +1561,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             pitchSliderPanel.setVisible(true);
             if (setup.fullScreenWhenPlaying) {
                 if (nativeFullScreenAvailable) {
-                    toggleNativeFullScreen();
+                    boolean current = isInNativeFullScreen.get();
+                    if (current) {
+                        boolean set = isInNativeFullScreen.compareAndSet(current, false);
+                        if (set) {
+                            toggleNativeFullScreen();
+                        }
+                    }
                 } else {
                     GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
                     if (previousSize != null && previousLocation != null) {
