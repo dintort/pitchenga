@@ -64,12 +64,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final MidiChannel keyboardInstrument;
     private final MidiChannel ringInstrument;
     private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
-    private volatile AtomicBoolean isInNativeFullScreen = new AtomicBoolean(false);
+    private final AtomicBoolean isInNativeFullScreen = new AtomicBoolean(false);
 
     private final AtomicReference<Tone> lastGuess = new AtomicReference<>(null);
     private volatile Pitch lastPitch;
     private volatile long lastGuessTimestampMs = System.currentTimeMillis();
-    private final List<Pair<Pitch, Double>> guessQueue = new ArrayList<>();
+    private final List<Pair<Pitch, Double>> guessQueuePitchAndRms = new ArrayList<>();
     private final Queue<Pitch> riddleQueue = new LinkedBlockingQueue<>();
     private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
@@ -336,16 +336,21 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (pitchDetectionResult.getPitch() != -1) {
                 Pitch guess = matchPitch(pitchDetectionResult.getPitch());
                 if (guess != null) {
-                    double maxRms = rms;
                     double rmsThreshold = 0.1;
-                    if (guessQueue.size() < 2) {
-                        guessQueue.add(new Pair<>(guess, rms));
+                    if (rms > rmsThreshold && !isPlaying()) {
+                        transcribe(guess, false);
+                    }
+                    double maxRms = rms;
+                    //fixme: Test it
+//                    if (guessQueuePitchAndRms.size() < 2) {
+                    if (guessQueuePitchAndRms.size() < 1) {
+                        guessQueuePitchAndRms.add(new Pair<>(guess, rms));
                     } else {
                         boolean same = true;
-                        for (Pair<Pitch, Double> pitchRms : guessQueue) {
-                            if (!guess.equals(pitchRms.left)) {
+                        for (Pair<Pitch, Double> pitchAndRms : guessQueuePitchAndRms) {
+                            if (!guess.equals(pitchAndRms.left)) {
                                 same = false;
-                                maxRms = Math.max(maxRms, pitchRms.right);
+                                maxRms = Math.max(maxRms, pitchAndRms.right);
                                 break;
                             }
                         }
@@ -359,8 +364,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                                 }
                             }
                         } else {
-                            guessQueue.clear();
-                            guessQueue.add(new Pair<>(guess, rms));
+                            guessQueuePitchAndRms.clear();
+                            guessQueuePitchAndRms.add(new Pair<>(guess, rms));
                         }
                     }
                     if (maxRms > rmsThreshold) {
