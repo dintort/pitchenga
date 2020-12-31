@@ -582,7 +582,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private List<Pitch> deduplicate(Supplier<List<Pitch>> supplier) {
         //fixme: This can be done better, e.g. move the conflicting items forward or something
         List<Pitch> pitches;
-        int attempts = 2048;
+        int attempts = 4096;
         while (true) {
             attempts--;
             debug("De-duplicating, attempts=" + attempts);
@@ -663,12 +663,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     public List<Pitch> shuffleGroupSeries(boolean shuffleMacroGroups, boolean shuffleGroups) {
         Pitch[][][] scales = getRiddler().scale;
-        List<Pitch[][]> shuffled = Arrays.asList(scales);
+        List<Pitch[][]> scalesList = Arrays.asList(scales);
         if (shuffleMacroGroups) {
-            Collections.shuffle(shuffled);
+            Collections.shuffle(scalesList);
         }
         List<Pitch> results = new LinkedList<>();
-        for (Pitch[][] scale : shuffled) {
+        for (Pitch[][] scale : scalesList) {
             List<List<Pitch>> listLists = Arrays.stream(scale)
                     .flatMap(group -> {
                         List<Pitch> pitches = deduplicate(() -> {
