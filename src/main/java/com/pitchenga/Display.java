@@ -22,7 +22,7 @@ public class Display extends JPanel {
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
     private volatile Color fillColor;
-    private volatile Updatable displayPanel;
+    private volatile JPanel displayPanel;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Display");
@@ -193,7 +193,7 @@ public class Display extends JPanel {
     }
 
     public void update() {
-        displayPanel.update();
+        displayPanel.repaint();
     }
 
     public static Pitch[][] FRETS = {
@@ -215,7 +215,7 @@ public class Display extends JPanel {
             {null, null, null, null, null, null},
     };
 
-    private class Frets extends JPanel implements Updatable {
+    private class Frets extends JPanel {
 
         private final JPanel[][] panels = new JPanel[FRETS.length][];
 
@@ -291,11 +291,6 @@ public class Display extends JPanel {
         }
 
         @Override
-        public void update() {
-            this.repaint();
-        }
-
-        @Override
         protected void paintComponent(Graphics g) {
             Tone tone = Display.this.tone;
             Color toneColor = Display.this.toneColor;
@@ -343,7 +338,7 @@ public class Display extends JPanel {
         }
     }
 
-    private class Circle extends JPanel implements Updatable {
+    private class Circle extends JPanel {
 
         public Circle() {
             for (JComponent label : labels) {
@@ -451,15 +446,6 @@ public class Display extends JPanel {
         protected void paintChildren(Graphics g) {
         }
 
-
-        @Override
-        public void update() {
-            repaint();
-        }
-    }
-
-    private static interface Updatable {
-        public void update();
     }
 
 }
