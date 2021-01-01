@@ -16,7 +16,10 @@ import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -26,11 +29,11 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.pitchenga.Duration.*;
-import static com.pitchenga.Pitch.*;
+import static com.pitchenga.Duration.four;
+import static com.pitchenga.Pitch.Do0;
+import static com.pitchenga.Pitch.Non;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
@@ -579,86 +582,125 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         frequencyLabel.setText(String.format("%07.2f", riddle.frequency));
     }
 
-    private List<Pitch> deduplicate(Supplier<List<Pitch>> supplier) {
-        //fixme: This can be done better, e.g. move the conflicting items forward or something
-        List<Pitch> pitches;
-        int attempts = 4096;
+    private List<Pitch> shuffleList(List<Pitch> source) {
+        int attempts = 1024;
         while (true) {
-            attempts--;
-            debug("De-duplicating, attempts=" + attempts);
-            pitches = supplier.get();
-            if (!hasDuplicates(pitches) || attempts < 0) {
-                return pitches;
+            List<Pitch> result = new LinkedList<>(source);
+            debug("source=" + result);
+            //fixme: +Spinner for series length +Spinner for repeats
+            while (result.size() % setup.series != 0) {
+                int random = this.random.nextInt(result.size());
+                result.add(result.get(random));
             }
-        }
-    }
+            debug("added=" + result);
+            Collections.shuffle(result);
+            debug("shuffled=" + result);
+            List<Pitch> reshuffle = new LinkedList<>();
 
-    private boolean hasDuplicates(List<Pitch> pitches) {
-        pitches = new ArrayList<>(pitches);
-        Pitch previous = null;
-        for (Pitch pitch : pitches) {
-            if (pitch.equals(previous)) {
-                debug(pitches);
-                return true;
-            }
-            previous = pitch;
-        }
-
-        if (setup.repeat > 0) {
+            Pitch previous = null;
             Pitch firstInSeries = null;
-            for (int i = 0; i < pitches.size(); i++) {
-                Pitch pitch = pitches.get(i);
-                int mod = i % setup.series;
-                if (mod == 0) {
-                    firstInSeries = pitch;
-                }
-                if (mod == setup.series - 1) {
-                    if (pitch.equals(firstInSeries)) {
-                        return true;
+            for (int i = 0; i < result.size(); i++) {
+                Pitch pitch = result.get(i);
+                if (pitch.equals(previous)) {
+                    debug("duplicate=" + pitch + ", i=" + i);
+                    result.remove(i);
+                    i--;
+                    reshuffle.add(pitch);
+                    debug("pitches=" + result);
+                    debug("reshuffle=" + reshuffle);
+                } else {
+                    int mod = i % setup.series;
+                    if (mod == 0) {
+                        firstInSeries = pitch;
+                    }
+                    if (mod == setup.series - 1 && pitch.equals(firstInSeries)) {
+                        debug("series duplicate=" + pitch + ", i=" + i);
+                        result.remove(i);
+                        i--;
+                        reshuffle.add(pitch);
+                        debug("mod=" + mod);
+                        debug("firstInSeries=" + firstInSeries);
+                        debug("pitches=" + result);
+                        debug("reshuffle=" + reshuffle);
                     }
                 }
+                previous = pitch;
+            }
+
+            firstInSeries = null;
+            for (Pitch pitch : reshuffle) {
+                boolean added = false;
+                for (int i = 0; i < result.size(); i++) {
+                    Pitch resultPitch1 = result.get(i);
+                    Pitch resultPitch2 = i + 1 < result.size() ? result.get(i + 1) : null;
+                    debug("");
+                    debug("i=" + i);
+                    debug("reshuffle=" + pitch);
+                    debug("pitches=" + result);
+                    debug("resultPitch[i]=" + resultPitch1);
+                    debug("resultPitch[i+1]=" + resultPitch2);
+                    int mod = i % setup.series;
+                    debug("mod=" + mod);
+                    if (mod == 0) {
+                        firstInSeries = resultPitch1;
+                    }
+                    debug("firstInSeries=" + firstInSeries);
+                    if (!pitch.equals(resultPitch1) && !pitch.equals(resultPitch2)
+                            && !(mod == setup.series && pitch.equals(firstInSeries))) {
+                        result.add(i + 1, pitch);
+                        debug("pitches=" + result);
+                        added = true;
+                        break;
+                    }
+                }
+                if (!added) {
+                    debug("Failed to deduplicate=" + pitch + ", attempts=" + attempts);
+                    display.text("err");
+                    if (attempts-- >= 0) {
+                        continue;
+                    } else {
+                        display.text("ERR");
+                        debug("No more deduplication attempts left, there will be duplicated pitch=" + pitch);
+                        result.add(pitch);
+                    }
+                }
+                return result;
             }
         }
-        return false;
     }
 
     public List<Pitch> shuffle() {
-        return deduplicate(() -> {
-            //fixme: Restore the manual scales
+//        return deduplicate(() -> {
+        //fixme: Restore the manual scales
 //        List<Pitch> pitches = getScalePitches();
-            List<Pitch> pitches = ordered();
-            //fixme: +Spinner for series length +Spinner for repeats
-            while (pitches.size() % setup.series != 0) {
-                int index = random.nextInt(pitches.size());
-                pitches.add(pitches.get(index));
-            }
-            Collections.shuffle(pitches);
-            List<Pitch> shuffled = addOctaves(pitches);
-            debug(shuffled + " are the new riddles without penalties");
-            int size = shuffled.size();
-            List<Pitch> multi = new ArrayList<>(size * setup.repeat);
-            for (int i = 0; i < size; i += setup.series) {
-                for (int j = 0; j < setup.repeat; j++) {
-                    for (int k = 0; k < setup.series; k++) {
-                        multi.add(shuffled.get(i + k));
-                    }
+        List<Pitch> pitches = ordered();
+        List<Pitch> shuffled = shuffleList(pitches);
+        shuffled = addOctaves(shuffled);
+        debug(shuffled + " are the new riddles without penalties");
+        int size = shuffled.size();
+        List<Pitch> multi = new ArrayList<>(size * setup.repeat);
+        for (int i = 0; i < size; i += setup.series) {
+            for (int j = 0; j < setup.repeat; j++) {
+                for (int k = 0; k < setup.series; k++) {
+                    multi.add(shuffled.get(i + k));
                 }
             }
-            debug(multi + " are the new riddles multiplied");
+        }
+        debug(multi + " are the new riddles multiplied");
 
-            List<Pitch> result = createPenalties();
-            result.addAll(multi);
-            debug(result + " are the new riddles with penalties");
+        List<Pitch> result = createPenalties();
+        result.addAll(multi);
+        debug(result + " are the new riddles with penalties");
 
-            Set<Triplet<Pitch, Pitch, Pitch>> reminders = new LinkedHashSet<>(penaltyReminders);
-            for (Triplet<Pitch, Pitch, Pitch> reminder : reminders) {
-                result.add(reminder.first);
-                result.add(reminder.second);
-                result.add(reminder.third);
-            }
-            debug(result + " are the new riddles with penalties and reminders");
-            return result;
-        });
+        Set<Triplet<Pitch, Pitch, Pitch>> reminders = new LinkedHashSet<>(penaltyReminders);
+        for (Triplet<Pitch, Pitch, Pitch> reminder : reminders) {
+            result.add(reminder.first);
+            result.add(reminder.second);
+            result.add(reminder.third);
+        }
+        debug(result + " are the new riddles with penalties and reminders");
+        return result;
+//        });
     }
 
     public List<Pitch> shuffleGroupSeries(boolean shuffleMacroGroups, boolean shuffleGroups) {
@@ -671,15 +713,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         for (Pitch[][] scale : scalesList) {
             List<List<Pitch>> listLists = Arrays.stream(scale)
                     .flatMap(group -> {
-                        List<Pitch> pitches = deduplicate(() -> {
-                            List<Pitch> list = new LinkedList<>(Arrays.asList(group));
-                            Collections.shuffle(list);
-                            while (list.size() % setup.series != 0) {
-                                int index = random.nextInt(list.size());
-                                list.add(list.get(index));
-                            }
-                            return list;
-                        });
+                        List<Pitch> pitches = Arrays.asList(group);
+                        pitches = shuffleList(pitches);
                         List<List<Pitch>> lists = new ArrayList<>(pitches.size());
                         List<Pitch> list = null;
                         for (int i = 0; i < pitches.size(); i++) {
@@ -1037,6 +1072,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (pressed && event.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 playButton.setSelected(false);
                 playButton.requestFocus();
+                boolean set = isInNativeFullScreen.compareAndSet(true, false);
+                if (set) {
+                    toggleNativeFullScreen();
+                }
                 GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
             }
             if (!pressed && event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
@@ -1046,7 +1085,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 display.text("RST\n");
                 updateMixer();
             }
-//            //fixme: Media keys not recognized :(
+            //fixme: Media keys not recognized :(
 //            if (!pressed && event.getKeyCode() == 0) {
 //                nextTempo(true);
 //            }
