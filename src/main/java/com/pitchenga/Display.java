@@ -197,22 +197,22 @@ public class Display extends JPanel {
     }
 
     public static Pitch[][] FRETS = {
-            {Mi5, Fa5, Fi5, So5, Le5, La5},
-            {Si4, Do5, Ra5, Re5, Me5, Mi5},
-            {So4, Le4, La4, Se4, Si4, Do5},
-            {Re4, Me4, Mi4, Fa4, Fi4, So4},
-            {La3, Se3, Si3, Do4, Ra4, Re4},
-            {Mi3, Fa3, Fi3, So3, Le3, La3},
+            {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
+            {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
+            {So4, Le4, La4, Se4, Si4, Do5, Ra5},
+            {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
+            {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
+            {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
     };
 
     //fixme: Prettify
     public static Pitch[][] BASE_FRETS = {
-            {null, null, null, null, null, null},
-            {null, null, null, null, null, null},
-            {null, Le4, La4, Se4, Si4, Do5},
-            {null, Me4, Mi4, Fa4, Fi4, So4},
-            {null, null, null, Do4, Ra4, Re4},
-            {null, null, null, null, null, null},
+            {null, null, null, null, null, null, null},
+            {null, null, null, null, null, null, null},
+            {null, Le4, La4, Se4, Si4, Do5, null},
+            {null, Me4, Mi4, Fa4, Fi4, So4, null},
+            {null, null, null, Do4, Ra4, Re4, null},
+            {null, null, null, null, null, null, null},
     };
 
     private class Frets extends JPanel {
@@ -220,14 +220,14 @@ public class Display extends JPanel {
         private final JPanel[][] panels = new JPanel[FRETS.length][];
 
         public Frets() {
-            super(new GridLayout(FRETS[0].length, FRETS.length, 4, 4));
+            super(new GridLayout(FRETS.length, FRETS[0].length, 4, 4));
             this.setBackground(Color.BLACK);
 
             this.addComponentListener(new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
                     int borderThickness = getBorderThickness(panels[0][0]);
-                    setLayout(new GridLayout(FRETS[0].length, FRETS.length, borderThickness, borderThickness));
+                    setLayout(new GridLayout(FRETS.length, FRETS[0].length, borderThickness, borderThickness));
                 }
             });
 
