@@ -48,10 +48,10 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Tempo100;
         defaultPacer = Pacer.Answer;
 
-        defaultRiddler = Riddler.Step44Fa4;
         defaultRiddler = Riddler.ChromaticScaleUpDownUp;
         defaultRiddler = Riddler.ChromaticScaleDownUpDown;
         defaultRiddler = Riddler.Step33Octaves2And3Shuffled;
+        defaultRiddler = Riddler.Step34Octaves2And3And4;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;
