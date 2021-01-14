@@ -326,9 +326,7 @@ public class Display extends JPanel {
                                 panel.setBackground(Color.BLACK);
                             }
                         }
-//                        panel.setOpaque(true);
                     } else {
-//                        panel.setOpaque(false);
                         panel.setBackground(Color.BLACK);
                         panel.setBorder(null);
                     }

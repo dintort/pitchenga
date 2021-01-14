@@ -76,7 +76,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final AtomicReference<Pitch> prevPrevRiddle = new AtomicReference<>(null);
     private volatile long riddleTimestampMs = System.currentTimeMillis();
     private volatile long penaltyRiddleTimestampMs = System.currentTimeMillis();
-    private volatile long lastPacerTimestampMs = System.currentTimeMillis();
+    private volatile long lastPacerTimestampMs = 0;
     private volatile long lastBuzzTimestampMs;
     private volatile boolean frozen = false;
     private final AtomicInteger seriesCounter = new AtomicInteger(0);
@@ -183,7 +183,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private void guess(Pitch guess, boolean exact) {
         try {
-            lastPacerTimestampMs = System.currentTimeMillis();
             if (frozen || !isPlaying()) {
                 return;
             }
@@ -296,7 +295,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void pace(int bpm, Object[] fugue) {
         long delay = 60_000 / bpm;
         long prevTimestamp = lastPacerTimestampMs;
-        long elapsed = System.currentTimeMillis() - prevTimestamp;
+        long elapsed = 0;
+        if (prevTimestamp != 0) {
+            elapsed = System.currentTimeMillis() - prevTimestamp;
+        }
         if (elapsed < delay) {
             long diff = delay - elapsed;
             int fugueLength = Arrays.stream(fugue)
@@ -1543,6 +1545,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (playing) {
             resetGame();
             playButton.setText("Stop");
+            lastPacerTimestampMs = 0;
             playExecutor.execute(() -> guess(null, false));
 //            if (!getPacer().equals(Pacer.Answer)) {
             //fixme: Hide only the control panel, but not the piano
@@ -1553,7 +1556,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 if (nativeFullScreenAvailable) {
                     boolean current = isInNativeFullScreen.get();
                     if (!current) {
-                        boolean set = isInNativeFullScreen.compareAndSet(current, true);
+                        boolean set = isInNativeFullScreen.compareAndSet(false, true);
                         if (set) {
                             toggleNativeFullScreen();
                         }
@@ -1572,7 +1575,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 if (nativeFullScreenAvailable) {
                     boolean current = isInNativeFullScreen.get();
                     if (current) {
-                        boolean set = isInNativeFullScreen.compareAndSet(current, false);
+                        boolean set = isInNativeFullScreen.compareAndSet(true, false);
                         if (set) {
                             toggleNativeFullScreen();
                         }
