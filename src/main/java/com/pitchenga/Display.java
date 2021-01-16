@@ -197,6 +197,12 @@ public class Display extends JPanel {
     }
 
     public static Pitch[][] FRETS = {
+            {Le4, La4, Se4, Si4, Do5,},
+            {Me4, Mi4, Fa4, Fi4, So4,},
+            {Se3, Si3, Do4, Ra4, Re4,},
+    };
+
+    public static Pitch[][] FRETS_FULL = {
             {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
             {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
             {So4, Le4, La4, Se4, Si4, Do5, Ra5},
@@ -207,6 +213,12 @@ public class Display extends JPanel {
 
     //fixme: Prettify
     public static Pitch[][] BASE_FRETS = {
+            {Le4, La4, Se4, Si4, Do5},
+            {Me4, Mi4, Fa4, Fi4, So4},
+            {null, null, Do4, Ra4, Re4},
+    };
+
+    public static Pitch[][] BASE_FRETS_FULL = {
             {null, null, null, null, null, null, null},
             {null, null, null, null, null, null, null},
             {null, Le4, La4, Se4, Si4, Do5, null},
@@ -226,7 +238,7 @@ public class Display extends JPanel {
             this.addComponentListener(new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
-                    int borderThickness = getBorderThickness(panels[0][0]);
+                    int borderThickness = getBorderThickness(panels[0][0]) * 2;
                     setLayout(new GridLayout(FRETS.length, FRETS[0].length, borderThickness, borderThickness));
                 }
             });
@@ -279,6 +291,10 @@ public class Display extends JPanel {
 //                });
                 }
                 labels = labelsList.toArray(new JComponent[0]);
+
+                int borderThickness = getBorderThickness(panels[0][0]) * 2;
+                this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, borderThickness));
+                setLayout(new GridLayout(FRETS.length, FRETS[0].length, borderThickness, borderThickness));
             }
         }
 
@@ -306,6 +322,8 @@ public class Display extends JPanel {
             }
 
             int borderThickness = getBorderThickness(panels[0][0]);
+            this.setBorder(BorderFactory.createLineBorder(fillColor, borderThickness * 2));
+
             for (int i = 0; i < FRETS.length; i++) {
                 Pitch[] row = FRETS[i];
                 Pitch[] baseRow = BASE_FRETS[i];
@@ -320,6 +338,7 @@ public class Display extends JPanel {
                             panel.setBackground(toneColor);
                         } else {
                             if (tones.contains(myTone)) {
+                                panel.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderThickness));
                                 panel.setBackground(myTone.color);
                             } else {
                                 panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
