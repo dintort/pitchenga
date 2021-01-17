@@ -82,7 +82,7 @@ public class Display extends JPanel {
 //        textPane.setBackground(null);
 //        textPane.setOpaque(false);
 //        textPane.getViewport().setBackground(new Color(0, 0, 0, 0.0f));
-        textPane.getViewport().setBackground(Color.BLACK);
+        textPane.getViewport().setBackground(Color.DARK_GRAY);
 //        textPane.getViewport().setBackground(null);
 //        textPane.getViewport().setOpaque(false);
 
@@ -91,7 +91,7 @@ public class Display extends JPanel {
         textArea.setFont(Pitchenga.MONOSPACED);
         textArea.setEditable(false);
         textArea.setForeground(Color.LIGHT_GRAY);
-        textArea.setBackground(Color.BLACK);
+        textArea.setBackground(Color.DARK_GRAY);
 //        textArea.setBackground(new Color(0, 0, 0, 0.0f));
 //        textArea.setBackground(null);
 //        textArea.setOpaque(false);
@@ -235,14 +235,6 @@ public class Display extends JPanel {
             super(new GridLayout(FRETS.length, FRETS[0].length, 4, 4));
             this.setBackground(Color.BLACK);
 
-            this.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    int borderThickness = getBorderThickness(panels[0][0]) * 2;
-                    setLayout(new GridLayout(FRETS.length, FRETS[0].length, borderThickness, borderThickness));
-                }
-            });
-
             List<JComponent> labelsList = new LinkedList<>();
             for (int i = 0; i < FRETS.length; i++) {
                 Pitch[] row = FRETS[i];
@@ -292,7 +284,7 @@ public class Display extends JPanel {
                 }
                 labels = labelsList.toArray(new JComponent[0]);
 
-                int borderThickness = getBorderThickness(panels[0][0]) * 2;
+                int borderThickness = getBorderThickness(panels[0][0]) * 4;
                 this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, borderThickness));
                 setLayout(new GridLayout(FRETS.length, FRETS[0].length, borderThickness, borderThickness));
             }
@@ -322,7 +314,8 @@ public class Display extends JPanel {
             }
 
             int borderThickness = getBorderThickness(panels[0][0]);
-            this.setBorder(BorderFactory.createLineBorder(fillColor, borderThickness * 2));
+            this.setBorder(BorderFactory.createLineBorder(fillColor, borderThickness * 4));
+            setLayout(new GridLayout(FRETS.length, FRETS[0].length, borderThickness * 4, borderThickness * 4));
 
             for (int i = 0; i < FRETS.length; i++) {
                 Pitch[] row = FRETS[i];
