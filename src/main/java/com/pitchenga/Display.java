@@ -82,7 +82,7 @@ public class Display extends JPanel {
 //        textPane.setBackground(null);
 //        textPane.setOpaque(false);
 //        textPane.getViewport().setBackground(new Color(0, 0, 0, 0.0f));
-        textPane.getViewport().setBackground(Color.DARK_GRAY);
+        textPane.getViewport().setBackground(Color.BLACK);
 //        textPane.getViewport().setBackground(null);
 //        textPane.getViewport().setOpaque(false);
 
@@ -91,7 +91,7 @@ public class Display extends JPanel {
         textArea.setFont(Pitchenga.MONOSPACED);
         textArea.setEditable(false);
         textArea.setForeground(Color.LIGHT_GRAY);
-        textArea.setBackground(Color.DARK_GRAY);
+        textArea.setBackground(Color.BLACK);
 //        textArea.setBackground(new Color(0, 0, 0, 0.0f));
 //        textArea.setBackground(null);
 //        textArea.setOpaque(false);
