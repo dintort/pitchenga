@@ -1020,21 +1020,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
             }
             if (!pressed && event.getKeyCode() == KeyEvent.VK_ENTER) {
-                if (nativeFullScreenAvailable) {
-                    boolean current = isInNativeFullScreen.get();
-                    isInNativeFullScreen.compareAndSet(current, !current);
-                    bottomPanel.setVisible(!bottomPanel.isVisible());
-                    toggleNativeFullScreen();
-                } else {
-                    GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-                    if (screenDevice.getFullScreenWindow() == this) {
-                        bottomPanel.setVisible(true);
-                        screenDevice.setFullScreenWindow(null);
-                    } else {
-                        bottomPanel.setVisible(false);
-                        screenDevice.setFullScreenWindow(this);
-                    }
-                }
+                handleEnterButton();
             }
             if (pressed && event.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 playButton.setSelected(false);
@@ -1591,8 +1577,25 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
             }
         }
-
         debug("running=" + playing);
+    }
+
+    private void handleEnterButton() {
+        if (nativeFullScreenAvailable) {
+            boolean current = isInNativeFullScreen.get();
+            isInNativeFullScreen.compareAndSet(current, !current);
+            bottomPanel.setVisible(!bottomPanel.isVisible());
+            toggleNativeFullScreen();
+        } else {
+            GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
+            if (screenDevice.getFullScreenWindow() == this) {
+                bottomPanel.setVisible(true);
+                screenDevice.setFullScreenWindow(null);
+            } else {
+                bottomPanel.setVisible(false);
+                screenDevice.setFullScreenWindow(this);
+            }
+        }
     }
 
     private void stop() {

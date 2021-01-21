@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.*;
@@ -22,7 +22,7 @@ public class Display extends JPanel {
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
     private volatile Color fillColor;
-    private volatile JPanel displayPanel;
+    private final Updatable displayPanel;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Display");
@@ -53,15 +53,14 @@ public class Display extends JPanel {
             return label;
         }).toArray(JComponent[]::new);
 
-//        this.setLayout(new OverlayLayout(this));
-        this.setLayout(new BorderLayout());
+        this.setLayout(new OverlayLayout(this));
 
         initTextPane();
-//        JPanel textLayer = new JPanel(new BorderLayout());
-//        textLayer.setOpaque(false);
-//        this.add(textLayer);
-//        textLayer.add(textPane, BorderLayout.EAST);
-        this.add(textPane, BorderLayout.EAST);
+        JPanel textLayer = new JPanel(new BorderLayout());
+        this.add(textLayer);
+        textLayer.setOpaque(false);
+        textLayer.setBackground(new Color(0, 0, 0, 0.0f));
+        textLayer.add(textPane, BorderLayout.EAST);
 
         //fixme: Make them switchable
 //        Circle circle = new Circle();
@@ -77,26 +76,16 @@ public class Display extends JPanel {
         textPane.setBorder(null);
         textPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         textPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-//        textPane.setBackground(new Color(0, 0, 0, 0.0f));
-        textPane.setBackground(Color.BLACK);
-//        textPane.setBackground(null);
-//        textPane.setOpaque(false);
-//        textPane.getViewport().setBackground(new Color(0, 0, 0, 0.0f));
-        textPane.getViewport().setBackground(Color.BLACK);
-//        textPane.getViewport().setBackground(null);
-//        textPane.getViewport().setOpaque(false);
+        textPane.setBackground(new Color(0, 0, 0, 0.0f));
+        textPane.getViewport().setBorder(null);
+        textPane.getViewport().setBackground(new Color(0, 0, 0, 0.0f));
 
         //fixme: Copy text to clipboard does not work on mac
-//        textArea.setVisible(false);
         textArea.setFont(Pitchenga.MONOSPACED);
         textArea.setEditable(false);
         textArea.setForeground(Color.LIGHT_GRAY);
-        textArea.setBackground(Color.BLACK);
-//        textArea.setBackground(new Color(0, 0, 0, 0.0f));
-//        textArea.setBackground(null);
-//        textArea.setOpaque(false);
+        textArea.setBackground(new Color(0, 0, 0, 0.0f));
         textArea.setBorder(null);
-        //        text("<html>");
         clearText();
     }
 
@@ -137,16 +126,17 @@ public class Display extends JPanel {
 
     private void initFontScaling() {
         this.addComponentListener(new ComponentAdapter() {
+            //fixme: Do it in paint instead maybe?
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                scaleFontAndRepaint();
+                scaleFontAndUpdate();
             }
         });
-        scaleFontAndRepaint();
+        scaleFontAndUpdate();
     }
 
-    private void scaleFontAndRepaint() {
+    private void scaleFontAndUpdate() {
         Dimension size = getSize();
         int min = Math.min(size.height, size.width);
         int fontSize = min / 35;
@@ -193,7 +183,7 @@ public class Display extends JPanel {
     }
 
     public void update() {
-        displayPanel.repaint();
+        displayPanel.update();
     }
 
     public static Pitch[][] FRETS = {
@@ -202,14 +192,14 @@ public class Display extends JPanel {
             {Se3, Si3, Do4, Ra4, Re4,},
     };
 
-    public static Pitch[][] FRETS_FULL = {
-            {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
-            {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
-            {So4, Le4, La4, Se4, Si4, Do5, Ra5},
-            {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
-            {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
-            {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
-    };
+//    public static Pitch[][] FRETS = {
+//            {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
+//            {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
+//            {So4, Le4, La4, Se4, Si4, Do5, Ra5},
+//            {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
+//            {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
+//            {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
+//    };
 
     //fixme: Prettify
     public static Pitch[][] BASE_FRETS = {
@@ -218,16 +208,20 @@ public class Display extends JPanel {
             {null, null, Do4, Ra4, Re4},
     };
 
-    public static Pitch[][] BASE_FRETS_FULL = {
-            {null, null, null, null, null, null, null},
-            {null, null, null, null, null, null, null},
-            {null, Le4, La4, Se4, Si4, Do5, null},
-            {null, Me4, Mi4, Fa4, Fi4, So4, null},
-            {null, null, null, Do4, Ra4, Re4, null},
-            {null, null, null, null, null, null, null},
-    };
+//    public static Pitch[][] BASE_FRETS = {
+//            {null, null, null, null, null, null, null},
+//            {null, null, null, null, null, null, null},
+//            {null, Le4, La4, Se4, Si4, Do5, null},
+//            {null, Me4, Mi4, Fa4, Fi4, So4, null},
+//            {null, null, null, Do4, Ra4, Re4, null},
+//            {null, null, null, null, null, null, null},
+//    };
 
-    private class Frets extends JPanel {
+    private interface Updatable {
+        void update();
+    }
+
+    private class Frets extends JPanel implements Updatable {
 
         private final JPanel[][] panels = new JPanel[FRETS.length][];
 
@@ -291,7 +285,10 @@ public class Display extends JPanel {
         }
 
         private int getBorderThickness(JPanel panel) {
-            int thickness = Math.min(panel.getWidth(), panel.getHeight()) / 12;
+            int width = panel.getWidth();
+            //fixme: Width fluctuating on every repaint on particular sizes +it gets negative after returning from full screen
+            System.out.println("width=" + width);
+            int thickness = Math.min(width, panel.getHeight()) / 12;
             if (thickness == 0) {
                 thickness = 1;
             }
@@ -299,7 +296,7 @@ public class Display extends JPanel {
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
+        public void update() {
             Tone tone = Display.this.tone;
             Color toneColor = Display.this.toneColor;
             Color pitchyColor = Display.this.pitchinessColor;
@@ -344,10 +341,11 @@ public class Display extends JPanel {
                     }
                 }
             }
-            super.paintComponent(g);
+            textPane.repaint();
         }
     }
 
+    @SuppressWarnings("unused")
     private class Circle extends JPanel {
 
         public Circle() {
