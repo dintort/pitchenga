@@ -22,7 +22,8 @@ public class Display extends JPanel {
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
     private volatile Color fillColor;
-    private final Updatable displayPanel;
+    private final Frets fretsBasePanel;
+    private final Frets fretsFirstPanel;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Display");
@@ -66,9 +67,15 @@ public class Display extends JPanel {
 //        Circle circle = new Circle();
 //        this.add(circle);
 //        this.displayPanel = circle;
-        Frets frets = new Frets();
-        this.add(frets);
-        this.displayPanel = frets;
+        Frets fretsFirst = new Frets(FRETS_FIRST);
+        this.add(fretsFirst);
+        this.fretsFirstPanel = fretsFirst;
+
+        Frets fretsBase = new Frets(FRETS_BASE);
+        fretsBase.setVisible(false);
+        this.add(fretsBase);
+        this.fretsBasePanel = fretsBase;
+
         initFontScaling();
     }
 
@@ -183,66 +190,59 @@ public class Display extends JPanel {
     }
 
     public void update() {
-        displayPanel.update();
+        if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
+            fretsBasePanel.setVisible(true);
+            fretsFirstPanel.setVisible(false);
+            fretsBasePanel.update();
+        } else {
+            fretsFirstPanel.setVisible(true);
+            fretsBasePanel.setVisible(false);
+            fretsFirstPanel.update();
+        }
     }
 
-    public static Pitch[][] FRETS = {
+    public static Pitch[][] FRETS_BASE = {
             {Le4, La4, Se4, Si4, Do5,},
             {Me4, Mi4, Fa4, Fi4, So4,},
-            {Se3, Si3, Do4, Ra4, Re4,},
+            {null, null, Do4, Ra4, Re4,},
     };
 
-//    public static Pitch[][] FRETS = {
-//            {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
-//            {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
-//            {So4, Le4, La4, Se4, Si4, Do5, Ra5},
-//            {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
-//            {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
-//            {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
-//    };
-
-    //fixme: Prettify
-    public static Pitch[][] BASE_FRETS = {
-            {Le4, La4, Se4, Si4, Do5},
-            {Me4, Mi4, Fa4, Fi4, So4},
-            {null, null, Do4, Ra4, Re4},
+    public static Pitch[][] FRETS_FIRST = {
+            {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
+            {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
+            {So4, Le4, La4, Se4, Si4, Do5, Ra5},
+            {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
+            {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
+            {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
     };
-
-//    public static Pitch[][] BASE_FRETS = {
-//            {null, null, null, null, null, null, null},
-//            {null, null, null, null, null, null, null},
-//            {null, Le4, La4, Se4, Si4, Do5, null},
-//            {null, Me4, Mi4, Fa4, Fi4, So4, null},
-//            {null, null, null, Do4, Ra4, Re4, null},
-//            {null, null, null, null, null, null, null},
-//    };
-
-    private interface Updatable {
-        void update();
-    }
 
     private class Frets extends JPanel implements Updatable {
 
-        private final JPanel[][] panels = new JPanel[FRETS.length][];
+        private final JPanel[][] panels;
+        private final Pitch[][] frets;
 
-        public Frets() {
-            super(new GridLayout(FRETS.length, FRETS[0].length, 4, 4));
-            this.setBackground(Color.BLACK);
+        public Frets(Pitch[][] frets) {
+            super(new GridLayout(frets.length, frets[0].length, 4, 4));
+            this.frets = frets;
+            setBackground(Color.BLACK);
+            panels = new JPanel[frets.length][];
 
             List<JComponent> labelsList = new LinkedList<>();
-            for (int i = 0; i < FRETS.length; i++) {
-                Pitch[] row = FRETS[i];
+            for (int i = 0; i < frets.length; i++) {
+                Pitch[] row = frets[i];
                 panels[i] = new JPanel[row.length];
                 for (int j = 0; j < row.length; j++) {
                     Pitch pitch = row[j];
-                    Tone tone = pitch.tone;
+                    String label = pitch != null ? pitch.tone.label : "    ";
+                    Color color = pitch != null ? pitch.tone.color : Color.BLACK;
+
                     JPanel panel = new JPanel();
                     panels[i][j] = panel;
                     this.add(panel);
                     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 //                    panel.setLayout(new BorderLayout());
                     panel.setBackground(Color.BLACK);
-                    panel.setBorder(BorderFactory.createLineBorder(tone.color, getBorderThickness(panel)));
+                    panel.setBorder(BorderFactory.createLineBorder(color, getBorderThickness()));
 
 //                    JPanel labelPanel = new JPanel();
 //                    labelPanel.setBackground(null);
@@ -250,7 +250,7 @@ public class Display extends JPanel {
 //                    labelPanel.setBorder(BorderFactory.createLineBorder(Color.GREEN));
 
                     panel.add(Box.createVerticalGlue());
-                    JLabel toneLabel = new JLabel(tone.label);
+                    JLabel toneLabel = new JLabel(label);
                     labelsList.add(toneLabel);
                     panel.add(toneLabel, BorderLayout.CENTER);
 //                    labelPanel.add(toneLabel, BorderLayout.CENTER);
@@ -261,6 +261,7 @@ public class Display extends JPanel {
                     toneLabel.setBackground(Color.BLACK);
                     toneLabel.setOpaque(true);
                     toneLabel.setHorizontalTextPosition(SwingConstants.CENTER);
+                    panel.setVisible(pitch != null);
                     panel.add(Box.createVerticalGlue());
 
 
@@ -278,17 +279,14 @@ public class Display extends JPanel {
                 }
                 labels = labelsList.toArray(new JComponent[0]);
 
-                int borderThickness = getBorderThickness(panels[0][0]) * 4;
+                int borderThickness = getBorderThickness() * 4;
                 this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, borderThickness));
-                setLayout(new GridLayout(FRETS.length, FRETS[0].length, borderThickness, borderThickness));
+                setLayout(new GridLayout(frets.length, frets[0].length, borderThickness, borderThickness));
             }
         }
 
-        private int getBorderThickness(JPanel panel) {
-            int width = panel.getWidth();
-            //fixme: Width fluctuating on every repaint on particular sizes +it gets negative after returning from full screen
-            System.out.println("width=" + width);
-            int thickness = Math.min(width, panel.getHeight()) / 12;
+        private int getBorderThickness() {
+            int thickness = (Math.min(getWidth(), getHeight()) / frets[0].length) / 18;
             if (thickness == 0) {
                 thickness = 1;
             }
@@ -310,19 +308,17 @@ public class Display extends JPanel {
                 return;
             }
 
-            int borderThickness = getBorderThickness(panels[0][0]);
+            int borderThickness = getBorderThickness();
             this.setBorder(BorderFactory.createLineBorder(fillColor, borderThickness * 4));
-            setLayout(new GridLayout(FRETS.length, FRETS[0].length, borderThickness * 4, borderThickness * 4));
+            setLayout(new GridLayout(frets.length, frets[0].length, borderThickness * 4, borderThickness * 4));
 
-            for (int i = 0; i < FRETS.length; i++) {
-                Pitch[] row = FRETS[i];
-                Pitch[] baseRow = BASE_FRETS[i];
+            for (int i = 0; i < frets.length; i++) {
+                Pitch[] row = frets[i];
                 for (int j = 0; j < row.length; j++) {
                     Pitch pitch = row[j];
-                    Pitch isBase = baseRow[j];
-                    Tone myTone = pitch.tone;
                     JPanel panel = panels[i][j];
-                    if (isBase != null || !Pitchenga.playButton.isSelected()) {
+                    if (pitch != null) {
+                        Tone myTone = pitch.tone;
                         if (myTone == tone && toneColor != null && pitchyColor != null) {
                             panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 2));
                             panel.setBackground(toneColor);
@@ -335,9 +331,6 @@ public class Display extends JPanel {
                                 panel.setBackground(Color.BLACK);
                             }
                         }
-                    } else {
-                        panel.setBackground(Color.BLACK);
-                        panel.setBorder(null);
                     }
                 }
             }
@@ -454,6 +447,10 @@ public class Display extends JPanel {
         protected void paintChildren(Graphics g) {
         }
 
+    }
+
+    private interface Updatable {
+        void update();
     }
 
 }
