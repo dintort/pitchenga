@@ -51,7 +51,7 @@ public class Ptchng extends Setup {
         defaultRiddler = Riddler.ChromaticScaleUpDownUp;
         defaultRiddler = Riddler.ChromaticScaleDownUpDown;
         defaultRiddler = Riddler.Step33Octaves2And3Shuffled;
-        defaultRiddler = Riddler.Step34Octaves2And3And4;
+        defaultRiddler = Riddler.Step34Octave4;
 
         defaultRinger = Ringer.ToneAndDo;
         defaultRinger = Ringer.JustDo;
