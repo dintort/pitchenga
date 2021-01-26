@@ -14,7 +14,7 @@ public class Display extends JPanel {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
     private final Set<Tone> scaleTones = EnumSet.noneOf(Tone.class);
-    private JComponent[] labels;
+    private final List<JComponent> labels = new ArrayList<>();
     private final JTextArea textArea = new JTextArea();
     private final JScrollPane textPane = new JScrollPane(textArea);
 
@@ -45,14 +45,14 @@ public class Display extends JPanel {
     public Display() {
         super();
 
-        //fixme
-        labels = Arrays.stream(TONES).map(tone -> {
+        //fixme: Move to Circle
+        for (Tone tone : TONES) {
             JLabel label = new JLabel(tone.label);
             label.setFont(Pitchenga.MONOSPACED);
             label.setForeground(Color.WHITE);
             label.setPreferredSize(new Dimension((int) label.getPreferredSize().getWidth(), (int) label.getPreferredSize().getWidth()));
-            return label;
-        }).toArray(JComponent[]::new);
+            labels.add(label);
+        }
 
         this.setLayout(new OverlayLayout(this));
 
@@ -227,7 +227,6 @@ public class Display extends JPanel {
             setBackground(Color.BLACK);
             panels = new JPanel[frets.length][];
 
-            List<JComponent> labelsList = new LinkedList<>();
             for (int i = 0; i < frets.length; i++) {
                 Pitch[] row = frets[i];
                 panels[i] = new JPanel[row.length];
@@ -251,7 +250,7 @@ public class Display extends JPanel {
 
                     panel.add(Box.createVerticalGlue());
                     JLabel toneLabel = new JLabel(label);
-                    labelsList.add(toneLabel);
+                    labels.add(toneLabel);
                     panel.add(toneLabel, BorderLayout.CENTER);
 //                    labelPanel.add(toneLabel, BorderLayout.CENTER);
                     toneLabel.setFont(Pitchenga.MONOSPACED);
@@ -277,7 +276,6 @@ public class Display extends JPanel {
 //                    }
 //                });
                 }
-                labels = labelsList.toArray(new JComponent[0]);
 
                 int borderThickness = getBorderThickness() * 4;
                 this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, borderThickness));
@@ -412,7 +410,7 @@ public class Display extends JPanel {
                     }
                 }
 
-                JComponent label = labels[i];
+                JComponent label = labels.get(i);
                 int width = label.getWidth();
                 int height = label.getHeight();
                 Graphics labelGraphics = graphics.create(offset + x + radius - width / 2, y + radius - height / 2, width, height);
