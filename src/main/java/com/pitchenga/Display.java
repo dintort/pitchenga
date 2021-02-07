@@ -22,8 +22,9 @@ public class Display extends JPanel {
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
     private volatile Color fillColor;
-    private final Frets fretsBasePanel;
-    private final Frets fretsFirstPanel;
+    private final Circle circle;
+//    private final Frets fretsBasePanel;
+//    private final Frets fretsFirstPanel;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Display");
@@ -64,17 +65,18 @@ public class Display extends JPanel {
         textLayer.add(textPane, BorderLayout.EAST);
 
         //fixme: Make them switchable
-//        Circle circle = new Circle();
-//        this.add(circle);
-//        this.displayPanel = circle;
-        Frets fretsFirst = new Frets(FRETS_FIRST);
-        this.add(fretsFirst);
-        this.fretsFirstPanel = fretsFirst;
+        Circle circle = new Circle();
+        this.add(circle);
+        this.circle = circle;
 
-        Frets fretsBase = new Frets(FRETS_BASE);
-        fretsBase.setVisible(false);
-        this.add(fretsBase);
-        this.fretsBasePanel = fretsBase;
+//        Frets fretsFirst = new Frets(FRETS_FIRST);
+//        this.add(fretsFirst);
+//        this.fretsFirstPanel = fretsFirst;
+//
+//        Frets fretsBase = new Frets(FRETS_BASE);
+//        fretsBase.setVisible(false);
+//        this.add(fretsBase);
+//        this.fretsBasePanel = fretsBase;
 
         initFontScaling();
     }
@@ -190,33 +192,36 @@ public class Display extends JPanel {
     }
 
     public void update() {
-        if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
-            fretsBasePanel.setVisible(true);
-            fretsFirstPanel.setVisible(false);
-            fretsBasePanel.update();
-        } else {
-            fretsFirstPanel.setVisible(true);
-            fretsBasePanel.setVisible(false);
-            fretsFirstPanel.update();
-        }
+        circle.repaint();
+//        if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
+//            fretsBasePanel.setVisible(true);
+//            fretsFirstPanel.setVisible(false);
+//            fretsBasePanel.update();
+//        } else {
+//            fretsFirstPanel.setVisible(true);
+//            fretsBasePanel.setVisible(false);
+//            fretsFirstPanel.update();
+//        }
     }
 
-    public static Pitch[][] FRETS_BASE = {
-            {Le4, La4, Se4, Si4, Do5,},
-            {Me4, Mi4, Fa4, Fi4, So4,},
-            {null, null, Do4, Ra4, Re4,},
-    };
+    @SuppressWarnings("unused")
+    private class Frets extends JPanel{
 
-    public static Pitch[][] FRETS_FIRST = {
-            {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
-            {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
-            {So4, Le4, La4, Se4, Si4, Do5, Ra5},
-            {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
-            {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
-            {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
-    };
+        public final Pitch[][] FRETS_BASE = {
+                {Le4, La4, Se4, Si4, Do5,},
+                {Me4, Mi4, Fa4, Fi4, So4,},
+                {null, null, Do4, Ra4, Re4,},
+        };
 
-    private class Frets extends JPanel implements Updatable {
+        public final Pitch[][] FRETS_FIRST = {
+                {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
+                {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
+                {So4, Le4, La4, Se4, Si4, Do5, Ra5},
+                {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
+                {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
+                {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
+        };
+
 
         private final JPanel[][] panels;
         private final Pitch[][] frets;
@@ -291,7 +296,6 @@ public class Display extends JPanel {
             return thickness;
         }
 
-        @Override
         public void update() {
             Tone tone = Display.this.tone;
             Color toneColor = Display.this.toneColor;
@@ -390,7 +394,7 @@ public class Display extends JPanel {
                     graphics.setColor(pitchyColor);
                     graphics.fillOval(x + offset, y, diameter, diameter);
                     graphics.setColor(toneColor);
-                    graphics.fillOval(x + offset + gap, y + gap, diameter - halfRadius, diameter - halfRadius);
+                    graphics.fillOval(x + offset + halfRadius / 2, y + halfRadius / 2, diameter - halfRadius, diameter - halfRadius);
                 } else {
                     graphics.setColor(myTone.color);
                     graphics.fillOval(x + offset, y, diameter, diameter);
@@ -445,10 +449,6 @@ public class Display extends JPanel {
         protected void paintChildren(Graphics g) {
         }
 
-    }
-
-    private interface Updatable {
-        void update();
     }
 
 }
