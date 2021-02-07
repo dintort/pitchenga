@@ -422,6 +422,7 @@ public class Display extends JPanel {
                 labelGraphics.fillOval(0, 0, width, height);
                 label.paint(labelGraphics);
             }
+            textPane.repaint();
         }
 
         private void triangle(Graphics graphics, int offset, int gap, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill) {
