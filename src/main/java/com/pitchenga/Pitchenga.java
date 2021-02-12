@@ -1086,7 +1086,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         index = up ? index + 1 : index - 1;
         if (index >= 0 && index < pacerCombo.getItemCount()) {
             pacerCombo.setSelectedIndex(index);
-//            display.text("   ");
+            display.text(String.valueOf(riddleQueue.size()));
+            display.text("\n");
             display.text(String.valueOf(getPacer().bpm));
             display.text("\n");
         }
