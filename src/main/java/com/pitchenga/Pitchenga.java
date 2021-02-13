@@ -589,6 +589,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             attempts--;
             debug("De-duplicating, attempts=" + attempts);
             pitches = supplier.get();
+            if (pitches.size() <= 3) {
+                return pitches;
+            }
             if (!hasDuplicates(pitches) || attempts < 0) {
                 return pitches;
             }
