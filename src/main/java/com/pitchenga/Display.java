@@ -46,6 +46,8 @@ public class Display extends JPanel {
     public Display() {
         super();
 
+        //fixme: Concurrently pressed keys are not displayed properly
+
         //fixme: Move to Circle
         for (Tone tone : TONES) {
             JLabel label = new JLabel(tone.label);

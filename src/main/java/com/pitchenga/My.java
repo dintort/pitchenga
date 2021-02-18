@@ -23,8 +23,6 @@ public class My extends Setup {
 
         series = 3;
         repeat = 3;
-//        series = 1;
-//        repeat = 1;
 
         defaultHinter = Hinter.Delayed200;
         defaultHinter = Hinter.Delayed100;
@@ -39,27 +37,10 @@ public class My extends Setup {
         //fixme: Delay hinter proportionally to the tempo
 
         defaultPacer = Pacer.Answer;
-        defaultPacer = Pacer.Tempo140;
-        defaultPacer = Pacer.Tempo45;
-        defaultPacer = Pacer.Tempo30;
-        defaultPacer = Pacer.Tempo40;
-        defaultPacer = Pacer.Tempo60;
-        defaultPacer = Pacer.Tempo80;
-        defaultPacer = Pacer.Tempo90;
-        defaultPacer = Pacer.Tempo50;
         defaultPacer = Pacer.Tempo100;
 
-        defaultRiddler = Riddler.Step37Octaves2And3And4And5ShuffledSiDo;
-        defaultRiddler = Riddler.Step38Octaves2And3And4And5ShuffledLaSe;
-        defaultRiddler = Riddler.Step39Octaves2And3And4And5ShuffledSoLe;
-        defaultRiddler = Riddler.Step40Octaves2And3And4And5ShuffledFaFi;
-        defaultRiddler = Riddler.Step41Octaves2And3And4And5ShuffledMeMi;
-        defaultRiddler = Riddler.Step42Octaves2And3And4And5ShuffledRaRe;
+        defaultRiddler = Riddler.Step43Octave6;
 
-        defaultRinger = Ringer.ToneAndDo;
-        defaultRinger = Ringer.JustDo;
-        defaultRinger = Ringer.ToneAndDo;
-        defaultRinger = Ringer.ToneAndLa;
         defaultRinger = Ringer.Tone;
         defaultRinger = Ringer.None;
 
