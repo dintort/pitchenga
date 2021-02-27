@@ -38,6 +38,7 @@ public class My extends Setup {
 
         defaultPacer = Pacer.Answer;
         defaultPacer = Pacer.Tempo100;
+        defaultPacer = Pacer.Tempo115;
 
         defaultRiddler = Riddler.Step43Octave6;
 
