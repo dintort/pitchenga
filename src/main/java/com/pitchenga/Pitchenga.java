@@ -1752,7 +1752,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private void initMidiInstruments(Synthesizer synthesizer) {
         javax.sound.midi.Instrument[] instruments = synthesizer.getLoadedInstruments();
-        javax.sound.midi.Instrument instrument = instruments[setup.buzzInstrument];
+        javax.sound.midi.Instrument instrument = instruments[setup.riddleInstrument];
         if (synthesizer.loadInstrument(instrument)) {
             buzzInstrument.programChange(instrument.getPatch().getProgram());
         }

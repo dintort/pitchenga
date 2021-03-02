@@ -17,7 +17,8 @@ public class My extends Setup {
 
         defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
 
-//        buzzInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
+//        riddleInstrument = Instrument.ELECTRIC_BASS_FINGER;
+//        riddleInstrument = Instrument.TENOR_SAX;
 //        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
@@ -38,8 +39,9 @@ public class My extends Setup {
 
         defaultPacer = Pacer.Answer;
         defaultPacer = Pacer.Tempo100;
-        defaultPacer = Pacer.Tempo115;
+        defaultPacer = Pacer.Tempo120;
 
+        defaultRiddler = Riddler.Step43Octaves2And3And4And5And6SiDo;
         defaultRiddler = Riddler.Step43Octave6;
 
         defaultRinger = Ringer.Tone;

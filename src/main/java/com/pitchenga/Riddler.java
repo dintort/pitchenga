@@ -1566,6 +1566,7 @@ public enum Riddler {
     }, {
             {Non}
     }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
+    //fixme: Rename numbers
     ;
 
     private final String name;
