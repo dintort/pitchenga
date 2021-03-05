@@ -6,11 +6,11 @@ import java.util.function.Function;
 import static com.pitchenga.Pitch.*;
 
 public enum Riddler {
-// fixme:   java: code too large
+    // fixme:   java: code too large, move to txt files
 //    ChromaticOneOctave("Chromatic - octave 4",
 //            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null),
     Chromatic("Chromatic - main octaves",
-            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null),
+            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0]),
     //    DoMajOneOctave("Do maj - octave 4",
 //            new Pitch[][][]{{Pitchenga.DO_MAJ_SCALE}}, Pitchenga::shuffle, new Integer[0]),
 //    DoMaj("Do maj - main octaves",
@@ -1186,8 +1186,9 @@ public enum Riddler {
             {Do6, Ra6, Ra6, Ra6, Ra6, Ra6, Ra6, Re6, Re6, Re6, Re6, Re6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Non}
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
 
+    //fixme: Rename numbers
     Step43Octaves2And3And4And5And6SiDo("Step 43: Octaves 2, 3, 4, 5, 6 - Si, Do", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
             {/* */Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4, Do4, Do4, Do4, Do4, Do4,},
@@ -1250,7 +1251,7 @@ public enum Riddler {
             {/* */Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Si6, Si6, Si6, Si6, Si6, Do7, Do7, Do7, Do7, Do7, Do7,},
     }, {
             {Non}
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
     Step44Octaves2And3And4And5And6LaSe("Step 44: Octaves 2, 3, 4, 5, 6 - La, Se", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, La2, La2, La2, La2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, La3, La3, La3, La3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3,},
@@ -1313,7 +1314,7 @@ public enum Riddler {
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, La6, La6, La6, La6, La6, Se6, Se6, Se6, Se6, Se6, Se6, Si6, Do7,},
     }, {
             {Non}
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
     Step45Octaves2And3And4And5And6SoLe("Step 45: Octaves 2, 3, 4, 5, 6 - So, Le", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, So2, So2, So2, So2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, So3, So3, So3, So3, So3, Le3, Le3, Le3, Le3, Le3, Le3, La3, Se3, Si3,},
@@ -1376,7 +1377,7 @@ public enum Riddler {
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, So6, So6, So6, So6, So6, Le6, Le6, Le6, Le6, Le6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Non}
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
     Step46Octaves2And3And4And5And6FaFi("Step 46: Octaves 2, 3, 4, 5, 6 - Fa, Fi", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fa3, Fa3, Fa3, Fa3, Fa3, Fi3, Fi3, Fi3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3,},
@@ -1439,7 +1440,7 @@ public enum Riddler {
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fa6, Fa6, Fa6, Fa6, Fa6, Fi6, Fi6, Fi6, Fi6, Fi6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Non}
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
     Step47Octaves2And3And4And5And6MeMi("Step 47: Octaves 2, 3, 4, 5, 6 - Me, Mi", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Me3, Me3, Me3, Me3, Me3, Mi3, Mi3, Mi3, Mi3, Mi3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
@@ -1502,7 +1503,7 @@ public enum Riddler {
             {Do6, Ra6, Re6, Me6, Me6, Me6, Me6, Me6, Me6, Mi6, Mi6, Mi6, Mi6, Mi6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Non}
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
     Step48Octaves2And3And4And5And6RaRe("Step 48: Octaves 2, 3, 4, 5, 6 - Ra, Re", new Pitch[][][]{{
             {Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Ra3, Ra3, Ra3, Ra3, Ra3, Re3, Re3, Re3, Re3, Re3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
@@ -1565,8 +1566,83 @@ public enum Riddler {
             {Do6, Ra6, Ra6, Ra6, Ra6, Ra6, Ra6, Re6, Re6, Re6, Re6, Re6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Non}
-    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
-    //fixme: Rename numbers
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
+//    Step50Guitar("Step 50: Guitar", new Pitch[][][]{{
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Ra3, Ra3, Ra3, Ra3, Ra3, Re3, Re3, Re3, Re3, Re3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do4, Ra4, Ra4, Ra4, Ra4, Ra4, Ra4, Re4, Re4, Re4, Re4, Re4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do5, Ra5, Ra5, Ra5, Ra5, Ra5, Ra5, Re5, Re5, Re5, Re5, Re5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+//            {Do6, Ra6, Ra6, Ra6, Ra6, Ra6, Ra6, Re6, Re6, Re6, Re6, Re6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Me3, Me3, Me3, Me3, Me3, Mi3, Mi3, Mi3, Mi3, Mi3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do4, Ra4, Re4, Me4, Me4, Me4, Me4, Me4, Me4, Mi4, Mi4, Mi4, Mi4, Mi4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do5, Ra5, Re5, Me5, Me5, Me5, Me5, Me5, Me5, Mi5, Mi5, Mi5, Mi5, Mi5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5},
+//            {Do6, Ra6, Re6, Me6, Me6, Me6, Me6, Me6, Me6, Mi6, Mi6, Mi6, Mi6, Mi6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fa3, Fa3, Fa3, Fa3, Fa3, Fi3, Fi3, Fi3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fa4, Fa4, Fa4, Fa4, Fa4, Fi4, Fi4, Fi4, Fi4, Fi4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fa5, Fa5, Fa5, Fa5, Fa5, Fi5, Fi5, Fi5, Fi5, Fi5, Fi5, So5, Le5, La5, Se5, Si5,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fa6, Fa6, Fa6, Fa6, Fa6, Fi6, Fi6, Fi6, Fi6, Fi6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, So2, So2, So2, So2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, So3, So3, So3, So3, So3, Le3, Le3, Le3, Le3, Le3, Le3, La3, Se3, Si3,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, So4, So4, So4, So4, So4, Le4, Le4, Le4, Le4, Le4, Le4, La4, Se4, Si4,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, So5, So5, So5, So5, So5, Le5, Le5, Le5, Le5, Le5, Le5, La5, Se5, Si5,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, So6, So6, So6, So6, So6, Le6, Le6, Le6, Le6, Le6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, La2, La2, La2, La2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, La3, La3, La3, La3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, La4, La4, La4, La4, La4, Se4, Se4, Se4, Se4, Se4, Se4, Si4,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, La5, La5, La5, La5, La5, Se5, Se5, Se5, Se5, Se5, Se5, Si5,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, La6, La6, La6, La6, La6, Se6, Se6, Se6, Se6, Se6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+//            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+//            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+//            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+//            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+//    }, {
+//            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
+//            {/* */Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4, Do4, Do4, Do4, Do4, Do4,},
+//            {/* */Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Si4, Si4, Si4, Si4, Si4, Do5, Do5, Do5, Do5, Do5, Do5,},
+//            {/* */Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Si5, Si5, Si5, Si5, Si5, Do6, Do6, Do6, Do6, Do6, Do6,},
+//            {/* */Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Si6, Si6, Si6, Si6, Si6, Do7, Do7, Do7, Do7, Do7, Do7,},
+//            {/* */Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Si6, Si6, Si6, Si6, Si6, Do7, Do7, Do7, Do7, Do7, Do7,},
+//    }, {
+//            {Non}
+//    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[]{0, 1, 2}),
     ;
 
     private final String name;
@@ -1574,13 +1650,15 @@ public enum Riddler {
     public final Function<Pitchenga, List<Pitch>> riddle;
     public final Integer[] octaves;
     public final Hinter hinter;
+    public final int[] instruments;
 
-    Riddler(String name, Pitch[][][] scale, Function<Pitchenga, List<Pitch>> riddle, Integer[] octaves, Hinter hinter) {
+    Riddler(String name, Pitch[][][] scale, Function<Pitchenga, List<Pitch>> riddle, Integer[] octaves, Hinter hinter, int[] instruments) {
         this.name = name;
         this.scale = scale;
         this.riddle = riddle;
         this.octaves = octaves;
         this.hinter = hinter;
+        this.instruments = instruments;
     }
 
     public String toString() {

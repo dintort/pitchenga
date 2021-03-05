@@ -16,7 +16,10 @@ import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -29,8 +32,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.pitchenga.Duration.*;
-import static com.pitchenga.Pitch.*;
+import static com.pitchenga.Duration.four;
+import static com.pitchenga.Pitch.Do0;
+import static com.pitchenga.Pitch.Non;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
@@ -60,7 +64,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final Random random = new Random();
     private volatile AudioDispatcher audioDispatcher;
     //fixme: +Selectors for instruments +Random instrument: 1) guitar/piano/sax 2) more 3) all
-    private final MidiChannel buzzInstrument;
+    private final MidiChannel[] riddleInstruments;
     private final MidiChannel keyboardInstrument;
     private final MidiChannel ringInstrument;
     private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
@@ -71,6 +75,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile long lastGuessTimestampMs = System.currentTimeMillis();
     private final List<Pair<Pitch, Double>> guessQueuePitchAndRms = new ArrayList<>();
     private final Queue<Pitch> riddleQueue = new LinkedBlockingQueue<>();
+    //fixme: Un-hack
+    private final Queue<Integer> instrumentsQueue = new LinkedList<>();
     private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> prevPrevRiddle = new AtomicReference<>(null);
@@ -101,7 +107,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JComboBox<Riddler> riddlerCombo = new JComboBox<>();
     private final JComboBox<Mixer.Info> inputCombo = new JComboBox<>();
     //    private final JToggleButton playButton = new JToggleButton();
-    //fixme: Un-hack
+    //fixme: Un-hack static
     public static final JToggleButton playButton = new JToggleButton();
     private final JToggleButton[] keyButtons = new JToggleButton[Button.values().length];
     private final JLabel frequencyLabel = new JLabel("0000.00");
@@ -110,6 +116,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JPanel bottomPanel;
     private volatile Dimension previousSize;
     private volatile Point previousLocation;
+    private volatile MidiChannel currentRiddleInstrument;
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
@@ -160,9 +167,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             synthesizer.open();
             synthesizer.loadAllInstruments(soundfont);
             MidiChannel[] channels = synthesizer.getChannels();
-            this.buzzInstrument = channels[0];
-            this.keyboardInstrument = channels[1];
-            this.ringInstrument = channels[2];
+            this.riddleInstruments = channels;
+            this.keyboardInstrument = channels[setup.riddleInstruments.length + 3];
+            this.ringInstrument = channels[setup.riddleInstruments.length + 4];
             initMidiInstruments(synthesizer);
         } catch (MidiUnavailableException | InvalidMidiDataException | IOException e) {
             throw new RuntimeException(e);
@@ -254,7 +261,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (this.lastBuzzTimestampMs - lastBuzzTimestampMs > 500) {
             frozen = true;
             try {
-                fugue(buzzInstrument, getBuzzer().buzz.apply(riddle), false);
+                fugue(currentRiddleInstrument, getBuzzer().buzz.apply(riddle), false);
             } finally {
                 frozen = false;
             }
@@ -273,6 +280,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             debug(riddleQueue + " is the riddle queue");
             Pitch riddle = riddleQueue.poll();
             if (riddle != null) {
+                Integer instrumentChannel = instrumentsQueue.remove();
+                currentRiddleInstrument = riddleInstruments[instrumentChannel];
                 debug(" [" + riddle + "] is the new riddle");
                 this.riddle.set(riddle);
                 this.riddleTimestampMs = System.currentTimeMillis();
@@ -282,7 +291,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 try {
                     boolean flashColors = getHinter() == Hinter.Always;
                     this.lastBuzzTimestampMs = System.currentTimeMillis();
-                    fugue(buzzInstrument, getBuzzer().buzz.apply(riddle), flashColors);
+                    currentRiddleInstrument = riddleInstruments[instrumentChannel];
+                    fugue(currentRiddleInstrument, getBuzzer().buzz.apply(riddle), flashColors);
                     playQueue.clear();
                 } finally {
                     frozen = false;
@@ -667,13 +677,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     public List<Pitch> shuffleGroupSeries(boolean shuffleMacroGroups, boolean shuffleGroups) {
+        int[] instruments = getRiddler().instruments;
+        if (instruments == null || instruments.length == 0) {
+            instruments = new int[]{0};
+        }
+        Queue<Integer> instrumentGroups = new LinkedList<>();
         Pitch[][][] scales = getRiddler().scale;
         List<Pitch[][]> scalesList = Arrays.asList(scales);
+        for (int i = 0; i < scales.length; i++) {
+            instrumentGroups.add(instruments[i % instruments.length]);
+        }
         if (shuffleMacroGroups) {
             Collections.shuffle(scalesList);
         }
         List<Pitch> results = new LinkedList<>();
         for (Pitch[][] scale : scalesList) {
+            Integer instrument = instrumentGroups.remove();
             List<List<Pitch>> listLists = Arrays.stream(scale)
                     .flatMap(group -> {
                         List<Pitch> pitches = deduplicate(() -> {
@@ -707,6 +726,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         List<List<Pitch>> multi = new ArrayList<>();
                         for (int i = 0; i < setup.repeat; i++) {
                             multi.add(list);
+                            for (int j = 0; j < list.size(); j++) {
+                                instrumentsQueue.add(instrument);
+                            }
                         }
                         return multi;
                     })
@@ -1752,9 +1774,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private void initMidiInstruments(Synthesizer synthesizer) {
         javax.sound.midi.Instrument[] instruments = synthesizer.getLoadedInstruments();
-        javax.sound.midi.Instrument instrument = instruments[setup.riddleInstrument];
-        if (synthesizer.loadInstrument(instrument)) {
-            buzzInstrument.programChange(instrument.getPatch().getProgram());
+        javax.sound.midi.Instrument instrument;
+        for (int i = 0; i < setup.riddleInstruments.length; i++) {
+            int riddleInstrumentId = setup.riddleInstruments[i];
+            instrument = instruments[riddleInstrumentId];
+            if (synthesizer.loadInstrument(instrument)) {
+                riddleInstruments[i].programChange(instrument.getPatch().getProgram());
+            }
         }
         instrument = instruments[setup.keyboardInstrument];
         if (synthesizer.loadInstrument(instrument)) {
