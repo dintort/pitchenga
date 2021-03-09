@@ -41,8 +41,7 @@ public class My extends Setup {
         defaultPacer = Pacer.Tempo100;
         defaultPacer = Pacer.Tempo120;
 
-        defaultRiddler = Riddler.Step43Octave6;
-        defaultRiddler = Riddler.Step43Octaves2And3And4And5And6SiDo;
+        defaultRiddler = Riddler.Step46Octaves2And3And4And5And6FaFi;
 //        defaultRiddler = Riddler.Step50Guitar;
 
         defaultRinger = Ringer.Tone;
