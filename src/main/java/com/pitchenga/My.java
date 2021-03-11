@@ -38,11 +38,10 @@ public class My extends Setup {
         //fixme: Delay hinter proportionally to the tempo
 
         defaultPacer = Pacer.Answer;
-        defaultPacer = Pacer.Tempo100;
         defaultPacer = Pacer.Tempo120;
+        defaultPacer = Pacer.Tempo100;
 
-        defaultRiddler = Riddler.Step46Octaves2And3And4And5And6FaFi;
-//        defaultRiddler = Riddler.Step50Guitar;
+        defaultRiddler = Riddler.Step51GuitarOctave2;
 
         defaultRinger = Ringer.Tone;
         defaultRinger = Ringer.None;
@@ -66,7 +65,6 @@ public class My extends Setup {
 //            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
             System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
             //fixme: Multiple JFrames collapse into tabs on mac
-            //fixme: Pitchy circles are broken
 //            Pitchenga primary = new Pitchenga(true, secondary);
             Pitchenga primary = new Pitchenga(true, null);
 
