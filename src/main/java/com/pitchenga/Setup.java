@@ -19,8 +19,12 @@ public class Setup {
     public volatile Ringer defaultRinger = Ringer.None;
     public volatile Pacer defaultPacer = Pacer.Tempo90;
     public volatile boolean mainFrameVisible = true;
-    public volatile int[] riddleInstruments = new int[] { Instrument.ACOUSTIC_GRAND_PIANO, Instrument.ELECTRIC_GUITAR_JAZZ, Instrument.TENOR_SAX };
-    public volatile int keyboardInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
+    public volatile int[] riddleInstruments = new int[] {
+            Instrument.ACOUSTIC_GRAND_PIANO,
+            Instrument.ELECTRIC_BASS_FINGER,
+            Instrument.ELECTRIC_GUITAR_JAZZ,
+            Instrument.TENOR_SAX };
+    public volatile int keyboardInstrument = Instrument.ELECTRIC_GRAND_PIANO;
     public volatile int ringInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
     public volatile int series = 3;
     public volatile int repeat = 3;
