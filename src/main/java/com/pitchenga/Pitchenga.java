@@ -64,9 +64,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final Random random = new Random();
     private volatile AudioDispatcher audioDispatcher;
     //fixme: +Selectors for instruments +Random instrument: 1) guitar/piano/sax 2) more 3) all
-    private final MidiChannel[] riddleInstruments;
-    private final MidiChannel keyboardInstrument;
-    private final MidiChannel ringInstrument;
+    private final MidiChannel[] riddleInstrumentChannels;
+    private final MidiChannel keyboardInstrumentChannel;
+    private final MidiChannel ringInstrumentChannel;
     private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
     private final AtomicBoolean isInNativeFullScreen = new AtomicBoolean(false);
 
@@ -117,6 +117,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile Dimension previousSize;
     private volatile Point previousLocation;
     private volatile MidiChannel currentRiddleInstrument;
+    private MidiChannel bassInstrumentChannel;
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
@@ -167,9 +168,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             synthesizer.open();
             synthesizer.loadAllInstruments(soundfont);
             MidiChannel[] channels = synthesizer.getChannels();
-            this.riddleInstruments = channels;
-            this.keyboardInstrument = channels[setup.riddleInstruments.length + 3];
-            this.ringInstrument = channels[setup.riddleInstruments.length + 4];
+            this.riddleInstrumentChannels = channels;
+            this.keyboardInstrumentChannel = channels[setup.riddleInstruments.length + 3];
+            this.ringInstrumentChannel = channels[setup.riddleInstruments.length + 4];
             initMidiInstruments(synthesizer);
         } catch (MidiUnavailableException | InvalidMidiDataException | IOException e) {
             throw new RuntimeException(e);
@@ -224,7 +225,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (getPacer() == Pacer.Answer) {
             transcribe(riddle, false);
         }
-        fugue(ringInstrument, getRinger().ring.apply(riddle), true);
+        fugue(ringInstrumentChannel, getRinger().ring.apply(riddle), true);
 
         this.playQueue.clear();
         playExecutor.execute(() -> guess(null, false));
@@ -281,7 +282,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             Pitch riddle = riddleQueue.poll();
             if (riddle != null) {
                 Integer instrumentChannel = instrumentsQueue.remove();
-                currentRiddleInstrument = riddleInstruments[instrumentChannel];
+                currentRiddleInstrument = riddleInstrumentChannels[instrumentChannel];
                 debug(" [" + riddle + "] is the new riddle");
                 this.riddle.set(riddle);
                 this.riddleTimestampMs = System.currentTimeMillis();
@@ -291,7 +292,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 try {
                     boolean flashColors = getHinter() == Hinter.Always;
                     this.lastBuzzTimestampMs = System.currentTimeMillis();
-                    currentRiddleInstrument = riddleInstruments[instrumentChannel];
+                    currentRiddleInstrument = riddleInstrumentChannels[instrumentChannel];
                     fugue(currentRiddleInstrument, getBuzzer().buzz.apply(riddle), flashColors);
                     playQueue.clear();
                 } finally {
@@ -677,6 +678,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     public List<Pitch> shuffleGroupSeries(boolean shuffleMacroGroups, boolean shuffleGroups) {
+        instrumentsQueue.clear();
         int[] instruments = getRiddler().instruments;
         if (instruments == null || instruments.length == 0) {
             instruments = new int[]{0};
@@ -811,7 +813,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     }
                     Pitch pitch = (Pitch) next;
                     if (pitch != Non) {
-                        midiChannel.noteOn(pitch.midi, 127);
+                        int velocity = 80;
+                        if (midiChannel == bassInstrumentChannel) {
+                            velocity = 127;
+                        }
+                        midiChannel.noteOn(pitch.midi, velocity);
                         if (flashColors) {
                             SwingUtilities.invokeLater(() -> {
                                 updatePianoButton(pitch.tone.getButton(), true);
@@ -1146,14 +1152,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (!pressedButtonToMidi.containsKey(button)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
                 pressedButtonToMidi.put(button, midi);
                 transcribe(pitch, true);
-                keyboardInstrument.noteOn(midi, 127);
+                keyboardInstrumentChannel.noteOn(midi, 127);
             }
         } else {
             Integer modifiedMidi = pressedButtonToMidi.remove(button);
             if (modifiedMidi != null) {
                 midi = modifiedMidi;
             }
-            keyboardInstrument.noteOff(midi);
+            keyboardInstrumentChannel.noteOff(midi);
             if (getPacer() == Pacer.Answer) {
                 playExecutor.execute(() -> guess(pitch, true));
             }
@@ -1777,18 +1783,21 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         javax.sound.midi.Instrument instrument;
         for (int i = 0; i < setup.riddleInstruments.length; i++) {
             int riddleInstrumentId = setup.riddleInstruments[i];
+            if (riddleInstrumentId == Instrument.ELECTRIC_BASS_FINGER) {
+                bassInstrumentChannel = riddleInstrumentChannels[i];
+            }
             instrument = instruments[riddleInstrumentId];
             if (synthesizer.loadInstrument(instrument)) {
-                riddleInstruments[i].programChange(instrument.getPatch().getProgram());
+                riddleInstrumentChannels[i].programChange(instrument.getPatch().getProgram());
             }
         }
         instrument = instruments[setup.keyboardInstrument];
         if (synthesizer.loadInstrument(instrument)) {
-            keyboardInstrument.programChange(instrument.getPatch().getProgram());
+            keyboardInstrumentChannel.programChange(instrument.getPatch().getProgram());
         }
         instrument = instruments[setup.ringInstrument];
         if (synthesizer.loadInstrument(instrument)) {
-            ringInstrument.programChange(instrument.getPatch().getProgram());
+            ringInstrumentChannel.programChange(instrument.getPatch().getProgram());
         }
     }
 
