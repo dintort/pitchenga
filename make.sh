@@ -1,1 +1,2 @@
-./gradlew assemble 
+#!/bin/bash
+./gradlew assemble
