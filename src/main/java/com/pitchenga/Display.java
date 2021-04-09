@@ -165,8 +165,6 @@ public class Display extends JPanel {
     }
 
     public void setTone(Tone tone, Color toneColor, Color pitchinessColor) {
-        this.tones.clear();
-        this.tones.add(tone);
         this.tone = tone;
         this.toneColor = toneColor;
         this.pitchinessColor = pitchinessColor;
@@ -207,23 +205,24 @@ public class Display extends JPanel {
     }
 
     @SuppressWarnings("unused")
+    public final Pitch[][] FRETS_BASE = {
+            {Le4, La4, Se4, Si4, Do5,},
+            {Me4, Mi4, Fa4, Fi4, So4,},
+            {null, null, Do4, Ra4, Re4,},
+    };
+
+    @SuppressWarnings("unused")
+    public final Pitch[][] FRETS_FIRST = {
+            {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
+            {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
+            {So4, Le4, La4, Se4, Si4, Do5, Ra5},
+            {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
+            {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
+            {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
+    };
+
+    @SuppressWarnings("unused")
     private class Frets extends JPanel{
-
-        public final Pitch[][] FRETS_BASE = {
-                {Le4, La4, Se4, Si4, Do5,},
-                {Me4, Mi4, Fa4, Fi4, So4,},
-                {null, null, Do4, Ra4, Re4,},
-        };
-
-        public final Pitch[][] FRETS_FIRST = {
-                {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
-                {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
-                {So4, Le4, La4, Se4, Si4, Do5, Ra5},
-                {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
-                {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
-                {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
-        };
-
 
         private final JPanel[][] panels;
         private final Pitch[][] frets;
@@ -400,7 +399,6 @@ public class Display extends JPanel {
                 } else {
                     graphics.setColor(myTone.color);
                     graphics.fillOval(x + offset, y, diameter, diameter);
-
                     if (tones.contains(myTone)) {
                         triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, true);
                     } else {
@@ -424,7 +422,8 @@ public class Display extends JPanel {
                 labelGraphics.fillOval(0, 0, width, height);
                 label.paint(labelGraphics);
             }
-            textPane.repaint();
+            //fixme: Repainting the text pane this way causes repainting everything continuously in the loop
+//            textPane.repaint();
         }
 
         private void triangle(Graphics graphics, int offset, int gap, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill) {

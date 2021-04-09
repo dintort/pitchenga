@@ -1166,6 +1166,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         Tone[] tones = pressedButtonToMidi.keySet().stream().map(k -> k.pitch.tone).toArray(Tone[]::new);
         display.setTones(tones);
+        display.update();
     }
 
     private void updatePianoButton(Button button, boolean pressed) {
@@ -1847,7 +1848,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return transposeFugue(pitch, pitch.tone.getFugue().tune);
     }
 
-    private static void debug(Object... messages) {
+    public static void debug(Object... messages) {
         if (!debug) {
             return;
         }
