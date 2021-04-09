@@ -813,7 +813,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     }
                     Pitch pitch = (Pitch) next;
                     if (pitch != Non) {
-                        int velocity = 80;
+                        int velocity = 100;
                         if (midiChannel == bassInstrumentChannel) {
                             velocity = 127;
                         }
