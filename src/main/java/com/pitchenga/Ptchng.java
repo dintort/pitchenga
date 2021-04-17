@@ -63,8 +63,8 @@ public class Ptchng extends Setup {
 
         SwingUtilities.invokeAndWait(() -> {
 //            Pitchenga secondary = new Pitchenga(false, null);
-            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
-//            System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
+//            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
+            System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
             //fixme: Multiple JFrames collapse into tabs on mac
 //            Pitchenga primary = new Pitchenga(true, secondary);
             Pitchenga primary = new Pitchenga(true, null);

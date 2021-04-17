@@ -986,7 +986,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
 
 //            setLocation(0, screenSize.height / 2 - getSize().height / 2);
-        setLocation(screenSize.width - getSize().width, screenSize.height / 2 - getSize().height / 2);
+        setLocation(0, screenSize.height / 2 - getSize().height / 2);
+//        setLocation(screenSize.width - getSize().width, screenSize.height / 2 - getSize().height / 2);
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
     }
 
@@ -1079,28 +1080,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             if (event.getKeyCode() == KeyEvent.VK_CONTROL) {
                 fall = pressed;
             }
-            if (event.getKeyCode() == KeyEvent.VK_Z) {
-                octaveShift = -4;
-            } else if (event.getKeyCode() == KeyEvent.VK_X) {
-                octaveShift = -3;
-            } else if (event.getKeyCode() == KeyEvent.VK_C) {
-                octaveShift = -2;
-            } else if (event.getKeyCode() == KeyEvent.VK_V) {
-                octaveShift = -1;
-            } else if (event.getKeyCode() == KeyEvent.VK_B) {
-                octaveShift = 0;
-            } else if (event.getKeyCode() == KeyEvent.VK_N) {
-                octaveShift = 1;
-            } else if (event.getKeyCode() == KeyEvent.VK_M) {
-                octaveShift = 2;
-            } else if (event.getKeyCode() == KeyEvent.VK_COMMA) {
-                octaveShift = 3;
-            } else if (event.getKeyCode() == KeyEvent.VK_PERIOD) {
-                octaveShift = 4;
+            if (pressed && event.getKeyCode() == KeyEvent.VK_Z) {
+                if (octaveShift > -5) {
+                    //noinspection NonAtomicOperationOnVolatileField
+                    octaveShift--;
+                }
+                debug("octaveShift=" + octaveShift);
+            } else if (pressed && event.getKeyCode() == KeyEvent.VK_X) {
+                if (octaveShift < 3) {
+                    //noinspection NonAtomicOperationOnVolatileField
+                    octaveShift++;
+                }
+                debug("octaveShift=" + octaveShift);
             }
-            if (pressed && (event.getKeyCode() == KeyEvent.VK_OPEN_BRACKET
-                    || event.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET)) {
-                nextTempo(event.getKeyCode() != KeyEvent.VK_OPEN_BRACKET);
+            if (pressed && (event.getKeyCode() == KeyEvent.VK_COMMA
+                    || event.getKeyCode() == KeyEvent.VK_PERIOD)) {
+                nextTempo(event.getKeyCode() != KeyEvent.VK_COMMA);
                 return true;
             }
             Button button = BUTTON_BY_CODE.get(event.getKeyCode());
