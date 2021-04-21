@@ -39,8 +39,8 @@ public class Ptchng extends Setup {
 
         defaultPacer = Pacer.Answer;
         defaultPacer = Pacer.Tempo120;
-        defaultPacer = Pacer.Tempo110;
         defaultPacer = Pacer.Tempo100;
+        defaultPacer = Pacer.Tempo110;
 
         defaultRiddler = Riddler.Step51BassOctave2;
 

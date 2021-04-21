@@ -1012,8 +1012,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         //fixme: Change to center when saving to file is implemented
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
         int width = 670;
-        int verticalOffset = 200;
-        setSize(width, (int) screenSize.getHeight()- verticalOffset);
+        int verticalOffset = (int) (screenSize.getHeight() / 3);
+        setSize(width, (int) screenSize.getHeight() - verticalOffset);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
