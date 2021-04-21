@@ -33,8 +33,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.pitchenga.Duration.four;
-import static com.pitchenga.Pitch.Do0;
-import static com.pitchenga.Pitch.Non;
+import static com.pitchenga.Pitch.*;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
@@ -113,6 +112,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JComponent pitchSliderPanel = new JPanel(new BorderLayout());
+    private final JSlider fineSlider = new JSlider(SwingConstants.HORIZONTAL);
     private final JPanel bottomPanel;
     private volatile Dimension previousSize;
     private volatile Point previousLocation;
@@ -419,7 +419,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
         if (!frozen) {
             SwingUtilities.invokeLater(() -> {
-                updateSlider(guess, frequency, isKeyboard);
+                updatePitchSlider(guess, frequency, isKeyboard);
+                updateFineSlider(guess, frequency);
                 frequencyLabel.setText(String.format("%07.2f", frequency));
                 boolean answer = getPacer() == Pacer.Answer;
                 if (!playing || answer) {
@@ -434,7 +435,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    private void updateSlider(Pitch pitch, float frequency, boolean isKeyboard) {
+    private void updatePitchSlider(Pitch pitch, float frequency, boolean isKeyboard) {
         if (!isKeyboard) {
             Pitch previous = this.lastPitch;
             this.lastPitch = pitch;
@@ -450,10 +451,39 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchSlider.setValue(value);
     }
 
+    private void updateFineSlider(Pitch pitch, float frequency) {
+        int value = convertPitchToFineSlider(pitch, frequency);
+        fineSlider.setValue(value);
+    }
+
+
     private int convertPitchToSlider(Pitch pitch, float frequency) {
         int value = pitch.midi * 100;
         //fixme: Polyphonic - multiple dots on the slider
         //fixme: Extract duplication
+        if (frequency != 0) {
+            double diff = frequency - pitch.frequency;
+            Pitch pitchy;
+            if (diff < 0) {
+                pitchy = transposePitch(pitch, 0, -1);
+            } else {
+                pitchy = transposePitch(pitch, 0, +1);
+            }
+            double pitchyDiff = Math.abs(pitch.frequency - pitchy.frequency);
+            double accuracy = Math.abs(diff) / pitchyDiff;
+            accuracy = accuracy * 100;
+            if (pitch.frequency < frequency) {
+                value += accuracy;
+            } else {
+                value -= accuracy;
+            }
+        }
+        return value;
+    }
+
+    private int convertPitchToFineSlider(Pitch pitch, float frequency) {
+        //fixme: Does not need to be this hacky
+        int value = 100;
         if (frequency != 0) {
             double diff = frequency - pitch.frequency;
             Pitch pitchy;
@@ -949,6 +979,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         circlePanel.setBackground(Color.DARK_GRAY);
         circlePanel.setLayout(new BorderLayout());
         circlePanel.add(display, BorderLayout.CENTER);
+        initFineSlider();
+        circlePanel.add(fineSlider, BorderLayout.NORTH);
 
         initPitchSlider();
         mainPanel.add(pitchSliderPanel, BorderLayout.WEST);
@@ -980,13 +1012,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         //fixme: Change to center when saving to file is implemented
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
         int width = 670;
-        setSize(width, (int) screenSize.getHeight());
+        int verticalOffset = 200;
+        setSize(width, (int) screenSize.getHeight()- verticalOffset);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
 
 //            setLocation(0, screenSize.height / 2 - getSize().height / 2);
-        setLocation(0, screenSize.height / 2 - getSize().height / 2);
+        setLocation(0, verticalOffset);
+//        setLocation(0, screenSize.height / 2 - getSize().height / 2);
 //        setLocation(screenSize.width - getSize().width, screenSize.height / 2 - getSize().height / 2);
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
     }
@@ -1025,6 +1059,23 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchSlider.setPaintLabels(true);
         //fixme: Scroll without bars
 //        JScrollPane scroll = new JScrollPane(pitchSlider);
+    }
+
+    private void initFineSlider() {
+        fineSlider.setEnabled(false);
+        fineSlider.setValue(0);
+        fineSlider.getModel().setMinimum(convertPitchToFineSlider(Pitch.Ra0, Do0.frequency));
+        fineSlider.getModel().setMaximum(convertPitchToFineSlider(Pitch.Ra0, Re0.frequency));
+        fineSlider.setMajorTickSpacing(100);
+        fineSlider.setMinorTickSpacing(50);
+        fineSlider.setValue(100);
+//        fineSlider.setPaintTicks(true);
+        fineSlider.setPaintLabels(true);
+        Dictionary<Integer, JLabel> labels = new Hashtable<>();
+        labels.put(0, new JLabel(""));
+        labels.put(100, new JLabel("|"));
+        labels.put(200, new JLabel(""));
+        fineSlider.setLabelTable(labels);
     }
 
     private void initKeyboard() {
@@ -1561,11 +1612,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playButton.setText("Stop");
             lastPacerTimestampMs = 0;
             playExecutor.execute(() -> guess(null, false));
-//            if (!getPacer().equals(Pacer.Answer)) {
-            //fixme: Hide only the control panel, but not the piano
             bottomPanel.setVisible(false);
             pitchSliderPanel.setVisible(false);
-//            }
+            fineSlider.setVisible(false);
             if (setup.fullScreenWhenPlaying) {
                 if (nativeFullScreenAvailable) {
                     boolean current = isInNativeFullScreen.get();
@@ -1585,6 +1634,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playButton.setText("Play");
             bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
+            fineSlider.setVisible(true);
             if (setup.fullScreenWhenPlaying) {
                 if (nativeFullScreenAvailable) {
                     boolean current = isInNativeFullScreen.get();
