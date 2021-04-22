@@ -230,50 +230,47 @@ public class Display extends JPanel {
 
     public class Piano extends JPanel {
 
+        private final JLabel[] labels;
         private final JPanel[] panels;
         private final Button[] buttons;
-        private final JPanel bottomPanel;
+        private final Component frontStrut;
+        private final Component rearStrut;
 
         public Piano() {
             this.setLayout(new BorderLayout());
 
-            bottomPanel = new JPanel();
-            bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
-            //fixme: Un-hardcode
-            bottomPanel.add(Box.createVerticalStrut(650));
-            bottomPanel.setBackground(Color.BLACK);
-            this.add(bottomPanel, BorderLayout.SOUTH);
-
             JPanel pianoPanel = new JPanel();
-            pianoPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 30));
+            pianoPanel.setBackground(Color.DARK_GRAY);
+            pianoPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 20));
             this.add(pianoPanel, BorderLayout.CENTER);
-            pianoPanel.setLayout(new GridLayout(2, 1));
+            pianoPanel.setLayout(new GridLayout(2, 1, 10, 10));
 
             JPanel blackKeysPanel = new JPanel(new BorderLayout());
             pianoPanel.add(blackKeysPanel);
             blackKeysPanel.setBackground(Color.DARK_GRAY);
-            JPanel topPanel = new JPanel();
             pianoPanel.add(blackKeysPanel, BorderLayout.CENTER);
 
             //fixme: The geometry is slightly wrong and hacky
-            Component frontStrut = Box.createHorizontalStrut(50);
+            frontStrut = Box.createHorizontalStrut(55);
             blackKeysPanel.add(frontStrut, BorderLayout.EAST);
             frontStrut.setBackground(Color.DARK_GRAY);
 
-            blackKeysPanel.add(topPanel, BorderLayout.CENTER);
-            topPanel.setBackground(Color.DARK_GRAY);
-            topPanel.setLayout(new GridLayout(1, 7));
+            JPanel blackKeysPanelPanel = new JPanel();
+            blackKeysPanel.add(blackKeysPanelPanel, BorderLayout.CENTER);
+            blackKeysPanelPanel.setBackground(Color.DARK_GRAY);
+            blackKeysPanelPanel.setLayout(new GridLayout(1, 7, 10, 10));
 
-            Component rearStrut = Box.createHorizontalStrut(50);
+            rearStrut = Box.createHorizontalStrut(55);
             blackKeysPanel.add(rearStrut, BorderLayout.WEST);
             rearStrut.setBackground(Color.DARK_GRAY);
 
             JPanel whiteKeysPanel = new JPanel();
             pianoPanel.add(whiteKeysPanel, BorderLayout.CENTER);
             whiteKeysPanel.setBackground(Color.DARK_GRAY);
-            whiteKeysPanel.setLayout(new GridLayout(1, 7));
+            whiteKeysPanel.setLayout(new GridLayout(1, 7, 10, 10));
 
             Button[] buttons = Button.values();
+            List<JLabel> labelsList = new LinkedList<>();
             List<JPanel> panelsList = new LinkedList<>();
             List<Button> buttonsList = new LinkedList<>();
             for (Button button : buttons) {
@@ -284,12 +281,12 @@ public class Display extends JPanel {
                 panelsList.add(colorPanel);
                 buttonsList.add(button);
                 if (button.pitch == null) {
-                    topPanel.add(colorPanel);
+                    blackKeysPanelPanel.add(colorPanel);
                     colorPanel.setBackground(Color.DARK_GRAY);
                 }
                 if (button.pitch != null) {
                     if (button.row == 1) {
-                        topPanel.add(colorPanel);
+                        blackKeysPanelPanel.add(colorPanel);
                     } else {
                         whiteKeysPanel.add(colorPanel);
                     }
@@ -305,30 +302,28 @@ public class Display extends JPanel {
                     colorPanel.add(Box.createVerticalGlue());
                 }
                 JLabel colorLabel = new JLabel(button.pitch == null ? "    " : button.pitch.tone.label);
-                labels.add(colorLabel);
+                labelsList.add(colorLabel);
                 colorPanel.add(colorLabel);
                 colorLabel.setFont(Pitchenga.MONOSPACED);
                 colorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 colorLabel.setForeground(Color.WHITE);
-                colorLabel.setBackground(Color.BLACK);
-                colorLabel.setOpaque(button.pitch != null);
                 if (button.row == 2) {
                     colorPanel.add(Box.createVerticalGlue());
                 }
                 colorPanel.add(Box.createVerticalStrut(5));
             }
+            Display.this.labels.addAll(labelsList);
+            this.labels = labelsList.toArray(new JLabel[0]);
             this.panels = panelsList.toArray(new JPanel[0]);
             this.buttons = buttonsList.toArray(new Button[0]);
         }
 
         private int getBorderThickness() {
-            return 10;
-            //fixme: scaling
-//            int thickness = (Math.min(getWidth(), getHeight()) / 7) / 18;
-//            if (thickness == 0) {
-//                thickness = 1;
-//            }
-//            return thickness;
+            int thickness = (Math.min(getWidth(), getHeight()) / 7) / 30;
+            if (thickness == 0) {
+                thickness = 1;
+            }
+            return thickness;
         }
 
         public void update() {
@@ -345,26 +340,30 @@ public class Display extends JPanel {
                 return;
             }
 
-            bottomPanel.setBackground(fillColor);
             int borderThickness = getBorderThickness();
-//            this.setBorder(BorderFactory.createLineBorder(fillColor, borderThickness * 2));
+            frontStrut.setPreferredSize(new Dimension(panels[0].getWidth() / 2, 0));
+            rearStrut.setPreferredSize(new Dimension(panels[0].getWidth() /2 , 0));
 
             for (int i = 0; i < panels.length; i++) {
-                    Pitch pitch = buttons[i].pitch;
-                    JPanel panel = panels[i];
-                    if (pitch != null) {
-                        Tone myTone = pitch.tone;
-                        if (myTone == tone && toneColor != null && pitchyColor != null) {
-                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness));
-                            panel.setBackground(toneColor);
+                Pitch pitch = buttons[i].pitch;
+                JPanel panel = panels[i];
+                JLabel label = labels[i];
+                if (pitch != null) {
+                    Tone myTone = pitch.tone;
+                    if (myTone == tone && toneColor != null && pitchyColor != null) {
+                        panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness));
+                        panel.setBackground(toneColor);
+                        label.setForeground(pitch.tone.fontColor);
+                    } else {
+                        if (tones.contains(myTone)) {
+                            panel.setBackground(myTone.color);
+                            label.setForeground(pitch.tone.fontColor);
                         } else {
-                            if (tones.contains(myTone)) {
-                                panel.setBackground(myTone.color);
-                            } else {
-                                panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
-                                panel.setBackground(Color.BLACK);
-                            }
+                            panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
+                            panel.setBackground(Color.BLACK);
+                            label.setForeground(Color.white);
                         }
+                    }
                 }
             }
 

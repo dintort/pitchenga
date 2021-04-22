@@ -11,18 +11,18 @@ import java.awt.*;
  */
 public enum Tone {
 
-    Do("C", true, new Color(255, 0, 0), Color.DARK_GRAY),
-    Ra("Db", false, new Color(127, 0, 0), Color.DARK_GRAY),
-    Re("D", true, new Color(255, 127, 0), Color.DARK_GRAY),
-    Me("Eb", false, new Color(171, 127, 0), Color.DARK_GRAY),
-    Mi("E", true, new Color(255, 255, 0), Color.DARK_GRAY),
-    Fa("F", true, new Color(0, 255, 0), Color.DARK_GRAY),
-    Fi("F#", false, new Color(0, 127, 127), Color.WHITE),
-    So("G", true, new Color(0, 255, 255), Color.DARK_GRAY),
-    Le("Ab", false, new Color(0, 0, 127), Color.DARK_GRAY),
-    La("A", true, new Color(0, 0, 255), Color.DARK_GRAY),
-    Se("Bb", false, new Color(127, 0, 255), Color.DARK_GRAY),
-    Si("B", true, new Color(255, 0, 255), Color.DARK_GRAY),
+    Do("C", true, new Color(255, 0, 0), Color.BLACK),
+    Ra("Db", false, new Color(127, 0, 0), Color.BLACK),
+    Re("D", true, new Color(255, 127, 0), Color.BLACK),
+    Me("Eb", false, new Color(171, 127, 0), Color.BLACK),
+    Mi("E", true, new Color(255, 255, 0), Color.BLACK),
+    Fa("F", true, new Color(0, 255, 0), Color.BLACK),
+    Fi("F#", false, new Color(0, 127, 127), Color.BLACK),
+    So("G", true, new Color(0, 255, 255), Color.BLACK),
+    Le("Ab", false, new Color(0, 0, 127), Color.BLACK),
+    La("A", true, new Color(0, 0, 255), Color.BLACK),
+    Se("Bb", false, new Color(127, 0, 255), Color.BLACK),
+    Si("B", true, new Color(255, 0, 255), Color.BLACK),
     ;
 
     public final String note;

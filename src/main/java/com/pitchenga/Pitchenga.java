@@ -1012,7 +1012,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         //fixme: Change to center when saving to file is implemented
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
         int width = 670;
-        int verticalOffset = (int) (screenSize.getHeight() / 5);
+        int verticalOffset = (int) (screenSize.getHeight() / 2);
         setSize(width, (int) screenSize.getHeight() - verticalOffset);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
