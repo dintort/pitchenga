@@ -1012,7 +1012,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         //fixme: Change to center when saving to file is implemented
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
         int width = 670;
-        int verticalOffset = (int) (screenSize.getHeight() / 3);
+        int verticalOffset = (int) (screenSize.getHeight() / 5);
         setSize(width, (int) screenSize.getHeight() - verticalOffset);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
@@ -1047,7 +1047,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
                     JLabel label = new JLabel(pitch.label);
-                    label.setFont(MONOSPACED);
+                    label.setFont(MONOSPACED.deriveFont(17f));
                     label.setOpaque(true);
 //                    label.setForeground(pitch.tone.fontColor);
                     label.setBackground(pitch.tone.color);
@@ -1066,10 +1066,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         fineSlider.setValue(0);
         fineSlider.getModel().setMinimum(convertPitchToFineSlider(Pitch.Ra0, Do0.frequency));
         fineSlider.getModel().setMaximum(convertPitchToFineSlider(Pitch.Ra0, Re0.frequency));
-        fineSlider.setMajorTickSpacing(100);
-        fineSlider.setMinorTickSpacing(50);
         fineSlider.setValue(100);
-//        fineSlider.setPaintTicks(true);
+        fineSlider.setPaintTicks(false);
         fineSlider.setPaintLabels(true);
         Dictionary<Integer, JLabel> labels = new Hashtable<>();
         labels.put(0, new JLabel(""));
@@ -1234,6 +1232,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     private JPanel initControlPanel() {
         JPanel controlPanelPanel = new JPanel();
+        controlPanelPanel.setVisible(false);
         controlPanelPanel.setBackground(Color.DARK_GRAY);
         JPanel controlPanel = new JPanel();
         controlPanel.setBackground(Color.DARK_GRAY);

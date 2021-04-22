@@ -22,7 +22,8 @@ public class Display extends JPanel {
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
     private volatile Color fillColor;
-    private final Circle circle;
+    private final Piano piano;
+//    private final Circle circle;
 //    private final Frets fretsBasePanel;
 //    private final Frets fretsFirstPanel;
 
@@ -67,9 +68,13 @@ public class Display extends JPanel {
         textLayer.add(textPane, BorderLayout.EAST);
 
         //fixme: Make them switchable
-        Circle circle = new Circle();
-        this.add(circle);
-        this.circle = circle;
+        Piano piano = new Piano();
+        this.add(piano);
+        this.piano = piano;
+
+//        Circle circle = new Circle();
+//        this.add(circle);
+//        this.circle = circle;
 
 //        Frets fretsFirst = new Frets(FRETS_FIRST);
 //        this.add(fretsFirst);
@@ -192,7 +197,8 @@ public class Display extends JPanel {
     }
 
     public void update() {
-        circle.repaint();
+        piano.update();
+//        circle.repaint();
 //        if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
 //            fretsBasePanel.setVisible(true);
 //            fretsFirstPanel.setVisible(false);
@@ -221,8 +227,153 @@ public class Display extends JPanel {
             {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
     };
 
+
+    public class Piano extends JPanel {
+
+        private final JPanel[] panels;
+        private final Button[] buttons;
+        private final JPanel bottomPanel;
+
+        public Piano() {
+            this.setLayout(new BorderLayout());
+
+            bottomPanel = new JPanel();
+            bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
+            //fixme: Un-hardcode
+            bottomPanel.add(Box.createVerticalStrut(650));
+            bottomPanel.setBackground(Color.BLACK);
+            this.add(bottomPanel, BorderLayout.SOUTH);
+
+            JPanel pianoPanel = new JPanel();
+            pianoPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 15));
+            this.add(pianoPanel, BorderLayout.CENTER);
+            pianoPanel.setLayout(new GridLayout(2, 1));
+
+            JPanel blackKeysPanel = new JPanel(new BorderLayout());
+            pianoPanel.add(blackKeysPanel);
+            blackKeysPanel.setBackground(Color.DARK_GRAY);
+            JPanel topPanel = new JPanel();
+            pianoPanel.add(blackKeysPanel, BorderLayout.CENTER);
+
+            //fixme: The geometry is slightly wrong and hacky
+            Component frontStrut = Box.createHorizontalStrut(50);
+            blackKeysPanel.add(frontStrut, BorderLayout.EAST);
+            frontStrut.setBackground(Color.DARK_GRAY);
+
+            blackKeysPanel.add(topPanel, BorderLayout.CENTER);
+            topPanel.setBackground(Color.DARK_GRAY);
+            topPanel.setLayout(new GridLayout(1, 7));
+
+            Component rearStrut = Box.createHorizontalStrut(50);
+            blackKeysPanel.add(rearStrut, BorderLayout.WEST);
+            rearStrut.setBackground(Color.DARK_GRAY);
+
+            JPanel whiteKeysPanel = new JPanel();
+            pianoPanel.add(whiteKeysPanel, BorderLayout.CENTER);
+            whiteKeysPanel.setBackground(Color.DARK_GRAY);
+            whiteKeysPanel.setLayout(new GridLayout(1, 7));
+
+            Button[] buttons = Button.values();
+            List<JPanel> panelsList = new LinkedList<>();
+            List<Button> buttonsList = new LinkedList<>();
+            for (Button button : buttons) {
+                if (button.row < 1 || !button.main) {
+                    continue;
+                }
+                JPanel colorPanel = new JPanel();
+                panelsList.add(colorPanel);
+                buttonsList.add(button);
+                if (button.pitch == null) {
+                    topPanel.add(colorPanel);
+                    colorPanel.setBackground(Color.DARK_GRAY);
+                }
+                if (button.pitch != null) {
+                    if (button.row == 1) {
+                        topPanel.add(colorPanel);
+                    } else {
+                        whiteKeysPanel.add(colorPanel);
+                    }
+                }
+                colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.Y_AXIS));
+                colorPanel.setBackground(Color.DARK_GRAY);
+                if (button.pitch != null) {
+                    colorPanel.setBorder(BorderFactory.createLineBorder(button.pitch.tone.color, getBorderThickness()));
+                }
+
+                colorPanel.add(Box.createVerticalStrut(5));
+                if (button.row == 1) {
+                    colorPanel.add(Box.createVerticalGlue());
+                }
+                JLabel colorLabel = new JLabel(button.pitch == null ? "    " : button.pitch.tone.label);
+                labels.add(colorLabel);
+                colorPanel.add(colorLabel);
+                colorLabel.setFont(Pitchenga.MONOSPACED);
+                colorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                colorLabel.setForeground(Color.WHITE);
+                colorLabel.setBackground(Color.BLACK);
+                colorLabel.setOpaque(button.pitch != null);
+                if (button.row == 2) {
+                    colorPanel.add(Box.createVerticalGlue());
+                }
+                colorPanel.add(Box.createVerticalStrut(5));
+            }
+            this.panels = panelsList.toArray(new JPanel[0]);
+            this.buttons = buttonsList.toArray(new Button[0]);
+        }
+
+        private int getBorderThickness() {
+            return 10;
+            //fixme: scaling
+//            int thickness = (Math.min(getWidth(), getHeight()) / 7) / 18;
+//            if (thickness == 0) {
+//                thickness = 1;
+//            }
+//            return thickness;
+        }
+
+        public void update() {
+            Tone tone = Display.this.tone;
+            Color toneColor = Display.this.toneColor;
+            Color pitchyColor = Display.this.pitchinessColor;
+            Color fillColor = Display.this.fillColor;
+            if (fillColor == null) {
+                fillColor = Color.DARK_GRAY;
+            }
+            setBackground(fillColor);
+
+            if (panels == null || panels[0] == null) {
+                return;
+            }
+
+            bottomPanel.setBackground(fillColor);
+            int borderThickness = getBorderThickness();
+//            this.setBorder(BorderFactory.createLineBorder(fillColor, borderThickness * 2));
+
+            for (int i = 0; i < panels.length; i++) {
+                    Pitch pitch = buttons[i].pitch;
+                    JPanel panel = panels[i];
+                    if (pitch != null) {
+                        Tone myTone = pitch.tone;
+                        if (myTone == tone && toneColor != null && pitchyColor != null) {
+                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness));
+                            panel.setBackground(toneColor);
+                        } else {
+                            if (tones.contains(myTone)) {
+                                panel.setBackground(myTone.color);
+                            } else {
+                                panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
+                                panel.setBackground(Color.BLACK);
+                            }
+                        }
+                }
+            }
+
+
+        }
+    }
+
     @SuppressWarnings("unused")
-    private class Frets extends JPanel{
+    private class Frets extends JPanel {
 
         private final JPanel[][] panels;
         private final Pitch[][] frets;
@@ -337,7 +488,6 @@ public class Display extends JPanel {
                     }
                 }
             }
-            textPane.repaint();
         }
     }
 
