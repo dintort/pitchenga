@@ -112,7 +112,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final JLabel frequencyLabel = new JLabel("0000.00");
     private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
     private final JComponent pitchSliderPanel = new JPanel(new BorderLayout());
-    private final JSlider fineSlider = new JSlider(SwingConstants.HORIZONTAL);
     private final JPanel bottomPanel;
     private volatile Dimension previousSize;
     private volatile Point previousLocation;
@@ -420,7 +419,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (!frozen) {
             SwingUtilities.invokeLater(() -> {
                 updatePitchSlider(guess, frequency, isKeyboard);
-                updateFineSlider(guess, frequency);
                 frequencyLabel.setText(String.format("%07.2f", frequency));
                 boolean answer = getPacer() == Pacer.Answer;
                 if (!playing || answer) {
@@ -451,39 +449,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchSlider.setValue(value);
     }
 
-    private void updateFineSlider(Pitch pitch, float frequency) {
-        int value = convertPitchToFineSlider(pitch, frequency);
-        fineSlider.setValue(value);
-    }
-
-
     private int convertPitchToSlider(Pitch pitch, float frequency) {
         int value = pitch.midi * 100;
         //fixme: Polyphonic - multiple dots on the slider
         //fixme: Extract duplication
-        if (frequency != 0) {
-            double diff = frequency - pitch.frequency;
-            Pitch pitchy;
-            if (diff < 0) {
-                pitchy = transposePitch(pitch, 0, -1);
-            } else {
-                pitchy = transposePitch(pitch, 0, +1);
-            }
-            double pitchyDiff = Math.abs(pitch.frequency - pitchy.frequency);
-            double accuracy = Math.abs(diff) / pitchyDiff;
-            accuracy = accuracy * 100;
-            if (pitch.frequency < frequency) {
-                value += accuracy;
-            } else {
-                value -= accuracy;
-            }
-        }
-        return value;
-    }
-
-    public static int convertPitchToFineSlider(Pitch pitch, float frequency) {
-        //fixme: Does not need to be this hacky
-        int value = 100;
         if (frequency != 0) {
             double diff = frequency - pitch.frequency;
             Pitch pitchy;
@@ -979,8 +948,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         displayPanel.setBackground(Color.DARK_GRAY);
         displayPanel.setLayout(new BorderLayout());
         displayPanel.add(display, BorderLayout.CENTER);
-        initFineSlider();
-        displayPanel.add(fineSlider, BorderLayout.NORTH);
 
         initPitchSlider();
         mainPanel.add(pitchSliderPanel, BorderLayout.WEST);
@@ -1060,21 +1027,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchSlider.setPaintLabels(true);
         //fixme: Scroll without bars
 //        JScrollPane scroll = new JScrollPane(pitchSlider);
-    }
-
-    private void initFineSlider() {
-        fineSlider.setEnabled(false);
-        fineSlider.setValue(0);
-        fineSlider.getModel().setMinimum(convertPitchToFineSlider(Pitch.Ra0, Do0.frequency));
-        fineSlider.getModel().setMaximum(convertPitchToFineSlider(Pitch.Ra0, Re0.frequency));
-        fineSlider.setValue(100);
-        fineSlider.setPaintTicks(false);
-        fineSlider.setPaintLabels(true);
-        Dictionary<Integer, JLabel> labels = new Hashtable<>();
-        labels.put(0, new JLabel(""));
-        labels.put(100, new JLabel("|"));
-        labels.put(200, new JLabel(""));
-        fineSlider.setLabelTable(labels);
     }
 
     private void initKeyboard() {
@@ -1614,7 +1566,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playExecutor.execute(() -> guess(null, false));
             bottomPanel.setVisible(false);
             pitchSliderPanel.setVisible(false);
-            fineSlider.setVisible(false);
             if (setup.fullScreenWhenPlaying) {
                 if (nativeFullScreenAvailable) {
                     boolean current = isInNativeFullScreen.get();
@@ -1634,7 +1585,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playButton.setText("Play");
             bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
-            fineSlider.setVisible(true);
             if (setup.fullScreenWhenPlaying) {
                 if (nativeFullScreenAvailable) {
                     boolean current = isInNativeFullScreen.get();

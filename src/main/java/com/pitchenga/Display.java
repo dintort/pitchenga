@@ -328,6 +328,29 @@ public class Display extends JPanel {
             this.buttons = buttonsList.toArray(new Button[0]);
         }
 
+        private int convertPitchToSlider(Pitch pitch, float frequency) {
+            //fixme: Does not need to be this hacky
+            int value = 100;
+            if (frequency != 0) {
+                double diff = frequency - pitch.frequency;
+                Pitch pitchy;
+                if (diff < 0) {
+                    pitchy = Pitchenga.transposePitch(pitch, 0, -1);
+                } else {
+                    pitchy = Pitchenga.transposePitch(pitch, 0, +1);
+                }
+                double pitchyDiff = Math.abs(pitch.frequency - pitchy.frequency);
+                double accuracy = Math.abs(diff) / pitchyDiff;
+                accuracy = accuracy * 100;
+                if (pitch.frequency < frequency) {
+                    value += accuracy;
+                } else {
+                    value -= accuracy;
+                }
+            }
+            return value;
+        }
+
         private int getBorderThickness() {
             int thickness = (Math.min(getWidth(), getHeight()) / 7) / 40;
             if (thickness == 0) {
@@ -341,8 +364,8 @@ public class Display extends JPanel {
             slider.setVisible(false);
             slider.setEnabled(false);
             slider.setValue(0);
-            slider.getModel().setMinimum(Pitchenga.convertPitchToFineSlider(Pitch.Ra0, Do0.frequency));
-            slider.getModel().setMaximum(Pitchenga.convertPitchToFineSlider(Pitch.Ra0, Re0.frequency));
+            slider.getModel().setMinimum(convertPitchToSlider(Pitch.Ra0, Do0.frequency));
+            slider.getModel().setMaximum(convertPitchToSlider(Pitch.Ra0, Re0.frequency));
             slider.setValue(100);
             slider.setPaintTicks(false);
             slider.setPaintLabels(true);
@@ -384,7 +407,7 @@ public class Display extends JPanel {
                         panel.setBackground(toneColor);
                         label.setForeground(pitch.tone.fontColor);
                         slider.setVisible(true);
-                        slider.setValue(Pitchenga.convertPitchToFineSlider(Display.this.pitch, frequency));
+                        slider.setValue(convertPitchToSlider(Display.this.pitch, frequency));
                     } else {
                         slider.setVisible(false);
                         if (tones.contains(myTone)) {
