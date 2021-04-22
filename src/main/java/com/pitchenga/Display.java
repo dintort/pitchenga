@@ -157,7 +157,7 @@ public class Display extends JPanel {
     private void scaleFontAndUpdate() {
         Dimension size = getSize();
         int min = Math.min(size.height, size.width);
-        int fontSize = min / 35;
+        int fontSize = min / 40;
         Font font = Pitchenga.MONOSPACED.deriveFont((float) fontSize);
         setLabelsFont(font);
         update();
@@ -245,16 +245,15 @@ public class Display extends JPanel {
 
             JPanel pianoPanel = new JPanel();
             pianoPanel.setBackground(Color.DARK_GRAY);
-            pianoPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 20));
+            pianoPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
             this.add(pianoPanel, BorderLayout.CENTER);
-            pianoPanel.setLayout(new GridLayout(2, 1, 10, 10));
+            pianoPanel.setLayout(new GridLayout(2, 1, 2, 2));
 
             JPanel blackKeysPanel = new JPanel(new BorderLayout());
             pianoPanel.add(blackKeysPanel);
             blackKeysPanel.setBackground(Color.DARK_GRAY);
             pianoPanel.add(blackKeysPanel, BorderLayout.CENTER);
 
-            //fixme: The geometry is slightly wrong and hacky
             frontStrut = Box.createHorizontalStrut(55);
             blackKeysPanel.add(frontStrut, BorderLayout.EAST);
             frontStrut.setBackground(Color.DARK_GRAY);
@@ -262,7 +261,7 @@ public class Display extends JPanel {
             JPanel blackKeysPanelPanel = new JPanel();
             blackKeysPanel.add(blackKeysPanelPanel, BorderLayout.CENTER);
             blackKeysPanelPanel.setBackground(Color.DARK_GRAY);
-            blackKeysPanelPanel.setLayout(new GridLayout(1, 7, 10, 10));
+            blackKeysPanelPanel.setLayout(new GridLayout(1, 13, 2, 2));
 
             rearStrut = Box.createHorizontalStrut(55);
             blackKeysPanel.add(rearStrut, BorderLayout.WEST);
@@ -271,7 +270,7 @@ public class Display extends JPanel {
             JPanel whiteKeysPanel = new JPanel();
             pianoPanel.add(whiteKeysPanel, BorderLayout.CENTER);
             whiteKeysPanel.setBackground(Color.DARK_GRAY);
-            whiteKeysPanel.setLayout(new GridLayout(1, 7, 10, 10));
+            whiteKeysPanel.setLayout(new GridLayout(1, 14, 2, 2));
 
             Button[] buttons = Button.values();
             List<JLabel> labelsList = new LinkedList<>();
@@ -387,13 +386,11 @@ public class Display extends JPanel {
                         slider.setVisible(true);
                         slider.setValue(Pitchenga.convertPitchToFineSlider(Display.this.pitch, frequency));
                     } else {
+                        slider.setVisible(false);
                         if (tones.contains(myTone)) {
-                            slider.setVisible(true);
-                            slider.setValue(100);
                             panel.setBackground(myTone.color);
                             label.setForeground(pitch.tone.fontColor);
                         } else {
-                            slider.setVisible(false);
                             panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
                             panel.setBackground(Color.BLACK);
                             label.setForeground(Color.white);

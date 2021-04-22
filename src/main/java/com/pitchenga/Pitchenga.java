@@ -1012,8 +1012,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         //fixme: Change to center when saving to file is implemented
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-        int width = 670;
-        int verticalOffset = (int) (screenSize.getHeight() / 2);
+        int width = 1000;
+        int verticalOffset = (int) (screenSize.getHeight() * 0.6);
         setSize(width, (int) screenSize.getHeight() - verticalOffset);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
@@ -1048,7 +1048,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
                     JLabel label = new JLabel(pitch.label);
-                    label.setFont(MONOSPACED.deriveFont(11f));
+                    label.setFont(MONOSPACED.deriveFont(12f));
                     label.setOpaque(true);
 //                    label.setForeground(pitch.tone.fontColor);
                     label.setBackground(pitch.tone.color);
