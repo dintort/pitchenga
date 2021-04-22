@@ -245,7 +245,7 @@ public class Display extends JPanel {
             this.add(bottomPanel, BorderLayout.SOUTH);
 
             JPanel pianoPanel = new JPanel();
-            pianoPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 15));
+            pianoPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 30));
             this.add(pianoPanel, BorderLayout.CENTER);
             pianoPanel.setLayout(new GridLayout(2, 1));
 
