@@ -18,9 +18,10 @@ public class Display extends JPanel {
     private final JTextArea textArea = new JTextArea();
     private final JScrollPane textPane = new JScrollPane(textArea);
 
-    private volatile Tone tone;
+    private volatile Pitch pitch;
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
+    private float frequency;
     private volatile Color fillColor;
     private final Piano piano;
 //    private final Circle circle;
@@ -60,12 +61,13 @@ public class Display extends JPanel {
 
         this.setLayout(new OverlayLayout(this));
 
-        initTextPane();
-        JPanel textLayer = new JPanel(new BorderLayout());
-        this.add(textLayer);
-        textLayer.setOpaque(false);
-        textLayer.setBackground(new Color(0, 0, 0, 0.0f));
-        textLayer.add(textPane, BorderLayout.EAST);
+        //fixme: Show/hide text pane on hotkey
+//        initTextPane();
+//        JPanel textLayer = new JPanel(new BorderLayout());
+//        this.add(textLayer);
+//        textLayer.setOpaque(false);
+//        textLayer.setBackground(new Color(0, 0, 0, 0.0f));
+//        textLayer.add(textPane, BorderLayout.EAST);
 
         //fixme: Make them switchable
         Piano piano = new Piano();
@@ -169,16 +171,17 @@ public class Display extends JPanel {
         }
     }
 
-    public void setTone(Tone tone, Color toneColor, Color pitchinessColor) {
-        this.tone = tone;
+    public void setTone(Pitch pitch, Color toneColor, Color pitchinessColor, float frequency) {
+        this.pitch = pitch;
         this.toneColor = toneColor;
         this.pitchinessColor = pitchinessColor;
+        this.frequency = frequency;
     }
 
     public void setTones(Tone... tones) {
         this.tones.clear();
         this.tones.addAll(Arrays.asList(tones));
-        this.tone = null;
+        this.pitch = null;
         this.pitchinessColor = null;
     }
 
@@ -232,6 +235,7 @@ public class Display extends JPanel {
 
         private final JLabel[] labels;
         private final JPanel[] panels;
+        private final JSlider[] sliders;
         private final Button[] buttons;
         private final Component frontStrut;
         private final Component rearStrut;
@@ -272,6 +276,7 @@ public class Display extends JPanel {
             Button[] buttons = Button.values();
             List<JLabel> labelsList = new LinkedList<>();
             List<JPanel> panelsList = new LinkedList<>();
+            List<JSlider> slidersList = new LinkedList<>();
             List<Button> buttonsList = new LinkedList<>();
             for (Button button : buttons) {
                 if (button.row < 1 || !button.main) {
@@ -297,8 +302,12 @@ public class Display extends JPanel {
                     colorPanel.setBorder(BorderFactory.createLineBorder(button.pitch.tone.color, getBorderThickness()));
                 }
 
+                JSlider slider = createSlider();
+                slidersList.add(slider);
                 colorPanel.add(Box.createVerticalStrut(5));
                 if (button.row == 1) {
+                    colorPanel.add(Box.createVerticalGlue());
+                    colorPanel.add(slider);
                     colorPanel.add(Box.createVerticalGlue());
                 }
                 JLabel colorLabel = new JLabel(button.pitch == null ? "    " : button.pitch.tone.label);
@@ -309,12 +318,14 @@ public class Display extends JPanel {
                 colorLabel.setForeground(Color.WHITE);
                 if (button.row == 2) {
                     colorPanel.add(Box.createVerticalGlue());
+                    colorPanel.add(slider);
+                    colorPanel.add(Box.createVerticalGlue());
                 }
-                colorPanel.add(Box.createVerticalStrut(5));
             }
             Display.this.labels.addAll(labelsList);
             this.labels = labelsList.toArray(new JLabel[0]);
             this.panels = panelsList.toArray(new JPanel[0]);
+            this.sliders = slidersList.toArray(new JSlider[0]);
             this.buttons = buttonsList.toArray(new Button[0]);
         }
 
@@ -326,8 +337,26 @@ public class Display extends JPanel {
             return thickness;
         }
 
+        private JSlider createSlider() {
+            JSlider slider = new JSlider(JSlider.VERTICAL);
+            slider.setVisible(false);
+            slider.setEnabled(false);
+            slider.setValue(0);
+            slider.getModel().setMinimum(Pitchenga.convertPitchToFineSlider(Pitch.Ra0, Do0.frequency));
+            slider.getModel().setMaximum(Pitchenga.convertPitchToFineSlider(Pitch.Ra0, Re0.frequency));
+            slider.setValue(100);
+            slider.setPaintTicks(false);
+            slider.setPaintLabels(true);
+            Dictionary<Integer, JLabel> labels = new Hashtable<>();
+            labels.put(0, new JLabel(""));
+            labels.put(100, new JLabel("-"));
+            labels.put(200, new JLabel(""));
+            slider.setLabelTable(labels);
+            return slider;
+        }
+
         public void update() {
-            Tone tone = Display.this.tone;
+            Tone tone = Display.this.pitch == null ? null : Display.this.pitch.tone;
             Color toneColor = Display.this.toneColor;
             Color pitchyColor = Display.this.pitchinessColor;
             Color fillColor = Display.this.fillColor;
@@ -342,23 +371,29 @@ public class Display extends JPanel {
 
             int borderThickness = getBorderThickness();
             frontStrut.setPreferredSize(new Dimension(panels[0].getWidth() / 2, 0));
-            rearStrut.setPreferredSize(new Dimension(panels[0].getWidth() /2 , 0));
+            rearStrut.setPreferredSize(new Dimension(panels[0].getWidth() / 2, 0));
 
             for (int i = 0; i < panels.length; i++) {
                 Pitch pitch = buttons[i].pitch;
                 JPanel panel = panels[i];
                 JLabel label = labels[i];
+                JSlider slider = sliders[i];
                 if (pitch != null) {
                     Tone myTone = pitch.tone;
                     if (myTone == tone && toneColor != null && pitchyColor != null) {
                         panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness));
                         panel.setBackground(toneColor);
                         label.setForeground(pitch.tone.fontColor);
+                        slider.setVisible(true);
+                        slider.setValue(Pitchenga.convertPitchToFineSlider(Display.this.pitch, frequency));
                     } else {
                         if (tones.contains(myTone)) {
+                            slider.setVisible(true);
+                            slider.setValue(100);
                             panel.setBackground(myTone.color);
                             label.setForeground(pitch.tone.fontColor);
                         } else {
+                            slider.setVisible(false);
                             panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
                             panel.setBackground(Color.BLACK);
                             label.setForeground(Color.white);
@@ -448,7 +483,7 @@ public class Display extends JPanel {
         }
 
         public void update() {
-            Tone tone = Display.this.tone;
+            Tone tone = Display.this.pitch == null ? null : Display.this.pitch.tone;
             Color toneColor = Display.this.toneColor;
             Color pitchyColor = Display.this.pitchinessColor;
             Color fillColor = Display.this.fillColor;
@@ -501,7 +536,7 @@ public class Display extends JPanel {
 
         @Override
         protected void paintComponent(Graphics graphics) {
-            Tone tone = Display.this.tone;
+            Tone tone = Display.this.pitch == null ? null : Display.this.pitch.tone;
             Color toneColor = Display.this.toneColor;
             Color pitchyColor = Display.this.pitchinessColor;
             Color fillColor = Display.this.fillColor;

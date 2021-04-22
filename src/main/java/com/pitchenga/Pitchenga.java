@@ -426,7 +426,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 if (!playing || answer) {
                     updatePianoButtons(guess.tone.getButton());
                     if (!isKeyboard || (!playing && !answer)) {
-                        display.setTone(guess.tone, guessColor, pitchinessColor);
+                        display.setTone(guess, guessColor, pitchinessColor, frequency);
                     }
                     display.setFillColor(guessColor);
                     display.update();
@@ -481,7 +481,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         return value;
     }
 
-    private int convertPitchToFineSlider(Pitch pitch, float frequency) {
+    public static int convertPitchToFineSlider(Pitch pitch, float frequency) {
         //fixme: Does not need to be this hacky
         int value = 100;
         if (frequency != 0) {
@@ -851,7 +851,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         if (flashColors) {
                             SwingUtilities.invokeLater(() -> {
                                 updatePianoButton(pitch.tone.getButton(), true);
-                                display.setTone(pitch.tone, pitch.tone.color, pitch.tone.color);
+                                display.setTone(pitch, pitch.tone.color, pitch.tone.color, pitch.frequency);
                                 display.update();
                             });
                         }
@@ -974,13 +974,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         mainPanel.setBackground(Color.DARK_GRAY);
         mainPanel.setLayout(new BorderLayout());
 
-        JPanel circlePanel = new JPanel();
-        mainPanel.add(circlePanel, BorderLayout.CENTER);
-        circlePanel.setBackground(Color.DARK_GRAY);
-        circlePanel.setLayout(new BorderLayout());
-        circlePanel.add(display, BorderLayout.CENTER);
+        JPanel displayPanel = new JPanel();
+        mainPanel.add(displayPanel, BorderLayout.CENTER);
+        displayPanel.setBackground(Color.DARK_GRAY);
+        displayPanel.setLayout(new BorderLayout());
+        displayPanel.add(display, BorderLayout.CENTER);
         initFineSlider();
-        circlePanel.add(fineSlider, BorderLayout.NORTH);
+        displayPanel.add(fineSlider, BorderLayout.NORTH);
 
         initPitchSlider();
         mainPanel.add(pitchSliderPanel, BorderLayout.WEST);
@@ -989,7 +989,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             keyButtons[button.ordinal()] = new JToggleButton(button.label);
         }
 
-        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        //fixme: Make it collapsable, remove penalty counters
+//        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         bottomPanel.add(initControlPanel(), BorderLayout.NORTH);
         bottomPanel.add(initChromaticPiano(), BorderLayout.CENTER);
         bottomPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
@@ -1019,7 +1020,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
 
 //            setLocation(0, screenSize.height / 2 - getSize().height / 2);
-        setLocation(0, verticalOffset);
+        setLocation(0, verticalOffset / 2);
 //        setLocation(0, screenSize.height / 2 - getSize().height / 2);
 //        setLocation(screenSize.width - getSize().width, screenSize.height / 2 - getSize().height / 2);
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
@@ -1047,7 +1048,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
                     JLabel label = new JLabel(pitch.label);
-                    label.setFont(MONOSPACED.deriveFont(17f));
+                    label.setFont(MONOSPACED.deriveFont(11f));
                     label.setOpaque(true);
 //                    label.setForeground(pitch.tone.fontColor);
                     label.setBackground(pitch.tone.color);
