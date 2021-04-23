@@ -23,7 +23,8 @@ public class Display extends JPanel {
     private volatile Color pitchinessColor;
     private float frequency;
     private volatile Color fillColor;
-    private final Piano piano;
+    private final Piano twoOctavePiano;
+    private final Piano oneOctavePiano;
 //    private final Circle circle;
 //    private final Frets fretsBasePanel;
 //    private final Frets fretsFirstPanel;
@@ -69,11 +70,17 @@ public class Display extends JPanel {
 //        textLayer.setBackground(new Color(0, 0, 0, 0.0f));
 //        textLayer.add(textPane, BorderLayout.EAST);
 
-        //fixme: Make them switchable
-        Piano piano = new Piano();
-        this.add(piano);
-        this.piano = piano;
+        Piano oneOctavePiano = new Piano(false);
+        this.add(oneOctavePiano);
+        this.oneOctavePiano = oneOctavePiano;
+        oneOctavePiano.setVisible(false);
 
+        Piano twoOctavePiano = new Piano(true);
+        this.add(twoOctavePiano);
+        this.twoOctavePiano = twoOctavePiano;
+        twoOctavePiano.setVisible(true);
+
+        //fixme: Make them switchable
 //        Circle circle = new Circle();
 //        this.add(circle);
 //        this.circle = circle;
@@ -200,7 +207,15 @@ public class Display extends JPanel {
     }
 
     public void update() {
-        piano.update();
+        if (Pitchenga.playButton.isSelected()) {
+            oneOctavePiano.setVisible(true);
+            twoOctavePiano.setVisible(false);
+            oneOctavePiano.update();
+        } else {
+            twoOctavePiano.setVisible(true);
+            oneOctavePiano.setVisible(false);
+            twoOctavePiano.update();
+        }
 //        circle.repaint();
 //        if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
 //            fretsBasePanel.setVisible(true);
@@ -240,7 +255,7 @@ public class Display extends JPanel {
         private final Component frontStrut;
         private final Component rearStrut;
 
-        public Piano() {
+        public Piano(boolean twoOctaves) {
             this.setLayout(new BorderLayout());
 
             JPanel pianoPanel = new JPanel();
@@ -280,6 +295,9 @@ public class Display extends JPanel {
             for (Button button : buttons) {
                 if (button.row < 1 || !button.main) {
                     continue;
+                }
+                if (!twoOctaves && button == Button.I) {
+                    break;
                 }
                 JPanel colorPanel = new JPanel();
                 panelsList.add(colorPanel);
@@ -421,9 +439,8 @@ public class Display extends JPanel {
                     }
                 }
             }
-
-
         }
+
     }
 
     @SuppressWarnings("unused")
