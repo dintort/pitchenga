@@ -296,7 +296,7 @@ public class Display extends JPanel {
                 if (button.row < 1 || !button.main) {
                     continue;
                 }
-                if (!twoOctaves && button == Button.I) {
+                if (!twoOctaves && button == Button.O) {
                     break;
                 }
                 JPanel colorPanel = new JPanel();
