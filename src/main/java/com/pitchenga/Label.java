@@ -15,6 +15,7 @@ public class Label extends JLabel {
         Graphics2D graphics = (Graphics2D) g;
         graphics.setColor(getForeground());
         graphics.rotate(Math.toRadians(270.0));
+        //fixme: Un-hardcode?
         graphics.drawString(text, -15, 15);
     }
 }

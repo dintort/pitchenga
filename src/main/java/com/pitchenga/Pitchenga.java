@@ -88,7 +88,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private final Map<Button, Integer> pressedButtonToMidi = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
-    private volatile Integer octaveShift = 0;
+    private volatile Integer octaveShift = -1;
+    private volatile Integer transposeShift = 0;
 
     private final Display display;
     private final JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
@@ -814,7 +815,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     if (pitch != Non) {
                         int velocity = 100;
 //                        if (midiChannel == bassInstrumentChannel) {
-                            velocity = 127;
+                        velocity = 127;
 //                        }
                         midiChannel.noteOn(pitch.midi, velocity);
                         if (flashColors) {
@@ -1092,6 +1093,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
                 debug("octaveShift=" + octaveShift);
             }
+            if (pressed && event.getKeyCode() == KeyEvent.VK_C) {
+                //noinspection NonAtomicOperationOnVolatileField
+                transposeShift--;
+                debug("transposeShift=" + transposeShift);
+            } else if (pressed && event.getKeyCode() == KeyEvent.VK_V) {
+                //noinspection NonAtomicOperationOnVolatileField
+                transposeShift++;
+                debug("transposeShift=" + transposeShift);
+            }
             if (pressed && (event.getKeyCode() == KeyEvent.VK_COMMA
                     || event.getKeyCode() == KeyEvent.VK_PERIOD)) {
                 nextTempo(event.getKeyCode() != KeyEvent.VK_COMMA);
@@ -1129,7 +1139,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         updatePianoButton(button, pressed);
         Pitch thePitch = button.pitch;
         if (octaveShift != 0) {
-            thePitch = transposePitch(button.pitch, octaveShift, 0);
+            thePitch = transposePitch(thePitch, octaveShift, 0);
+        }
+        if (transposeShift != 0) {
+            thePitch = transposePitch(thePitch, 0, transposeShift);
         }
         if (fall && lift) {
             thePitch = transposePitch(thePitch, 2, 0);
