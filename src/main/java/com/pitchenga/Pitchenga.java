@@ -110,7 +110,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     public static final JToggleButton playButton = new JToggleButton();
     private final JToggleButton[] keyButtons = new JToggleButton[Button.values().length];
     private final JLabel frequencyLabel = new JLabel("0000.00");
-    private final JSlider pitchSlider = new JSlider(SwingConstants.VERTICAL);
+    private final JSlider pitchSlider = new JSlider(SwingConstants.HORIZONTAL);
     private final JComponent pitchSliderPanel = new JPanel(new BorderLayout());
     private final JPanel bottomPanel;
     private volatile Dimension previousSize;
@@ -813,9 +813,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     Pitch pitch = (Pitch) next;
                     if (pitch != Non) {
                         int velocity = 100;
-                        if (midiChannel == bassInstrumentChannel) {
+//                        if (midiChannel == bassInstrumentChannel) {
                             velocity = 127;
-                        }
+//                        }
                         midiChannel.noteOn(pitch.midi, velocity);
                         if (flashColors) {
                             SwingUtilities.invokeLater(() -> {
@@ -950,7 +950,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         displayPanel.add(display, BorderLayout.CENTER);
 
         initPitchSlider();
-        mainPanel.add(pitchSliderPanel, BorderLayout.WEST);
+        mainPanel.add(pitchSliderPanel, BorderLayout.SOUTH);
 
         for (Button button : Button.values()) {
             keyButtons[button.ordinal()] = new JToggleButton(button.label);
@@ -979,7 +979,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         //fixme: Change to center when saving to file is implemented
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
-        int width = 1000;
+        int width = 700;
         int verticalOffset = (int) (screenSize.getHeight() * 0.6);
         setSize(width, (int) screenSize.getHeight() - verticalOffset);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
@@ -1011,16 +1011,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchSlider.getModel().setMaximum(convertPitchToSlider(Pitch.Re6, 0f));
         pitchSlider.setMajorTickSpacing(100);
         pitchSlider.setPaintTicks(true);
-        Hashtable<Integer, JLabel> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
+        Hashtable<Integer, Label> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
-                    JLabel label = new JLabel(pitch.label);
+                    Label label = new Label(pitch.label);
                     label.setFont(MONOSPACED.deriveFont(12f));
                     label.setOpaque(true);
-//                    label.setForeground(pitch.tone.fontColor);
-                    label.setBackground(pitch.tone.color);
-//                    label.setBackground(pitch.tone.fontColor);
-//                    label.setForeground(Color.WHITE);
+                    label.setForeground(pitch.tone.color);
                     return label;
                 })));
         pitchSlider.setLabelTable(dictionary);
