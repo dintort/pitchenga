@@ -936,7 +936,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private void initGui() {
-        initIcon();
+//        initIcon();
         this.setLayout(new BorderLayout());
 
         JPanel mainPanel = new JPanel();
@@ -998,13 +998,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void initPitchSlider() {
         pitchSliderPanel.setOpaque(false);
 
-        JPanel frequencyPanel = new JPanel();
-        pitchSliderPanel.add(frequencyPanel, BorderLayout.SOUTH);
-        frequencyPanel.setOpaque(false);
-        frequencyPanel.add(frequencyLabel);
-        frequencyLabel.setFont(MONOSPACED);
-        frequencyLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        frequencyLabel.setForeground(Color.LIGHT_GRAY);
+//        JPanel frequencyPanel = new JPanel();
+//        pitchSliderPanel.add(frequencyPanel, BorderLayout.SOUTH);
+//        frequencyPanel.setOpaque(false);
+//        frequencyPanel.add(frequencyLabel);
+//        frequencyLabel.setFont(MONOSPACED);
+//        frequencyLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//        frequencyLabel.setForeground(Color.LIGHT_GRAY);
 
         pitchSliderPanel.add(pitchSlider, BorderLayout.CENTER);
         pitchSlider.setEnabled(false);
