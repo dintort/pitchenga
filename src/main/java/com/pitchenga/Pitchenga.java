@@ -998,6 +998,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private void initPitchSlider() {
         pitchSliderPanel.setOpaque(false);
 
+        //fixme: Display frequency in the overlay layer same as transcribe history?
 //        JPanel frequencyPanel = new JPanel();
 //        pitchSliderPanel.add(frequencyPanel, BorderLayout.SOUTH);
 //        frequencyPanel.setOpaque(false);
