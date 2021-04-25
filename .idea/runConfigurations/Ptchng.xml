@@ -2,6 +2,7 @@
   <configuration default="false" name="Ptchng" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="com.pitchenga.Ptchng" />
     <module name="pitchenga.main" />
+    <option name="PROGRAM_PARAMETERS" value="-NSRequiresAquaSystemAppearance False" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
