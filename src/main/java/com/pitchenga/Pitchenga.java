@@ -110,7 +110,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     //fixme: Un-hack static
     public static final JToggleButton playButton = new JToggleButton();
     private final JToggleButton[] keyButtons = new JToggleButton[Button.values().length];
-    private final JLabel frequencyLabel = new JLabel("0000.00");
+    private final JLabel frequencyLabel = new JLabel("000.0");
     private final JSlider pitchSlider = new JSlider(SwingConstants.HORIZONTAL);
     private final JComponent pitchSliderPanel = new JPanel(new BorderLayout());
     private final JPanel bottomPanel;
@@ -423,7 +423,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (!frozen) {
             SwingUtilities.invokeLater(() -> {
                 updatePitchSlider(guess, frequency, isKeyboard);
-                frequencyLabel.setText(String.format("%07.2f", frequency));
+                frequencyLabel.setText(String.format("%05.1f", frequency));
                 boolean answer = getPacer() == Pacer.Answer;
                 if (!playing || answer) {
                     updatePianoButtons(guess.tone.getButton());
@@ -972,7 +972,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
-        sideSize();
+        initSizeAndLocation();
         setVisible(setup.mainFrameVisible);
 
         if (!setup.mainFrameVisible) {
@@ -981,14 +981,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         }
     }
 
-    private void sideSize() {
+    private void initSizeAndLocation() {
         Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
         //fixme: Change to center when saving to file is implemented
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
         int width = 700;
-        int verticalOffset = (int) (screenSize.getHeight() * 0.7);
+//        int verticalOffset = (int) (screenSize.getHeight() * 0.7);
 //        setSize(width, screenSize.height - verticalOffset);
         setSize(width, 600);
+        setLocation(0, 370);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
@@ -996,7 +997,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //            setLocation(0, screenSize.height / 2 - getSize().height / 2);
 //        setLocation(0, verticalOffset / 2);
 //        setLocation(0, verticalOffset / 2);
-        setLocation(0, 240);
 //        setLocation(0, verticalOffset / 2);
 //        setLocation(0, screenSize.height - getHeight());
 //        setLocation(0, screenSize.height / 2 - getSize().height / 2);
@@ -1008,13 +1008,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchSliderPanel.setOpaque(false);
 
         //fixme: Display frequency in the overlay layer same as transcribe history?
-//        JPanel frequencyPanel = new JPanel();
-//        pitchSliderPanel.add(frequencyPanel, BorderLayout.SOUTH);
-//        frequencyPanel.setOpaque(false);
-//        frequencyPanel.add(frequencyLabel);
-//        frequencyLabel.setFont(MONOSPACED);
-//        frequencyLabel.setHorizontalAlignment(SwingConstants.CENTER);
-//        frequencyLabel.setForeground(Color.LIGHT_GRAY);
+        JPanel frequencyPanel = new JPanel(new BorderLayout());
+        pitchSliderPanel.add(frequencyPanel, BorderLayout.WEST);
+        frequencyPanel.setOpaque(false);
+        frequencyPanel.add(frequencyLabel, BorderLayout.CENTER);
+        frequencyLabel.setFont(MONOSPACED.deriveFont(9f));
+        frequencyLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        frequencyLabel.setForeground(Color.LIGHT_GRAY);
+
+        JToggleButton showControlToggle = new JToggleButton("");
+        showControlToggle.setFocusable(false);
+        controlPanelPanel.setVisible(false);
+        showControlToggle.addItemListener(event -> {
+            controlPanelPanel.setVisible(showControlToggle.isSelected());
+        });
+        showControlToggle.setSelected(false);
+        frequencyPanel.add(showControlToggle, BorderLayout.SOUTH);
 
         pitchSliderPanel.add(pitchSlider, BorderLayout.CENTER);
         pitchSlider.setEnabled(false);
@@ -1034,14 +1043,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 })));
         pitchSlider.setLabelTable(dictionary);
         pitchSlider.setPaintLabels(true);
-
-        JToggleButton showBottomToggle = new JToggleButton("");
-        controlPanelPanel.setVisible(false);
-        showBottomToggle.addItemListener(event -> {
-            controlPanelPanel.setVisible(showBottomToggle.isSelected());
-        });
-        showBottomToggle.setSelected(false);
-        pitchSliderPanel.add(showBottomToggle, BorderLayout.WEST);
     }
 
     private void initKeyboard() {
@@ -1589,7 +1590,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             playButton.setText("Stop");
             lastPacerTimestampMs = 0;
             playExecutor.execute(() -> guess(null, false));
-            bottomPanel.setVisible(false);
+//            bottomPanel.setVisible(false);
             pitchSliderPanel.setVisible(false);
             if (setup.fullScreenWhenPlaying) {
                 if (nativeFullScreenAvailable) {
@@ -1608,7 +1609,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             }
         } else {
             playButton.setText("Play");
-            bottomPanel.setVisible(true);
+//            bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
             if (setup.fullScreenWhenPlaying) {
                 if (nativeFullScreenAvailable) {
@@ -1637,15 +1638,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         if (nativeFullScreenAvailable) {
             boolean current = isInNativeFullScreen.get();
             isInNativeFullScreen.compareAndSet(current, !current);
-            bottomPanel.setVisible(!bottomPanel.isVisible());
+//            bottomPanel.setVisible(!bottomPanel.isVisible());
             toggleNativeFullScreen();
         } else {
             GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
             if (screenDevice.getFullScreenWindow() == this) {
-                bottomPanel.setVisible(true);
+//                bottomPanel.setVisible(true);
                 screenDevice.setFullScreenWindow(null);
             } else {
-                bottomPanel.setVisible(false);
+//                bottomPanel.setVisible(false);
                 screenDevice.setFullScreenWindow(this);
             }
         }
