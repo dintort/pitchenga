@@ -118,6 +118,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private volatile Point previousLocation;
     private volatile MidiChannel currentRiddleInstrument;
     private MidiChannel bassInstrumentChannel;
+    private final JPanel controlPanelPanel = new JPanel();
 
     //fixme: Foreground colors don't work
     //fixme: Update the logo with the fixed Me color
@@ -175,6 +176,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         } catch (MidiUnavailableException | InvalidMidiDataException | IOException e) {
             throw new RuntimeException(e);
         }
+        //fixme: Latency :(
+//        new Midi(this.keyboardInstrumentChannel);
         initGui();
         initKeyboard();
         asyncExecutor.execute(() -> {
@@ -413,10 +416,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             pitchinessColor = interpolateColor(pitchiness, toneColor, pitchy.tone.color);
         }
         boolean playing = isPlaying();
-        if (debug && !playing && isPrimary) {
-            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
-                    guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
-        }
+//        if (debug && !playing && isPrimary) {
+//            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
+//                    guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
+//        }
         if (!frozen) {
             SwingUtilities.invokeLater(() -> {
                 updatePitchSlider(guess, frequency, isKeyboard);
@@ -942,6 +945,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         JPanel mainPanel = new JPanel();
         this.add(mainPanel);
         mainPanel.setBackground(Color.DARK_GRAY);
+        bottomPanel.setBackground(Color.DARK_GRAY);
         mainPanel.setLayout(new BorderLayout());
 
         JPanel displayPanel = new JPanel();
@@ -950,18 +954,19 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         displayPanel.setLayout(new BorderLayout());
         displayPanel.add(display, BorderLayout.CENTER);
 
-        initPitchSlider();
-        mainPanel.add(pitchSliderPanel, BorderLayout.SOUTH);
 
         for (Button button : Button.values()) {
             keyButtons[button.ordinal()] = new JToggleButton(button.label);
         }
 
-        //fixme: Make it collapsable, remove penalty counters
-//        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         bottomPanel.add(initControlPanel(), BorderLayout.NORTH);
-        bottomPanel.add(initChromaticPiano(), BorderLayout.CENTER);
-        bottomPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
+//        bottomPanel.add(initChromaticPiano(), BorderLayout.CENTER);
+//        bottomPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
+
+        initPitchSliderPanel();
+        bottomPanel.add(pitchSliderPanel, BorderLayout.SOUTH);
+
         updateToneSpinners();
         updateOctaveToggles(getRiddler());
 
@@ -982,20 +987,24 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        this.setSize((int) screenSize.getWidth(), (int) screenSize.getHeight());
         int width = 700;
         int verticalOffset = (int) (screenSize.getHeight() * 0.7);
-        setSize(width, screenSize.height - verticalOffset);
+//        setSize(width, screenSize.height - verticalOffset);
+        setSize(width, 600);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
 
 //            setLocation(0, screenSize.height / 2 - getSize().height / 2);
-        setLocation(0, verticalOffset / 2);
+//        setLocation(0, verticalOffset / 2);
+//        setLocation(0, verticalOffset / 2);
+        setLocation(0, 240);
+//        setLocation(0, verticalOffset / 2);
 //        setLocation(0, screenSize.height - getHeight());
 //        setLocation(0, screenSize.height / 2 - getSize().height / 2);
 //        setLocation(screenSize.width - getSize().width, screenSize.height / 2 - getSize().height / 2);
 //        pitchenga.setLocation(10, screenSize.height / 2 - getSize().height / 2);
     }
 
-    private void initPitchSlider() {
+    private void initPitchSliderPanel() {
         pitchSliderPanel.setOpaque(false);
 
         //fixme: Display frequency in the overlay layer same as transcribe history?
@@ -1025,8 +1034,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 })));
         pitchSlider.setLabelTable(dictionary);
         pitchSlider.setPaintLabels(true);
-        //fixme: Scroll without bars
-//        JScrollPane scroll = new JScrollPane(pitchSlider);
+
+        JToggleButton showBottomToggle = new JToggleButton("");
+        controlPanelPanel.setVisible(false);
+        showBottomToggle.addItemListener(event -> {
+            controlPanelPanel.setVisible(showBottomToggle.isSelected());
+        });
+        showBottomToggle.setSelected(false);
+        pitchSliderPanel.add(showBottomToggle, BorderLayout.WEST);
     }
 
     private void initKeyboard() {
@@ -1196,8 +1211,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     }
 
     private JPanel initControlPanel() {
-        JPanel controlPanelPanel = new JPanel();
-        controlPanelPanel.setVisible(false);
         controlPanelPanel.setBackground(Color.DARK_GRAY);
         JPanel controlPanel = new JPanel();
         controlPanel.setBackground(Color.DARK_GRAY);
