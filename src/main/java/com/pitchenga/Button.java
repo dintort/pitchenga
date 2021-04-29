@@ -34,8 +34,8 @@ public enum Button {
     n07(So4, KeyEvent.VK_7, 0, "7", false),
     n08(Le4, KeyEvent.VK_8, 0, "8", false),
     n09(La4, KeyEvent.VK_9, 0, "9", false),
-    n10(Se4, KeyEvent.VK_0, 0, "0", false),
-    n11(Si4, KeyEvent.VK_MINUS, 0, "-", false),
+    n10(Te4, KeyEvent.VK_0, 0, "0", false),
+    n11(Ti4, KeyEvent.VK_MINUS, 0, "-", false),
     n12(Do5, KeyEvent.VK_EQUALS, 0, "=", false),
 
 //    do3(Do3, -1, 1, null, false),
@@ -63,7 +63,7 @@ public enum Button {
 //    m05(Se3, -5, null, false),
 //    m06(Si3, -6, null, false),
 //    m07(null, -7, null, false),
-    Q(Si3, KeyEvent.VK_Q, -1, null, false),
+    Q(Ti3, KeyEvent.VK_Q, -1, null, false),
     A(Do4, KeyEvent.VK_A, 2, "a", true),
     W(Ra4, KeyEvent.VK_W, 1, "w", true),
     S(Re4, KeyEvent.VK_S, 2, "s", true),
@@ -75,8 +75,8 @@ public enum Button {
     G(So4, KeyEvent.VK_G, 2, "g", true),
     Y(Le4, KeyEvent.VK_Y, 1, "y", true),
     H(La4, KeyEvent.VK_H, 2, "h", true),
-    U(Se4, KeyEvent.VK_U, 1, "u", true),
-    J(Si4, KeyEvent.VK_J, 2, "j", true),
+    U(Te4, KeyEvent.VK_U, 1, "u", true),
+    J(Ti4, KeyEvent.VK_J, 2, "j", true),
     I(null, KeyEvent.VK_I, 1, null, true),
     K(Do5, KeyEvent.VK_K, 2, "k", true),
     O(Ra5, KeyEvent.VK_O, 1, "o", true),
@@ -89,8 +89,8 @@ public enum Button {
     NUMPAD1(So5, KeyEvent.VK_NUMPAD1, 2, null, true),
     NUMPAD4(Le5, KeyEvent.VK_NUMPAD4, 1, null, true),
     NUMPAD2(La5, KeyEvent.VK_NUMPAD2, 2, null, true),
-    NUMPAD6(Se5, KeyEvent.VK_NUMPAD5, 1, null, true),
-    NUMPAD3(Si5, KeyEvent.VK_NUMPAD3, 2, null, true),
+    NUMPAD6(Te5, KeyEvent.VK_NUMPAD5, 1, null, true),
+    NUMPAD3(Ti5, KeyEvent.VK_NUMPAD3, 2, null, true),
     ;
 
     public final Pitch pitch;

@@ -21,8 +21,8 @@ public enum Tone {
     So("G", true, new Color(0, 255, 255), Color.WHITE),
     Le("Ab", false, new Color(0, 0, 127), Color.WHITE),
     La("A", true, new Color(0, 0, 255), Color.WHITE),
-    Se("Bb", false, new Color(127, 0, 255), Color.WHITE),
-    Si("B", true, new Color(255, 0, 255), Color.WHITE),
+    Te("Bb", false, new Color(127, 0, 255), Color.WHITE),
+    Ti("B", true, new Color(255, 0, 255), Color.WHITE),
     ;
 
     public final String note;

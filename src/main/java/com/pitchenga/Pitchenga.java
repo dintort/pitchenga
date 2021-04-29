@@ -1035,7 +1035,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         Hashtable<Integer, Label> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
-                    Label label = new Label(pitch.label);
+                    Label label = new Label(pitch.label, 270.0, -15, 15, false);
                     label.setFont(MONOSPACED.deriveFont(12f));
                     label.setOpaque(true);
                     label.setForeground(pitch.tone.color);
