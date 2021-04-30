@@ -331,7 +331,9 @@ public class Display extends JPanel {
                 colorPanel.add(colorLabel);
                 colorLabel.setFont(Pitchenga.MONOSPACED);
                 colorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-                colorLabel.setForeground(Color.WHITE);
+                if (button.pitch != null) {
+                    colorLabel.setForeground(button.pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
+                }
                 if (button.row == 2) {
                     colorPanel.add(Box.createVerticalGlue());
                     colorPanel.add(slider);
@@ -422,18 +424,15 @@ public class Display extends JPanel {
                     if (myTone == tone && toneColor != null && pitchyColor != null) {
                         panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness));
                         panel.setBackground(toneColor);
-                        label.setForeground(pitch.tone.fontColor);
                         slider.setValue(convertPitchToSlider(Display.this.pitch, frequency));
                         slider.setVisible(true);
                     } else {
                         slider.setVisible(false);
                         if (tones.contains(myTone)) {
                             panel.setBackground(myTone.color);
-                            label.setForeground(pitch.tone.fontColor);
                         } else {
                             panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
-                            panel.setBackground(Color.BLACK);
-                            label.setForeground(Color.white);
+                            panel.setBackground(pitch.tone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                         }
                     }
                 }
