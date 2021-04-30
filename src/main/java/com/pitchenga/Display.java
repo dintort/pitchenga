@@ -299,45 +299,48 @@ public class Display extends JPanel {
                 if (!twoOctaves && button == Button.O) {
                     break;
                 }
-                JPanel colorPanel = new JPanel();
-                panelsList.add(colorPanel);
+                JPanel buttonPanel = new JPanel();
+                panelsList.add(buttonPanel);
                 buttonsList.add(button);
                 if (button.pitch == null) {
-                    blackKeysPanelPanel.add(colorPanel);
-                    colorPanel.setBackground(Color.DARK_GRAY);
+                    blackKeysPanelPanel.add(buttonPanel);
+                    buttonPanel.setBackground(Color.DARK_GRAY);
                 }
                 if (button.pitch != null) {
                     if (button.row == 1) {
-                        blackKeysPanelPanel.add(colorPanel);
+                        blackKeysPanelPanel.add(buttonPanel);
                     } else {
-                        whiteKeysPanel.add(colorPanel);
+                        whiteKeysPanel.add(buttonPanel);
                     }
                 }
-                colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.Y_AXIS));
-                colorPanel.setBackground(Color.DARK_GRAY);
+                buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+                buttonPanel.setBackground(Color.DARK_GRAY);
                 if (button.pitch != null) {
-                    colorPanel.setBorder(BorderFactory.createLineBorder(button.pitch.tone.color, getBorderThickness()));
+                    buttonPanel.setBorder(BorderFactory.createLineBorder(button.pitch.tone.color, getBorderThickness()));
                 }
 
                 JSlider slider = createSlider();
                 slidersList.add(slider);
+                //fixme: When going back from full screen the label stays big vertically
+                //fixme: There is a one pixel gap between the label border and the outer border in the top row
                 if (button.row == 1) {
-                    colorPanel.add(Box.createVerticalGlue());
-                    colorPanel.add(slider);
-                    colorPanel.add(Box.createVerticalGlue());
+                    buttonPanel.add(Box.createVerticalGlue());
+                    buttonPanel.add(slider);
+                    buttonPanel.add(Box.createVerticalGlue());
                 }
-                JLabel colorLabel = new JLabel(button.pitch == null ? "    " : button.pitch.tone.label);
-                labelsList.add(colorLabel);
-                colorPanel.add(colorLabel);
-                colorLabel.setFont(Pitchenga.MONOSPACED);
-                colorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                JLabel toneLabel = new JLabel(button.pitch == null ? "    " : button.pitch.tone.label);
+                labelsList.add(toneLabel);
+                buttonPanel.add(toneLabel);
+                toneLabel.setFont(Pitchenga.MONOSPACED);
+                toneLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 if (button.pitch != null) {
-                    colorLabel.setForeground(button.pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
+                    toneLabel.setForeground(button.pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
+                    toneLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, getBorderThickness() * 5));
                 }
                 if (button.row == 2) {
-                    colorPanel.add(Box.createVerticalGlue());
-                    colorPanel.add(slider);
-                    colorPanel.add(Box.createVerticalGlue());
+                    buttonPanel.add(Box.createVerticalGlue());
+                    buttonPanel.add(slider);
+                    buttonPanel.add(Box.createVerticalGlue());
                 }
             }
             Display.this.labels.addAll(labelsList);
@@ -421,8 +424,9 @@ public class Display extends JPanel {
                 JSlider slider = sliders[i];
                 if (pitch != null) {
                     Tone myTone = pitch.tone;
+                    panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
                     if (myTone == tone && toneColor != null && pitchyColor != null) {
-                        panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness));
+                        label.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness() * 4));
                         panel.setBackground(toneColor);
                         slider.setValue(convertPitchToSlider(Display.this.pitch, frequency));
                         slider.setVisible(true);
@@ -430,8 +434,9 @@ public class Display extends JPanel {
                         slider.setVisible(false);
                         if (tones.contains(myTone)) {
                             panel.setBackground(myTone.color);
+                            label.setBorder(BorderFactory.createLineBorder(myTone.color, getBorderThickness() * 4));
                         } else {
-                            panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
+                            label.setBorder(BorderFactory.createLineBorder(pitch.tone.diatonic ? Color.DARK_GRAY : Color.BLACK, getBorderThickness() * 4));
                             panel.setBackground(pitch.tone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                         }
                     }
