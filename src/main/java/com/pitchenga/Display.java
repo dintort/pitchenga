@@ -11,7 +11,7 @@ import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.*;
 
 public class Display extends JPanel {
-    private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Ti, Te, La, Le, So};
+    private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
     private final Set<Tone> scaleTones = EnumSet.noneOf(Tone.class);
     private final List<JComponent> labels = new ArrayList<>();
@@ -230,19 +230,19 @@ public class Display extends JPanel {
 
     @SuppressWarnings("unused")
     public final Pitch[][] FRETS_BASE = {
-            {Le4, La4, Te4, Ti4, Do5,},
+            {Le4, La4, Se4, Si4, Do5,},
             {Me4, Mi4, Fa4, Fi4, So4,},
             {null, null, Do4, Ra4, Re4,},
     };
 
     @SuppressWarnings("unused")
     public final Pitch[][] FRETS_FIRST = {
-            {Mi5, Fa5, Fi5, So5, Le5, La5, Te5},
-            {Ti4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
-            {So4, Le4, La4, Te4, Ti4, Do5, Ra5},
+            {Mi5, Fa5, Fi5, So5, Le5, La5, Se5},
+            {Si4, Do5, Ra5, Re5, Me5, Mi5, Fa5},
+            {So4, Le4, La4, Se4, Si4, Do5, Ra5},
             {Re4, Me4, Mi4, Fa4, Fi4, So4, Le4},
-            {La3, Te3, Ti3, Do4, Ra4, Re4, Me4},
-            {Mi3, Fa3, Fi3, So3, Le3, La3, Te3},
+            {La3, Se3, Si3, Do4, Ra4, Re4, Me4},
+            {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
     };
 
 
@@ -335,7 +335,7 @@ public class Display extends JPanel {
                 toneLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                 if (button.pitch != null) {
                     toneLabel.setForeground(button.pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
-                    toneLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, getBorderThickness() * 5));
+                    toneLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, getBorderThickness() * 4));
                 }
                 if (button.row == 2) {
                     buttonPanel.add(Box.createVerticalGlue());

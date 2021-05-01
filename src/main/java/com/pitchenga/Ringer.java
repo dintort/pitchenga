@@ -19,8 +19,8 @@ public enum Ringer {
     JustSo("Ring So", pitch -> Pitchenga.transposeFugue(pitch, new Object[]{So.getFugue().pitch, eight, four})),
     JustLe("Ring Le", pitch -> Pitchenga.transposeFugue(pitch, new Object[]{Le.getFugue().pitch, eight, four})),
     JustLa("Ring La", pitch -> Pitchenga.transposeFugue(pitch, new Object[]{La.getFugue().pitch, eight, four})),
-    JustSe("Ring Se", pitch -> Pitchenga.transposeFugue(pitch, new Object[]{Te.getFugue().pitch, eight, four})),
-    JustSi("Ring Si", pitch -> Pitchenga.transposeFugue(pitch, new Object[]{Ti.getFugue().pitch, eight, four})),
+    JustSe("Ring Se", pitch -> Pitchenga.transposeFugue(pitch, new Object[]{Se.getFugue().pitch, eight, four})),
+    JustSi("Ring Si", pitch -> Pitchenga.transposeFugue(pitch, new Object[]{Si.getFugue().pitch, eight, four})),
     ToneAndDo("Ring tone and Do", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[Do.ordinal()])),
     ToneAndRa("Ring tone and Ra", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[Ra.ordinal()])),
     ToneAndRe("Ring tone and Re", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[Re.ordinal()])),
@@ -31,8 +31,8 @@ public enum Ringer {
     ToneAndSo("Ring tone and So", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[So.ordinal()])),
     ToneAndLe("Ring tone and Le", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[Le.ordinal()])),
     ToneAndLa("Ring tone and La", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[La.ordinal()])),
-    ToneAndSe("Ring tone and Se", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[Te.ordinal()])),
-    ToneAndSi("Ring tone and Si", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[Ti.ordinal()])),
+    ToneAndSe("Ring tone and Se", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[Se.ordinal()])),
+    ToneAndSi("Ring tone and Si", pitch -> Pitchenga.transposeFugue(pitch, pitch.tone.getFugue().intervals[Si.ordinal()])),
     ;
     private final String name;
     public final Function<Pitch, Object[]> ring;
