@@ -14,7 +14,7 @@ public class Display extends JPanel {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Si, Se, La, Le, So};
     private final Set<Tone> tones = EnumSet.noneOf(Tone.class);
     private final Set<Tone> scaleTones = EnumSet.noneOf(Tone.class);
-    private final List<JComponent> labels = new ArrayList<>();
+    private final List<JComponent> allLabelsToScale = new ArrayList<>();
     private final JTextArea textArea = new JTextArea();
     private final JScrollPane textPane = new JScrollPane(textArea);
 
@@ -25,9 +25,11 @@ public class Display extends JPanel {
     private volatile Color fillColor;
     private final Piano twoOctavePiano;
     private final Piano oneOctavePiano;
-//    private final Circle circle;
-//    private final Frets fretsBasePanel;
-//    private final Frets fretsFirstPanel;
+    private final Circle circle;
+    private final Frets fretsBase;
+    private final Frets fretsFirst;
+    private final JComponent[] views;
+    private volatile Object currentView;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Display");
@@ -51,15 +53,6 @@ public class Display extends JPanel {
 
         //fixme: Concurrently pressed keys are not displayed properly
 
-        //fixme: Move to Circle
-        for (Tone tone : TONES) {
-            JLabel label = new JLabel(tone.label);
-            label.setFont(Pitchenga.MONOSPACED);
-            label.setForeground(Color.WHITE);
-            label.setPreferredSize(new Dimension((int) label.getPreferredSize().getWidth(), (int) label.getPreferredSize().getWidth()));
-            labels.add(label);
-        }
-
         this.setLayout(new OverlayLayout(this));
 
         //fixme: Show/hide text pane on hotkey
@@ -81,18 +74,22 @@ public class Display extends JPanel {
         twoOctavePiano.setVisible(true);
 
         //fixme: Make them switchable
-//        Circle circle = new Circle();
-//        this.add(circle);
-//        this.circle = circle;
+        Circle circle = new Circle();
+        this.add(circle);
+        this.circle = circle;
+        circle.setVisible(false);
 
-//        Frets fretsFirst = new Frets(FRETS_FIRST);
-//        this.add(fretsFirst);
-//        this.fretsFirstPanel = fretsFirst;
-//
-//        Frets fretsBase = new Frets(FRETS_BASE);
-//        fretsBase.setVisible(false);
-//        this.add(fretsBase);
-//        this.fretsBasePanel = fretsBase;
+        Frets fretsFirst = new Frets(FRETS_FIRST);
+        this.add(fretsFirst);
+        this.fretsFirst = fretsFirst;
+
+        Frets fretsBase = new Frets(FRETS_BASE);
+        fretsBase.setVisible(false);
+        this.add(fretsBase);
+        this.fretsBase = fretsBase;
+
+        this.views = new JComponent[]{twoOctavePiano, circle, fretsFirst};
+        this.currentView = twoOctavePiano;
 
         initFontScaling();
     }
@@ -171,7 +168,7 @@ public class Display extends JPanel {
     }
 
     public void setLabelsFont(Font font) {
-        for (JComponent label : labels) {
+        for (JComponent label : allLabelsToScale) {
             label.setFont(font);
             Dimension size = new Dimension((int) label.getMinimumSize().getWidth(), (int) label.getMinimumSize().getWidth());
             label.setPreferredSize(size);
@@ -207,25 +204,41 @@ public class Display extends JPanel {
     }
 
     public void update() {
-        if (Pitchenga.playButton.isSelected()) {
-            oneOctavePiano.setVisible(true);
-            twoOctavePiano.setVisible(false);
-            oneOctavePiano.update();
+        //fixme: Generify
+        if (currentView == twoOctavePiano) {
+            if (Pitchenga.playButton.isSelected()) {
+                oneOctavePiano.setVisible(true);
+                twoOctavePiano.setVisible(false);
+                oneOctavePiano.update();
+            } else {
+                twoOctavePiano.setVisible(true);
+                oneOctavePiano.setVisible(false);
+                twoOctavePiano.update();
+            }
         } else {
-            twoOctavePiano.setVisible(true);
             oneOctavePiano.setVisible(false);
-            twoOctavePiano.update();
+            twoOctavePiano.setVisible(false);
         }
-//        circle.repaint();
-//        if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
-//            fretsBasePanel.setVisible(true);
-//            fretsFirstPanel.setVisible(false);
-//            fretsBasePanel.update();
-//        } else {
-//            fretsFirstPanel.setVisible(true);
-//            fretsBasePanel.setVisible(false);
-//            fretsFirstPanel.update();
-//        }
+        if (currentView == circle) {
+            circle.setVisible(true);
+            circle.repaint();
+        } else {
+            circle.setVisible(false);
+        }
+        if (currentView == fretsFirst) {
+            if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
+                fretsBase.setVisible(true);
+                fretsFirst.setVisible(false);
+                fretsBase.update();
+            } else {
+                fretsFirst.setVisible(true);
+                fretsBase.setVisible(false);
+                fretsFirst.update();
+            }
+        } else {
+            fretsBase.setVisible(false);
+            fretsFirst.setVisible(false);
+        }
     }
 
     @SuppressWarnings("unused")
@@ -245,6 +258,20 @@ public class Display extends JPanel {
             {Mi3, Fa3, Fi3, So3, Le3, La3, Se3},
     };
 
+    public void flip() {
+        for (int i = 0; i < views.length; i++) {
+            JComponent view = views[i];
+            if (currentView == view) {
+                if (i == views.length - 1) {
+                    currentView = views[0];
+                } else {
+                    currentView = views[i + 1];
+                    break;
+                }
+            }
+        }
+        update();
+    }
 
     public class Piano extends JPanel {
 
@@ -343,7 +370,7 @@ public class Display extends JPanel {
                     buttonPanel.add(Box.createVerticalGlue());
                 }
             }
-            Display.this.labels.addAll(labelsList);
+            Display.this.allLabelsToScale.addAll(labelsList);
             this.labels = labelsList.toArray(new JLabel[0]);
             this.panels = panelsList.toArray(new JPanel[0]);
             this.sliders = slidersList.toArray(new JSlider[0]);
@@ -471,7 +498,8 @@ public class Display extends JPanel {
                     this.add(panel);
                     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 //                    panel.setLayout(new BorderLayout());
-                    panel.setBackground(Color.BLACK);
+//                    panel.setBackground(Color.BLACK);
+                    panel.setBackground(pitch != null && pitch.tone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                     panel.setBorder(BorderFactory.createLineBorder(color, getBorderThickness()));
 
 //                    JPanel labelPanel = new JPanel();
@@ -481,15 +509,15 @@ public class Display extends JPanel {
 
                     panel.add(Box.createVerticalGlue());
                     JLabel toneLabel = new JLabel(label);
-                    labels.add(toneLabel);
+                    allLabelsToScale.add(toneLabel);
                     panel.add(toneLabel, BorderLayout.CENTER);
 //                    labelPanel.add(toneLabel, BorderLayout.CENTER);
                     toneLabel.setFont(Pitchenga.MONOSPACED);
                     toneLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                     toneLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
-                    toneLabel.setForeground(Color.WHITE);
-                    toneLabel.setBackground(Color.BLACK);
-                    toneLabel.setOpaque(true);
+                    toneLabel.setForeground(pitch != null && pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
+//                    toneLabel.setBackground(Color.BLACK);
+//                    toneLabel.setOpaque(true);
                     toneLabel.setHorizontalTextPosition(SwingConstants.CENTER);
                     panel.setVisible(pitch != null);
                     panel.add(Box.createVerticalGlue());
@@ -557,6 +585,7 @@ public class Display extends JPanel {
                             } else {
                                 panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
                                 panel.setBackground(Color.BLACK);
+                                panel.setBackground(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                             }
                         }
                     }
@@ -568,9 +597,18 @@ public class Display extends JPanel {
     @SuppressWarnings("unused")
     private class Circle extends JPanel {
 
+        private final List<JLabel> labels = new ArrayList<>(TONES.length);
+
         public Circle() {
-            for (JComponent label : labels) {
+            for (Tone tone : TONES) {
+                JLabel label = new JLabel(tone.label);
+                label.setFont(Pitchenga.MONOSPACED);
+                label.setForeground(tone.diatonic ? Color.BLACK : Color.WHITE);
+                label.setPreferredSize(new Dimension((int) label.getPreferredSize().getWidth(), (int) label.getPreferredSize().getWidth()));
+                label.setOpaque(false);
                 this.add(label);
+                labels.add(label);
+                allLabelsToScale.add(label);
             }
         }
 
@@ -611,58 +649,88 @@ public class Display extends JPanel {
             for (int i = 0; i < TONES.length; i++) {
                 Tone myTone = TONES[i];
                 double phi = (i * Math.PI * 2) / TONES.length;
-                int x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
-                int y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
+                int x;
+                int y;
+                if (myTone.diatonic) {
+                    x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
+                    y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
+                } else {
+                    x = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.sin(phi) + halfSide - halfRadius + radius);
+                    y = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.cos(phi) + halfSide - halfRadius + radius);
+                }
 
+                Color labelColor;
                 if (myTone == tone && toneColor != null && pitchyColor != null) {
-                    triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, toneColor, true);
+                    labelColor = myTone.diatonic ? Color.BLACK : Color.WHITE;
+                    triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, toneColor, true, myTone.diatonic);
                     graphics.setColor(pitchyColor);
                     graphics.fillOval(x + offset, y, diameter, diameter);
                     graphics.setColor(toneColor);
                     graphics.fillOval(x + offset + halfRadius / 2, y + halfRadius / 2, diameter - halfRadius, diameter - halfRadius);
                 } else {
-                    graphics.setColor(myTone.color);
-                    graphics.fillOval(x + offset, y, diameter, diameter);
                     if (tones.contains(myTone)) {
-                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, true);
+                        labelColor = myTone.diatonic ? Color.BLACK : Color.WHITE;
+                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, true, myTone.diatonic);
+                        graphics.setColor(myTone.color);
+                        graphics.fillOval(x + offset, y, diameter, diameter);
                     } else {
-                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false);
+                        labelColor = Color.WHITE;
+                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
+                        graphics.setColor(myTone.color);
+                        graphics.fillOval(x + offset, y, diameter, diameter);
                         int thickness;
                         if (scaleTones.contains(myTone)) {
                             thickness = 1 + gap / 2;
                         } else {
                             thickness = 1 + gap / 12;
                         }
+//                        graphics.setColor(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                         graphics.setColor(Color.BLACK);
                         graphics.fillOval(offset + x + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
                     }
                 }
 
                 JComponent label = labels.get(i);
+                label.setForeground(labelColor);
                 int width = label.getWidth();
                 int height = label.getHeight();
                 Graphics labelGraphics = graphics.create(offset + x + radius - width / 2, y + radius - height / 2, width, height);
-                labelGraphics.setColor(Color.BLACK);
-                labelGraphics.fillOval(0, 0, width, height);
+//                labelGraphics.setColor(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
+//                labelGraphics.fillOval(0, 0, width, height);
                 label.paint(labelGraphics);
             }
             //fixme: Repainting the text pane this way causes repainting everything continuously in the loop
 //            textPane.repaint();
         }
 
-        private void triangle(Graphics graphics, int offset, int gap, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill) {
+        private void triangle(Graphics graphics, int offset, int gap, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill, boolean diatonic) {
             double phi2 = ((i - 0.2) * Math.PI * 2) / TONES.length;
-            int x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
-            int y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
             double phi3 = ((i + 0.2) * Math.PI * 2) / TONES.length;
-            int x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
-            int y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
-            graphics.setColor(color);
+            int x2;
+            int y2;
+            int x3;
+            int y3;
+            if (diatonic) {
+                x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
+                y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
+                x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
+                y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
+            } else {
+                x2 = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.sin(phi2) + halfSide + halfRadius + radius);
+                y2 = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.cos(phi2) + halfSide + halfRadius + radius);
+                x3 = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.sin(phi3) + halfSide + halfRadius + radius);
+                y3 = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.cos(phi3) + halfSide + halfRadius + radius);
+            }
             int[] xPoints = {x2 + offset, x3 + offset, fullSide / 2 + offset};
             int[] yPoints = {y2, y3, fullSide / 2};
             if (fill) {
+                graphics.setColor(color);
                 graphics.fillPolygon(xPoints, yPoints, 3);
             } else {
+//                graphics.setColor(diatonic ? Color.DARK_GRAY : Color.BLACK);
+                graphics.setColor(Color.BLACK);
+                graphics.fillPolygon(xPoints, yPoints, 3);
+                graphics.setColor(color);
                 graphics.drawPolygon(xPoints, yPoints, 3);
             }
         }

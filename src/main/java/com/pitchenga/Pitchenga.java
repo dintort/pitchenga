@@ -1011,19 +1011,25 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         JPanel frequencyPanel = new JPanel(new BorderLayout());
         pitchSliderPanel.add(frequencyPanel, BorderLayout.WEST);
         frequencyPanel.setOpaque(false);
-        frequencyPanel.add(frequencyLabel, BorderLayout.CENTER);
+        frequencyPanel.add(frequencyLabel, BorderLayout.NORTH);
         frequencyLabel.setFont(MONOSPACED.deriveFont(9f));
         frequencyLabel.setHorizontalAlignment(SwingConstants.CENTER);
         frequencyLabel.setForeground(Color.LIGHT_GRAY);
 
+        JButton flipDisplayButton = new JButton("");
+        frequencyPanel.add(flipDisplayButton, BorderLayout.CENTER);
+        flipDisplayButton.setFocusable(false);
+        flipDisplayButton.setSelected(false);
+        flipDisplayButton.addActionListener(event ->{
+            display.flip();
+        });
+
         JToggleButton showControlToggle = new JToggleButton("");
+        frequencyPanel.add(showControlToggle, BorderLayout.SOUTH);
         showControlToggle.setFocusable(false);
         controlPanelPanel.setVisible(false);
-        showControlToggle.addItemListener(event -> {
-            controlPanelPanel.setVisible(showControlToggle.isSelected());
-        });
+        showControlToggle.addItemListener(event -> controlPanelPanel.setVisible(showControlToggle.isSelected()));
         showControlToggle.setSelected(false);
-        frequencyPanel.add(showControlToggle, BorderLayout.SOUTH);
 
         pitchSliderPanel.add(pitchSlider, BorderLayout.CENTER);
         pitchSlider.setEnabled(false);
