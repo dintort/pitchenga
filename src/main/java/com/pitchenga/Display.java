@@ -161,7 +161,7 @@ public class Display extends JPanel {
     private void scaleFontAndUpdate() {
         Dimension size = getSize();
         int min = Math.min(size.height, size.width);
-        int fontSize = min / 40;
+        int fontSize = min / 42;
         Font font = Pitchenga.MONOSPACED.deriveFont((float) fontSize);
         setLabelsFont(font);
         update();
@@ -401,7 +401,7 @@ public class Display extends JPanel {
         }
 
         private int getBorderThickness() {
-            int thickness = (Math.min(getWidth(), getHeight()) / 7) / 40;
+            int thickness = (Math.min(getWidth(), getHeight()) / 7) / 50;
             if (thickness == 0) {
                 thickness = 1;
             }

@@ -15,7 +15,9 @@ public class Ptchng extends Setup {
 
         defaultOctaves = new Integer[]{2, 3, 4, 5, 6};
 
-        defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
+//        defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.MPM;
+//        defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.DYNAMIC_WAVELET;
+        defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.YIN;
 
 //        riddleInstrument = Instrument.ELECTRIC_BASS_FINGER;
 //        riddleInstrument = Instrument.TENOR_SAX;
@@ -65,6 +67,7 @@ public class Ptchng extends Setup {
 //            Pitchenga secondary = new Pitchenga(false, null);
 //            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
             System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
+//            System.setProperty("com.pitchenga.default.input", "STUDIO-CAPTURE");
 //            System.setProperty("com.pitchenga.default.input", "HD Pro Webcam C920");
 //            Pitchenga primary = new Pitchenga(true, secondary);
             Pitchenga primary = new Pitchenga(true, null);

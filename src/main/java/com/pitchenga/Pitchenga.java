@@ -120,7 +120,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
     private MidiChannel bassInstrumentChannel;
     private final JPanel controlPanelPanel = new JPanel();
 
-    //fixme: Foreground colors don't work
+
     //fixme: Update the logo with the fixed Me color
     //fixme: Adjust the font size based on window dimensions for the remaining labels
     //fixme: Triangles are a bit uneven
@@ -181,8 +181,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         initGui();
         initKeyboard();
         asyncExecutor.execute(() -> {
-            updateMixer();
-            //fixme: Does not work the first time
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -357,8 +355,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                         transcribe(guess, false);
                     }
                     double maxRms = rms;
-                    //fixme: Test it
-//                    if (guessQueuePitchAndRms.size() < 2) {
                     if (guessQueuePitchAndRms.size() < 1) {
                         guessQueuePitchAndRms.add(new Pair<>(guess, rms));
                     } else {
@@ -416,10 +412,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             pitchinessColor = interpolateColor(pitchiness, toneColor, pitchy.tone.color);
         }
         boolean playing = isPlaying();
-//        if (debug && !playing && isPrimary) {
-//            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
-//                    guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
-//        }
+        if (debug && !playing && isPrimary) {
+            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
+                    guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
+        }
         if (!frozen) {
             SwingUtilities.invokeLater(() -> {
                 updatePitchSlider(guess, frequency, isKeyboard);
@@ -1020,9 +1016,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         frequencyPanel.add(flipDisplayButton, BorderLayout.CENTER);
         flipDisplayButton.setFocusable(false);
         flipDisplayButton.setSelected(false);
-        flipDisplayButton.addActionListener(event ->{
-            display.flip();
-        });
+        flipDisplayButton.addActionListener(event -> display.flip());
 
         JToggleButton showControlToggle = new JToggleButton("");
         frequencyPanel.add(showControlToggle, BorderLayout.SOUTH);
@@ -1761,15 +1755,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
             PitchEstimationAlgorithm pitchAlgo = pitchAlgoOrNull == null ? setup.defaultPitchAlgo : pitchAlgoOrNull;
             Mixer mixer = AudioSystem.getMixer(mixerInfo);
             float sampleRate = 44100;
-            int bufferSize = 1024;
-            AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, true);
+            int bufferSize = 1024 * 4;
+            int overlap = 768 * 4;
+            AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
             DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
             TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
             line.open(format, bufferSize);
             line.start();
-            AudioInputStream stream = new AudioInputStream(line);
-            JVMAudioInputStream audioStream = new JVMAudioInputStream(stream);
-            audioDispatcher = new AudioDispatcher(audioStream, bufferSize, 0);
+            AudioInputStream audioInputStream = new AudioInputStream(line);
+            JVMAudioInputStream jvmAudioInputStream = new JVMAudioInputStream(audioInputStream);
+            audioDispatcher = new AudioDispatcher(jvmAudioInputStream, bufferSize, overlap);
             audioDispatcher.addAudioProcessor(new PitchProcessor(pitchAlgo, sampleRate, bufferSize, this));
             Runnable dispatch = () -> {
                 try {
