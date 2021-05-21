@@ -651,13 +651,13 @@ public class Display extends JPanel {
                 double phi = (i * Math.PI * 2) / TONES.length;
                 int x;
                 int y;
-                if (myTone.diatonic) {
+//                if (myTone.diatonic) {
                     x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
                     y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
-                } else {
-                    x = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.sin(phi) + halfSide - halfRadius + radius);
-                    y = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.cos(phi) + halfSide - halfRadius + radius);
-                }
+//                } else {
+//                    x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
+//                    y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
+//                }
 
                 Color labelColor;
                 if (myTone == tone && toneColor != null && pitchyColor != null) {
@@ -710,17 +710,17 @@ public class Display extends JPanel {
             int y2;
             int x3;
             int y3;
-            if (diatonic) {
+//            if (diatonic) {
                 x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
                 y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
                 x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
                 y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
-            } else {
-                x2 = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.sin(phi2) + halfSide + halfRadius + radius);
-                y2 = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.cos(phi2) + halfSide + halfRadius + radius);
-                x3 = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.sin(phi3) + halfSide + halfRadius + radius);
-                y3 = (int) Math.round(gap / 4.0 + halfSide * 0.7 * Math.cos(phi3) + halfSide + halfRadius + radius);
-            }
+//            } else {
+//                x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
+//                y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
+//                x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
+//                y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
+//            }
             int[] xPoints = {x2 + offset, x3 + offset, fullSide / 2 + offset};
             int[] yPoints = {y2, y3, fullSide / 2};
             if (fill) {

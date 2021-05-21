@@ -1028,8 +1028,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         pitchSliderPanel.add(pitchSlider, BorderLayout.CENTER);
         pitchSlider.setEnabled(false);
         pitchSlider.setValue(0);
-        pitchSlider.getModel().setMinimum(convertPitchToSlider(Pitch.Do1, 0f));
-        pitchSlider.getModel().setMaximum(convertPitchToSlider(Pitch.Re6, 0f));
+        pitchSlider.getModel().setMinimum(convertPitchToSlider(Mi0, 0f));
+        pitchSlider.getModel().setMaximum(convertPitchToSlider(Re6, 0f));
         pitchSlider.setMajorTickSpacing(100);
         pitchSlider.setPaintTicks(true);
         Hashtable<Integer, Label> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
