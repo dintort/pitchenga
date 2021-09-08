@@ -6,6 +6,9 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.*;
@@ -17,6 +20,7 @@ public class Display extends JPanel {
     private final List<JComponent> allLabelsToScale = new ArrayList<>();
     private final JTextArea textArea = new JTextArea();
     private final JScrollPane textPane = new JScrollPane(textArea);
+    private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor(new Threads("pitchenga-display-async"));
 
     private volatile Pitch pitch;
     private volatile Color toneColor;
@@ -24,12 +28,13 @@ public class Display extends JPanel {
     private float frequency;
     private volatile Color fillColor;
     private final Piano twoOctavePiano;
-    private final Piano oneOctavePiano;
+//    private final Piano oneOctavePiano;
     private final Circle circle;
     private final Frets fretsBase;
     private final Frets fretsFirst;
     private final JComponent[] views;
     private volatile Object currentView;
+    private final JPanel bottomPanel;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Display");
@@ -56,42 +61,54 @@ public class Display extends JPanel {
         this.setLayout(new OverlayLayout(this));
 
         //fixme: Show/hide text pane on hotkey
-//        initTextPane();
-//        JPanel textLayer = new JPanel(new BorderLayout());
-//        this.add(textLayer);
-//        textLayer.setOpaque(false);
-//        textLayer.setBackground(new Color(0, 0, 0, 0.0f));
-//        textLayer.add(textPane, BorderLayout.EAST);
+        initTextPane();
+        JPanel textLayer = new JPanel(new BorderLayout());
+        this.add(textLayer);
+        textLayer.setOpaque(false);
+        textLayer.setBackground(new Color(0, 0, 0, 0.0f));
+        textLayer.add(textPane, BorderLayout.EAST);
 
+        //fixme: Make customizable
+        JPanel displayPanel = new JPanel();
+//        displayPanel.setLayout(new BoxLayout(displayPanel, BoxLayout.Y_AXIS));
+        displayPanel.setLayout(new BorderLayout());
+        this.add(displayPanel);
+
+        Circle circle = new Circle();
+        displayPanel.add(circle, BorderLayout.CENTER);
+        this.circle = circle;
+        circle.setVisible(true);
+
+        bottomPanel = new JPanel();
+        displayPanel.add(bottomPanel, BorderLayout.SOUTH);
+        bottomPanel.setLayout(new OverlayLayout(bottomPanel));
         Piano oneOctavePiano = new Piano(false);
-        this.add(oneOctavePiano);
-        this.oneOctavePiano = oneOctavePiano;
-        oneOctavePiano.setVisible(false);
+        bottomPanel.add(oneOctavePiano);
+//        this.oneOctavePiano = oneOctavePiano;
+//        oneOctavePiano.setVisible(false);
 
         Piano twoOctavePiano = new Piano(true);
-        this.add(twoOctavePiano);
+        bottomPanel.add(twoOctavePiano);
         this.twoOctavePiano = twoOctavePiano;
         twoOctavePiano.setVisible(true);
 
-        //fixme: Make them switchable
-        Circle circle = new Circle();
-        this.add(circle);
-        this.circle = circle;
-        circle.setVisible(false);
-
         Frets fretsFirst = new Frets(FRETS_FIRST);
-        this.add(fretsFirst);
+        fretsFirst.setVisible(false);
+        bottomPanel.add(fretsFirst);
         this.fretsFirst = fretsFirst;
 
         Frets fretsBase = new Frets(FRETS_BASE);
         fretsBase.setVisible(false);
-        this.add(fretsBase);
+        bottomPanel.add(fretsBase);
         this.fretsBase = fretsBase;
 
-        this.views = new JComponent[]{twoOctavePiano, circle, fretsFirst};
+        this.views = new JComponent[]{twoOctavePiano, fretsFirst};
         this.currentView = twoOctavePiano;
 
         initFontScaling();
+
+        setTone(Do4, Do4.tone.color, Do4.tone.color, Do4.frequency);
+        update();
     }
 
     private void initTextPane() {
@@ -141,8 +158,11 @@ public class Display extends JPanel {
 //            } catch (BadLocationException e) {
 //                e.printStackTrace();
 //            }
+            textArea.setVisible(true);
             textArea.append(message);
             textArea.setCaretPosition(textArea.getDocument().getLength());
+            asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> textArea.setVisible(false)),
+                    1, TimeUnit.SECONDS);
         }
     }
 
@@ -161,7 +181,7 @@ public class Display extends JPanel {
     private void scaleFontAndUpdate() {
         Dimension size = getSize();
         int min = Math.min(size.height, size.width);
-        int fontSize = min / 42;
+        int fontSize = min / 45;
         Font font = Pitchenga.MONOSPACED.deriveFont((float) fontSize);
         setLabelsFont(font);
         update();
@@ -205,40 +225,61 @@ public class Display extends JPanel {
 
     public void update() {
         //fixme: Generify
-        if (currentView == twoOctavePiano) {
-            if (Pitchenga.playButton.isSelected()) {
-                oneOctavePiano.setVisible(true);
-                twoOctavePiano.setVisible(false);
-                oneOctavePiano.update();
-            } else {
+        circle.repaint();
+        if (Pitchenga.playButton.isSelected()) {
+            bottomPanel.setVisible(false);
+        } else {
+            bottomPanel.setVisible(true);
+            if (currentView == twoOctavePiano) {
                 twoOctavePiano.setVisible(true);
-                oneOctavePiano.setVisible(false);
                 twoOctavePiano.update();
-            }
-        } else {
-            oneOctavePiano.setVisible(false);
-            twoOctavePiano.setVisible(false);
-        }
-        if (currentView == circle) {
-            circle.setVisible(true);
-            circle.repaint();
-        } else {
-            circle.setVisible(false);
-        }
-        if (currentView == fretsFirst) {
-            if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
-                fretsBase.setVisible(true);
-                fretsFirst.setVisible(false);
-                fretsBase.update();
             } else {
-                fretsFirst.setVisible(true);
-                fretsBase.setVisible(false);
-                fretsFirst.update();
+                twoOctavePiano.setVisible(false);
             }
-        } else {
-            fretsBase.setVisible(false);
-            fretsFirst.setVisible(false);
+            if (currentView == fretsFirst) {
+                if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
+                    fretsBase.setVisible(true);
+                    fretsFirst.setVisible(false);
+                    fretsBase.update();
+                } else {
+                    fretsFirst.setVisible(true);
+                    fretsBase.setVisible(false);
+                    fretsFirst.update();
+                }
+            } else {
+                fretsBase.setVisible(false);
+                fretsFirst.setVisible(false);
+            }
         }
+
+//        if (currentView == twoOctavePiano) {
+//            if (Pitchenga.playButton.isSelected()) {
+//                oneOctavePiano.setVisible(true);
+//                twoOctavePiano.setVisible(false);
+//                oneOctavePiano.update();
+//            } else {
+//                twoOctavePiano.setVisible(true);
+//                oneOctavePiano.setVisible(false);
+//                twoOctavePiano.update();
+//            }
+//        } else {
+//            oneOctavePiano.setVisible(false);
+//            twoOctavePiano.setVisible(false);
+//        }
+//        if (currentView == fretsFirst) {
+//            if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
+//                fretsBase.setVisible(true);
+//                fretsFirst.setVisible(false);
+//                fretsBase.update();
+//            } else {
+//                fretsFirst.setVisible(true);
+//                fretsBase.setVisible(false);
+//                fretsFirst.update();
+//            }
+//        } else {
+//            fretsBase.setVisible(false);
+//            fretsFirst.setVisible(false);
+//        }
     }
 
     @SuppressWarnings("unused")
@@ -498,8 +539,8 @@ public class Display extends JPanel {
                     this.add(panel);
                     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 //                    panel.setLayout(new BorderLayout());
-//                    panel.setBackground(Color.BLACK);
-                    panel.setBackground(pitch != null && pitch.tone.diatonic ? Color.DARK_GRAY : Color.BLACK);
+                    panel.setBackground(Color.BLACK);
+//                        panel.setBackground(pitch != null && pitch.tone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                     panel.setBorder(BorderFactory.createLineBorder(color, getBorderThickness()));
 
 //                    JPanel labelPanel = new JPanel();
@@ -515,8 +556,8 @@ public class Display extends JPanel {
                     toneLabel.setFont(Pitchenga.MONOSPACED);
                     toneLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
                     toneLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
-                    toneLabel.setForeground(pitch != null && pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
-//                    toneLabel.setBackground(Color.BLACK);
+//                    toneLabel.setForeground(pitch != null && pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
+                    toneLabel.setBackground(Color.BLACK);
 //                    toneLabel.setOpaque(true);
                     toneLabel.setHorizontalTextPosition(SwingConstants.CENTER);
                     panel.setVisible(pitch != null);
@@ -585,7 +626,7 @@ public class Display extends JPanel {
                             } else {
                                 panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
                                 panel.setBackground(Color.BLACK);
-                                panel.setBackground(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
+//                                panel.setBackground(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                             }
                         }
                     }
@@ -652,8 +693,8 @@ public class Display extends JPanel {
                 int x;
                 int y;
 //                if (myTone.diatonic) {
-                    x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
-                    y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
+                x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
+                y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
 //                } else {
 //                    x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
 //                    y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
@@ -711,10 +752,10 @@ public class Display extends JPanel {
             int x3;
             int y3;
 //            if (diatonic) {
-                x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
-                y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
-                x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
-                y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
+            x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
+            y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
+            x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
+            y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
 //            } else {
 //                x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
 //                y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
