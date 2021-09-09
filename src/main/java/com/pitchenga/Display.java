@@ -28,13 +28,12 @@ public class Display extends JPanel {
     private float frequency;
     private volatile Color fillColor;
     private final Piano twoOctavePiano;
-//    private final Piano oneOctavePiano;
+    private final Piano oneOctavePiano;
     private final Circle circle;
     private final Frets fretsBase;
     private final Frets fretsFirst;
     private final JComponent[] views;
     private volatile Object currentView;
-    private final JPanel bottomPanel;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Display");
@@ -68,47 +67,34 @@ public class Display extends JPanel {
         textLayer.setBackground(new Color(0, 0, 0, 0.0f));
         textLayer.add(textPane, BorderLayout.EAST);
 
-        //fixme: Make customizable
-        JPanel displayPanel = new JPanel();
-//        displayPanel.setLayout(new BoxLayout(displayPanel, BoxLayout.Y_AXIS));
-        displayPanel.setLayout(new BorderLayout());
-        this.add(displayPanel);
-
-        Circle circle = new Circle();
-        displayPanel.add(circle, BorderLayout.CENTER);
-        this.circle = circle;
-        circle.setVisible(true);
-
-        bottomPanel = new JPanel();
-        displayPanel.add(bottomPanel, BorderLayout.SOUTH);
-        bottomPanel.setLayout(new OverlayLayout(bottomPanel));
         Piano oneOctavePiano = new Piano(false);
-        bottomPanel.add(oneOctavePiano);
-//        this.oneOctavePiano = oneOctavePiano;
-//        oneOctavePiano.setVisible(false);
+        this.add(oneOctavePiano);
+        this.oneOctavePiano = oneOctavePiano;
+        oneOctavePiano.setVisible(false);
 
         Piano twoOctavePiano = new Piano(true);
-        bottomPanel.add(twoOctavePiano);
+        this.add(twoOctavePiano);
         this.twoOctavePiano = twoOctavePiano;
         twoOctavePiano.setVisible(true);
 
+        Circle circle = new Circle();
+        this.add(circle);
+        this.circle = circle;
+        circle.setVisible(false);
+
         Frets fretsFirst = new Frets(FRETS_FIRST);
-        fretsFirst.setVisible(false);
-        bottomPanel.add(fretsFirst);
+        this.add(fretsFirst);
         this.fretsFirst = fretsFirst;
 
         Frets fretsBase = new Frets(FRETS_BASE);
         fretsBase.setVisible(false);
-        bottomPanel.add(fretsBase);
+        this.add(fretsBase);
         this.fretsBase = fretsBase;
 
-        this.views = new JComponent[]{twoOctavePiano, fretsFirst};
+        this.views = new JComponent[]{twoOctavePiano, circle, fretsFirst};
         this.currentView = twoOctavePiano;
 
         initFontScaling();
-
-        setTone(Do4, Do4.tone.color, Do4.tone.color, Do4.frequency);
-        update();
     }
 
     private void initTextPane() {
@@ -181,7 +167,7 @@ public class Display extends JPanel {
     private void scaleFontAndUpdate() {
         Dimension size = getSize();
         int min = Math.min(size.height, size.width);
-        int fontSize = min / 45;
+        int fontSize = min / 42;
         Font font = Pitchenga.MONOSPACED.deriveFont((float) fontSize);
         setLabelsFont(font);
         update();
@@ -225,61 +211,40 @@ public class Display extends JPanel {
 
     public void update() {
         //fixme: Generify
-        circle.repaint();
-        if (Pitchenga.playButton.isSelected()) {
-            bottomPanel.setVisible(false);
-        } else {
-            bottomPanel.setVisible(true);
-            if (currentView == twoOctavePiano) {
-                twoOctavePiano.setVisible(true);
-                twoOctavePiano.update();
-            } else {
+        if (currentView == twoOctavePiano) {
+            if (Pitchenga.playButton.isSelected()) {
+                oneOctavePiano.setVisible(true);
                 twoOctavePiano.setVisible(false);
-            }
-            if (currentView == fretsFirst) {
-                if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
-                    fretsBase.setVisible(true);
-                    fretsFirst.setVisible(false);
-                    fretsBase.update();
-                } else {
-                    fretsFirst.setVisible(true);
-                    fretsBase.setVisible(false);
-                    fretsFirst.update();
-                }
+                oneOctavePiano.update();
             } else {
-                fretsBase.setVisible(false);
-                fretsFirst.setVisible(false);
+                twoOctavePiano.setVisible(true);
+                oneOctavePiano.setVisible(false);
+                twoOctavePiano.update();
             }
+        } else {
+            oneOctavePiano.setVisible(false);
+            twoOctavePiano.setVisible(false);
         }
-
-//        if (currentView == twoOctavePiano) {
-//            if (Pitchenga.playButton.isSelected()) {
-//                oneOctavePiano.setVisible(true);
-//                twoOctavePiano.setVisible(false);
-//                oneOctavePiano.update();
-//            } else {
-//                twoOctavePiano.setVisible(true);
-//                oneOctavePiano.setVisible(false);
-//                twoOctavePiano.update();
-//            }
-//        } else {
-//            oneOctavePiano.setVisible(false);
-//            twoOctavePiano.setVisible(false);
-//        }
-//        if (currentView == fretsFirst) {
-//            if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
-//                fretsBase.setVisible(true);
-//                fretsFirst.setVisible(false);
-//                fretsBase.update();
-//            } else {
-//                fretsFirst.setVisible(true);
-//                fretsBase.setVisible(false);
-//                fretsFirst.update();
-//            }
-//        } else {
-//            fretsBase.setVisible(false);
-//            fretsFirst.setVisible(false);
-//        }
+        if (currentView == circle) {
+            circle.setVisible(true);
+            circle.repaint();
+        } else {
+            circle.setVisible(false);
+        }
+        if (currentView == fretsFirst) {
+            if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
+                fretsBase.setVisible(true);
+                fretsFirst.setVisible(false);
+                fretsBase.update();
+            } else {
+                fretsFirst.setVisible(true);
+                fretsBase.setVisible(false);
+                fretsFirst.update();
+            }
+        } else {
+            fretsBase.setVisible(false);
+            fretsFirst.setVisible(false);
+        }
     }
 
     @SuppressWarnings("unused")

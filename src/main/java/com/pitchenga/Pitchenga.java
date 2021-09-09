@@ -984,10 +984,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         int width = 700;
 //        int verticalOffset = (int) (screenSize.getHeight() * 0.7);
 //        setSize(width, screenSize.height - verticalOffset);
-//        setSize(width, 530);
-        setSize(width, 1050);
-        setLocation(0, 0);
-//        setLocation(0, 538);
+        setSize(width, 530);
+        setLocation(0, 538);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
