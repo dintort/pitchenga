@@ -148,7 +148,7 @@ public class Display extends JPanel {
             textArea.append(message);
             textArea.setCaretPosition(textArea.getDocument().getLength());
             asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> textArea.setVisible(false)),
-                    1, TimeUnit.SECONDS);
+                    3, TimeUnit.SECONDS);
         }
     }
 
@@ -244,6 +244,9 @@ public class Display extends JPanel {
         } else {
             fretsBase.setVisible(false);
             fretsFirst.setVisible(false);
+        }
+        if (textPane.isVisible()) {
+            textPane.repaint();
         }
     }
 
