@@ -1631,7 +1631,7 @@ public enum Riddler {
 //            {Non}
 //    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
 
-//    Step51BassOctave1("Step 51: Bass Octave 1", new Pitch[][][]{{
+    //    Step51BassOctave1("Step 51: Bass Octave 1", new Pitch[][][]{{
 //            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
 //            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
 //            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
@@ -1707,12 +1707,92 @@ public enum Riddler {
 //            {Non}
 //    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
 //            new int[]{0, 1}),
-
+    Step51BassOctave2HackRelearn("Step 51: Bass Octave 2", new Pitch[][][]{{
+            {Do2, Do2, Do2, Do2, Do2, Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
+            {Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
+            {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, So2, So2, So2, So2, So2, Le2, La2, Se2, Si2, Do3},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3},
+    }, {
+            {Do2, Do2, Do2, Do2, Do2, Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Do2, Do2, Do2, Do2, Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Do2, Do2, Do2, Do2, Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Do2, Do2, Do2, Do2, Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Do2, Do2, Do2, Do2, Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+    }, {
+            {Do3, Do3, Do3, Do3, Do3, Do3, Ra3, Ra3, Ra3, Ra3, Ra3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+            {Do3, Ra3, Re3, Re3, Re3, Re3, Re3, Re3, Me3, Me3, Me3, Me3, Me3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+            {Do3, Ra3, Re3, Me3, Mi3, Mi3, Mi3, Mi3, Mi3, Mi3, Fa3, Fa3, Fa3, Fa3, Fa3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4},
+            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, Fi3, Fi3, Fi3, Fi3, Fi3, So3, So3, So3, So3, So3, So3, Le3, La3, Se3, Si3, Do4},
+            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, Le3, Le3, Le3, Le3, Le3, La3, La3, La3, La3, La3, La3, Se3, Si3, Do4},
+            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4},
+    }, {
+            {Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+    }, {
+            {Do4, Do4, Do4, Do4, Do4, Do4, Ra4, Ra4, Ra4, Ra4, Ra4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+            {Do4, Ra4, Re4, Re4, Re4, Re4, Re4, Re4, Me4, Me4, Me4, Me4, Me4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+            {Do4, Ra4, Re4, Me4, Mi4, Mi4, Mi4, Mi4, Mi4, Mi4, Fa4, Fa4, Fa4, Fa4, Fa4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Do5},
+            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, Fi4, Fi4, Fi4, Fi4, Fi4, So4, So4, So4, So4, So4, So4, Le4, La4, Se4, Si4, Do5},
+            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, Le4, Le4, Le4, Le4, Le4, La4, La4, La4, La4, La4, La4, Se4, Si4, Do5},
+            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Se4, Se4, Se4, Se4, Se4, Si4, Si4, Si4, Si4, Si4, Si4, Do5},
+    }, {
+            {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
+    }, {
+            {Do5, Ra5, Do5, Ra5, Do5, Ra5, Do5, Ra5, Do5, Ra5, Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+            {Do5, Ra5, Re5, Me5, Re5, Me5, Re5, Me5, Re5, Me5, Re5, Me5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Mi5, Fa5, Mi5, Fa5, Mi5, Fa5, Mi5, Fa5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Fi5, So5, Fi5, So5, Fi5, So5, Fi5, So5, Fi5, So5, Le5, La5, Se5, Si5, Do6},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Le5, La5, Le5, La5, Le5, La5, Le5, La5, Le5, La5, Se5, Si5, Do6},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Se5, Si5, Se5, Si5, Se5, Si5, Se5, Si5, Se5, Si5, Do6},
+    }, {
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, So2, So2, So2, So2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, So2, So2, So2, So2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, So2, So2, So2, So2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, So2, So2, So2, So2, So2, Le2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, So2, So2, So2, So2, So2, Le2, La2, Se2, Si2, Do3,},
+    }, {
+            {Do6, Ra6, Do6, Ra6, Do6, Ra6, Do6, Ra6, Do6, Ra6, Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+            {Do6, Ra6, Re6, Me6, Re6, Me6, Re6, Me6, Re6, Me6, Re6, Me6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Mi6, Fa6, Mi6, Fa6, Mi6, Fa6, Mi6, Fa6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Fi6, So6, Fi6, So6, Fi6, So6, Fi6, So6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Le6, La6, Le6, La6, Le6, La6, Le6, La6, Le6, La6, Se6, Si6, Do7,},
+            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Se6, Si6, Se6, Si6, Se6, Si6, Se6, Si6, Se6, Si6, Do7,},
+    }, {
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
+    }, {
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+    }, {
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3,},
+    }, {
+            {Non}
+    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, false), new Integer[0], null,
+            new int[]{0, 1}),
     Step51BassOctave2("Step 51: Bass Octave 2", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Do2, Do2, Do2, Do2, Do2, Do2, Ra2, Ra2, Ra2, Ra2, Ra2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
@@ -1723,8 +1803,8 @@ public enum Riddler {
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Me2, Me2, Me2, Me2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
@@ -1735,8 +1815,8 @@ public enum Riddler {
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Mi2, Mi2, Mi2, Mi2, Mi2, Fa2, Fa2, Fa2, Fa2, Fa2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3,},
@@ -1747,8 +1827,8 @@ public enum Riddler {
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, Fi2, Fi2, Fi2, Fi2, Fi2, So2, So2, So2, So2, So2, So2, Le2, La2, Se2, Si2, Do3,},
@@ -1759,8 +1839,8 @@ public enum Riddler {
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
@@ -1771,8 +1851,8 @@ public enum Riddler {
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
             {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3,},
