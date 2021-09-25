@@ -294,7 +294,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                     boolean flashColors = getHinter() == Hinter.Always;
                     this.lastBuzzTimestampMs = System.currentTimeMillis();
                     currentRiddleInstrument = riddleInstrumentChannels[instrumentChannel];
-                    fugue(currentRiddleInstrument, getBuzzer().buzz.apply(riddle), flashColors);
+                    Object[] fugue = getBuzzer().buzz.apply(riddle);
+                    //Hack: removing the initial delay to make faster tempo possible
+                    if (fugue[0] instanceof Integer && getPacer().bpm > 90) {
+                        Object[] fastFugue = new Object[fugue.length - 1];
+                        System.arraycopy(fugue, 1, fastFugue, 0, fastFugue.length);
+                        fugue = fastFugue;
+                    }
+                    fugue(currentRiddleInstrument, fugue, flashColors);
                     playQueue.clear();
                 } finally {
                     frozen = false;
@@ -985,7 +992,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 //        int verticalOffset = (int) (screenSize.getHeight() * 0.7);
 //        setSize(width, screenSize.height - verticalOffset);
         setSize(width, 530);
-        setLocation(0, 538);
+//        setLocation(0, 538);
+        setLocation(0, 0);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);
         //fixme: Should resize relatively + have a slider for the user to resize
 //        riddlePanel.add(Box.createVerticalStrut((int) (pitchenga.getSize().getHeight() / 3)));
