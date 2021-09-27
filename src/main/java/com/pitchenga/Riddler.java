@@ -1770,8 +1770,10 @@ public enum Riddler {
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, La2, La2, La2, La2, La2, Se2, Si2, Do3,},
     }, {
-            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
-            {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+            {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
             {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
     }, {
             {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5, Se5, Si5, Se5, Si5, Se5, Si5, Se5, Si5, Se5, Si5, Do6},
