@@ -1,15 +1,22 @@
 package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
+import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.viz.Visualizer;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings("unused")
-public class Ptchng extends Setup {
+public class Ptchng extends Setup implements Visualizer<AnalyzedFrame> {
 
+
+    private final Pitchenga primary;
 
     public Ptchng() {
+
+        this.primary = new Pitchenga(true, null);
+        ;
         defaultPenaltyFactor = 3;
         defaultPenaltyFactor = 0;
 
@@ -72,7 +79,7 @@ public class Ptchng extends Setup {
 //            System.setProperty("com.pitchenga.default.input", "STUDIO-CAPTURE");
 //            System.setProperty("com.pitchenga.default.input", "HD Pro Webcam C920");
 //            Pitchenga primary = new Pitchenga(true, secondary);
-            Pitchenga primary = new Pitchenga(true, null);
+            new Ptchng();
 
 //            secondary.requestFocus();
 //            Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -83,5 +90,15 @@ public class Ptchng extends Setup {
 //            primary.setSize(screenSize.width, screenSize.height);
 //            primary.setExtendedState(primary.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         });
+    }
+
+    @Override
+    public void update(AnalyzedFrame data) {
+        primary.update(data);
+    }
+
+    @Override
+    public void setPitchStep(int i) {
+        primary.setPitchStep(i);
     }
 }

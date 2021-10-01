@@ -72,23 +72,10 @@ public class OpenGlCircularVisualizer implements
 
         binsPerHalftone = ctx.getBinsPerHalftone();
         halftoneCount = ctx.getHalftonesPerOctave();
-//        System.out.println("======== " + binsPerHalftone + " " + halftoneCount);
 
         values = pcProfile.getOctaveBins();
-        double biggest = 0;
-        int biggestN = 0;
-        for (int i = 0; i < values.length; i++) {
-            double value = values[i];
-            if (value > biggest) {
-                biggest = value;
-                biggestN = i;
-            }
-//            System.out.println(i + ":" + value);
-        }
         segmentCountInv = 1.0 / values.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
-//        System.out.println("======== " + segmentCountInv + " " + stepAngle);
-        System.out.println("======== " + biggestN + " : " + biggest);
     }
 
     @Override

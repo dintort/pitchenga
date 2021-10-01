@@ -30,8 +30,8 @@ public enum Tone {
     public final Color color;
     public final Color fontColor;
     public final String label;
-    public volatile Button button;
-    public volatile Fugue fugue;
+    private volatile Button button;
+    private volatile Fugue fugue;
 
     Tone(String note, boolean diatonic, Color color, Color fontColor) {
         this.note = note;

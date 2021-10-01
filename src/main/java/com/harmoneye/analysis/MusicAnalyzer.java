@@ -2,6 +2,7 @@ package com.harmoneye.analysis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.pitchenga.Ptchng;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.util.FastMath;
 
@@ -28,6 +29,7 @@ public class MusicAnalyzer implements SoundConsumer {
     private DecibelCalculator dbCalculator;
     private HarmonicPatternPitchClassDetector pcDetector;
     private Visualizer<AnalyzedFrame> visualizer;
+    private Visualizer<AnalyzedFrame> visualizer2;
     //private MovingAverageAccumulator accumulator;
     private ExpSmoother accumulator;
     private ExpSmoother allBinSmoother;
@@ -58,6 +60,7 @@ public class MusicAnalyzer implements SoundConsumer {
     public MusicAnalyzer(Visualizer<AnalyzedFrame> visualizer,
                          float sampleRate, int bitsPerSample) {
         this.visualizer = visualizer;
+        this.visualizer2 = new Ptchng();
 
         //@formatter:off
         ctx = CqtContext.create()
@@ -111,6 +114,7 @@ public class MusicAnalyzer implements SoundConsumer {
         computeCqtSpectrum();
         AnalyzedFrame frame = analyzeFrame(amplitudeSpectrumDb);
         visualizer.update(frame);
+        visualizer2.update(frame);
     }
 
     private void computeCqtSpectrum() {

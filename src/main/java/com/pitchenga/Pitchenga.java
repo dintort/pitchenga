@@ -2,11 +2,13 @@ package com.pitchenga;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
-import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.math.cqt.CqtContext;
+import com.harmoneye.viz.Visualizer;
+import org.apache.commons.math3.util.FastMath;
 
 import javax.sound.midi.*;
 import javax.sound.sampled.*;
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
 import static com.pitchenga.Duration.four;
 import static com.pitchenga.Pitch.*;
 
-public class Pitchenga extends JFrame implements PitchDetectionHandler {
+public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualizer<AnalyzedFrame> {
 
     private static final PrintStream log;
     private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
@@ -395,6 +397,57 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void update(AnalyzedFrame pcProfile) {
+        if (pcProfile == null) {
+            return;
+        }
+
+        CqtContext ctx = pcProfile.getCtxContext();
+
+        int binsPerHalftone = ctx.getBinsPerHalftone();
+        int halftoneCount = ctx.getHalftonesPerOctave();
+//        System.out.println("======== " + binsPerHalftone + " " + halftoneCount);
+
+        double[] values = pcProfile.getOctaveBins();
+        double biggestValue = 0;
+        int biggest = 0;
+        for (int i = 0; i < values.length; i++) {
+            double value = values[i];
+            if (value > biggestValue) {
+                biggestValue = value;
+                biggest = i;
+            }
+//            System.out.println(i + ":" + value);
+        }
+        double segmentCountInv = 1.0 / values.length;
+        double stepAngle = 2 * FastMath.PI * segmentCountInv;
+//        System.out.println("======== " + segmentCountInv + " " + stepAngle);
+
+//        segmentCountInv = 1.0 / values.length;
+//        stepAngle = 2 * FastMath.PI * segmentCountInv;
+
+        int k = biggest / (values.length / TONES.length);
+        Tone tone = TONES[k];
+
+        Pitch pitch = tone.getFugue().pitch;
+//        System.out.println("# " + biggest + "=" + biggestValue + ", k=" + k + ", tone=" + tone);
+//        updatePitch(pitch, pitch.frequency, 1.0f, 1.0, false);
+//            Pitch guess = null;
+
+//            for (Pitch aPitch : PITCHES) {
+//                double diff = Math.abs(aPitch.frequency - pitch);
+//                if (diff < 5) {
+//                    if (guess != null) {
+//                        if (Math.abs(guess.frequency - pitch) < diff) {
+//                            aPitch = guess;
+//                        }
+//                    }
+//                    guess = aPitch;
+//                }
+//            }
     }
 
     private void updatePitch(Pitch guess, float frequency, float probability, double rms, boolean isKeyboard) {
@@ -1751,45 +1804,45 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     //fixme: Add selector for the output device
     private void updateMixer() {
-        try {
-            if (audioDispatcher != null) {
-                audioDispatcher.stop();
-            }
-            Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
-            if (mixerInfo == null || mixerInfo == Setup.NO_AUDIO_INPUT) {
-                System.out.println("No audio input selected, play using keyboard or mouse");
-                System.out.println("To play using a musical instrument please select an audio input");
-                return;
-            }
-            PitchEstimationAlgorithm pitchAlgoOrNull = (PitchEstimationAlgorithm) pitchAlgoCombo.getSelectedItem();
-            PitchEstimationAlgorithm pitchAlgo = pitchAlgoOrNull == null ? setup.defaultPitchAlgo : pitchAlgoOrNull;
-            Mixer mixer = AudioSystem.getMixer(mixerInfo);
-            float sampleRate = 44100;
-            int bufferSize = 1024 * 4;
-            int overlap = 768 * 4;
-            AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
-            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
-            TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
-            line.open(format, bufferSize);
-            line.start();
-            AudioInputStream audioInputStream = new AudioInputStream(line);
-            JVMAudioInputStream jvmAudioInputStream = new JVMAudioInputStream(audioInputStream);
-            audioDispatcher = new AudioDispatcher(jvmAudioInputStream, bufferSize, overlap);
-            audioDispatcher.addAudioProcessor(new PitchProcessor(pitchAlgo, sampleRate, bufferSize, this));
-            Runnable dispatch = () -> {
-                try {
-                    System.out.println("Listening to " + mixer.getMixerInfo().getName());
-                    audioDispatcher.run();
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                } finally {
-                    System.out.println("Stopped listening to " + mixer.getMixerInfo().getName());
-                }
-            };
-            new Thread(dispatch, "pitchenga-mixer" + Threads.ID_COUNTER.incrementAndGet()).start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            if (audioDispatcher != null) {
+//                audioDispatcher.stop();
+//            }
+//            Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
+//            if (mixerInfo == null || mixerInfo == Setup.NO_AUDIO_INPUT) {
+//                System.out.println("No audio input selected, play using keyboard or mouse");
+//                System.out.println("To play using a musical instrument please select an audio input");
+//                return;
+//            }
+//            PitchEstimationAlgorithm pitchAlgoOrNull = (PitchEstimationAlgorithm) pitchAlgoCombo.getSelectedItem();
+//            PitchEstimationAlgorithm pitchAlgo = pitchAlgoOrNull == null ? setup.defaultPitchAlgo : pitchAlgoOrNull;
+//            Mixer mixer = AudioSystem.getMixer(mixerInfo);
+//            float sampleRate = 44100;
+//            int bufferSize = 1024 * 4;
+//            int overlap = 768 * 4;
+//            AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
+//            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
+//            TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
+//            line.open(format, bufferSize);
+//            line.start();
+//            AudioInputStream audioInputStream = new AudioInputStream(line);
+//            JVMAudioInputStream jvmAudioInputStream = new JVMAudioInputStream(audioInputStream);
+//            audioDispatcher = new AudioDispatcher(jvmAudioInputStream, bufferSize, overlap);
+//            audioDispatcher.addAudioProcessor(new PitchProcessor(pitchAlgo, sampleRate, bufferSize, this));
+//            Runnable dispatch = () -> {
+//                try {
+//                    System.out.println("Listening to " + mixer.getMixerInfo().getName());
+//                    audioDispatcher.run();
+//                } catch (Throwable e) {
+//                    e.printStackTrace();
+//                } finally {
+//                    System.out.println("Stopped listening to " + mixer.getMixerInfo().getName());
+//                }
+//            };
+//            new Thread(dispatch, "pitchenga-mixer" + Threads.ID_COUNTER.incrementAndGet()).start();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     private List<Mixer.Info> getAvailableInputs() {
@@ -1934,4 +1987,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
 
     }
 
+
+
+
+    @Override
+    public void setPitchStep(int i) {
+        System.out.println("pitchStep=" + i);
+    }
 }
