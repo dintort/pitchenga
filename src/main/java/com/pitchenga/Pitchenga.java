@@ -1787,7 +1787,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler {
                 }
             };
             new Thread(dispatch, "pitchenga-mixer" + Threads.ID_COUNTER.incrementAndGet()).start();
-        } catch (LineUnavailableException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
