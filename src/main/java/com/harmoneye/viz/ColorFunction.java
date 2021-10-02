@@ -13,6 +13,7 @@ public class ColorFunction {
 
 	public Color toColor(float velocity, double toneRatio) {
 
+		//fixme: hack
 		toneRatio = toneRatio - 0.4;
 
 		int toneNumber = (int) toneRatio;
