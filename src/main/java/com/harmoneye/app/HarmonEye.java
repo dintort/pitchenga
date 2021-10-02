@@ -4,12 +4,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
+import com.pitchenga.Ptchng;
 import org.simplericity.macify.eawt.Application;
 import org.simplericity.macify.eawt.DefaultApplication;
 
 /**
  * Application launcher for Mac OS X.
- * 
+ *
  */
 public class HarmonEye {
 
@@ -41,7 +42,7 @@ public class HarmonEye {
 		public void run() {
 			Application app = new DefaultApplication();
 
-			final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp();
+			final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(null);
 			class Initializer extends SwingWorker<String, Object> {
 				@Override
 				public String doInBackground() {

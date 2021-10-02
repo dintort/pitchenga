@@ -2,21 +2,20 @@ package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
 import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.app.CaptureHarmonEyeApp;
 import com.harmoneye.viz.Visualizer;
+import org.simplericity.macify.eawt.Application;
+import org.simplericity.macify.eawt.DefaultApplication;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 
 @SuppressWarnings("unused")
-public class Ptchng extends Setup implements Visualizer<AnalyzedFrame> {
+public class Ptchng extends Setup {
 
-
-    private final Pitchenga primary;
 
     public Ptchng() {
 
-        this.primary = new Pitchenga(true, null);
-        ;
         defaultPenaltyFactor = 3;
         defaultPenaltyFactor = 0;
 
@@ -79,7 +78,8 @@ public class Ptchng extends Setup implements Visualizer<AnalyzedFrame> {
 //            System.setProperty("com.pitchenga.default.input", "STUDIO-CAPTURE");
 //            System.setProperty("com.pitchenga.default.input", "HD Pro Webcam C920");
 //            Pitchenga primary = new Pitchenga(true, secondary);
-            new Ptchng();
+            Pitchenga primary = new Pitchenga(true, null);
+            harmonEye(primary);
 
 //            secondary.requestFocus();
 //            Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -92,13 +92,24 @@ public class Ptchng extends Setup implements Visualizer<AnalyzedFrame> {
         });
     }
 
-    @Override
-    public void update(AnalyzedFrame data) {
-        primary.update(data);
+    public static void harmonEye(Visualizer<AnalyzedFrame> visualizer2) {
+        Application app = new DefaultApplication();
+
+        final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(visualizer2);
+        class Initializer extends SwingWorker<String, Object> {
+            @Override
+            public String doInBackground() {
+                captureHarmonEyeApp.init();
+                captureHarmonEyeApp.start();
+                return null;
+            }
+        }
+
+        new Initializer().execute();
+
+        app.addApplicationListener(captureHarmonEyeApp.getApplicationListener());
+        app.addPreferencesMenuItem();
+        app.setEnabledPreferencesMenu(true);
     }
 
-    @Override
-    public void setPitchStep(int i) {
-        primary.setPitchStep(i);
-    }
 }

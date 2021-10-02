@@ -2,7 +2,6 @@ package com.harmoneye.analysis;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.pitchenga.Ptchng;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.util.FastMath;
 
@@ -58,9 +57,9 @@ public class MusicAnalyzer implements SoundConsumer {
     private static final boolean NOISE_GATE_MEDIAN_THRESHOLD_ENABLED = false;
 
     public MusicAnalyzer(Visualizer<AnalyzedFrame> visualizer,
-                         float sampleRate, int bitsPerSample) {
+                         float sampleRate, int bitsPerSample, Visualizer<AnalyzedFrame> visualizer2) {
         this.visualizer = visualizer;
-        this.visualizer2 = new Ptchng();
+        this.visualizer2 = visualizer2;
 
         //@formatter:off
         ctx = CqtContext.create()
@@ -103,7 +102,7 @@ public class MusicAnalyzer implements SoundConsumer {
     }
 
     @Override
-    public void consume(double[] samples) {
+    public void consume(double[] samples, byte[] data) {
         ringBufferBank.write(samples);
     }
 
@@ -114,7 +113,9 @@ public class MusicAnalyzer implements SoundConsumer {
         computeCqtSpectrum();
         AnalyzedFrame frame = analyzeFrame(amplitudeSpectrumDb);
         visualizer.update(frame);
-        visualizer2.update(frame);
+        if (visualizer2 != null) {
+            visualizer2.update(frame);
+        }
     }
 
     private void computeCqtSpectrum() {

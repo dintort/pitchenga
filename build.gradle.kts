@@ -23,12 +23,9 @@ dependencies {
     implementation("edu.emory.mathcs:JTransforms:2.4")
     implementation("org.apache.commons:commons-math3:3.2")
     implementation("org.apache.commons:commons-lang3:3.1")
-
     implementation("org.simplericity.macify:macify:1.6")
-
     implementation("javazoom:jlayer:1.0.1")
     implementation("com.googlecode.soundlibs:mp3spi:1.9.5.4")
-
     implementation("com.googlecode.soundlibs:tritonus-share:0.3.7.4")
 
 //    macBundleApp(":appbundler:1.0")

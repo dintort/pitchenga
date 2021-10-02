@@ -80,7 +80,7 @@ public class Capture implements Runnable {
 			}
 			ByteConverter.littleEndianBytesToDoubles(data, amplitudes);
 
-			soundConsumer.consume(amplitudes);
+			soundConsumer.consume(amplitudes, data);
 		}
 
 		// we reached the end of the stream.

@@ -18,13 +18,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import com.harmoneye.viz.Visualizer;
 import org.simplericity.macify.eawt.ApplicationEvent;
 import org.simplericity.macify.eawt.ApplicationListener;
 
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.analysis.MusicAnalyzer;
 import com.harmoneye.viz.OpenGlCircularVisualizer;
-import com.harmoneye.viz.OpenGlLinearVisualizer;
 import com.harmoneye.viz.SwingVisualizer;
 
 public class AbstractHarmonEyeApp {
@@ -51,11 +51,11 @@ public class AbstractHarmonEyeApp {
 
 	private Timer updateTimer;
 
-	public AbstractHarmonEyeApp() {
+	public AbstractHarmonEyeApp(Visualizer<AnalyzedFrame> visualizer2) {
 		visualizer = new OpenGlCircularVisualizer();
 //		visualizer = new OpenGlLinearVisualizer();
 
-		soundAnalyzer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE);
+		soundAnalyzer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE, visualizer2);
 
 		circleOfFifthsEnabledAction = new CircleOfFifthsEnabledAction("Circle of fifths", null, "", new Integer(
 			KeyEvent.VK_F));
@@ -75,6 +75,7 @@ public class AbstractHarmonEyeApp {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(512, 512);
 		frame.setLocationRelativeTo(null);
+		frame.setLocation(700, 0);
 
 		frame.setJMenuBar(createMenuBar());
 
@@ -300,7 +301,7 @@ public class AbstractHarmonEyeApp {
 	public ApplicationListener getApplicationListener() {
 		return appListener;
 	}
-	
+
 	private static class WebHelper {
 
 		// TODO: the help page!
