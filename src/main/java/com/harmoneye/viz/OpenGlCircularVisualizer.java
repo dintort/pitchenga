@@ -145,7 +145,8 @@ public class OpenGlCircularVisualizer implements
 
         // outer circle
         gl.glBegin(GL.GL_LINE_LOOP);
-        drawCircle(gl, 0.9, 100);
+        drawCircle(gl, 0.98, 100);
+//        drawCircle(gl, 0.9, 100);
         gl.glEnd();
 
         // lines between bins
@@ -159,8 +160,9 @@ public class OpenGlCircularVisualizer implements
                     (byte) color.getBlue());
 
             double angle = 2 * FastMath.PI * (i * halfToneCountInv);
-            double x = 0.65 * FastMath.sin(angle);
-            double y = 0.65 * FastMath.cos(angle);
+            double lineRadius = 0.71;
+            double x = lineRadius * FastMath.sin(angle);
+            double y = lineRadius * FastMath.cos(angle);
             gl.glVertex2d(x, y);
             gl.glVertex2d(0, 0);
         }
@@ -227,7 +229,9 @@ public class OpenGlCircularVisualizer implements
             return;
         }
 
-        double radius = 0.68;
+//        double radius = 0.68;
+//        double radius = 0.99;
+        double radius = 0.7;
 
         gl.glBegin(GL.GL_TRIANGLES);
         double angle = 0.5 * (1 - binsPerHalftone) * stepAngle;
@@ -280,7 +284,7 @@ public class OpenGlCircularVisualizer implements
 
         double centerX = width / 2;
         double centerY = height / 2;
-        double size = 0.9 * FastMath.min(width, height);
+        double size = 0.99 * FastMath.min(width, height);
         double angleStep = 2 * FastMath.PI / HALFTONE_NAMES.length;
         double angle = 0;
         float scaleFactor = (float) (0.0015f * size);
@@ -317,6 +321,7 @@ public class OpenGlCircularVisualizer implements
     }
 
     private void drawCentralPupil(GL2 gl) {
+//        float radius = 0.09f;
         float radius = 0.09f;
         int steps = 30;
 

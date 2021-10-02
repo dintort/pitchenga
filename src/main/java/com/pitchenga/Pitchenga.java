@@ -1133,7 +1133,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         int width = 700;
 //        int verticalOffset = (int) (screenSize.getHeight() * 0.7);
 //        setSize(width, screenSize.height - verticalOffset);
-        setSize(width, 530);
+        int height = 430;
+        setSize(width, height);
 //        setLocation(0, 538);
         setLocation(0, 0);
 //        setLocation(screen.width / 2 - getSize().width / 2, screen.height / 2 - getSize().height / 2);

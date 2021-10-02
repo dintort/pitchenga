@@ -73,10 +73,11 @@ public class AbstractHarmonEyeApp {
 		JFrame frame = new JFrame(WINDOW_TITLE);
 		frame.add(visualizer.getComponent());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(512, 512);
+//		frame.setSize(512, 512);
+		frame.setSize(700, 700);
 		frame.setLocationRelativeTo(null);
 //		frame.setLocation(700, 0);
-		frame.setLocation(188, 556);
+		frame.setLocation(0, 456);
 
 		frame.setJMenuBar(createMenuBar());
 
@@ -89,7 +90,7 @@ public class AbstractHarmonEyeApp {
 		menuBar.add(createVisualizationMenu());
 		menuBar.add(createWindowMenu());
 		menuBar.add(createHelpMenu());
-
+		menuBar.setVisible(false);
 		return menuBar;
 	}
 
