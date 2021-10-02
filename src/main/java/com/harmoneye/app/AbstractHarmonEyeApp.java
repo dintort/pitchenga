@@ -75,7 +75,8 @@ public class AbstractHarmonEyeApp {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(512, 512);
 		frame.setLocationRelativeTo(null);
-		frame.setLocation(700, 0);
+//		frame.setLocation(700, 0);
+		frame.setLocation(188, 556);
 
 		frame.setJMenuBar(createMenuBar());
 

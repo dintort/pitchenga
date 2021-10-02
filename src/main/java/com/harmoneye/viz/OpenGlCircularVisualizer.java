@@ -13,6 +13,8 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 
+import com.pitchenga.Pitchenga;
+import com.pitchenga.Tone;
 import org.apache.commons.math3.util.FastMath;
 
 import com.harmoneye.analysis.AnalyzedFrame;
@@ -73,7 +75,14 @@ public class OpenGlCircularVisualizer implements
         binsPerHalftone = ctx.getBinsPerHalftone();
         halftoneCount = ctx.getHalftonesPerOctave();
 
-        values = pcProfile.getOctaveBins();
+        double[] octaveBins = pcProfile.getOctaveBins();
+        for (int i = 0; i < octaveBins.length; i++) {
+            octaveBins[i] = octaveBins[i] * 1.05;
+            if (octaveBins[i] > 1) {
+                octaveBins[i] = 1;
+            }
+        }
+        values = octaveBins;
         segmentCountInv = 1.0 / values.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
     }
@@ -118,7 +127,7 @@ public class OpenGlCircularVisualizer implements
             double angle = 2 * FastMath.PI * unitAngle;
 
             float value = (float) (0.25 + 0.5 * ((1 - unitAngle + phaseOffset) % 1.0));
-            Color color = colorFunction.toColor((float) value);
+            Color color = colorFunction.toColor(value);
             gl.glColor3ub((byte) color.getRed(),
                     (byte) color.getGreen(),
                     (byte) color.getBlue());
@@ -144,11 +153,17 @@ public class OpenGlCircularVisualizer implements
         double halfToneCountInv = 1.0 / HALFTONE_NAMES.length;
         gl.glBegin(GL.GL_LINES);
         for (int i = 0; i < HALFTONE_NAMES.length; i++) {
-            double angle = 2 * FastMath.PI * ((i - 0.5) * halfToneCountInv);
-            double x = 0.9 * FastMath.sin(angle);
-            double y = 0.9 * FastMath.cos(angle);
+            Tone tone = Tone.values()[i];
+            Color color = tone.color;
+            gl.glColor3ub((byte) color.getRed(),
+                    (byte) color.getGreen(),
+                    (byte) color.getBlue());
+
+            double angle = 2 * FastMath.PI * (i * halfToneCountInv);
+            double x = 0.65 * FastMath.sin(angle);
+            double y = 0.65 * FastMath.cos(angle);
             gl.glVertex2d(x, y);
-            gl.glVertex2d(-x, -y);
+            gl.glVertex2d(0, 0);
         }
         gl.glEnd();
     }

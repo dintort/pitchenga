@@ -209,27 +209,35 @@ public class Display extends JPanel {
         setFillColor(null);
     }
 
+    public void updateSlider(int value) {
+        oneOctavePiano.updateSlider(value);
+        twoOctavePiano.updateSlider(value);
+    }
+
     public void update() {
         //fixme: Generify
-        if (currentView == twoOctavePiano) {
-            if (Pitchenga.playButton.isSelected()) {
-                oneOctavePiano.setVisible(true);
-                twoOctavePiano.setVisible(false);
-                oneOctavePiano.update();
-            } else {
-                twoOctavePiano.setVisible(true);
-                oneOctavePiano.setVisible(false);
-                twoOctavePiano.update();
-            }
-        } else {
-            oneOctavePiano.setVisible(false);
-            twoOctavePiano.setVisible(false);
-        }
         if (currentView == circle) {
             circle.setVisible(true);
             circle.repaint();
         } else {
             circle.setVisible(false);
+        }
+        if (currentView == twoOctavePiano) {
+            if (Pitchenga.playButton.isSelected()) {
+                //fixme: Hack
+//                oneOctavePiano.setVisible(true);
+                twoOctavePiano.setVisible(false);
+//                oneOctavePiano.update();
+                circle.setVisible(true);
+                circle.repaint();
+            } else {
+                twoOctavePiano.setVisible(true);
+//                oneOctavePiano.setVisible(false);
+                twoOctavePiano.update();
+            }
+        } else {
+            oneOctavePiano.setVisible(false);
+            twoOctavePiano.setVisible(false);
         }
         if (currentView == fretsFirst) {
             if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
@@ -254,7 +262,7 @@ public class Display extends JPanel {
     public final Pitch[][] FRETS_BASE = {
             {Le4, La4, Se4, Si4, Do5,},
             {Me4, Mi4, Fa4, Fi4, So4,},
-            {null, null, Do4, Ra4, Re4,},
+            {Se3, Si3, Do4, Ra4, Re4,},
     };
 
     @SuppressWarnings("unused")
@@ -290,6 +298,7 @@ public class Display extends JPanel {
         private final Button[] buttons;
         private final Component frontStrut;
         private final Component rearStrut;
+        private int sliderValue;
 
         public Piano(boolean twoOctaves) {
             this.setLayout(new BorderLayout());
@@ -422,8 +431,10 @@ public class Display extends JPanel {
             slider.setVisible(false);
             slider.setEnabled(false);
             slider.setValue(0);
-            slider.getModel().setMinimum(convertPitchToSlider(Pitch.Ra0, Do0.frequency));
-            slider.getModel().setMaximum(convertPitchToSlider(Pitch.Ra0, Re0.frequency));
+//            slider.getModel().setMinimum(convertPitchToSlider(Pitch.Ra0, Do0.frequency));
+//            slider.getModel().setMaximum(convertPitchToSlider(Pitch.Ra0, Re0.frequency));
+            slider.getModel().setMinimum(0);
+            slider.getModel().setMaximum(200);
             slider.setValue(100);
             slider.setPaintTicks(false);
             slider.setPaintLabels(true);
@@ -464,7 +475,8 @@ public class Display extends JPanel {
                     if (myTone == tone && toneColor != null && pitchyColor != null) {
                         label.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness() * 4));
                         panel.setBackground(toneColor);
-                        slider.setValue(convertPitchToSlider(Display.this.pitch, frequency));
+//                        int sliderValue = convertPitchToSlider(Display.this.pitch, frequency);
+//                        slider.setValue(this.sliderValue);
                         slider.setVisible(true);
                     } else {
                         slider.setVisible(false);
@@ -480,6 +492,21 @@ public class Display extends JPanel {
             }
         }
 
+        public void updateSlider(int value) {
+            this.sliderValue = value;
+//            this.sliderValue = 10;
+            if (sliders == null || sliders.length == 0 || sliders[0] == null) {
+                return;
+            }
+            for (JSlider slider : sliders) {
+//                if (slider.isVisible()) {
+                slider.setValue(value);
+//                    slider.setValue(10);
+//                    slider.repaint();
+//                }
+            }
+
+        }
     }
 
     @SuppressWarnings("unused")
@@ -529,6 +556,9 @@ public class Display extends JPanel {
 //                    toneLabel.setOpaque(true);
                     toneLabel.setHorizontalTextPosition(SwingConstants.CENTER);
                     panel.setVisible(pitch != null);
+                    if (pitch != null) {
+                        toneLabel.setForeground(pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
+                    }
                     panel.add(Box.createVerticalGlue());
 
 
@@ -585,7 +615,9 @@ public class Display extends JPanel {
                     if (pitch != null) {
                         Tone myTone = pitch.tone;
                         if (myTone == tone && toneColor != null && pitchyColor != null) {
-                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 2));
+                            //fixme: Pitchiness color around the label instead
+//                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 2));
+                            panel.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderThickness * 2));
                             panel.setBackground(toneColor);
                         } else {
                             if (tones.contains(myTone)) {
@@ -593,8 +625,8 @@ public class Display extends JPanel {
                                 panel.setBackground(myTone.color);
                             } else {
                                 panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
-                                panel.setBackground(Color.BLACK);
-//                                panel.setBackground(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
+//                                panel.setBackground(Color.BLACK);
+                                panel.setBackground(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                             }
                         }
                     }
@@ -683,7 +715,8 @@ public class Display extends JPanel {
                         graphics.setColor(myTone.color);
                         graphics.fillOval(x + offset, y, diameter, diameter);
                     } else {
-                        labelColor = Color.WHITE;
+//                        labelColor = Color.WHITE;
+                        labelColor = myTone.diatonic ? Color.BLACK : Color.WHITE;
                         triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
                         graphics.setColor(myTone.color);
                         graphics.fillOval(x + offset, y, diameter, diameter);
@@ -693,8 +726,8 @@ public class Display extends JPanel {
                         } else {
                             thickness = 1 + gap / 12;
                         }
-//                        graphics.setColor(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
-                        graphics.setColor(Color.BLACK);
+                        graphics.setColor(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
+//                        graphics.setColor(Color.BLACK);
                         graphics.fillOval(offset + x + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
                     }
                 }
