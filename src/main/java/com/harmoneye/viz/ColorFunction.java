@@ -13,8 +13,6 @@ public class ColorFunction {
 
 	public Color toColor(float velocity, double toneRatio) {
 
-		//fixme: hack
-		toneRatio = toneRatio - 0.4;
 
 		int toneNumber = (int) toneRatio;
 		double diff = toneRatio - toneNumber;
@@ -40,15 +38,16 @@ public class ColorFunction {
 		inaccuracy = inaccuracy * 40;
 		Color toneColor = guess.tone.color;
 		Pair<Color, Color> guessAndPitchinessColor = Pitchenga.getGuessAndPitchinessColor(diff, pitchy, inaccuracy, toneColor);
-//		Pair<Color, Color> guessAndPitchinessColor = Pitchenga.getGuessAndPitchinessColor(diff, pitchy, 0, toneColor);
+		Color color = guessAndPitchinessColor.left;
+//		Color color = toneColor;
 
-		if (velocity > 0.4) {
-			System.out.println("clfn tone=" + tone + " toneNumber=" + toneNumber + " ratio=" + toneRatio + " pitchy=" + pitchy + " diff="
-					+ diff + " pitchyDiff=" + pitchyDiff + " inaccuracy=" + inaccuracy + " color=" + guessAndPitchinessColor.left);
+//		float colorVelocity = velocity * 0.5f;
+		float colorVelocity = 0.3f + velocity * 1.2f;
+		if (colorVelocity > 1) {
+			colorVelocity = 1;
 		}
-
-//		Pair<Color, Color> guessAndPitchinessColor = Pitchenga.getGuessAndPitchinessColor(diff, pitchy, 0, toneColor);
-		return guessAndPitchinessColor.left;
+		color = Pitchenga.interpolateColor(colorVelocity, Color.black, color);
+		return color;
 
 ////		double toneRatio = (double) biggest / ((double) values.length / (double) TONES.length);
 //		double toneRatio = (double) value / ((double) 1 / (double) Tone.values().length);

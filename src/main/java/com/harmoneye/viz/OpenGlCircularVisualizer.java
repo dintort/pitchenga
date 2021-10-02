@@ -104,7 +104,7 @@ public class OpenGlCircularVisualizer implements
         drawPitchClassFrame(gl);
         drawPitchClassBins(gl);
         drawHalftoneNames(drawable);
-        drawCentralPupil(gl);
+//        drawCentralPupil(gl);
         if (!isDataAvailable()) {
             drawWaitingAnimation(gl);
         }
@@ -125,17 +125,16 @@ public class OpenGlCircularVisualizer implements
             double unitAngle = (i - 0.5) * halfToneCountInv;
             double angle = 2 * FastMath.PI * unitAngle;
 
-            float value = (float) (0.25 + 0.5 * ((1 - unitAngle + phaseOffset) % 1.0));
-            Color color = colorFunction.toColor(value, i);
+            float velocity = (float) (0.25 + 0.5 * ((1 - unitAngle + phaseOffset) % 1.0));
+            Color color = colorFunction.toColor(velocity, i);
             gl.glColor3ub((byte) color.getRed(),
                     (byte) color.getGreen(),
                     (byte) color.getBlue());
 
             double x = FastMath.sin(angle);
             double y = FastMath.cos(angle);
-            //fixme: Figure out and re-enable
-//            gl.glVertex2d(innerRadius * x, innerRadius * y);
-//            gl.glVertex2d(outerRadius * x, outerRadius * y);
+            gl.glVertex2d(innerRadius * x, innerRadius * y);
+            gl.glVertex2d(outerRadius * x, outerRadius * y);
         }
         gl.glEnd();
         gl.glLineWidth(DEFAULT_LINE_WIDTH);
@@ -172,11 +171,55 @@ public class OpenGlCircularVisualizer implements
         double angleStep = 2 * FastMath.PI / steps;
         double angle = 0;
 
+        Color color = Color.black;
+        gl.glColor3ub((byte) color.getRed(),
+                (byte) color.getGreen(),
+                (byte) color.getBlue());
+
+//        gl.glVertex2d(0, 0);
+
+//        double startRadius = radius * binVelocities[index];
+//        double startAngle = angle - 0.5 * stepAngle;
+//        gl.glVertex2d(startRadius * FastMath.sin(startAngle), startRadius
+//                * FastMath.cos(startAngle));
+//
+//        double endRadius = radius * binVelocities[index];
+//        double endAngle = angle + 0.5 * stepAngle;
+//        gl.glVertex2d(endRadius * FastMath.sin(endAngle), endRadius
+//                * FastMath.cos(endAngle)
+//                );
+
+        //glColor3ub(253, 184, 19);
+//        glColor3ub(255, 0, 0);
+
+//        double blackRadius= radius;
+        //fixme: Hack - just fill the background black
+        double blackRadius = 2;
+        for (double i = 0; i <= 360; ) {
+            gl.glBegin(GL.GL_TRIANGLES);
+            double x = blackRadius * FastMath.cos(i);
+            double y = blackRadius * FastMath.sin(i);
+            gl.glVertex2d(x, y);
+            i = i + .5;
+            x = blackRadius * FastMath.cos(i);
+            y = blackRadius * FastMath.sin(i);
+            gl.glVertex2d(x, y);
+            gl.glVertex2d(0, 0);
+            gl.glEnd();
+            i = i + .5;
+        }
+
+        color = Color.darkGray;
+        gl.glBegin(GL.GL_LINE_LOOP);
+        gl.glColor3ub((byte) color.getRed(),
+                (byte) color.getGreen(),
+                (byte) color.getBlue());
         for (int i = 0; i <= steps; i++, angle += angleStep) {
             double x = radius * FastMath.cos(angle);
             double y = radius * FastMath.sin(angle);
             gl.glVertex2d(x, y);
         }
+        gl.glEnd();
     }
 
     private void drawPitchClassBins(GL2 gl) {
@@ -198,12 +241,16 @@ public class OpenGlCircularVisualizer implements
 //            Color color = guessAndPitchinessColor.left;
 
             double toneRatio = i / ((double) binVelocities.length / (double) Tone.values().length);
+            //fixme: hack
+            toneRatio = toneRatio - 0.4;
+
 //            double toneRatio = angle * (1.0 / (double) Tone.values().length);
-            Color color = colorFunction.toColor((float) binVelocities[i], toneRatio);
+            Color color = colorFunction.toColor(1, toneRatio);
+//            Color color = colorFunction.toColor((float) binVelocities[i], toneRatio);
 //            if (
-            if (binVelocities[i] > 0.3) {
-                System.out.println("i=" + i + " ratio=" + toneRatio + " bins=" + binVelocities.length);
-            }
+//            if (binVelocities[i] > 0.3) {
+//                System.out.println("i=" + i + " ratio=" + toneRatio + " bins=" + binVelocities.length);
+//            }
             gl.glColor3ub((byte) color.getRed(),
                     (byte) color.getGreen(),
                     (byte) color.getBlue());

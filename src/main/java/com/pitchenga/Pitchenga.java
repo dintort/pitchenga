@@ -405,10 +405,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     @Override
     public void update(AnalyzedFrame pcProfile) {
-//        if ("true".equals(System.getProperty("old"))) {
-        if (!"false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
-            return;
-        }
+//        if ("true".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
+//        if (!"false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
+//            return;
+//        }
         try {
             if (pcProfile == null) {
                 return;
@@ -463,7 +463,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             double diff = toneRatio - toneNumber;
             int diffInt = (int) (diff * 100);
             value += diffInt;
-            System.out.println("tone=" + tone + ", toneRatio=" + toneRatio + ", diff=" + diffInt + ", value=" + value + ", pitch=" + pitch + " bins=" + octaveBins.length);
+//            System.out.println("tone=" + tone + ", toneRatio=" + toneRatio + ", diff=" + diffInt + ", value=" + value + ", pitch=" + pitch + " bins=" + octaveBins.length);
 
 //        display.updateSlider(value);
 //        Pitch pitchy;
@@ -523,8 +523,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         double inaccuracy = Math.abs(diff) / pitchyDiff;
         Color toneColor = guess.tone.color;
         Pair<Color, Color> guessAndPitchinessColor = getGuessAndPitchinessColor(diff, pitchy, inaccuracy, toneColor);
-        System.out.println("ptch tone=" + guess.tone + " toneNumber=" + guess.tone.ordinal() + " freq=" + frequency + " pitchy=" + pitchy + " diff="
-                + diff + " pitchyDiff=" + pitchyDiff + " inaccuracy=" + inaccuracy + " color=" + guessAndPitchinessColor.left);
+//        System.out.println("ptch tone=" + guess.tone + " toneNumber=" + guess.tone.ordinal() + " freq=" + frequency + " pitchy=" + pitchy + " diff="
+//                + diff + " pitchyDiff=" + pitchyDiff + " inaccuracy=" + inaccuracy + " color=" + guessAndPitchinessColor.left);
 
         Color guessColor = guessAndPitchinessColor.left;
         Color pitchinessColor = guessAndPitchinessColor.right;
@@ -1893,10 +1893,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     //fixme: Add selector for the output device
     private void updateMixer() {
-        if ("false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
-//        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
+        if (true) {
             return;
         }
+
+//        if ("false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
+//        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
+//            return;
+//        }
         try {
             if (audioDispatcher != null) {
                 audioDispatcher.stop();

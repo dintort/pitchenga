@@ -1,6 +1,6 @@
 package com.harmoneye.app;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.net.URI;
