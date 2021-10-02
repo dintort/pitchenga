@@ -11,6 +11,7 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 
+import com.pitchenga.Tone;
 import org.apache.commons.math3.util.FastMath;
 
 import com.harmoneye.analysis.AnalyzedFrame;
@@ -28,7 +29,7 @@ public class OpenGlLinearVisualizer implements SwingVisualizer<AnalyzedFrame>,
 	protected static final String[] HALFTONE_NAMES = { "do", "ra", "re", "me",
 		"mi", "fa", "fi", "so", "le", "la", "se", "si" };
 
-	private ColorFunction colorFunction = new TemperatureColorFunction();
+	private ColorFunction colorFunction = new ColorFunction();
 	private Component component;
 
 	private AnalyzedFrame frame;
@@ -100,7 +101,8 @@ public class OpenGlLinearVisualizer implements SwingVisualizer<AnalyzedFrame>,
 			double angle = 2 * FastMath.PI * unitAngle;
 
 			float value = (float) (0.25 + 0.5 * ((1 - unitAngle + phaseOffset) % 1.0));
-			Color color = colorFunction.toColor((float) value);
+//			double toneRatio = i / ((double) octaveBins.length / (double) Tone.values().length);
+			Color color = colorFunction.toColor(value, i);
 			gl.glColor3ub((byte) color.getRed(),
 				(byte) color.getGreen(),
 				(byte) color.getBlue());

@@ -2,7 +2,7 @@ package com.pitchenga;
 
 import java.util.Objects;
 
-class Pair<L, R> {
+public class Pair<L, R> {
     public final L left;
     public final R right;
 

@@ -3,7 +3,6 @@ package com.pitchenga;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
-import be.tarsos.dsp.pitch.FastYin;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
@@ -11,7 +10,6 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.math.cqt.CqtContext;
 import com.harmoneye.viz.Visualizer;
-import org.apache.commons.math3.util.FastMath;
 
 import javax.sound.midi.*;
 import javax.sound.sampled.*;
@@ -407,6 +405,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     @Override
     public void update(AnalyzedFrame pcProfile) {
+//        if ("true".equals(System.getProperty("old"))) {
+        if (!"false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
+            return;
+        }
         try {
             if (pcProfile == null) {
                 return;
@@ -418,22 +420,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        int halftoneCount = ctx.getHalftonesPerOctave();
 //        System.out.println("======== " + binsPerHalftone + " " + halftoneCount);
 
-            double[] values = pcProfile.getOctaveBins();
-            double biggestValue = 0;
-            int biggest = 0;
-            for (int i = 0; i < values.length; i++) {
-                double value = values[i];
-                if (value > biggestValue) {
-                    biggestValue = value;
-                    biggest = i;
+            double[] octaveBins = pcProfile.getOctaveBins();
+            double biggestBinVelocity = 0;
+            int biggestBinNumber = 0;
+            for (int i = 0; i < octaveBins.length; i++) {
+                double value = octaveBins[i];
+                if (value > biggestBinVelocity) {
+                    biggestBinVelocity = value;
+                    biggestBinNumber = i;
                 }
             }
 
-//        double segmentCountInv = 1.0 / values.length;
+//        double segmentCountInv = 1.0 / octaveBins.length;
 //        double stepAngle = 2 * FastMath.PI * segmentCountInv;
 //        System.out.println("======== " + segmentCountInv + " " + stepAngle);
 
-//        segmentCountInv = 1.0 / values.length;
+//        segmentCountInv = 1.0 / octaveBins.length;
 //        stepAngle = 2 * FastMath.PI * segmentCountInv;
 
             double[] allBins = pcProfile.getAllBins();
@@ -445,11 +447,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        PitchDetectionResult pitchDetectionResult = fastYin.getPitch(floats);
 //        Pitch pitch1 = matchPitch(pitchDetectionResult.getPitch());
 
-            double toneRatio = (double) biggest / ((double) values.length / (double) TONES.length);
-            int toneNumber = (int) Math.round(toneRatio);
+            double toneRatio = (double) biggestBinNumber / ((double) octaveBins.length / (double) TONES.length);
+            int toneNumber = (int) toneRatio;
+//            int toneNumber = (int) Math.round(toneRatio);
             Tone tone;
             if (toneNumber >= TONES.length) {
                 tone = Do;
+                System.out.println("toneNumber=" + toneNumber);
             } else {
                 tone = TONES[toneNumber];
             }
@@ -459,8 +463,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             double diff = toneRatio - toneNumber;
             int diffInt = (int) (diff * 100);
             value += diffInt;
-//        System.out.println("toneNumber=" + toneNumber + ", toneRatio=" + toneRatio + ", diff=" + diffInt + ", value=" + value + ", pitch=" + pitch1);
-//        System.out.println("toneNumber=" + toneNumber + ", toneRatio=" + toneRatio + ", diff=" + diffInt + ", value=" + value + ", pitch=" + pitch);
+            System.out.println("tone=" + tone + ", toneRatio=" + toneRatio + ", diff=" + diffInt + ", value=" + value + ", pitch=" + pitch + " bins=" + octaveBins.length);
 
 //        display.updateSlider(value);
 //        Pitch pitchy;
@@ -517,16 +520,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             pitchy = transposePitch(guess, 0, +1);
         }
         double pitchyDiff = Math.abs(guess.frequency - pitchy.frequency);
-        double accuracy = Math.abs(diff) / pitchyDiff;
-        double pitchiness = accuracy * 20;
+        double inaccuracy = Math.abs(diff) / pitchyDiff;
         Color toneColor = guess.tone.color;
-        Pair<Color, Color> guessAndPitchinessColor = getGuessAndPitchinessColor(diff, pitchy, accuracy, pitchiness, toneColor);
+        Pair<Color, Color> guessAndPitchinessColor = getGuessAndPitchinessColor(diff, pitchy, inaccuracy, toneColor);
+        System.out.println("ptch tone=" + guess.tone + " toneNumber=" + guess.tone.ordinal() + " freq=" + frequency + " pitchy=" + pitchy + " diff="
+                + diff + " pitchyDiff=" + pitchyDiff + " inaccuracy=" + inaccuracy + " color=" + guessAndPitchinessColor.left);
+
         Color guessColor = guessAndPitchinessColor.left;
         Color pitchinessColor = guessAndPitchinessColor.right;
         boolean playing = isPlaying();
         if (debug && !playing && isPrimary) {
-            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | accuracy=%.2f | pitchiness=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
-                    guess, frequency, probability, rms, diff, pitchyDiff, accuracy, pitchiness, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
+            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | inaccuracy=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
+                    guess, frequency, probability, rms, diff, pitchyDiff, inaccuracy, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
         }
         if (!frozen) {
             SwingUtilities.invokeLater(() -> {
@@ -548,14 +553,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         }
     }
 
-    public static Pair<Color, Color> getGuessAndPitchinessColor(double diff, Pitch pitchy, double accuracy, double pitchiness, Color toneColor) {
+    public static Pair<Color, Color> getGuessAndPitchinessColor(double diff, Pitch pitchy, double pitchinessDiff, Color toneColor) {
         Pair<Color, Color> guessAndPitchinessColor;
+        double pitchiness = pitchinessDiff * 20;
         ;
         if (Math.abs(diff) < 0.000000000042) {
             guessAndPitchinessColor = new Pair<>(toneColor, toneColor);
         } else {
             //fixme: Unit test for interpolation, e.g. direction
-            Color guessColor = interpolateColor(accuracy, toneColor, pitchy.tone.color);
+            Color guessColor = interpolateColor(pitchinessDiff, toneColor, pitchy.tone.color);
             Color pitchinessColor = interpolateColor(pitchiness, toneColor, pitchy.tone.color);
             guessAndPitchinessColor = new Pair<>(guessColor, pitchinessColor);
         }
@@ -1887,7 +1893,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     //fixme: Add selector for the output device
     private void updateMixer() {
-        if (!"true".equals(System.getProperty("com.pitchenga.old.mixer"))) {
+        if ("false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
+//        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
             return;
         }
         try {
