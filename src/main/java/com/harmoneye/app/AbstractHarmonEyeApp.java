@@ -185,6 +185,10 @@ public class AbstractHarmonEyeApp {
 		}
 	}
 
+	public JFrame getFrame() {
+		return frame;
+	}
+
 	private class CircleOfFifthsEnabledAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 

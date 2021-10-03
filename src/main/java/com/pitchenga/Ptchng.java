@@ -2,6 +2,7 @@ package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
 import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.app.AbstractHarmonEyeApp;
 import com.harmoneye.app.CaptureHarmonEyeApp;
 import com.harmoneye.viz.Visualizer;
 import org.simplericity.macify.eawt.Application;
@@ -27,7 +28,9 @@ public class Ptchng extends Setup {
 
 //        riddleInstrument = Instrument.ELECTRIC_BASS_FINGER;
 //        riddleInstrument = Instrument.TENOR_SAX;
-//        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
+//        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CkkLEAN;
+//        keyboardInstrument = Instrument.ELECTRIC_PIANO_1;
+        keyboardInstrument = Instrument.ELECTRIC_PIANO_2;
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
         series = 3;
@@ -79,7 +82,8 @@ public class Ptchng extends Setup {
 //            System.setProperty("com.pitchenga.default.input", "HD Pro Webcam C920");
 //            Pitchenga primary = new Pitchenga(true, secondary);
             Pitchenga primary = new Pitchenga(true, null);
-            harmonEye(primary);
+            AbstractHarmonEyeApp app = harmonEye(primary);
+            primary.setEye(app.getFrame());
 
 //            secondary.requestFocus();
 //            Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -92,8 +96,8 @@ public class Ptchng extends Setup {
         });
     }
 
-    public static void harmonEye(Visualizer<AnalyzedFrame> visualizer2) {
-        Application app = new DefaultApplication();
+    public static AbstractHarmonEyeApp harmonEye(Visualizer<AnalyzedFrame> visualizer2) {
+        Application defaultApplication = new DefaultApplication();
 
         final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(visualizer2);
         class Initializer extends SwingWorker<String, Object> {
@@ -107,9 +111,10 @@ public class Ptchng extends Setup {
 
         new Initializer().execute();
 
-        app.addApplicationListener(captureHarmonEyeApp.getApplicationListener());
-        app.addPreferencesMenuItem();
-        app.setEnabledPreferencesMenu(true);
+        defaultApplication.addApplicationListener(captureHarmonEyeApp.getApplicationListener());
+        defaultApplication.addPreferencesMenuItem();
+        defaultApplication.setEnabledPreferencesMenu(true);
+        return captureHarmonEyeApp;
     }
 
 }

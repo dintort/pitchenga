@@ -21,6 +21,8 @@ import com.harmoneye.math.cqt.CqtContext;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.awt.TextRenderer;
 
+import static com.pitchenga.Tone.Do;
+
 // TODO: rewrite to use vertex buffers instead of immediate mode
 
 public class OpenGlCircularVisualizer implements
@@ -101,9 +103,32 @@ public class OpenGlCircularVisualizer implements
 
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
+        double biggestBinVelocity = 0;
+        int biggestBinNumber = 0;
+        Tone tone = null;
+        if (binVelocities != null) {
+            for (int i = 0; i < binVelocities.length; i++) {
+                double value = binVelocities[i];
+                if (value > biggestBinVelocity) {
+                    biggestBinVelocity = value;
+                    biggestBinNumber = i;
+                }
+            }
+            double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
+            int toneNumber = (int) toneRatio;
+//            int toneNumber = (int) Math.round(toneRatio);
+            if (toneNumber >= Tone.values().length) {
+                tone = Do;
+                System.out.println("toneNumber=" + toneNumber);
+            } else {
+                tone = Tone.values()[toneNumber];
+            }
+        }
+
+
         drawPitchClassFrame(gl);
-        drawPitchClassBins(gl);
-        drawHalftoneNames(drawable);
+        drawPitchClassBins(gl, biggestBinNumber, tone);
+        drawHalftoneNames(drawable, biggestBinNumber, tone);
 //        drawCentralPupil(gl);
         if (!isDataAvailable()) {
             drawWaitingAnimation(gl);
@@ -145,7 +170,27 @@ public class OpenGlCircularVisualizer implements
 
         // outer circle
         gl.glBegin(GL.GL_LINE_LOOP);
-        drawCircle(gl, 0.98, 100);
+        Color color = Color.black;
+
+        gl.glColor3ub((byte) color.getRed(),
+                (byte) color.getGreen(),
+                (byte) color.getBlue());
+        double radius = 1;
+        for (double i = 0; i <= 360; ) {
+            gl.glBegin(GL.GL_TRIANGLES);
+            double x = radius * FastMath.cos(i);
+            double y = radius * FastMath.sin(i);
+            gl.glVertex2d(x, y);
+            i = i + .5;
+            x = radius * FastMath.cos(i);
+            y = radius * FastMath.sin(i);
+            gl.glVertex2d(x, y);
+            gl.glVertex2d(0, 0);
+            gl.glEnd();
+            i = i + .5;
+        }
+
+//        drawCircle(gl, 0.98, 100);
 //        drawCircle(gl, 0.9, 100);
         gl.glEnd();
 
@@ -154,7 +199,7 @@ public class OpenGlCircularVisualizer implements
         gl.glBegin(GL.GL_LINES);
         for (int i = 0; i < HALFTONE_NAMES.length; i++) {
             Tone tone = Tone.values()[i];
-            Color color = tone.color;
+            color = tone.color;
             gl.glColor3ub((byte) color.getRed(),
                     (byte) color.getGreen(),
                     (byte) color.getBlue());
@@ -173,10 +218,6 @@ public class OpenGlCircularVisualizer implements
         double angleStep = 2 * FastMath.PI / steps;
         double angle = 0;
 
-        Color color = Color.black;
-        gl.glColor3ub((byte) color.getRed(),
-                (byte) color.getGreen(),
-                (byte) color.getBlue());
 
 //        gl.glVertex2d(0, 0);
 
@@ -196,35 +237,22 @@ public class OpenGlCircularVisualizer implements
 
 //        double blackRadius= radius;
         //fixme: Hack - just fill the background black
-        double blackRadius = 2;
-        for (double i = 0; i <= 360; ) {
-            gl.glBegin(GL.GL_TRIANGLES);
-            double x = blackRadius * FastMath.cos(i);
-            double y = blackRadius * FastMath.sin(i);
-            gl.glVertex2d(x, y);
-            i = i + .5;
-            x = blackRadius * FastMath.cos(i);
-            y = blackRadius * FastMath.sin(i);
-            gl.glVertex2d(x, y);
-            gl.glVertex2d(0, 0);
-            gl.glEnd();
-            i = i + .5;
-        }
 
-        color = Color.darkGray;
-        gl.glBegin(GL.GL_LINE_LOOP);
-        gl.glColor3ub((byte) color.getRed(),
-                (byte) color.getGreen(),
-                (byte) color.getBlue());
-        for (int i = 0; i <= steps; i++, angle += angleStep) {
-            double x = radius * FastMath.cos(angle);
-            double y = radius * FastMath.sin(angle);
-            gl.glVertex2d(x, y);
-        }
-        gl.glEnd();
+
+//        color = Color.darkGray;
+//        gl.glBegin(GL.GL_LINE_LOOP);
+//        gl.glColor3ub((byte) color.getRed(),
+//                (byte) color.getGreen(),
+//                (byte) color.getBlue());
+//        for (int i = 0; i <= steps; i++, angle += angleStep) {
+//            double x = radius * FastMath.cos(angle);
+//            double y = radius * FastMath.sin(angle);
+//            gl.glVertex2d(x, y);
+//        }
+//        gl.glEnd();
     }
 
-    private void drawPitchClassBins(GL2 gl) {
+    private void drawPitchClassBins(GL2 gl, int biggestBinNumber, Tone biggestTone) {
         if (!isDataAvailable()) {
             return;
         }
@@ -233,7 +261,7 @@ public class OpenGlCircularVisualizer implements
 //        double radius = 0.99;
         double radius = 0.7;
 
-        gl.glBegin(GL.GL_TRIANGLES);
+//        gl.glBegin(GL.GL_TRIANGLES);
         double angle = 0.5 * (1 - binsPerHalftone) * stepAngle;
         for (int i = 0; i < binVelocities.length; i++, angle += stepAngle) {
             int pitchClass = i / binsPerHalftone;
@@ -241,7 +269,7 @@ public class OpenGlCircularVisualizer implements
             int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
             int index = movedPitchClass * binsPerHalftone + binInPitchClass;
 
-//            Pair<Color, Color> guessAndPitchinessColor = Pitchenga.getGuessAndPitchinessColor(0, tone.getFugue().pitch, 1, tone.color);
+//            Pair<Color, Color> guessAndPitchinessColor = Pitchenga.getGuessAndPitchinessColor(0, biggestTone.getFugue().pitch, 1, biggestTone.color);
 //            Color color = guessAndPitchinessColor.left;
 
             double toneRatio = i / ((double) binVelocities.length / (double) Tone.values().length);
@@ -255,6 +283,7 @@ public class OpenGlCircularVisualizer implements
 //            if (binVelocities[i] > 0.3) {
 //                System.out.println("i=" + i + " ratio=" + toneRatio + " bins=" + binVelocities.length);
 //            }
+            gl.glBegin(GL.GL_TRIANGLES);
             gl.glColor3ub((byte) color.getRed(),
                     (byte) color.getGreen(),
                     (byte) color.getBlue());
@@ -263,14 +292,61 @@ public class OpenGlCircularVisualizer implements
 
             double startRadius = radius * binVelocities[index];
             double startAngle = angle - 0.5 * stepAngle;
-            gl.glVertex2d(startRadius * FastMath.sin(startAngle), startRadius
-                    * FastMath.cos(startAngle));
+            double sinStartAngle = FastMath.sin(startAngle);
+            double cosStartAngle = FastMath.cos(startAngle);
+            gl.glVertex2d(startRadius * sinStartAngle, startRadius * cosStartAngle);
 
             double endRadius = radius * binVelocities[index];
             double endAngle = angle + 0.5 * stepAngle;
-            gl.glVertex2d(endRadius * FastMath.sin(endAngle), endRadius
-                    * FastMath.cos(endAngle));
+            double sinEndAngle = FastMath.sin(endAngle);
+            double cosEndAngle = FastMath.cos(endAngle);
+            gl.glVertex2d(endRadius * sinEndAngle, endRadius * cosEndAngle);
+            gl.glEnd();
+
+            drawOuterDots(gl, biggestBinNumber, angle, i, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
         }
+//        gl.glEnd();
+//
+//        gl.glBegin(GL.GL_TRIANGLES);
+//
+//        gl.glEnd();
+    }
+
+    private void drawOuterDots(GL2 gl, int biggestBinNumber, double angle, int i, int index, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
+        // Outer dots
+        double outerRadius = 1;
+//            color = Color.RED;
+        gl.glBegin(GL.GL_TRIANGLES);
+        gl.glColor3ub((byte) color.getRed(),
+                (byte) color.getGreen(),
+                (byte) color.getBlue());
+
+//            gl.glVertex2d(0, 0);
+//        double centerOuterRadiusus = 0.98;
+//            double centerAngle = angle + 0.5 * stepAngle;
+//            double centerAngle = angle * stepAngle;
+//            double sinCenterAngle = FastMath.sin(centerAngle);
+//            double cosCenterAngle = FastMath.cos(centerAngle);
+//            gl.glVertex2d(centerOuterRadius * sinCenterAngle , centerOuterRadius * cosCenterAngle);
+
+//            startAngle = angle - 0.5 * stepAngle;
+        //fixme: Crooked to 0.5 degrees
+//            double centerRadius = outerRadius * 0.99 * (binVelocities[index] * 0.9);
+//            double centerRadius = radius * binVelocities[index];
+        double centerRadius;
+        if (biggestBinNumber == i) {
+            centerRadius = outerRadius * 0.999 - binVelocities[index] * 0.1;
+        } else {
+            centerRadius = outerRadius * 0.999 - binVelocities[index] * 0.08;
+        }
+
+        double centerAngle = angle - 0.000000001 * stepAngle;
+        double sinCenterAngle = FastMath.sin(centerAngle);
+        double cosCenterAngle = FastMath.cos(centerAngle);
+        gl.glVertex2d(centerRadius * sinCenterAngle, centerRadius * cosCenterAngle);
+
+        gl.glVertex2d(outerRadius * sinStartAngle, outerRadius * cosStartAngle);
+        gl.glVertex2d(outerRadius * sinEndAngle, outerRadius * cosEndAngle);
         gl.glEnd();
     }
 
@@ -278,7 +354,7 @@ public class OpenGlCircularVisualizer implements
         return binVelocities != null;
     }
 
-    private void drawHalftoneNames(GLAutoDrawable drawable) {
+    private void drawHalftoneNames(GLAutoDrawable drawable, int biggestBinNumber, Tone tone) {
         int width = drawable.getSurfaceWidth();
         int height = drawable.getSurfaceHeight();
 
@@ -291,10 +367,16 @@ public class OpenGlCircularVisualizer implements
 
         renderer.beginRendering(width, height);
 
+
         for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
             int index = (i * pitchStep) % HALFTONE_NAMES.length;
-            float value = getMaxBinValue(index);
-            Color color = colorFunction.toColor(value, i);
+            float velocity = getMaxBinValue(index);
+            float myVelocity = 1f;
+
+            if (tone != null && !tone.name().equalsIgnoreCase(HALFTONE_NAMES[i])) {
+                myVelocity = velocity * 0.7f;
+            }
+            Color color = colorFunction.toColor(myVelocity, i);
             renderer.setColor(color);
             String str = HALFTONE_NAMES[index];
             Rectangle2D bounds = renderer.getBounds(str);
@@ -321,7 +403,6 @@ public class OpenGlCircularVisualizer implements
     }
 
     private void drawCentralPupil(GL2 gl) {
-//        float radius = 0.09f;
         float radius = 0.09f;
         int steps = 30;
 

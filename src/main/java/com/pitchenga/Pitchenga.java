@@ -125,6 +125,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private volatile MidiChannel currentRiddleInstrument;
     private MidiChannel bassInstrumentChannel;
     private final JPanel controlPanelPanel = new JPanel();
+    private JFrame eye;
 
 
     //fixme: Update the logo with the fixed Me color
@@ -194,6 +195,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
             updateMixer();
         });
+    }
+
+    public void setEye(JFrame eye) {
+        this.eye = eye;
     }
 
     private void guess(Pitch guess, boolean exact) {
@@ -2070,7 +2075,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             Class<?> app = Class.forName("com.apple.eawt.Application");
             Object getApp = app.getMethod("getApplication").invoke(null);
             getApp.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(getApp, this);
-        } catch (Exception ignore) {
+            if (eye == null) {
+                System.out.println("eye is null");
+            }
+//            getApp.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(getApp, eye);
+        } catch (Exception e) {
+            e.printStackTrace();
+
+//            log(e.getMessage());
         }
     }
 
