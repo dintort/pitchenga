@@ -363,7 +363,7 @@ public class OpenGlCircularVisualizer implements
             gl.glEnd();
 
             // Outer dot
-            double outerRadius = 1;
+            double outerRadius = 0.98;
             gl.glBegin(GL.GL_TRIANGLES);
             gl.glColor3ub((byte) color.getRed(),
                     (byte) color.getGreen(),
@@ -450,7 +450,8 @@ public class OpenGlCircularVisualizer implements
             Rectangle2D bounds = renderer.getBounds(str);
             int offsetX = (int) (scaleFactor * 0.5f * bounds.getWidth());
             int offsetY = (int) (scaleFactor * 0.5f * bounds.getHeight());
-            double radius = 0.43;
+//            double radius = 0.43;
+            double radius = 0.41;
             int x = (int) (centerX + radius * size * FastMath.sin(angle) - offsetX);
             int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
 
