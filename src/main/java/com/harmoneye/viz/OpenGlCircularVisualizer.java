@@ -183,7 +183,6 @@ public class OpenGlCircularVisualizer implements
         drawPitchClassFrame(gl);
         drawPitchClassBins(gl, biggestBinNumber, tone);
         drawHalftoneNames(drawable, tone);
-//        drawCentralPupil(gl);
         if (!isDataAvailable()) {
             drawWaitingAnimation(gl);
         }
@@ -220,36 +219,10 @@ public class OpenGlCircularVisualizer implements
     }
 
     private void drawPitchClassFrame(GL2 gl) {
-        gl.glColor3f(0.5f, 0.5f, 0.5f);
+        gl.glClearColor(0f, 0f, 0f, 1f);
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-        // outer circle
-        gl.glBegin(GL.GL_LINE_LOOP);
-        Color color = Color.black;
-
-        gl.glColor3ub((byte) color.getRed(),
-                (byte) color.getGreen(),
-                (byte) color.getBlue());
-//        double radius = 1;
-        double radius = 3;
-        for (double i = 0; i <= 360; ) {
-            gl.glBegin(GL.GL_TRIANGLES);
-            double x = radius * FastMath.cos(i);
-            double y = radius * FastMath.sin(i);
-            gl.glVertex2d(x, y);
-            i = i + .5;
-            x = radius * FastMath.cos(i);
-            y = radius * FastMath.sin(i);
-            gl.glVertex2d(x, y);
-            gl.glVertex2d(0, 0);
-            gl.glEnd();
-            i = i + .5;
-        }
-
-//        drawCircle(gl, 0.98, 100);
-//        drawCircle(gl, 0.9, 100);
-        gl.glEnd();
-
-        // lines between bins
+        Color color;
         double halfToneCountInv = 1.0 / HALFTONE_NAMES.length;
         gl.glBegin(GL.GL_LINES);
         for (int i = 0; i < HALFTONE_NAMES.length; i++) {
@@ -267,44 +240,6 @@ public class OpenGlCircularVisualizer implements
             gl.glVertex2d(0, 0);
         }
         gl.glEnd();
-    }
-
-    private void drawCircle(GL2 gl, double radius, int steps) {
-        double angleStep = 2 * FastMath.PI / steps;
-        double angle = 0;
-
-
-//        gl.glVertex2d(0, 0);
-
-//        double startRadius = radius * binVelocities[index];
-//        double startAngle = angle - 0.5 * stepAngle;
-//        gl.glVertex2d(startRadius * FastMath.sin(startAngle), startRadius
-//                * FastMath.cos(startAngle));
-//
-//        double endRadius = radius * binVelocities[index];
-//        double endAngle = angle + 0.5 * stepAngle;
-//        gl.glVertex2d(endRadius * FastMath.sin(endAngle), endRadius
-//                * FastMath.cos(endAngle)
-//                );
-
-        //glColor3ub(253, 184, 19);
-//        glColor3ub(255, 0, 0);
-
-//        double blackRadius= radius;
-        //fixme: Hack - just fill the background black
-
-
-//        color = Color.darkGray;
-//        gl.glBegin(GL.GL_LINE_LOOP);
-//        gl.glColor3ub((byte) color.getRed(),
-//                (byte) color.getGreen(),
-//                (byte) color.getBlue());
-//        for (int i = 0; i <= steps; i++, angle += angleStep) {
-//            double x = radius * FastMath.cos(angle);
-//            double y = radius * FastMath.sin(angle);
-//            gl.glVertex2d(x, y);
-//        }
-//        gl.glEnd();
     }
 
     private void drawPitchClassBins(GL2 gl, int biggestBinNumber, Tone tone) {
@@ -473,21 +408,6 @@ public class OpenGlCircularVisualizer implements
             max = FastMath.max(max, value);
         }
         return max;
-    }
-
-    private void drawCentralPupil(GL2 gl) {
-        float radius = 0.09f;
-        int steps = 30;
-
-        gl.glColor3f(0.25f, 0.25f, 0.25f);
-        gl.glBegin(GL.GL_TRIANGLE_FAN);
-        drawCircle(gl, radius, steps);
-        gl.glEnd();
-
-        gl.glColor3f(0.5f, 0.5f, 0.5f);
-        gl.glBegin(GL.GL_LINE_LOOP);
-        drawCircle(gl, radius, steps);
-        gl.glEnd();
     }
 
     private void setConstantAspectRatio(GLAutoDrawable drawable) {
