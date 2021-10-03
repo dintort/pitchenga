@@ -11,7 +11,7 @@ import static com.pitchenga.Tone.Do;
 
 public class ColorFunction {
 
-	public Color toColor(float velocity, double toneRatio) {
+	public Color toColor(double velocity, double toneRatio) {
 
 
 		int toneNumber = (int) toneRatio;
@@ -42,7 +42,7 @@ public class ColorFunction {
 //		Color color = toneColor;
 
 //		float colorVelocity = velocity * 0.5f;
-		float colorVelocity = 0.3f + velocity * 1.2f;
+		double colorVelocity = 0.3 + velocity * 1.2;
 		if (colorVelocity > 1) {
 			colorVelocity = 1;
 		}

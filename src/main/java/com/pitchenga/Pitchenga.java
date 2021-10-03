@@ -9,6 +9,7 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.math.cqt.CqtContext;
+import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.Visualizer;
 
 import javax.sound.midi.*;
@@ -58,7 +59,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     public static final Font MONOSPACED = new Font(Font.MONOSPACED, Font.BOLD, 20);
     public static final Font SERIF = new Font(Font.SANS_SERIF, Font.PLAIN, 11);
 
-    private final Setup setup = Setup.create();
+    private static final Setup setup = Setup.create();
     private final boolean isPrimary;
     private final Pitchenga secondary;
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor(new Threads("pitchenga-async"));
@@ -89,8 +90,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private volatile long penaltyRiddleTimestampMs = System.currentTimeMillis();
     private volatile long lastPacerTimestampMs = 0;
     private volatile long lastBuzzTimestampMs;
-    private volatile boolean frozen = false;
-    private final AtomicInteger seriesCounter = new AtomicInteger(0);
+    public volatile static boolean frozen = false;
+    private static final AtomicInteger seriesCounter = new AtomicInteger(0);
     private final Map<Button, Integer> pressedButtonToMidi = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
@@ -126,6 +127,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private MidiChannel bassInstrumentChannel;
     private final JPanel controlPanelPanel = new JPanel();
     private JFrame eye;
+    private volatile boolean showSeriesHint;
 
 
     //fixme: Update the logo with the fixed Me color
@@ -410,6 +412,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     @Override
     public void update(AnalyzedFrame pcProfile) {
+        if (isPlaying() & !isShowSeriesHint(seriesCounter.get())) {
+            return;
+        }
 //        if ("true".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
 //        if (!"false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
 //            return;
@@ -686,9 +691,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             return;
         } else if (hinter == Hinter.Series) {
             SwingUtilities.invokeLater(() -> {
-                if (isShowSeriesHint(seriesCount)) {
+                this.showSeriesHint = isShowSeriesHint(seriesCount);
+                //fixme: trigger redraw gl
+                if (showSeriesHint) {
+                    OpenGlCircularVisualizer.locked = false;
+                    OpenGlCircularVisualizer.toneOverride = riddle.tone;
+                    OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
+                            new double[0], new double[0], new double[0]));
+//                    OpenGlCircularVisualizer.INSTANCE.
                     showHint(riddle);
                 } else {
+                    OpenGlCircularVisualizer.locked = true;
+                    OpenGlCircularVisualizer.toneOverride = null;
                     display.setTones();
                     display.setFillColor(null);
                     display.update();
@@ -725,7 +739,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         }), hinter.delayMs, TimeUnit.MILLISECONDS);
     }
 
-    private boolean isShowSeriesHint(int seriesCount) {
+    public static boolean isShowSeriesHint() {
+        return isShowSeriesHint(seriesCounter.get());
+    }
+
+    private static boolean isShowSeriesHint(int seriesCount) {
         int mod = seriesCount % (setup.repeat * setup.series);
         return mod >= setup.series;
     }
@@ -974,6 +992,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                         if (flashColors) {
                             SwingUtilities.invokeLater(() -> {
                                 updatePianoButton(pitch.tone.getButton(), true);
+                                OpenGlCircularVisualizer.toneOverride = pitch.tone;
+                                OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
+                                        new double[0], new double[0], new double[0]));
                                 display.setTone(pitch, pitch.tone.color, pitch.tone.color, pitch.frequency);
                                 display.update();
                             });
@@ -1843,7 +1864,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         return color.getRed() + "," + color.getGreen() + "," + color.getBlue();
     }
 
-    private boolean isPlaying() {
+    public static boolean isPlaying() {
         return playButton.isSelected();
     }
 

@@ -664,7 +664,8 @@ public class Display extends JPanel {
             }
 
             Dimension bounds = this.getSize();
-            graphics.setColor(fillColor);
+//            graphics.setColor(fillColor);
+            graphics.setColor(Color.BLACK);
             graphics.fillRect(0, 0, bounds.width, bounds.height);
 
             int offset;
