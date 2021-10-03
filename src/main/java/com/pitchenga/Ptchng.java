@@ -68,7 +68,6 @@ public class Ptchng extends Setup {
         mainFrameVisible = false;
         mainFrameVisible = true;
         fullScreenWhenPlaying = true;
-        fullScreenWhenPlaying = false;
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {

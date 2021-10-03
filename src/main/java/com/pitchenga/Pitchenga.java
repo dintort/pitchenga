@@ -72,7 +72,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private final MidiChannel[] riddleInstrumentChannels;
     private final MidiChannel keyboardInstrumentChannel;
     private final MidiChannel ringInstrumentChannel;
-    private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
+//    private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
+    private final boolean nativeFullScreenAvailable = false;
     private final AtomicBoolean isInNativeFullScreen = new AtomicBoolean(false);
 
     private final AtomicReference<Tone> lastGuess = new AtomicReference<>(null);
@@ -1787,7 +1788,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 } else {
                     this.previousSize = getSize();
                     this.previousLocation = getLocation();
-                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
+//                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
+                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
                 }
             }
         } else {
@@ -1825,12 +1827,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             toggleNativeFullScreen();
         } else {
             GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-            if (screenDevice.getFullScreenWindow() == this) {
+//            if (screenDevice.getFullScreenWindow() == this) {
+            if (screenDevice.getFullScreenWindow() == eye) {
 //                bottomPanel.setVisible(true);
                 screenDevice.setFullScreenWindow(null);
             } else {
 //                bottomPanel.setVisible(false);
-                screenDevice.setFullScreenWindow(this);
+//                screenDevice.setFullScreenWindow(this);
+                screenDevice.setFullScreenWindow(eye);
             }
         }
     }
@@ -2097,16 +2101,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     //fixme: This works wrong when the window was put to full screen manually
     public void toggleNativeFullScreen() {
         try {
-            Class<?> app = Class.forName("com.apple.eawt.Application");
-            Object getApp = app.getMethod("getApplication").invoke(null);
-            getApp.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(getApp, this);
+            Class<?> appClass = Class.forName("com.apple.eawt.Application");
+            Object app = appClass.getMethod("getApplication").invoke(null);
             if (eye == null) {
                 System.out.println("eye is null");
             }
-//            getApp.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(getApp, eye);
+            app.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(app, this);
+//            app.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(app, eye);
         } catch (Exception e) {
             e.printStackTrace();
-
 //            log(e.getMessage());
         }
     }
