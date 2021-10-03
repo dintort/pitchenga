@@ -200,10 +200,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         });
     }
 
-    public void setEye(JFrame eye) {
-        this.eye = eye;
-    }
-
     private void guess(Pitch guess, boolean exact) {
         try {
             if (frozen || !isPlaying()) {
@@ -416,20 +412,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         if (isPlaying() & !isShowSeriesHint(seriesCounter.get())) {
             return;
         }
-//        if ("true".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
-//        if (!"false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
-//            return;
-//        }
         try {
             if (pcProfile == null) {
                 return;
             }
-
-            CqtContext ctx = pcProfile.getCtxContext();
-
-//        int binsPerHalftone = ctx.getBinsPerHalftone();
-//        int halftoneCount = ctx.getHalftonesPerOctave();
-//        System.out.println("======== " + binsPerHalftone + " " + halftoneCount);
 
             double[] octaveBins = pcProfile.getOctaveBins();
             double biggestBinVelocity = 0;
@@ -442,25 +428,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 }
             }
 
-//        double segmentCountInv = 1.0 / octaveBins.length;
-//        double stepAngle = 2 * FastMath.PI * segmentCountInv;
-//        System.out.println("======== " + segmentCountInv + " " + stepAngle);
-
-//        segmentCountInv = 1.0 / octaveBins.length;
-//        stepAngle = 2 * FastMath.PI * segmentCountInv;
-
-            double[] allBins = pcProfile.getAllBins();
-//        float[] floats = new float[allBins.length];
-//        for (int i = 0; i < allBins.length; i++) {
-//            double value = allBins[i];
-//            floats[i] = (float) value;
-//        }
-//        PitchDetectionResult pitchDetectionResult = fastYin.getPitch(floats);
-//        Pitch pitch1 = matchPitch(pitchDetectionResult.getPitch());
-
             double toneRatio = (double) biggestBinNumber / ((double) octaveBins.length / (double) TONES.length);
             int toneNumber = (int) toneRatio;
-//            int toneNumber = (int) Math.round(toneRatio);
             Tone tone;
             if (toneNumber >= TONES.length) {
                 tone = Do;
@@ -470,12 +439,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
             Pitch pitch = tone.getFugue().pitch;
 
-            int value = 100;
-            double diff = toneRatio - toneNumber;
-            int diffInt = (int) (diff * 100);
-            value += diffInt;
-//            System.out.println("tone=" + tone + ", toneRatio=" + toneRatio + ", diff=" + diffInt + ", value=" + value + ", pitch=" + pitch + " bins=" + octaveBins.length);
+//            int value = 100;
+//            double diff = toneRatio - toneNumber;
+//            int diffInt = (int) (diff * 100);
+//            value += diffInt;
 
+            //            System.out.println("tone=" + tone + ", toneRatio=" + toneRatio + ", diff=" + diffInt + ", value=" + value + ", pitch=" + pitch + " bins=" + octaveBins.length);
 //        display.updateSlider(value);
 //        Pitch pitchy;
 //        if (diff < 0) {
@@ -2130,4 +2099,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     public void setPitchStep(int i) {
         System.out.println("pitchStep=" + i);
     }
+
+    public void setEye(JFrame eye) {
+        this.eye = eye;
+    }
+
 }
