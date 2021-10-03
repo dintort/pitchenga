@@ -30,7 +30,7 @@ import com.harmoneye.viz.SwingVisualizer;
 public class AbstractHarmonEyeApp {
 
 	private static final int TIME_PERIOD_MILLIS = 25;
-	private static final String WINDOW_TITLE = "HarmonEye";
+	private static final String WINDOW_TITLE = "Pitchenga";
 
 	protected static final float AUDIO_SAMPLE_RATE = 44100.0f;
 	protected static final int AUDIO_BITS_PER_SAMPLE = 16;
@@ -74,10 +74,11 @@ public class AbstractHarmonEyeApp {
 		frame.add(visualizer.getComponent());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //		frame.setSize(512, 512);
-		frame.setSize(700, 700);
+		frame.setSize(700, 710);
 		frame.setLocationRelativeTo(null);
 //		frame.setLocation(700, 0);
-		frame.setLocation(0, 456);
+//		frame.setLocation(0, 456);
+		frame.setLocation(0, 0);
 
 		frame.setJMenuBar(createMenuBar());
 

@@ -14,10 +14,10 @@ import org.simplericity.macify.eawt.DefaultApplication;
  */
 public class HarmonEye {
 
-	private static final String MAC_APP_NAME = "HarmonEye";
+	private static final String MAC_APP_NAME = "Pitchenga";
 
 	public static void main(String[] args) throws Exception {
-		// must be called before setLookAndFeel()
+		// must be called before setLo1okAndFeel()
 		macSetup();
 
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

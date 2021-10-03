@@ -409,6 +409,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     @Override
     public void update(AnalyzedFrame pcProfile) {
+        if (true) {
+            return;
+        }
         if (isPlaying() & !isShowSeriesHint(seriesCounter.get())) {
             return;
         }
@@ -1120,10 +1123,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         initSizeAndLocation();
         setVisible(setup.mainFrameVisible);
 
-        if (!setup.mainFrameVisible) {
-            JFrame frame = new JFrame("Test");
-            frame.setVisible(true);
-        }
+//        if (!setup.mainFrameVisible) {
+//            JFrame frame = new JFrame("Test");
+//            frame.setVisible(true);
+//        }
     }
 
     private void initSizeAndLocation() {

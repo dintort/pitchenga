@@ -65,8 +65,8 @@ public class Ptchng extends Setup {
         defaultAudioInput = NO_AUDIO_INPUT;
         defaultAudioInput = null;
 
-        mainFrameVisible = false;
         mainFrameVisible = true;
+        mainFrameVisible = false;
         fullScreenWhenPlaying = true;
     }
 
