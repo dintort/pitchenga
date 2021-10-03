@@ -74,6 +74,9 @@ public class OpenGlCircularVisualizer implements
         if (pcProfile == null) {
             return;
         }
+        if (Pitchenga.isPlaying()) {
+            return;
+        }
 //        if (Pitchenga.frozen) {
 //            return;
 //        }
@@ -102,25 +105,62 @@ public class OpenGlCircularVisualizer implements
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        if (Pitchenga.frozen) {
-            return;
-        }
-//        if (Pitchenga.isPlaying() & !Pitchenga.isShowSeriesHint()) {
-        if (locked) {
-            return;
-        }
+//        if (Pitchenga.frozen) {
+//            return;
+//        }
+//        if (locked) {
+//            return;
+//        }
         Tone tone = toneOverride;
-        if (Pitchenga.isPlaying() && tone == null) {
-            return;
-        }
+//        if (Pitchenga.isPlaying() && tone == null) {
+//            return;
+//        }
 
         GL2 gl = drawable.getGL().getGL2();
 
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
         //match bin
-        int biggestBinNumber = 0;
-        if (!Pitchenga.isPlaying()) {
+        int biggestBinNumber = -1;
+        if (Pitchenga.isPlaying()) {
+            if (binVelocities != null) {
+                binVelocities = new double[binVelocities.length];
+                if (binVelocities.length > 0) {
+                    if (tone != null) {
+                        double binRatio = (int) (tone.ordinal() / ((double) Tone.values().length / (double) binVelocities.length));
+                        //fixme: hack
+                        binRatio = binRatio + 4;
+                        biggestBinNumber = (int) binRatio;
+                        //                Arrays.fill(binVelocities, 0.1);
+//                    binVelocities[addWithFlip(biggestBinNumber, -12)] = 0.3;
+//                    binVelocities[addWithFlip(biggestBinNumber, -11)] = 0.35;
+//                    binVelocities[addWithFlip(biggestBinNumber, -10)] = 0.4;
+//                    binVelocities[addWithFlip(biggestBinNumber, -9)] = 0.45;
+//                    binVelocities[addWithFlip(biggestBinNumber, -8)] = 0.5;
+//                    binVelocities[addWithFlip(biggestBinNumber, -7)] = 0.55;
+//            binVelocities[addWithFlip(biggestBinNumber, -6)] = 0.6;
+//            binVelocities[addWithFlip(biggestBinNumber, -5)] = 0.65;
+                        binVelocities[addWithFlip(biggestBinNumber, -4)] = 0.7;
+                        binVelocities[addWithFlip(biggestBinNumber, -3)] = 0.75;
+                        binVelocities[addWithFlip(biggestBinNumber, -2)] = 0.8;
+                        binVelocities[addWithFlip(biggestBinNumber, -1)] = 0.85;
+                        binVelocities[biggestBinNumber] = 0.9;
+                        binVelocities[addWithFlip(biggestBinNumber, 1)] = 0.85;
+                        binVelocities[addWithFlip(biggestBinNumber, 2)] = 0.8;
+                        binVelocities[addWithFlip(biggestBinNumber, 3)] = 0.75;
+                        binVelocities[addWithFlip(biggestBinNumber, 4)] = 0.7;
+//            binVelocities[addWithFlip(biggestBinNumber, 5)] = 0.65;
+//            binVelocities[addWithFlip(biggestBinNumber, 6)] = 0.6;
+//                    binVelocities[addWithFlip(biggestBinNumber, 7)] = 0.55;
+//                    binVelocities[addWithFlip(biggestBinNumber, 8)] = 0.5;
+//                    binVelocities[addWithFlip(biggestBinNumber, 9)] = 0.45;
+//                    binVelocities[addWithFlip(biggestBinNumber, 10)] = 0.4;
+//                    binVelocities[addWithFlip(biggestBinNumber, 11)] = 0.35;
+//                    binVelocities[addWithFlip(biggestBinNumber, 12)] = 0.3;
+                    }
+                }
+            }
+        } else {
             double biggestBinVelocity = 0;
             if (binVelocities != null) {
                 for (int i = 0; i < binVelocities.length; i++) {
@@ -137,42 +177,6 @@ public class OpenGlCircularVisualizer implements
 //            } else {
 //            }
             }
-        } else {
-            double binRatio = (int) (tone.ordinal() / ((double) Tone.values().length / (double) binVelocities.length));
-            //fixme: hack
-            binRatio = binRatio + 4;
-            biggestBinNumber = (int) binRatio;
-//                biggestBinNumber = i / ((double) Tone.values().length / binVelocities.length);
-//                biggestBinNumber = tone.ordinal() / (
-
-//                    biggestBinNumber =
-            binVelocities = new double[binVelocities.length];
-//                Arrays.fill(binVelocities, 0.1);
-//                    binVelocities[addWithFlip(biggestBinNumber, -12)] = 0.3;
-//                    binVelocities[addWithFlip(biggestBinNumber, -11)] = 0.35;
-//                    binVelocities[addWithFlip(biggestBinNumber, -10)] = 0.4;
-//                    binVelocities[addWithFlip(biggestBinNumber, -9)] = 0.45;
-//                    binVelocities[addWithFlip(biggestBinNumber, -8)] = 0.5;
-//                    binVelocities[addWithFlip(biggestBinNumber, -7)] = 0.55;
-//            binVelocities[addWithFlip(biggestBinNumber, -6)] = 0.6;
-//            binVelocities[addWithFlip(biggestBinNumber, -5)] = 0.65;
-//            binVelocities[addWithFlip(biggestBinNumber, -4)] = 0.7;
-            binVelocities[addWithFlip(biggestBinNumber, -3)] = 0.75;
-            binVelocities[addWithFlip(biggestBinNumber, -2)] = 0.8;
-            binVelocities[addWithFlip(biggestBinNumber, -1)] = 0.85;
-            binVelocities[biggestBinNumber] = 0.9;
-            binVelocities[addWithFlip(biggestBinNumber, 1)] = 0.85;
-            binVelocities[addWithFlip(biggestBinNumber, 2)] = 0.8;
-            binVelocities[addWithFlip(biggestBinNumber, 3)] = 0.75;
-//            binVelocities[addWithFlip(biggestBinNumber, 4)] = 0.7;
-//            binVelocities[addWithFlip(biggestBinNumber, 5)] = 0.65;
-//            binVelocities[addWithFlip(biggestBinNumber, 6)] = 0.6;
-//                    binVelocities[addWithFlip(biggestBinNumber, 7)] = 0.55;
-//                    binVelocities[addWithFlip(biggestBinNumber, 8)] = 0.5;
-//                    binVelocities[addWithFlip(biggestBinNumber, 9)] = 0.45;
-//                    binVelocities[addWithFlip(biggestBinNumber, 10)] = 0.4;
-//                    binVelocities[addWithFlip(biggestBinNumber, 11)] = 0.35;
-//                    binVelocities[addWithFlip(biggestBinNumber, 12)] = 0.3;
         }
 
 
@@ -402,7 +406,7 @@ public class OpenGlCircularVisualizer implements
 
     private int addWithFlip(int biggestBinNumber, int i) {
         int result = biggestBinNumber + i;
-        result = result % 108;
+        result = result % binVelocities.length;
         if (result < 0) {
 //            //fixme: magic number
             result = 0;
@@ -431,34 +435,34 @@ public class OpenGlCircularVisualizer implements
         double angle = 0;
         float scaleFactor = (float) (0.0015f * size);
 
-        renderer.beginRendering(width, height);
 
 //        if (Pitchenga.isPlaying() && toneOverride != null) {
 //            tone = toneOverride;
 //        }
-        for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
-            int index = (i * pitchStep) % HALFTONE_NAMES.length;
-            float velocity = getMaxBinValue(index);
-            float myVelocity;
-            myVelocity = velocity * 0.001f;
-            if (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i])) {
-                myVelocity = 1f;
-            }
-            Color color = colorFunction.toColor(myVelocity, i);
-            renderer.setColor(color);
-            String str = HALFTONE_NAMES[index];
-            Rectangle2D bounds = renderer.getBounds(str);
-            int offsetX = (int) (scaleFactor * 0.5f * bounds.getWidth());
-            int offsetY = (int) (scaleFactor * 0.5f * bounds.getHeight());
+        if (binVelocities != null && binVelocities.length > 0) {
+            renderer.beginRendering(width, height);
+            for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
+                int index = (i * pitchStep) % HALFTONE_NAMES.length;
+                float velocity = getMaxBinValue(index);
+                float myVelocity;
+                myVelocity = velocity * 0.001f;
+                if (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i])) {
+                    myVelocity = 1f;
+                }
+                Color color = colorFunction.toColor(myVelocity, i);
+                renderer.setColor(color);
+                String str = HALFTONE_NAMES[index];
+                Rectangle2D bounds = renderer.getBounds(str);
+                int offsetX = (int) (scaleFactor * 0.5f * bounds.getWidth());
+                int offsetY = (int) (scaleFactor * 0.5f * bounds.getHeight());
 //            double radius = 0.43;
-            double radius = 0.41;
-            int x = (int) (centerX + radius * size * FastMath.sin(angle) - offsetX);
-            int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
-
-            renderer.draw3D(str, x, y, 0, scaleFactor);
+                double radius = 0.42;
+                int x = (int) (centerX + radius * size * FastMath.sin(angle) - offsetX);
+                int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
+                renderer.draw3D(str, x, y, 0, scaleFactor);
+            }
+            renderer.endRendering();
         }
-
-        renderer.endRendering();
     }
 
     private float getMaxBinValue(int halftoneIndex) {

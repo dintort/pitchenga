@@ -50,7 +50,7 @@ public final class CqtContext {
 		signalBlockSize = calc.nextPowerOf2(calc.bandWidth(firstKernelBin));
 		normalizationFactor = 2 / (signalBlockSize * windowIntegral);
 
-		System.out.println(this);
+//		System.out.println(this);
 	}
 
 	public int getOctaves() {

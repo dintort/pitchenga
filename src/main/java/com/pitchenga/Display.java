@@ -225,14 +225,14 @@ public class Display extends JPanel {
         if (currentView == twoOctavePiano) {
             if (Pitchenga.playButton.isSelected()) {
                 //fixme: Hack
-//                oneOctavePiano.setVisible(true);
+                oneOctavePiano.setVisible(true);
                 twoOctavePiano.setVisible(false);
-//                oneOctavePiano.update();
-                circle.setVisible(true);
-                circle.repaint();
+                oneOctavePiano.update();
+//                circle.setVisible(true);
+//                circle.repaint();
             } else {
                 twoOctavePiano.setVisible(true);
-//                oneOctavePiano.setVisible(false);
+                oneOctavePiano.setVisible(false);
                 twoOctavePiano.update();
             }
         } else {

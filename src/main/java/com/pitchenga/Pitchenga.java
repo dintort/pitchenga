@@ -694,15 +694,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 this.showSeriesHint = isShowSeriesHint(seriesCount);
                 //fixme: trigger redraw gl
                 if (showSeriesHint) {
-                    OpenGlCircularVisualizer.locked = false;
+//                    OpenGlCircularVisualizer.locked = false;
                     OpenGlCircularVisualizer.toneOverride = riddle.tone;
                     OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
                             new double[0], new double[0], new double[0]));
-//                    OpenGlCircularVisualizer.INSTANCE.
+                    OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();
                     showHint(riddle);
                 } else {
                     OpenGlCircularVisualizer.locked = true;
                     OpenGlCircularVisualizer.toneOverride = null;
+                    OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
+                            new double[0], new double[0], new double[0]));
+                    OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();
                     display.setTones();
                     display.setFillColor(null);
                     display.update();
@@ -992,9 +995,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                         if (flashColors) {
                             SwingUtilities.invokeLater(() -> {
                                 updatePianoButton(pitch.tone.getButton(), true);
-                                OpenGlCircularVisualizer.toneOverride = pitch.tone;
-                                OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
-                                        new double[0], new double[0], new double[0]));
+//                                OpenGlCircularVisualizer.toneOverride = pitch.tone;
+//                                OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
+//                                        new double[0], new double[0], new double[0]));
+//                                OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();
                                 display.setTone(pitch, pitch.tone.color, pitch.tone.color, pitch.frequency);
                                 display.update();
                             });
