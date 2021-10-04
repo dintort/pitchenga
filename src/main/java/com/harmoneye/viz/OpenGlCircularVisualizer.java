@@ -318,10 +318,10 @@ public class OpenGlCircularVisualizer implements
                 }
             } else {
                 if (biggestBinNumber == i) {
-                    centerRadius = outerRadius * 0.999 - binVelocities[index] * 0.1;
+                    centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.1;
                 } else {
 //                    centerRadius = outerRadius - 0.02;
-                    centerRadius = outerRadius * 0.999 - binVelocities[index] * 0.05;
+                    centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.05;
                 }
             }
 
