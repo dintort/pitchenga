@@ -24,7 +24,6 @@ import org.simplericity.macify.eawt.ApplicationListener;
 
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.analysis.MusicAnalyzer;
-import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.SwingVisualizer;
 
 public class AbstractHarmonEyeApp {
@@ -52,8 +51,8 @@ public class AbstractHarmonEyeApp {
 	private Timer updateTimer;
 
 	public AbstractHarmonEyeApp(Visualizer<AnalyzedFrame> visualizer2) {
-		visualizer = new OpenGlCircularVisualizer();
-//		visualizer = new OpenGlLinearVisualizer();
+		visualizer = new com.harmoneye.viz.OpenGlCircularVisualizer();
+//		visualizer = new com.harmoneye.viz.OpenGlLinearVisualizer();
 
 		soundAnalyzer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE, visualizer2);
 

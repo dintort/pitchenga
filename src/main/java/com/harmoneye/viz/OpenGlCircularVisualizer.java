@@ -130,6 +130,7 @@ public class OpenGlCircularVisualizer implements
                         double binRatio = (int) (tone.ordinal() / ((double) Tone.values().length / (double) binVelocities.length));
                         //fixme: hack
                         binRatio = binRatio + 4;
+//                        binRatio = binRatio + 7.5;
                         biggestBinNumber = (int) binRatio;
                         //                Arrays.fill(binVelocities, 0.1);
 //                    binVelocities[addWithFlip(biggestBinNumber, -12)] = 0.3;
@@ -140,7 +141,7 @@ public class OpenGlCircularVisualizer implements
 //                    binVelocities[addWithFlip(biggestBinNumber, -7)] = 0.55;
 //            binVelocities[addWithFlip(biggestBinNumber, -6)] = 0.6;
 //            binVelocities[addWithFlip(biggestBinNumber, -5)] = 0.65;
-                        binVelocities[addWithFlip(biggestBinNumber, -4)] = 0.7;
+//                        binVelocities[addWithFlip(biggestBinNumber, -4)] = 0.7;
                         binVelocities[addWithFlip(biggestBinNumber, -3)] = 0.75;
                         binVelocities[addWithFlip(biggestBinNumber, -2)] = 0.8;
                         binVelocities[addWithFlip(biggestBinNumber, -1)] = 0.85;
@@ -148,7 +149,7 @@ public class OpenGlCircularVisualizer implements
                         binVelocities[addWithFlip(biggestBinNumber, 1)] = 0.85;
                         binVelocities[addWithFlip(biggestBinNumber, 2)] = 0.8;
                         binVelocities[addWithFlip(biggestBinNumber, 3)] = 0.75;
-                        binVelocities[addWithFlip(biggestBinNumber, 4)] = 0.7;
+//                        binVelocities[addWithFlip(biggestBinNumber, 4)] = 0.7;
 //            binVelocities[addWithFlip(biggestBinNumber, 5)] = 0.65;
 //            binVelocities[addWithFlip(biggestBinNumber, 6)] = 0.6;
 //                    binVelocities[addWithFlip(biggestBinNumber, 7)] = 0.55;
