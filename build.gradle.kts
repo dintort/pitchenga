@@ -42,6 +42,12 @@ dependencies {
     implementation(files("lib/jogamp/jogl-all.jar"))
     implementation(files("lib/jogamp/gluegen-java-src.zip"))
     implementation(files("lib/jogamp/jogl-java-src.zip"))
+
+    //fixme: if (os = muzdie) {
+    implementation(files("lib/jogamp/gluegen-rt-natives-windows-amd64.jar"))
+    implementation(files("lib/jogamp/jogl-all-natives-windows-amd64.jar"))
+//    implementation(files("lib/jogamp/gluegen-rt-natives-linux-amd64.jar"))
+//    implementation(files("lib/jogamp/jogl-all-natives-linux-amd64.jar"))
     implementation(files("lib/jogamp/gluegen-rt-natives-macosx-universal.jar"))
     implementation(files("lib/jogamp/jogl-all-natives-macosx-universal.jar"))
 

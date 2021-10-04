@@ -270,7 +270,7 @@ public class AbstractHarmonEyeApp {
 			m.append(title).append("\n");
 			m.append("Version: ").append(version).append("\n\n");
 			m.append("A software that enables you to see what you hear.\n");
-			m.append("Crafted with love by Bohumír Zámečník since 2012.\n\n");
+			m.append("Crafted with love by Bohumír Zamecník since 2012.\n\n"); //Sorry for butchering the accented symbols, but it crashed on windows :(
 			m.append("http://harmoneye.com/");
 			return m.toString();
 		}
