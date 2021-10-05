@@ -29,6 +29,7 @@ public class Setup {
     public volatile int series = 3;
     public volatile int repeat = 3;
     public volatile boolean fullScreenWhenPlaying = false;
+    public volatile boolean voiceHints = true;
 
     public static Setup create() {
         String className = System.getProperty("com.pitchenga.setup.class");

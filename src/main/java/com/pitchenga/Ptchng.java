@@ -27,6 +27,7 @@ public class Ptchng extends Setup {
         defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.YIN;
 
 //        riddleInstrument = Instrument.ELECTRIC_BASS_FINGER;
+//        riddleInstruments = new int[] { Instrument.ELECTRIC_PIANO_2 };
 //        riddleInstrument = Instrument.TENOR_SAX;
 //        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CkkLEAN;
 //        keyboardInstrument = Instrument.ELECTRIC_PIANO_1;
@@ -35,6 +36,8 @@ public class Ptchng extends Setup {
 
         series = 3;
         repeat = 3;
+//        series = 1;
+//        repeat = 1;
 
         defaultHinter = Hinter.Delayed200;
         defaultHinter = Hinter.Delayed100;
@@ -67,6 +70,7 @@ public class Ptchng extends Setup {
 
         mainFrameVisible = true;
         mainFrameVisible = false;
+        fullScreenWhenPlaying = false;
         fullScreenWhenPlaying = true;
     }
 
