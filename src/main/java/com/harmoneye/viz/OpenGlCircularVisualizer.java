@@ -48,7 +48,6 @@ public class OpenGlCircularVisualizer implements
 
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
-    public static volatile boolean locked;
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
@@ -81,7 +80,7 @@ public class OpenGlCircularVisualizer implements
 //            return;
 //        }
 
-        CqtContext ctx = pcProfile.getCtxContext();
+        CqtContext ctx = pcProfile.getCqtContext();
 
         binsPerHalftone = ctx.getBinsPerHalftone();
         halftoneCount = ctx.getHalftonesPerOctave();
@@ -105,6 +104,9 @@ public class OpenGlCircularVisualizer implements
 
     @Override
     public void display(GLAutoDrawable drawable) {
+        if (Pitchenga.isPlaying()) {
+            return;
+        }
 //        if (Pitchenga.frozen) {
 //            return;
 //        }
@@ -174,7 +176,10 @@ public class OpenGlCircularVisualizer implements
 //            if (toneOverride != null) {
 //                tone = toneOverride;
                 double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
-                tone = Tone.values()[(int) toneRatio];
+                int toneNumber = (int) toneRatio;
+                if (toneNumber > 0 && toneNumber <= Tone.values().length + 1) {
+                    tone = Tone.values()[toneNumber];
+                }
 //            } else {
 //            }
             }
@@ -182,7 +187,7 @@ public class OpenGlCircularVisualizer implements
 
 
         drawPitchClassFrame(gl);
-        drawPitchClassBins(gl, biggestBinNumber, tone);
+        drawPitchClassBins(gl, biggestBinNumber);
         drawHalftoneNames(drawable, tone);
         if (!isDataAvailable()) {
             drawWaitingAnimation(gl);
@@ -221,7 +226,7 @@ public class OpenGlCircularVisualizer implements
 
     private void drawPitchClassFrame(GL2 gl) {
         gl.glClearColor(0f, 0f, 0f, 1f);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
         Color color;
         double halfToneCountInv = 1.0 / HALFTONE_NAMES.length;
@@ -243,7 +248,7 @@ public class OpenGlCircularVisualizer implements
         gl.glEnd();
     }
 
-    private void drawPitchClassBins(GL2 gl, int biggestBinNumber, Tone tone) {
+    private void drawPitchClassBins(GL2 gl, int biggestBinNumber) {
         if (!isDataAvailable()) {
             return;
         }
@@ -364,8 +369,8 @@ public class OpenGlCircularVisualizer implements
         int width = drawable.getSurfaceWidth();
         int height = drawable.getSurfaceHeight();
 
-        double centerX = width / 2;
-        double centerY = height / 2;
+        double centerX = width / 2.0;
+        double centerY = height / 2.0;
         double size = 0.99 * FastMath.min(width, height);
         double angleStep = 2 * FastMath.PI / HALFTONE_NAMES.length;
         double angle = 0;

@@ -4,36 +4,32 @@ import com.harmoneye.math.cqt.CqtContext;
 
 public class AnalyzedFrame {
 
-	private final double[] allBins;
-	private final double[] octaveBins;
-	private final CqtContext ctx;
-	private double[] detectedPitchClasses;
+    private final double[] amplitudeSpectrumDbBins;
+    private final double[] octaveBins;
+    private final CqtContext cqtContext;
+    private final double[] pitchClasses;
 
-	public AnalyzedFrame(CqtContext ctx, double[] allBins, double[] octaveBins) {
-		this(ctx, allBins, octaveBins, null);
-	}
+    public AnalyzedFrame(CqtContext cqtContext, double[] amplitudeSpectrumDbBins, double[] octaveBins,
+                         double[] pitchClasses) {
+        this.amplitudeSpectrumDbBins = amplitudeSpectrumDbBins;
+        this.octaveBins = octaveBins;
+        this.cqtContext = cqtContext;
+        this.pitchClasses = pitchClasses;
+    }
 
-	public AnalyzedFrame(CqtContext ctx, double[] allBins, double[] octaveBins,
-		double[] detectedPitchClasses) {
-		this.allBins = allBins;
-		this.octaveBins = octaveBins;
-		this.ctx = ctx;
-		this.detectedPitchClasses = detectedPitchClasses;
-	}
+    public double[] getAmplitudeSpectrumDbBins() {
+        return amplitudeSpectrumDbBins;
+    }
 
-	public double[] getAllBins() {
-		return allBins;
-	}
+    public double[] getOctaveBins() {
+        return octaveBins;
+    }
 
-	public double[] getOctaveBins() {
-		return octaveBins;
-	}
+    public CqtContext getCqtContext() {
+        return cqtContext;
+    }
 
-	public CqtContext getCtxContext() {
-		return ctx;
-	}
-
-	public double[] getDetectedPitchClasses() {
-		return detectedPitchClasses;
-	}
+    public double[] getPitchClasses() {
+        return pitchClasses;
+    }
 }

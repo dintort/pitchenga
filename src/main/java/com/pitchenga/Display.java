@@ -23,9 +23,10 @@ public class Display extends JPanel {
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor(new Threads("pitchenga-display-async"));
 
     private volatile Pitch pitch;
+    private volatile Fugue toneFugue;
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
-    private float frequency;
+    private volatile float frequency;
     private volatile Color fillColor;
     private final Piano twoOctavePiano;
     private final Piano oneOctavePiano;
@@ -188,7 +189,8 @@ public class Display extends JPanel {
         this.frequency = frequency;
     }
 
-    public void setTones(Tone... tones) {
+    public void setTones(Fugue toneFugue, Tone... tones) {
+        this.toneFugue = toneFugue;
         this.tones.clear();
         this.tones.addAll(Arrays.asList(tones));
         this.pitch = null;
@@ -205,7 +207,7 @@ public class Display extends JPanel {
     }
 
     public void clear() {
-        setTones();
+        setTones(null);
         setFillColor(null);
     }
 
@@ -298,7 +300,7 @@ public class Display extends JPanel {
         private final Button[] buttons;
         private final Component frontStrut;
         private final Component rearStrut;
-        private int sliderValue;
+        private volatile int sliderValue;
 
         public Piano(boolean twoOctaves) {
             this.setLayout(new BorderLayout());
@@ -469,6 +471,7 @@ public class Display extends JPanel {
                 JPanel panel = panels[i];
                 JLabel label = labels[i];
                 JSlider slider = sliders[i];
+                Button button = buttons[i];
                 if (pitch != null) {
                     Tone myTone = pitch.tone;
                     panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
@@ -480,7 +483,11 @@ public class Display extends JPanel {
                         slider.setVisible(true);
                     } else {
                         slider.setVisible(false);
-                        if (tones.contains(myTone)) {
+                        //fixme: Make less hacky maybe?
+                        boolean hideForDo = (Fugue.DoDo.equals(toneFugue) && !button.equals(Button.K))
+                                || (Fugue.Do.equals(toneFugue) && !button.equals(Button.A));
+//                        Pitchenga.debug("toneFugue=" + toneFugue + ", hideForLowerDo=" + hideForDo);
+                        if (!hideForDo && tones.contains(myTone)) {
                             panel.setBackground(myTone.color);
                             label.setBorder(BorderFactory.createLineBorder(myTone.color, getBorderThickness() * 4));
                         } else {

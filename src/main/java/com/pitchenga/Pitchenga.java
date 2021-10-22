@@ -8,8 +8,6 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import com.harmoneye.analysis.AnalyzedFrame;
-import com.harmoneye.math.cqt.CqtContext;
-import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.Visualizer;
 
 import javax.sound.midi.*;
@@ -43,8 +41,8 @@ import static com.pitchenga.Tone.Do;
 public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualizer<AnalyzedFrame> {
 
     private static final PrintStream log;
-    //    private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
-    private static final boolean debug = false;
+    private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
+    //    private static final boolean debug = false;
     private static final Pitch[] PITCHES = Pitch.values();
     private static final Tone[] TONES = Tone.values();
     private static final Fugue[] FUGUES = Fugue.values();
@@ -73,16 +71,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private final MidiChannel[] riddleInstrumentChannels;
     private final MidiChannel keyboardInstrumentChannel;
     private final MidiChannel ringInstrumentChannel;
-    //    private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
-    private final boolean nativeFullScreenAvailable = false;
+    private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
     private final AtomicBoolean isInNativeFullScreen = new AtomicBoolean(false);
 
     private final AtomicReference<Tone> lastGuess = new AtomicReference<>(null);
     private volatile Pitch lastPitch;
-    private volatile Pitch lastPitchEe;
+    private volatile Pitch lastPitchForTarsos;
     private volatile long lastGuessTimestampMs = System.currentTimeMillis();
     private final List<Pair<Pitch, Double>> guessQueuePitchAndRms = new ArrayList<>();
-    private final Queue<Pitch> riddleQueue = new LinkedBlockingQueue<>();
+    private List<Pitch> riddles = new ArrayList<>(4096); // Not thread-safe
+    private static int riddlesPointer = -1; // Not thread-safe
+    private StringBuilder riddleInfo; // Not thread-safe
     //fixme: Un-hack
     private final Queue<Integer> instrumentsQueue = new LinkedList<>();
     private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
@@ -93,14 +92,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private volatile long lastPacerTimestampMs = 0;
     private volatile long lastBuzzTimestampMs;
     public volatile static boolean frozen = false;
-    private static final AtomicInteger seriesCounter = new AtomicInteger(0);
     private final Map<Button, Integer> pressedButtonToMidi = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
     private volatile Integer octaveShift = -1;
     private volatile Integer transposeShift = 0;
-//        private volatile boolean forceMidi = false;
-    private volatile boolean forceMidi = true;
+    //        private final boolean forceMidi = false;
+    private final boolean forceMidi = true;
 
     private final Display display;
     private final JSpinner penaltyFactorSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9, 1));
@@ -177,7 +175,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         this.bottomPanel = new JPanel(new BorderLayout());
 
         try {
-            Soundbank soundfont = MidiSystem.getSoundbank(this.getClass().getResourceAsStream("/FluidR3_GM.sf2"));
+            Soundbank soundfont = MidiSystem.getSoundbank(Objects.requireNonNull(this.getClass().getResourceAsStream("/FluidR3_GM.sf2")));
             Synthesizer synthesizer = MidiSystem.getSynthesizer();
             synthesizer.open();
             synthesizer.loadAllInstruments(soundfont);
@@ -285,15 +283,18 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     private Pitch riddle() {
         while (this.riddle.get() == null) {
-            if (riddleQueue.size() == 0) {
+            if (riddlesPointer >= riddles.size() - 1) {
                 Riddler riddler = getRiddler();
-                List<Pitch> riddles = riddler.riddle.apply(this);
-                seriesCounter.set(0);
-                debug(" " + riddles + " are the next riddles, riddler=" + riddler);
-                riddleQueue.addAll(riddles);
+                riddles = riddler.riddle.apply(this);
+                riddleInfo = new StringBuilder();
+                for (int i = 0; i < riddles.size(); i++) {
+                    Pitch riddle = riddles.get(i);
+                    riddleInfo.append(i).append(":").append(riddle).append(", ");
+                }
+                riddlesPointer = -1;
             }
-            debug(riddleQueue + " is the riddle queue");
-            Pitch riddle = riddleQueue.poll();
+
+            Pitch riddle = riddles.get(++riddlesPointer);
             if (riddle != null) {
                 Integer instrumentChannel;
                 if (instrumentsQueue.isEmpty()) {
@@ -302,12 +303,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                     instrumentChannel = instrumentsQueue.remove();
                 }
                 currentRiddleInstrument = riddleInstrumentChannels[instrumentChannel];
-                debug(" [" + riddle + "] is the new riddle");
+                debug("riddle=" + riddle + ", pointer=" + riddlesPointer + ", riddles=" + riddleInfo);
                 this.riddle.set(riddle);
                 this.riddleTimestampMs = System.currentTimeMillis();
-                int seriesCount = seriesCounter.getAndIncrement();
-                boolean voiceHint = isVoiceHint(seriesCount);
-                scheduleHint(riddle, seriesCount);
+                boolean voiceHint = isVoiceHint(riddlesPointer);
+                scheduleHint(riddle, riddlesPointer);
                 frozen = true;
                 try {
                     boolean flashColors = getHinter() == Hinter.Always;
@@ -418,10 +418,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     @Override
     public void update(AnalyzedFrame pcProfile) {
-        if (true) {
-            return;
-        }
-        if (isPlaying() & !isShowSeriesHint(seriesCounter.get())) {
+        if (isPlaying()) {
             return;
         }
         try {
@@ -521,10 +518,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         Color guessColor = guessAndPitchinessColor.left;
         Color pitchinessColor = guessAndPitchinessColor.right;
         boolean playing = isPlaying();
-        if (debug && !playing && isPrimary) {
-            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | inaccuracy=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
-                    guess, frequency, probability, rms, diff, pitchyDiff, inaccuracy, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
-        }
+//        if (debug && !playing && isPrimary) {
+//            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | inaccuracy=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
+//                    guess, frequency, probability, rms, diff, pitchyDiff, inaccuracy, info(toneColor), info(pitchy.tone.color), info(guessColor), info(pitchinessColor)));
+//        }
         if (!frozen) {
             SwingUtilities.invokeLater(() -> {
                 updatePitchSlider(guess, frequency, isKeyboard);
@@ -532,8 +529,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 boolean answer = getPacer() == Pacer.Answer;
                 if (!playing || answer) {
 //                    updatePianoButtons(guess.tone.getButton());
-                    if (lastPitchEe != guess) {
-                        lastPitchEe = guess;
+                    if (lastPitchForTarsos != guess) {
+                        lastPitchForTarsos = guess;
                         if (!isKeyboard || (!playing && !answer)) {
                             display.setTone(guess, guessColor, pitchinessColor, frequency);
                         }
@@ -675,19 +672,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             SwingUtilities.invokeLater(() -> {
                 this.showSeriesHint = isShowSeriesHint(seriesCount);
                 if (showSeriesHint) {
-//                    OpenGlCircularVisualizer.locked = false;
-                    OpenGlCircularVisualizer.toneOverride = riddle.tone;
-                    OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
-                            new double[0], new double[0], new double[0]));
-                    OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();
+//                    OpenGlCircularVisualizer.toneOverride = riddle.tone;
+//                    OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
+//                            new double[0], new double[0], new double[0]));
+//                    OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();
                     showHint(riddle);
                 } else {
-                    OpenGlCircularVisualizer.locked = true;
-                    OpenGlCircularVisualizer.toneOverride = null;
-                    OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
-                            new double[0], new double[0], new double[0]));
-                    OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();
-                    display.setTones();
+//                    OpenGlCircularVisualizer.toneOverride = null;
+//                    OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
+//                            new double[0], new double[0], new double[0]));
+//                    OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();
+                    display.setTones(null);
                     display.setFillColor(null);
                     display.update();
                 }
@@ -697,7 +692,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             return;
         } else {
             SwingUtilities.invokeLater(() -> {
-                display.setTones();
+                display.setTones(null);
                 if (getPacer() != Pacer.Answer) {
                     display.setFillColor(null);
                 }
@@ -724,26 +719,27 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     public static boolean isShowSeriesHint() {
-        return isShowSeriesHint(seriesCounter.get());
+        return isShowSeriesHint(riddlesPointer);
     }
 
     private static boolean isShowSeriesHint(int seriesCount) {
-        int mod = seriesCount % (setup.repeat * setup.series);
-        return mod >= setup.series;
+        int mod = seriesCount % (setup.repeats * setup.seriesLength);
+        return mod >= setup.seriesLength;
     }
 
     private static boolean isVoiceHint(int seriesCount) {
-        int mod = seriesCount % (setup.repeat * setup.series);
-        return mod >= setup.series && mod < setup.series * 2;
+        int mod = seriesCount % (setup.repeats * setup.seriesLength);
+//        return mod >= setup.series;
+        return mod >= setup.seriesLength && mod < setup.seriesLength * 2;
     }
 
     private void showHint(Pitch riddle) {
-        debug("hint=" + riddle);
+//        debug("hint=" + riddle + ", tone=" + riddle.tone);
         if (riddle == Non) {
             return;
         }
-        debug("tone=" + riddle.tone);
-        display.setTones(riddle.tone);
+        Fugue toneFugue = getToneFugue(riddle);
+        display.setTones(toneFugue, riddle.tone);
         if (getPacer() != Pacer.Answer) {
             display.setFillColor(riddle.tone.color);
         }
@@ -780,15 +776,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             previous = pitch;
         }
 
-        if (setup.repeat > 0) {
+        if (setup.repeats > 0) {
             Pitch firstInSeries = null;
             for (int i = 0; i < pitches.size(); i++) {
                 Pitch pitch = pitches.get(i);
-                int mod = i % setup.series;
+                int mod = i % setup.seriesLength;
                 if (mod == 0) {
                     firstInSeries = pitch;
                 }
-                if (mod == setup.series - 1) {
+                if (mod == setup.seriesLength - 1) {
                     if (pitch.equals(firstInSeries)) {
                         return true;
                     }
@@ -804,7 +800,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        List<Pitch> pitches = getScalePitches();
             List<Pitch> pitches = ordered();
             //fixme: +Spinner for series length +Spinner for repeats
-            while (pitches.size() % setup.series != 0) {
+            while (pitches.size() % setup.seriesLength != 0) {
                 int index = random.nextInt(pitches.size());
                 pitches.add(pitches.get(index));
             }
@@ -812,10 +808,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             List<Pitch> shuffled = addOctaves(pitches);
             debug(shuffled + " are the new riddles without penalties");
             int size = shuffled.size();
-            List<Pitch> multi = new ArrayList<>(size * setup.repeat);
-            for (int i = 0; i < size; i += setup.series) {
-                for (int j = 0; j < setup.repeat; j++) {
-                    for (int k = 0; k < setup.series; k++) {
+            List<Pitch> multi = new ArrayList<>(size * setup.repeats);
+            for (int i = 0; i < size; i += setup.seriesLength) {
+                for (int j = 0; j < setup.repeats; j++) {
+                    for (int k = 0; k < setup.seriesLength; k++) {
                         multi.add(shuffled.get(i + k));
                     }
                 }
@@ -860,7 +856,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                         List<Pitch> pitches = deduplicate(() -> {
                             List<Pitch> list = new LinkedList<>(Arrays.asList(group));
                             Collections.shuffle(list);
-                            while (list.size() % setup.series != 0) {
+                            while (list.size() % setup.seriesLength != 0) {
                                 int index = random.nextInt(list.size());
                                 list.add(list.get(index));
                             }
@@ -870,8 +866,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                         List<Pitch> list = null;
                         for (int i = 0; i < pitches.size(); i++) {
                             Pitch pitch = pitches.get(i);
-                            if (list == null || i % setup.series == 0) {
-                                list = new ArrayList<>(setup.series * setup.repeat);
+                            if (list == null || i % setup.seriesLength == 0) {
+                                list = new ArrayList<>(setup.seriesLength * setup.repeats);
                                 lists.add(list);
                             }
                             list.add(pitch);
@@ -886,7 +882,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             List<Pitch> result = listLists.stream()
                     .map(list -> {
                         List<List<Pitch>> multi = new ArrayList<>();
-                        for (int i = 0; i < setup.repeat; i++) {
+                        for (int i = 0; i < setup.repeats; i++) {
                             multi.add(list);
                             for (int j = 0; j < list.size(); j++) {
                                 instrumentsQueue.add(instrument);
@@ -973,20 +969,22 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                     }
                     Pitch pitch = (Pitch) next;
                     if (pitch != Non) {
-                        int velocity = 100;
-//                        if (midiChannel == bassInstrumentChannel) {
-                        velocity = 127;
-//                        }
+                        int velocity = 73;
+                        if (midiChannel == bassInstrumentChannel) {
+                            velocity = 127;
+                        }
                         midiNoteOn(pitch.midi, midiChannel, velocity);
                         if (setup.voiceHints) {
                             if (voiceHint) {
-                                Player player = pitch.tone.getFugue().pitch.player;
+                                Fugue toneFugue = getToneFugue(pitch);
+                                Player player = toneFugue.pitch.player;
                                 player.play();
                             }
                         }
                         if (flashColors) {
                             SwingUtilities.invokeLater(() -> {
                                 updatePianoButton(pitch.tone.getButton(), true);
+                                //fixme: Visualize fugues
 //                                OpenGlCircularVisualizer.toneOverride = pitch.tone;
 //                                OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
 //                                        new double[0], new double[0], new double[0]));
@@ -1026,12 +1024,31 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         }
     }
 
+    private Fugue getToneFugue(Pitch pitch) {
+        Fugue toneFugue = pitch.tone.getFugue();
+        if (pitch.tone.equals(Do)) {
+            int seriesLength = setup.seriesLength;
+            int mod = riddlesPointer % seriesLength;
+            int seriesStart = riddlesPointer - mod;
+            for (int i = seriesStart; i < seriesStart + seriesLength; i++) {
+                Pitch aPitch = riddles.get(i);
+//                debug("apitch=" + aPitch + ", i=" + i);
+                if (aPitch.midi < pitch.midi) {
+                    toneFugue = Fugue.DoDo;
+                    break;
+                }
+            }
+//            debug("mod=" + mod + ", pointer=" + pointer + ", pitch=" + pitch + ", seriesStart=" + seriesStart + ", toneFugue=" + toneFugue);
+        }
+        return toneFugue;
+    }
+
     private void midiNoteOn(int midi, MidiChannel midiChannel, int velocity) {
         Pitch pitch = PITCH_BY_MIDI.get(midi);
         if (!forceMidi && pitch.player != null /*&& instrument.getProgram() == Instrument.ACOUSTIC_GRAND_PIANO*/) {
             pitch.player.play();
         } else {
-            midiChannel.noteOn(midi, 127);
+            midiChannel.noteOn(midi, velocity);
         }
     }
 
@@ -1071,19 +1088,23 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
         try {
             //fixme: Configurable log path
-            File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/logs/");
-            //noinspection ResultOfMethodCallIgnored
-            logDir.mkdirs();
-            File logFile = new File(logDir, "pitchenga.log");
-            if (logFile.exists()) {
+            if (debug) {
+                File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/logs/");
                 //noinspection ResultOfMethodCallIgnored
-                logFile.delete();
+                logDir.mkdirs();
+                File logFile = new File(logDir, "pitchenga.log");
+                if (logFile.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    logFile.delete();
+                }
+                boolean newFile = logFile.createNewFile();
+                if (!newFile) {
+                    throw new RuntimeException("Failed creating log file=" + logFile.getCanonicalPath());
+                }
+                log = new PrintStream(new FileOutputStream(logFile));
+            } else {
+                log = null;
             }
-            boolean newFile = logFile.createNewFile();
-            if (!newFile) {
-                throw new RuntimeException("Failed creating log file=" + logFile.getCanonicalPath());
-            }
-            log = new PrintStream(new FileOutputStream(logFile));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -1331,7 +1352,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         if (index >= 0 && index < pacerCombo.getItemCount()) {
             pacerCombo.setSelectedIndex(index);
             if (playButton.isSelected()) {
-                display.text(String.valueOf(riddleQueue.size()));
+                display.text(String.valueOf(riddles.size() - riddlesPointer));
                 display.text("\n");
             }
             display.text(String.valueOf(getPacer().bpm));
@@ -1362,7 +1383,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         } else if (lift) {
             thePitch = transposePitch(thePitch, 1, 0);
         }
-        debug("octaveShift=" + octaveShift + ", fall=" + fall + ", lift=" + lift + ", pitch=" + button.pitch + ", transposed=" + thePitch);
+//        debug("octaveShift=" + octaveShift + ", fall=" + fall + ", lift=" + lift + ", pitch=" + button.pitch + ", transposed=" + thePitch);
         Pitch pitch = thePitch;
         int midi = pitch.midi;
         if (pressed) {
@@ -1383,7 +1404,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
         }
         Tone[] tones = pressedButtonToMidi.keySet().stream().map(k -> k.pitch.tone).toArray(Tone[]::new);
-        display.setTones(tones);
+        display.setTones(null, tones);
         display.update();
     }
 
@@ -1797,8 +1818,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 } else {
                     this.previousSize = getSize();
                     this.previousLocation = getLocation();
-//                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
-                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
+                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
+//                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
                 }
             }
         } else {
@@ -1836,14 +1857,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             toggleNativeFullScreen();
         } else {
             GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-//            if (screenDevice.getFullScreenWindow() == this) {
-            if (screenDevice.getFullScreenWindow() == eye) {
+            if (screenDevice.getFullScreenWindow() == this) {
+//            if (screenDevice.getFullScreenWindow() == eye) {
 //                bottomPanel.setVisible(true);
                 screenDevice.setFullScreenWindow(null);
+                eye.setVisible(true);
             } else {
 //                bottomPanel.setVisible(false);
-//                screenDevice.setFullScreenWindow(this);
-                screenDevice.setFullScreenWindow(eye);
+                eye.setVisible(false);
+                screenDevice.setFullScreenWindow(this);
+//                screenDevice.setFullScreenWindow(eye);
             }
         }
     }
@@ -1888,7 +1911,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private void resetGame() {
         riddle.set(null);
         prevRiddle.set(null);
-        riddleQueue.clear();
+        riddles.clear();
         penaltyLists.forEach(List::clear);
         penaltyReminders.clear();
     }

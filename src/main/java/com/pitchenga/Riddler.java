@@ -1707,6 +1707,17 @@ public enum Riddler {
 //            {Non}
 //    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
 //            new int[]{0, 1}),
+    test("test", new Pitch[][][]{{
+            {Do3, Re2, Mi2, Do3, Re2, Mi2, Do3, Re2, Mi2},
+            {Do2, Re2, Mi2, Do2, Re2, Mi2, Do2, Re2, Mi2},
+            {Do2, Re2, Do3, Do2, Re2, Do3, Do2, Re2, Do3},
+            {Do3, Re2, Do2, Do3, Re2, Do2, Do3, Re2, Do2},
+            {Do3, Do3, Do2, Do3, Do3, Do2, Do3, Do3, Do2},
+            {Do2, Do3, Do2, Do2, Do3, Do2, Do2, Do3, Do2},
+            {Do2, Do2, Do3, Do2, Do2, Do3, Do2, Do2, Do3},
+            {Do1, Do1, Do1, Do1, Do1, Do1, Do1, Do1, Do1},
+    }}, Pitchenga::ordered, new Integer[0], null,
+            new int[]{0,}),
     Step51BassOctave2HackRelearn("Step 51: Bass Octave 2", new Pitch[][][]{{
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},
             {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3},

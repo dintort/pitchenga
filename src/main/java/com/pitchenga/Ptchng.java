@@ -34,8 +34,8 @@ public class Ptchng extends Setup {
         keyboardInstrument = Instrument.ELECTRIC_PIANO_2;
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
-        series = 3;
-        repeat = 3;
+        seriesLength = 3;
+        repeats = 3;
 //        series = 1;
 //        repeat = 1;
 
@@ -57,6 +57,7 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Tempo110;
         defaultPacer = Pacer.Tempo75;
 
+        defaultRiddler = Riddler.test;
         defaultRiddler = Riddler.Step51BassOctave2;
         defaultRiddler = Riddler.Step51BassOctave2HackRelearn;
 
@@ -68,14 +69,14 @@ public class Ptchng extends Setup {
         defaultAudioInput = NO_AUDIO_INPUT;
         defaultAudioInput = null;
 
-        mainFrameVisible = true;
         mainFrameVisible = false;
+        mainFrameVisible = true;
         fullScreenWhenPlaying = false;
         fullScreenWhenPlaying = true;
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
-        System.setProperty("com.pitchenga.debug", "true");
+//        System.setProperty("com.pitchenga.debug", "true");
         System.setProperty("com.pitchenga.setup.class", "com.pitchenga.Ptchng");
 
         SwingUtilities.invokeAndWait(() -> {

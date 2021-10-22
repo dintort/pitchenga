@@ -21,40 +21,44 @@ public class MusicAnalyzer implements SoundConsumer {
      */
     private static final double SMOOTHING_FACTOR = 0.25;
 
-    private CqtContext ctx;
+    private final CqtContext ctx;
 
-    private FastCqt cqt;
-    private MultiRateRingBufferBank ringBufferBank;
-    private DecibelCalculator dbCalculator;
-    private HarmonicPatternPitchClassDetector pcDetector;
-    private Visualizer<AnalyzedFrame> visualizer;
-    private Visualizer<AnalyzedFrame> visualizer2;
+    private final FastCqt cqt;
+    private final MultiRateRingBufferBank ringBufferBank;
+    private final DecibelCalculator dbCalculator;
+    private final HarmonicPatternPitchClassDetector pcDetector;
+    private final Visualizer<AnalyzedFrame> visualizer;
+    private final Visualizer<AnalyzedFrame> visualizer2;
     //private MovingAverageAccumulator accumulator;
-    private ExpSmoother accumulator;
-    private ExpSmoother allBinSmoother;
-    private ExpSmoother octaveBinSmoother;
+    private final ExpSmoother accumulator;
+    private final ExpSmoother allBinSmoother;
+    private final ExpSmoother octaveBinSmoother;
     private NoiseGate noiseGate;
-    private PercussionSuppressor percussionSuppressor;
-    private SpectralEqualizer spectralEqualizer;
+    private final PercussionSuppressor percussionSuppressor;
+    private final SpectralEqualizer spectralEqualizer;
     private Median medianFilter;
 
-    private double[] samples;
+    private final double[] samples;
     /**
      * peak amplitude spectrum
      */
-    private double[] amplitudeSpectrumDb;
-    private double[] octaveBins;
+    private final double[] amplitudeSpectrumDb;
+    private final double[] octaveBins;
 
-    private AtomicBoolean initialized = new AtomicBoolean();
-    private AtomicBoolean accumulatorEnabled = new AtomicBoolean();
+    private final AtomicBoolean initialized = new AtomicBoolean();
+    private final AtomicBoolean accumulatorEnabled = new AtomicBoolean();
 
     private static final boolean BIN_SMOOTHER_ENABLED = false;
+    //    private static final boolean BIN_SMOOTHER_ENABLED = true;
     private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = true;
     private static final boolean HARMONIC_DETECTOR_ENABLED = true;
     private static final boolean PERCUSSION_SUPPRESSOR_ENABLED = true;
     private static final boolean SPECTRAL_EQUALIZER_ENABLED = true;
+    //    private static final boolean SPECTRAL_EQUALIZER_ENABLED = false;
     private static final boolean NOISE_GATE_ENABLED = false;
+    //    private static final boolean NOISE_GATE_ENABLED = true;
     private static final boolean NOISE_GATE_MEDIAN_THRESHOLD_ENABLED = false;
+//    private static final boolean NOISE_GATE_MEDIAN_THRESHOLD_ENABLED = true;
 
     public MusicAnalyzer(Visualizer<AnalyzedFrame> visualizer,
                          float sampleRate, int bitsPerSample, Visualizer<AnalyzedFrame> visualizer2) {
@@ -141,25 +145,24 @@ public class MusicAnalyzer implements SoundConsumer {
         }
     }
 
-    private AnalyzedFrame analyzeFrame(double[] allBins) {
+    private AnalyzedFrame analyzeFrame(double[] amplitudeSpectrumDb) {
         double[] detectedPitchClasses = null;
 
         if (BIN_SMOOTHER_ENABLED) {
-            allBins = allBinSmoother.smooth(allBins);
+            amplitudeSpectrumDb = allBinSmoother.smooth(amplitudeSpectrumDb);
         }
         if (PERCUSSION_SUPPRESSOR_ENABLED) {
-            allBins = percussionSuppressor.filter(allBins);
+            amplitudeSpectrumDb = percussionSuppressor.filter(amplitudeSpectrumDb);
         }
 
         if (HARMONIC_DETECTOR_ENABLED) {
-            detectedPitchClasses = pcDetector.detectPitchClasses(allBins);
+            detectedPitchClasses = pcDetector.detectPitchClasses(amplitudeSpectrumDb);
             if (SPECTRAL_EQUALIZER_ENABLED) {
-                detectedPitchClasses = spectralEqualizer
-                        .filter(detectedPitchClasses);
+                detectedPitchClasses = spectralEqualizer.filter(detectedPitchClasses);
             }
-            octaveBins = aggregateIntoOctaves(detectedPitchClasses, octaveBins);
+            aggregateIntoOctaves(detectedPitchClasses, octaveBins);
         } else {
-            octaveBins = aggregateIntoOctaves(allBins, octaveBins);
+            aggregateIntoOctaves(amplitudeSpectrumDb, octaveBins);
         }
 
         double[] smoothedOctaveBins = smooth(octaveBins);
@@ -172,12 +175,10 @@ public class MusicAnalyzer implements SoundConsumer {
             noiseGate.filter(smoothedOctaveBins);
         }
 
-        AnalyzedFrame pcProfile = new AnalyzedFrame(ctx, allBins,
-                smoothedOctaveBins, detectedPitchClasses);
-        return pcProfile;
+        return new AnalyzedFrame(ctx, amplitudeSpectrumDb, smoothedOctaveBins, detectedPitchClasses);
     }
 
-    private double[] aggregateIntoOctaves(double[] bins, double[] octaveBins) {
+    private void aggregateIntoOctaves(double[] bins, double[] octaveBins) {
         int binsPerOctave = ctx.getBinsPerOctave();
         for (int i = 0; i < binsPerOctave; i++) {
             // maximum over octaves:
@@ -188,11 +189,10 @@ public class MusicAnalyzer implements SoundConsumer {
             octaveBins[i] = value;
         }
 
-        return octaveBins;
     }
 
     private double[] smooth(double[] octaveBins) {
-        double[] smoothedOctaveBins = null;
+        double[] smoothedOctaveBins;
         double[] accumulatedOctaveBins = accumulator.smooth(octaveBins);
         if (accumulatorEnabled.get()) {
             //accumulator.add(octaveBins);
@@ -208,9 +208,9 @@ public class MusicAnalyzer implements SoundConsumer {
 
     public void toggleAccumulatorEnabled() {
         accumulatorEnabled.set(!accumulatorEnabled.get());
-        if (accumulatorEnabled.get()) {
-            //accumulator.reset();
-        }
+//        if (accumulatorEnabled.get()) {
+        //accumulator.reset();
+//        }
     }
 
 }
