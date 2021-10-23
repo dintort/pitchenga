@@ -53,8 +53,8 @@ public class AbstractHarmonEyeApp {
     private Timer updateTimer;
 
     public AbstractHarmonEyeApp(Visualizer<AnalyzedFrame> visualizer2) {
-//		visualizer = new com.harmoneye.viz.OpenGlCircularVisualizer();
-        visualizer = new com.harmoneye.viz.OpenGlLinearVisualizer();
+		visualizer = new com.harmoneye.viz.OpenGlCircularVisualizer();
+//        visualizer = new com.harmoneye.viz.OpenGlLinearVisualizer();
 
         soundAnalyzer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE, visualizer2);
 
@@ -81,8 +81,8 @@ public class AbstractHarmonEyeApp {
         }
         frame.setLocationRelativeTo(null);
 //		frame.setLocation(700, 0);
-//        frame.setLocation(0, 456);
-        frame.setLocation(0, 421);
+        frame.setLocation(0, 456);
+//        frame.setLocation(0, 421);
 //		frame.setLocation(0, 0);
 
         frame.setJMenuBar(createMenuBar());
