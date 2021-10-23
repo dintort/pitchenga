@@ -34,16 +34,16 @@ public class OpenGlCircularVisualizer implements
 
     protected static final String[] HALFTONE_NAMES = {"do", "ra", "re", "me",
             "mi", "fa", "fi", "so", "le", "la", "se", "si"};
+    private static final Color MORE_DARK = new Color(42, 42, 42);
 
     private int pitchStep = 1;
 
     private double[] binVelocities;
 
-    private ColorFunction colorFunction = new ColorFunction();
-    private Component component;
+    private final ColorFunction colorFunction = new ColorFunction();
+    private final Component component;
     private int binsPerHalftone;
     private int halftoneCount;
-    private double segmentCountInv;
     private double stepAngle;
 
     private TextRenderer renderer;
@@ -85,15 +85,21 @@ public class OpenGlCircularVisualizer implements
         binsPerHalftone = ctx.getBinsPerHalftone();
         halftoneCount = ctx.getHalftonesPerOctave();
 
-        double[] octaveBins = pcProfile.getOctaveBins();
-        for (int i = 0; i < octaveBins.length; i++) {
-            octaveBins[i] = octaveBins[i] * 1.05;
-            if (octaveBins[i] > 1) {
-                octaveBins[i] = 1;
+        binVelocities = pcProfile.getOctaveBins();
+        for (int i = 0; i < binVelocities.length; i++) {
+            double binVelocity = binVelocities[i];
+            if (binVelocity < 0.2) {
+                binVelocity = binVelocity * 0.8;
+            } else if (binVelocity < 0.3) {
+                binVelocity = binVelocity * 0.9;
+            } else if (binVelocity < 0.4) {
+                binVelocity = binVelocity * 0.95;
+            } else if (binVelocity > 0.5) {
+                binVelocity = binVelocity * 1.1;
             }
+            binVelocities[i] = binVelocity;
         }
-        this.binVelocities = octaveBins;
-        segmentCountInv = 1.0 / this.binVelocities.length;
+        double segmentCountInv = 1.0 / binVelocities.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
     }
 
@@ -122,7 +128,6 @@ public class OpenGlCircularVisualizer implements
 
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
-        //match bin
         int biggestBinNumber = -1;
         if (Pitchenga.isPlaying()) {
             if (binVelocities != null) {
@@ -134,16 +139,6 @@ public class OpenGlCircularVisualizer implements
                         binRatio = binRatio + 4;
 //                        binRatio = binRatio + 7.5;
                         biggestBinNumber = (int) binRatio;
-                        //                Arrays.fill(binVelocities, 0.1);
-//                    binVelocities[addWithFlip(biggestBinNumber, -12)] = 0.3;
-//                    binVelocities[addWithFlip(biggestBinNumber, -11)] = 0.35;
-//                    binVelocities[addWithFlip(biggestBinNumber, -10)] = 0.4;
-//                    binVelocities[addWithFlip(biggestBinNumber, -9)] = 0.45;
-//                    binVelocities[addWithFlip(biggestBinNumber, -8)] = 0.5;
-//                    binVelocities[addWithFlip(biggestBinNumber, -7)] = 0.55;
-//            binVelocities[addWithFlip(biggestBinNumber, -6)] = 0.6;
-//            binVelocities[addWithFlip(biggestBinNumber, -5)] = 0.65;
-//                        binVelocities[addWithFlip(biggestBinNumber, -4)] = 0.7;
                         binVelocities[addWithFlip(biggestBinNumber, -3)] = 0.75;
                         binVelocities[addWithFlip(biggestBinNumber, -2)] = 0.8;
                         binVelocities[addWithFlip(biggestBinNumber, -1)] = 0.85;
@@ -151,15 +146,6 @@ public class OpenGlCircularVisualizer implements
                         binVelocities[addWithFlip(biggestBinNumber, 1)] = 0.85;
                         binVelocities[addWithFlip(biggestBinNumber, 2)] = 0.8;
                         binVelocities[addWithFlip(biggestBinNumber, 3)] = 0.75;
-//                        binVelocities[addWithFlip(biggestBinNumber, 4)] = 0.7;
-//            binVelocities[addWithFlip(biggestBinNumber, 5)] = 0.65;
-//            binVelocities[addWithFlip(biggestBinNumber, 6)] = 0.6;
-//                    binVelocities[addWithFlip(biggestBinNumber, 7)] = 0.55;
-//                    binVelocities[addWithFlip(biggestBinNumber, 8)] = 0.5;
-//                    binVelocities[addWithFlip(biggestBinNumber, 9)] = 0.45;
-//                    binVelocities[addWithFlip(biggestBinNumber, 10)] = 0.4;
-//                    binVelocities[addWithFlip(biggestBinNumber, 11)] = 0.35;
-//                    binVelocities[addWithFlip(biggestBinNumber, 12)] = 0.3;
                     }
                 }
             }
@@ -173,15 +159,11 @@ public class OpenGlCircularVisualizer implements
                         biggestBinNumber = i;
                     }
                 }
-//            if (toneOverride != null) {
-//                tone = toneOverride;
                 double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
                 int toneNumber = (int) toneRatio;
-                if (toneNumber > 0 && toneNumber <= Tone.values().length + 1) {
+                if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
                     tone = Tone.values()[toneNumber];
                 }
-//            } else {
-//            }
             }
         }
 
@@ -349,7 +331,7 @@ public class OpenGlCircularVisualizer implements
         int result = biggestBinNumber + i;
         result = result % binVelocities.length;
         if (result < 0) {
-//            //fixme: magic number
+//            //fixme: implement
             result = 0;
 //            result = 108  + result;
 //            result = 0;
@@ -384,14 +366,6 @@ public class OpenGlCircularVisualizer implements
             renderer.beginRendering(width, height);
             for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
                 int index = (i * pitchStep) % HALFTONE_NAMES.length;
-                float velocity = getMaxBinValue(index);
-                float myVelocity;
-                myVelocity = velocity * 0.001f;
-                if (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i])) {
-                    myVelocity = 1f;
-                }
-                Color color = colorFunction.toColor(myVelocity, i);
-                renderer.setColor(color);
                 String str = HALFTONE_NAMES[index];
                 Rectangle2D bounds = renderer.getBounds(str);
                 int offsetX = (int) (scaleFactor * 0.5f * bounds.getWidth());
@@ -400,6 +374,15 @@ public class OpenGlCircularVisualizer implements
                 double radius = 0.42;
                 int x = (int) (centerX + radius * size * FastMath.sin(angle) - offsetX);
                 int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
+                Color color;
+                if (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i])) {
+                    renderer.setColor(MORE_DARK);
+                    renderer.draw3D(str, x + 1, y - 1, 0, scaleFactor);
+                    color = colorFunction.toColor(1f, i);
+                } else {
+                    color = MORE_DARK;
+                }
+                renderer.setColor(color);
                 renderer.draw3D(str, x, y, 0, scaleFactor);
             }
             renderer.endRendering();
