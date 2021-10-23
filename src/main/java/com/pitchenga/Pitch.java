@@ -130,7 +130,7 @@ public enum Pitch {
         this.octave = octave;
         this.midi = midi;
         this.frequency = frequency;
-        this.note = tone.note + octave;
+        this.note = tone.west + octave;
         this.label = name().toLowerCase();
         URL resource = getClass().getResource("/wav/" + midi + ".wav");
         if (resource == null) {

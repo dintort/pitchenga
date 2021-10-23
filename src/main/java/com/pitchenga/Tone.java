@@ -25,7 +25,7 @@ public enum Tone {
     Si("B", true, new Color(255, 0, 255), Color.WHITE),
     ;
 
-    public final String note;
+    public final String west;
     public final boolean diatonic;
     public final Color color;
     public final Color fontColor;
@@ -33,8 +33,8 @@ public enum Tone {
     private volatile Button button;
     private volatile Fugue fugue;
 
-    Tone(String note, boolean diatonic, Color color, Color fontColor) {
-        this.note = note;
+    Tone(String west, boolean diatonic, Color color, Color fontColor) {
+        this.west = west;
         this.diatonic = diatonic;
         this.color = color;
         this.fontColor = fontColor;

@@ -1,26 +1,19 @@
 package com.harmoneye.viz;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.geom.Rectangle2D;
-
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.GLProfile;
+import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.math.cqt.CqtContext;
+import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
-
+import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.awt.TextRenderer;
 import com.pitchenga.Pitchenga;
 import com.pitchenga.Tone;
 import org.apache.commons.math3.util.FastMath;
 
-import com.harmoneye.analysis.AnalyzedFrame;
-import com.harmoneye.math.cqt.CqtContext;
-import com.jogamp.opengl.util.Animator;
-import com.jogamp.opengl.util.awt.TextRenderer;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+
+import static java.awt.Color.*;
 
 // TODO: rewrite to use vertex buffers instead of immediate mode
 
@@ -150,6 +143,7 @@ public class OpenGlCircularVisualizer implements
                 }
             }
         } else {
+            tone = null;
             double biggestBinVelocity = 0;
             if (binVelocities != null) {
                 for (int i = 0; i < binVelocities.length; i++) {
@@ -159,10 +153,12 @@ public class OpenGlCircularVisualizer implements
                         biggestBinNumber = i;
                     }
                 }
-                double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
-                int toneNumber = (int) toneRatio;
-                if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
-                    tone = Tone.values()[toneNumber];
+                if (biggestBinVelocity > 0.3) {
+                    double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
+                    int toneNumber = (int) toneRatio;
+                    if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
+                        tone = Tone.values()[toneNumber];
+                    }
                 }
             }
         }
@@ -366,8 +362,8 @@ public class OpenGlCircularVisualizer implements
             renderer.beginRendering(width, height);
             for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
                 int index = (i * pitchStep) % HALFTONE_NAMES.length;
-                String str = HALFTONE_NAMES[index];
-                Rectangle2D bounds = renderer.getBounds(str);
+                String halftoneName = HALFTONE_NAMES[index];
+                Rectangle2D bounds = renderer.getBounds(halftoneName);
                 int offsetX = (int) (scaleFactor * 0.5f * bounds.getWidth());
                 int offsetY = (int) (scaleFactor * 0.5f * bounds.getHeight());
 //            double radius = 0.43;
@@ -376,14 +372,20 @@ public class OpenGlCircularVisualizer implements
                 int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
                 Color color;
                 if (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i])) {
-                    renderer.setColor(MORE_DARK);
-                    renderer.draw3D(str, x + 1, y - 1, 0, scaleFactor);
-                    color = colorFunction.toColor(1f, i);
+                    color = BLACK;
+                    renderer.setColor(color);
+                    renderer.draw3D(halftoneName, x + 4, y - 4, 0, scaleFactor);
+                    color = WHITE;
                 } else {
-                    color = MORE_DARK;
+                    Tone myTone = Pitchenga.TONE_BY_LOWERCASE_NAME.get(halftoneName);
+                    if (myTone != null && myTone.diatonic) {
+                        color = Color.DARK_GRAY;
+                    } else {
+                        color = MORE_DARK;
+                    }
                 }
                 renderer.setColor(color);
-                renderer.draw3D(str, x, y, 0, scaleFactor);
+                renderer.draw3D(halftoneName, x, y, 0, scaleFactor);
             }
             renderer.endRendering();
         }
