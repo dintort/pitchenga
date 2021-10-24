@@ -480,7 +480,8 @@ public class Display extends JPanel {
                         panel.setBackground(toneColor);
 //                        int sliderValue = convertPitchToSlider(Display.this.pitch, frequency);
 //                        slider.setValue(this.sliderValue);
-                        slider.setVisible(true);
+//                        slider.setVisible(true);
+                        slider.setVisible(false);
                     } else {
                         slider.setVisible(false);
                         //fixme: Make less hacky maybe?
