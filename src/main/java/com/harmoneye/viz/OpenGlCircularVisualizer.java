@@ -88,7 +88,7 @@ public class OpenGlCircularVisualizer implements
             } else if (binVelocity < 0.4) {
                 binVelocity = binVelocity * 0.95;
             } else if (binVelocity > 0.5) {
-                binVelocity = binVelocity * 1.1;
+                binVelocity = binVelocity * 1.02;
             }
 //            binVelocity = binVelocity * 1.2;
             if (binVelocity > 1.1) {
