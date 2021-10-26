@@ -975,12 +975,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                             velocity = 127;
                         }
                         midiNoteOn(pitch.midi, midiChannel, velocity);
-                        if (setup.voiceHints) {
-                            if (voiceHint) {
-                                Fugue toneFugue = getToneFugue(pitch);
-                                Player player = toneFugue.pitch.player;
-                                player.play();
-                            }
+                        if (setup.voiceHints && voiceHint) {
+                            Fugue toneFugue = getToneFugue(pitch);
+                            Player player = toneFugue.pitch.player;
+                            player.play();
                         }
                         if (flashColors) {
                             SwingUtilities.invokeLater(() -> {
