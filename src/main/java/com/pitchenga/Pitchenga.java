@@ -8,6 +8,7 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.Visualizer;
 
 import javax.sound.midi.*;
@@ -669,13 +670,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             SwingUtilities.invokeLater(() -> {
                 this.showSeriesHint = isShowSeriesHint(seriesCount);
                 if (showSeriesHint) {
-//                    OpenGlCircularVisualizer.toneOverride = riddle.tone;
+                    OpenGlCircularVisualizer.toneOverride = riddle.tone;
 //                    OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
 //                            new double[0], new double[0], new double[0]));
 //                    OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();
                     showHint(riddle);
                 } else {
-//                    OpenGlCircularVisualizer.toneOverride = null;
+                    OpenGlCircularVisualizer.toneOverride = null;
 //                    OpenGlCircularVisualizer.INSTANCE.update(new AnalyzedFrame(CqtContext.create().build(),
 //                            new double[0], new double[0], new double[0]));
 //                    OpenGlCircularVisualizer.INSTANCE.getComponent().repaint();

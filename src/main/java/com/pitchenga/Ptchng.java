@@ -37,8 +37,8 @@ public class Ptchng extends Setup {
 
 //        riddleInstrument = Instrument.TENOR_SAX;
 //        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CkkLEAN;
-//        keyboardInstrument = Instrument.ELECTRIC_PIANO_1;
-        keyboardInstrument = Instrument.ELECTRIC_PIANO_2;
+        keyboardInstrument = Instrument.ELECTRIC_PIANO_1;
+//        keyboardInstrument = Instrument.ELECTRIC_PIANO_2;
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
         seriesLength = 3;

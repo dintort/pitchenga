@@ -28,6 +28,7 @@ public class OpenGlCircularVisualizer implements
     protected static final String[] HALFTONE_NAMES = {"do", "ra", "re", "me",
             "mi", "fa", "fi", "so", "le", "la", "se", "si"};
     private static final Color MORE_DARK = new Color(42, 42, 42);
+    private static final Color EVEN_MORE_DARK = new Color(21, 21, 21);
 
     private int pitchStep = 1;
 
@@ -316,9 +317,9 @@ public class OpenGlCircularVisualizer implements
         float scaleFactor = (float) (0.0015f * size);
 
 
-//        if (Pitchenga.isPlaying() && toneOverride != null) {
-//            tone = toneOverride;
-//        }
+        if (Pitchenga.isPlaying()) {
+            tone = toneOverride;
+        }
         if (binVelocities != null && binVelocities.length > 0) {
             renderer.beginRendering(width, height);
             for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
@@ -336,13 +337,14 @@ public class OpenGlCircularVisualizer implements
                     color = BLACK;
                     renderer.setColor(color);
                     renderer.draw3D(halftoneName, x + 4, y - 4, 0, scaleFactor);
-                    color = WHITE;
+                    color = colorFunction.toColor(100, i);
+//                    color = WHITE;
                 } else {
                     Tone myTone = Pitchenga.TONE_BY_LOWERCASE_NAME.get(halftoneName);
                     if (myTone != null && myTone.diatonic) {
-                        color = Color.DARK_GRAY;
-                    } else {
                         color = MORE_DARK;
+                    } else {
+                        color = EVEN_MORE_DARK;
                     }
                 }
                 renderer.setColor(color);
