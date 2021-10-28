@@ -27,8 +27,10 @@ public class OpenGlCircularVisualizer implements
 
     protected static final String[] HALFTONE_NAMES = {"do", "ra", "re", "me",
             "mi", "fa", "fi", "so", "le", "la", "se", "si"};
-    private static final Color MORE_DARK = new Color(42, 42, 42);
-    private static final Color EVEN_MORE_DARK = new Color(21, 21, 21);
+//    private static final Color MORE_DARK = new Color(42, 42, 42);
+//    private static final Color EVEN_MORE_DARK = new Color(21, 21, 21);
+    private static final Color MORE_DARK = new Color(20, 20, 20);
+    private static final Color EVEN_MORE_DARK = new Color(10, 10, 10);
 
     private int pitchStep = 1;
 
