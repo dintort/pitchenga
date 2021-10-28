@@ -66,9 +66,9 @@ public class OpenGlCircularVisualizer implements
         if (pcProfile == null) {
             return;
         }
-        if (Pitchenga.isPlaying()) {
-            return;
-        }
+//        if (Pitchenga.isPlaying()) {
+//            return;
+//        }
 //        if (Pitchenga.frozen) {
 //            return;
 //        }
@@ -107,9 +107,9 @@ public class OpenGlCircularVisualizer implements
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        if (Pitchenga.isPlaying()) {
-            return;
-        }
+//        if (Pitchenga.isPlaying()) {
+//            return;
+//        }
 //        if (Pitchenga.frozen) {
 //            return;
 //        }
@@ -126,27 +126,27 @@ public class OpenGlCircularVisualizer implements
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
         int biggestBinNumber = -1;
-        if (Pitchenga.isPlaying()) {
-            if (binVelocities != null) {
-                binVelocities = new double[binVelocities.length];
-                if (binVelocities.length > 0) {
-                    if (tone != null) {
-                        double binRatio = (int) (tone.ordinal() / ((double) Tone.values().length / (double) binVelocities.length));
-                        //fixme: hack
-                        binRatio = binRatio + 4;
-//                        binRatio = binRatio + 7.5;
-                        biggestBinNumber = (int) binRatio;
-                        binVelocities[addWithFlip(biggestBinNumber, -3)] = 0.75;
-                        binVelocities[addWithFlip(biggestBinNumber, -2)] = 0.8;
-                        binVelocities[addWithFlip(biggestBinNumber, -1)] = 0.85;
-                        binVelocities[biggestBinNumber] = 0.9;
-                        binVelocities[addWithFlip(biggestBinNumber, 1)] = 0.85;
-                        binVelocities[addWithFlip(biggestBinNumber, 2)] = 0.8;
-                        binVelocities[addWithFlip(biggestBinNumber, 3)] = 0.75;
-                    }
-                }
-            }
-        } else {
+//        if (Pitchenga.isPlaying()) {
+//            if (binVelocities != null) {
+//                binVelocities = new double[binVelocities.length];
+//                if (binVelocities.length > 0) {
+//                    if (tone != null) {
+//                        double binRatio = (int) (tone.ordinal() / ((double) Tone.values().length / (double) binVelocities.length));
+//                        //fixme: hack
+//                        binRatio = binRatio + 4;
+////                        binRatio = binRatio + 7.5;
+//                        biggestBinNumber = (int) binRatio;
+//                        binVelocities[addWithFlip(biggestBinNumber, -3)] = 0.75;
+//                        binVelocities[addWithFlip(biggestBinNumber, -2)] = 0.8;
+//                        binVelocities[addWithFlip(biggestBinNumber, -1)] = 0.85;
+//                        binVelocities[biggestBinNumber] = 0.9;
+//                        binVelocities[addWithFlip(biggestBinNumber, 1)] = 0.85;
+//                        binVelocities[addWithFlip(biggestBinNumber, 2)] = 0.8;
+//                        binVelocities[addWithFlip(biggestBinNumber, 3)] = 0.75;
+//                    }
+//                }
+//            }
+//        } else {
             tone = null;
             double biggestBinVelocity = 0;
             if (binVelocities != null) {
@@ -165,7 +165,7 @@ public class OpenGlCircularVisualizer implements
                     }
                 }
             }
-        }
+//        }
 
 
         drawPitchClassFrame(gl);
@@ -265,19 +265,19 @@ public class OpenGlCircularVisualizer implements
                 (byte) color.getBlue());
 
         double centerRadius;
-        if (Pitchenga.isPlaying()) {
-            if (biggestBinNumber == i) {
-                centerRadius = outerRadius - 0.03;
-            } else {
-                centerRadius = outerRadius - 0.01;
-            }
-        } else {
+//        if (Pitchenga.isPlaying()) {
+//            if (biggestBinNumber == i) {
+//                centerRadius = outerRadius - 0.03;
+//            } else {
+//                centerRadius = outerRadius - 0.01;
+//            }
+//        } else {
             if (biggestBinNumber == i) {
                 centerRadius = outerRadius * 0.99 - 0.04;
             } else {
                 centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.02;
             }
-        }
+//        }
 
         double centerAngle = angle - 0.000000001 * stepAngle;
         double sinCenterAngle = FastMath.sin(centerAngle);

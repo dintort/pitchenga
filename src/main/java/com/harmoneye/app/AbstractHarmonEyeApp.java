@@ -30,7 +30,8 @@ import com.harmoneye.viz.SwingVisualizer;
 
 public class AbstractHarmonEyeApp {
 
-    private static final int TIME_PERIOD_MILLIS = 16;
+//    private static final int TIME_PERIOD_MILLIS = 16;
+    private static final int TIME_PERIOD_MILLIS = 8;
     private static final String WINDOW_TITLE = "HarmonEye";
 
     protected static final float AUDIO_SAMPLE_RATE = 44100.0f;

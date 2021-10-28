@@ -29,7 +29,6 @@ import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -77,14 +76,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     private final AtomicReference<Tone> lastGuess = new AtomicReference<>(null);
     private volatile Pitch lastPitch;
-    private volatile Pitch lastPitchForTarsos;
     private volatile long lastGuessTimestampMs = System.currentTimeMillis();
     private final List<Pair<Pitch, Double>> guessQueuePitchAndRms = new ArrayList<>();
-    private List<Pitch> riddles = new ArrayList<>(4096); // Not thread-safe
+    private volatile Pitch[] riddlesQueue = new Pitch[0]; // Not thread-safe
     private static int riddlesPointer = -1; // Not thread-safe
     private StringBuilder riddleInfo; // Not thread-safe
-    //fixme: Un-hack
-    private final Queue<Integer> instrumentsQueue = new LinkedList<>();
+    private volatile Integer[] instrumentsQueue = new Integer[0];  // Not thread-safe
     private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> prevPrevRiddle = new AtomicReference<>(null);
@@ -284,24 +281,24 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     private Pitch riddle() {
         while (this.riddle.get() == null) {
-            if (riddlesPointer >= riddles.size() - 1) {
+            if (riddlesPointer >= riddlesQueue.length - 1) {
                 Riddler riddler = getRiddler();
-                riddles = riddler.riddle.apply(this);
+                riddlesQueue = riddler.riddle.apply(this).toArray(new Pitch[0]);
                 riddleInfo = new StringBuilder();
-                for (int i = 0; i < riddles.size(); i++) {
-                    Pitch riddle = riddles.get(i);
+                for (int i = 0; i < riddlesQueue.length; i++) {
+                    Pitch riddle = riddlesQueue[i];
                     riddleInfo.append(i).append(":").append(riddle).append(", ");
                 }
                 riddlesPointer = -1;
             }
 
-            Pitch riddle = riddles.get(++riddlesPointer);
+            Pitch riddle = riddlesQueue[++riddlesPointer];
             if (riddle != null) {
                 Integer instrumentChannel;
-                if (instrumentsQueue.isEmpty()) {
+                if (instrumentsQueue.length == 0) {
                     instrumentChannel = 0;
                 } else {
-                    instrumentChannel = instrumentsQueue.remove();
+                    instrumentChannel = instrumentsQueue[riddlesPointer];
                 }
                 currentRiddleInstrument = riddleInstrumentChannels[instrumentChannel];
                 debug("riddle=" + riddle + ", pointer=" + riddlesPointer + ", riddles=" + riddleInfo);
@@ -419,6 +416,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     @Override
     public void update(AnalyzedFrame pcProfile) {
+//        if (true) {
+//            return;
+//        }
         if (isPlaying()) {
             return;
         }
@@ -530,14 +530,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 boolean answer = getPacer() == Pacer.Answer;
                 if (!playing || answer) {
 //                    updatePianoButtons(guess.tone.getButton());
-                    if (lastPitchForTarsos != guess) {
-                        lastPitchForTarsos = guess;
                         if (!isKeyboard || (!playing && !answer)) {
                             display.setTone(guess, guessColor, pitchinessColor, frequency);
                         }
                         display.setFillColor(guessColor);
                         display.update();
-                    }
                 }
             });
         }
@@ -546,7 +543,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     public static Pair<Color, Color> getGuessAndPitchinessColor(double diff, Pitch pitchy, double pitchinessDiff, Color toneColor) {
         Pair<Color, Color> guessAndPitchinessColor;
         double pitchiness = pitchinessDiff * 20;
-        ;
         if (Math.abs(diff) < 0.000000000042) {
             guessAndPitchinessColor = new Pair<>(toneColor, toneColor);
         } else {
@@ -835,16 +831,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     public List<Pitch> shuffleGroupSeries(boolean shuffleMacroGroups, boolean shuffleGroups) {
-        instrumentsQueue.clear();
-        int[] instruments = getRiddler().instruments;
-        if (instruments == null || instruments.length == 0) {
-            instruments = new int[]{0};
+        List<Integer> instrumentsQueue = new ArrayList<>();
+        int[] riddleInstruments = getRiddler().instruments;
+        if (riddleInstruments == null || riddleInstruments.length == 0) {
+            riddleInstruments = new int[]{0};
         }
         Queue<Integer> instrumentGroups = new LinkedList<>();
         Pitch[][][] scales = getRiddler().scale;
         List<Pitch[][]> scalesList = Arrays.asList(scales);
         for (int i = 0; i < scales.length; i++) {
-            instrumentGroups.add(instruments[i % instruments.length]);
+            instrumentGroups.add(riddleInstruments[i % riddleInstruments.length]);
         }
         if (shuffleMacroGroups) {
             Collections.shuffle(scalesList);
@@ -897,6 +893,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             //fixme: Refactor?
             results.addAll(result);
         }
+        //fixme: Un-hack - return value rather then assign
+        this.instrumentsQueue = instrumentsQueue.toArray(new Integer[0]);
         debug(results + " are the new riddles multiplied");
         return results;
     }
@@ -1030,7 +1028,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             int mod = riddlesPointer % seriesLength;
             int seriesStart = riddlesPointer - mod;
             for (int i = seriesStart; i < seriesStart + seriesLength; i++) {
-                Pitch aPitch = riddles.get(i);
+                Pitch aPitch = riddlesQueue[i];
 //                debug("apitch=" + aPitch + ", i=" + i);
                 if (aPitch.midi < pitch.midi) {
                     toneFugue = Fugue.DoDo;
@@ -1316,7 +1314,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                     octaveShift--;
                 }
                 debug("octaveShift=" + octaveShift);
-            } else if (pressed && event.getKeyCode() == KeyEvent.VK_X) {
+            }
+            if (pressed && event.getKeyCode() == KeyEvent.VK_X) {
                 if (octaveShift < 3) {
                     //noinspection NonAtomicOperationOnVolatileField
                     octaveShift++;
@@ -1327,14 +1326,36 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 //noinspection NonAtomicOperationOnVolatileField
                 transposeShift--;
                 debug("transposeShift=" + transposeShift);
-            } else if (pressed && event.getKeyCode() == KeyEvent.VK_V) {
+            }
+            if (pressed && event.getKeyCode() == KeyEvent.VK_V) {
                 //noinspection NonAtomicOperationOnVolatileField
                 transposeShift++;
                 debug("transposeShift=" + transposeShift);
             }
-            if (pressed && (event.getKeyCode() == KeyEvent.VK_COMMA
-                    || event.getKeyCode() == KeyEvent.VK_PERIOD)) {
-                nextTempo(event.getKeyCode() != KeyEvent.VK_COMMA);
+            if (pressed && event.getKeyCode() == KeyEvent.VK_COMMA) {
+                nextTempo(false);
+                return true;
+            }
+            if (pressed && event.getKeyCode() == KeyEvent.VK_PERIOD) {
+                nextTempo(true);
+                return true;
+            }
+            if (pressed && event.getKeyCode() == KeyEvent.VK_PAGE_UP) {
+                riddlesPointer += 30 * setup.seriesLength;
+                if (riddlesPointer >= riddlesQueue.length - 1) {
+                    riddlesPointer = 0;
+                }
+                display.text(String.valueOf(riddlesQueue.length - riddlesPointer));
+                display.text("\n");
+                return true;
+            }
+            if (pressed && event.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
+                riddlesPointer -= 30 * setup.seriesLength;
+                if (riddlesPointer < 0) {
+                    riddlesPointer = 0;
+                }
+                display.text(String.valueOf(riddlesQueue.length - riddlesPointer));
+                display.text("\n");
                 return true;
             }
             Button button = BUTTON_BY_CODE.get(event.getKeyCode());
@@ -1352,7 +1373,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         if (index >= 0 && index < pacerCombo.getItemCount()) {
             pacerCombo.setSelectedIndex(index);
             if (playButton.isSelected()) {
-                display.text(String.valueOf(riddles.size() - riddlesPointer));
+                display.text(String.valueOf(riddlesQueue.length - riddlesPointer));
                 display.text("\n");
             }
             display.text(String.valueOf(getPacer().bpm));
@@ -1818,8 +1839,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 } else {
                     this.previousSize = getSize();
                     this.previousLocation = getLocation();
-                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
-//                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
+//                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
+                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
                 }
             }
         } else {
@@ -1857,16 +1878,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             toggleNativeFullScreen();
         } else {
             GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-            if (screenDevice.getFullScreenWindow() == this) {
-//            if (screenDevice.getFullScreenWindow() == eye) {
+//            if (screenDevice.getFullScreenWindow() == this) {
+            if (screenDevice.getFullScreenWindow() == eye) {
 //                bottomPanel.setVisible(true);
                 screenDevice.setFullScreenWindow(null);
                 eye.setVisible(true);
             } else {
 //                bottomPanel.setVisible(false);
                 eye.setVisible(false);
-                screenDevice.setFullScreenWindow(this);
-//                screenDevice.setFullScreenWindow(eye);
+//                screenDevice.setFullScreenWindow(this);
+                screenDevice.setFullScreenWindow(eye);
             }
         }
     }
@@ -1911,7 +1932,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private void resetGame() {
         riddle.set(null);
         prevRiddle.set(null);
-        riddles.clear();
+        riddlesQueue = new Pitch[0];
         penaltyLists.forEach(List::clear);
         penaltyReminders.clear();
     }
@@ -2147,13 +2168,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     public static boolean isNativeFullScreenAvailable() {
-        try {
-            Class.forName("com.apple.eawt.FullScreenUtilities");
-            Class.forName("com.apple.eawt.Application");
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-        return true;
+        return false;
+//        try {
+//            Class.forName("com.apple.eawt.FullScreenUtilities");
+//            Class.forName("com.apple.eawt.Application");
+//        } catch (ClassNotFoundException e) {
+//            return false;
+//        }
+//        return true;
 
     }
 

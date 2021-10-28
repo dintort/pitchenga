@@ -39,9 +39,9 @@ public class OpenGlLinearVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
     @Override
     public void update(AnalyzedFrame frame) {
-        if (Pitchenga.isPlaying()) {
-            return;
-        }
+//        if (Pitchenga.isPlaying()) {
+//            return;
+//        }
         this.frame = frame;
     }
 
@@ -51,9 +51,9 @@ public class OpenGlLinearVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        if (Pitchenga.isPlaying()) {
-            return;
-        }
+//        if (Pitchenga.isPlaying()) {
+//            return;
+//        }
         if (frame == null) {
             return;
         }

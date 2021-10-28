@@ -28,6 +28,13 @@ public class Ptchng extends Setup {
 
 //        riddleInstrument = Instrument.ELECTRIC_BASS_FINGER;
 //        riddleInstruments = new int[] { Instrument.ELECTRIC_PIANO_2 };
+        riddleInstruments = new int[] {
+                Instrument.ACOUSTIC_GRAND_PIANO,
+                Instrument.ELECTRIC_BASS_FINGER,
+                Instrument.ELECTRIC_PIANO_1,
+                Instrument.ELECTRIC_GUITAR_JAZZ,
+                Instrument.TENOR_SAX };
+
 //        riddleInstrument = Instrument.TENOR_SAX;
 //        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CkkLEAN;
 //        keyboardInstrument = Instrument.ELECTRIC_PIANO_1;
@@ -55,11 +62,13 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Tempo120;
         defaultPacer = Pacer.Tempo100;
         defaultPacer = Pacer.Tempo110;
+        defaultPacer = Pacer.Tempo80;
         defaultPacer = Pacer.Tempo75;
 
         defaultRiddler = Riddler.test;
         defaultRiddler = Riddler.Step51BassOctave2;
         defaultRiddler = Riddler.Step51BassOctave2HackRelearn;
+        defaultRiddler = Riddler.Step51;
 
         defaultRinger = Ringer.Tone;
         defaultRinger = Ringer.None;
