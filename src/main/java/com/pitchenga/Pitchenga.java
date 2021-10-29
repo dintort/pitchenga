@@ -1049,7 +1049,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         } else {
             midiChannel.noteOff(midi);
         }
-//        OpenGlCircularVisualizer.toneOverride = null;
     }
 
     private void transcribe(Pitch guess, boolean force) {

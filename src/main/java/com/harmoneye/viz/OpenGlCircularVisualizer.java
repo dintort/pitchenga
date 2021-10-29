@@ -135,7 +135,7 @@ public class OpenGlCircularVisualizer implements
                         binRatio = binRatio + 4;
 //                        binRatio = binRatio + 7.5;
                         biggestBinNumber = (int) binRatio;
-                        binVelocities[addWithFlip(biggestBinNumber, -4)] = 0.6;
+                        binVelocities[addWithFlip(biggestBinNumber, -4)] = 0.55;
                         binVelocities[addWithFlip(biggestBinNumber, -3)] = 0.7;
                         binVelocities[addWithFlip(biggestBinNumber, -2)] = 0.8;
                         binVelocities[addWithFlip(biggestBinNumber, -1)] = 0.89;
@@ -143,7 +143,7 @@ public class OpenGlCircularVisualizer implements
                         binVelocities[addWithFlip(biggestBinNumber, 1)] = 0.89;
                         binVelocities[addWithFlip(biggestBinNumber, 2)] = 0.8;
                         binVelocities[addWithFlip(biggestBinNumber, 3)] = 0.7;
-                        binVelocities[addWithFlip(biggestBinNumber, 4)] = 0.6;
+                        binVelocities[addWithFlip(biggestBinNumber, 4)] = 0.55;
                     }
                 }
             }
