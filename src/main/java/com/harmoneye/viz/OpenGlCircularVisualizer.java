@@ -42,6 +42,7 @@ public class OpenGlCircularVisualizer implements
 
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
+    public static volatile String text;
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
@@ -315,7 +316,6 @@ public class OpenGlCircularVisualizer implements
         double angle = 0;
         float scaleFactor = (float) (0.0015f * size);
 
-
         if (Pitchenga.isPlaying()) {
             tone = toneOverride;
         }
@@ -348,6 +348,10 @@ public class OpenGlCircularVisualizer implements
                 }
                 renderer.setColor(color);
                 renderer.draw3D(halftoneName, x, y, 0, scaleFactor);
+            }
+            if (text != null) {
+                renderer.setColor(white);
+                renderer.draw3D(text, 0, 0, 0, scaleFactor);
             }
             renderer.endRendering();
         }

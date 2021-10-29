@@ -1,5 +1,7 @@
 package com.pitchenga;
 
+import com.harmoneye.viz.OpenGlCircularVisualizer;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
@@ -125,6 +127,7 @@ public class Display extends JPanel {
 
 
     public void text(String message) {
+        OpenGlCircularVisualizer.text = message;
 //        text(message, null, null);
 //    }
 //
@@ -148,7 +151,10 @@ public class Display extends JPanel {
             textArea.setVisible(true);
             textArea.append(message);
             textArea.setCaretPosition(textArea.getDocument().getLength());
-            asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> textArea.setVisible(false)),
+            asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> {
+                        textArea.setVisible(false);
+                        OpenGlCircularVisualizer.text = null;
+                    }),
                     3, TimeUnit.SECONDS);
         }
     }
@@ -190,6 +196,7 @@ public class Display extends JPanel {
     }
 
     public void setTones(Fugue toneFugue, Tone... tones) {
+        OpenGlCircularVisualizer.toneOverride = toneFugue == null ? null : toneFugue.pitch.tone;
         this.toneFugue = toneFugue;
         this.tones.clear();
         this.tones.addAll(Arrays.asList(tones));
