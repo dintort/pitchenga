@@ -134,7 +134,10 @@ public class OpenGlLinearVisualizer implements SwingVisualizer<AnalyzedFrame>,
 //            double toneRatio = i / ((double) binVelocities.length / (double) Tone.values().length);
             double toneRatio = i / ((double) binVelocities.length / (double) Tone.values().length);
 
-            Color color = colorFunction.toColor(1.0, toneRatio);
+//            Color color = colorFunction.toColor(1.0, toneRatio);
+            //fixme: Always 1 for the biggest bin
+            Color color = colorFunction.toColor(binVelocity, toneRatio);
+//            Color color = colorFunction.toColor(binVelocity * 0.1, toneRatio);
 			gl.glColor3ub((byte) color.getRed(),
 				(byte) color.getGreen(),
 				(byte) color.getBlue());

@@ -13,6 +13,7 @@ import org.apache.commons.math3.util.FastMath;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
+import static com.pitchenga.Pitch.*;
 import static java.awt.Color.*;
 
 // TODO: rewrite to use vertex buffers instead of immediate mode
@@ -20,6 +21,10 @@ import static java.awt.Color.*;
 public class OpenGlCircularVisualizer implements
         SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
+    //    public static final boolean fixmevis = "true".equals(System.getProperty("fixmevis"));
+    public static final boolean harmonWhenPlaying = true;
+    public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
+    public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
     public static volatile OpenGlCircularVisualizer INSTANCE;
     private static final float DEFAULT_LINE_WIDTH = 1f;
@@ -27,8 +32,13 @@ public class OpenGlCircularVisualizer implements
 
     protected static final String[] HALFTONE_NAMES = {"do", "ra", "re", "me",
             "mi", "fa", "fi", "so", "le", "la", "se", "si"};
-    private static final Color MORE_DARK = new Color(42, 42, 42);
+    public static final Color MORE_DARK = new Color(42, 42, 42);
     private static final Color EVEN_MORE_DARK = new Color(31, 31, 31);
+    public static volatile Tone toneOverrideTarsos;
+    public static volatile double freqOverrideTarsos;
+    public static int sliderOverrideTarsos;
+    public static Color guessColorOverrideTarsos;
+    public static Color pitchinessColorOverrideTarsos;
 
     private int pitchStep = 1;
 
@@ -68,7 +78,7 @@ public class OpenGlCircularVisualizer implements
         if (pcProfile == null) {
             return;
         }
-        if (Pitchenga.isPlaying()) {
+        if (harmonWhenPlaying()) {
             return;
         }
 //        if (Pitchenga.frozen) {
@@ -118,14 +128,95 @@ public class OpenGlCircularVisualizer implements
 //        if (locked) {
 //            return;
 //        }
-        Tone tone = toneOverride;
-
         GL2 gl = drawable.getGL().getGL2();
-
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
+//        Tone tone = toneOverride;
+        int biggestBinNumber = getBiggestBinNumber();
+
+        gl.glClearColor(0f, 0f, 0f, 1f);
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+
+        drawPitchClassBins(gl, biggestBinNumber);
+        drawPitchClassFrame(gl);
+        drawTuner(gl, biggestBinNumber);
+        drawHalftoneNames(drawable, toneOverride);
+    }
+
+    private void drawTuner(GL2 gl, int biggestBinNumber) {
+        if (binsPerHalftone == 0) {
+            return;
+        }
+
+
+        int slider = sliderOverrideTarsos;
+//        pitchSlider.getModel().setMinimum(convertPitchToSlider(Mi0, 0f));
+//        pitchSlider.getModel().setMaximum(convertPitchToSlider(Re6, 0f));
+
+
+        //        max = max - min;
+//        slider = slider - min;
+        slider = slider * 2;
+        slider = slider % SLIDER_MAX;
+        double halfToneCountInv = 1.0 / SLIDER_MIN;
+        double angle = 2 * FastMath.PI * (slider * halfToneCountInv);
+//        System.out.println(slider + " " + angle);
+
+//        int i = 100;
+        int i = slider;
+//        double angle = 0.5 * (1 - binsPerHalftone) * stepAngle;
+
+        int pitchClass = i / binsPerHalftone;
+        int binInPitchClass = i % binsPerHalftone;
+        int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
+        int index = movedPitchClass * binsPerHalftone + binInPitchClass;
+
+        //fixme: hack
+
+//            Color color = colorFunction.toColor(1, toneRatio);
+//        double binVelocity = binVelocities[i];
+        Color color = guessColorOverrideTarsos;
+//        Color color = pitchinessColorOverrideTarsos;
+        if (color == null) {
+            color = white;
+//            color = colorFunction.toColor(binVelocity, toneRatio);
+        }
+
+//        double velocity = binVelocities[index];
+        double myVelocity = 1;
+
+        double startAngle = angle - 0.5 * stepAngle;
+        double sinStartAngle = FastMath.sin(startAngle);
+        double cosStartAngle = FastMath.cos(startAngle);
+
+        double endAngle = angle + 0.5 * stepAngle;
+        double sinEndAngle = FastMath.sin(endAngle);
+        double cosEndAngle = FastMath.cos(endAngle);
+
+        double outerRadius = 0.95;
+        gl.glBegin(GL.GL_TRIANGLES);
+        gl.glColor3ub((byte) color.getRed(),
+                (byte) color.getGreen(),
+                (byte) color.getBlue());
+
+        double centerRadius;
+        centerRadius = outerRadius;
+        outerRadius = outerRadius - 0.05;
+
+        double centerAngle = angle - 0.000000001 * stepAngle;
+        double sinCenterAngle = FastMath.sin(centerAngle);
+        double cosCenterAngle = FastMath.cos(centerAngle);
+        gl.glVertex2d(centerRadius * sinCenterAngle, centerRadius * cosCenterAngle);
+        gl.glVertex2d(outerRadius * sinStartAngle, outerRadius * cosStartAngle);
+        gl.glVertex2d(outerRadius * sinEndAngle, outerRadius * cosEndAngle);
+        gl.glEnd();
+    }
+
+    private int getBiggestBinNumber() {
         int biggestBinNumber = -1;
-        if (Pitchenga.isPlaying()) {
+        if (harmonWhenPlaying()) {
+            Tone tone = toneOverride;
+            int biggestBinNumber1 = biggestBinNumber;
             if (binVelocities != null) {
                 binVelocities = new double[binVelocities.length];
                 if (binVelocities.length > 0) {
@@ -133,22 +224,23 @@ public class OpenGlCircularVisualizer implements
                         double binRatio = (int) (tone.ordinal() / ((double) Tone.values().length / (double) binVelocities.length));
                         //fixme: hack
                         binRatio = binRatio + 4;
-//                        binRatio = binRatio + 7.5;
-                        biggestBinNumber = (int) binRatio;
-                        binVelocities[addWithFlip(biggestBinNumber, -4)] = 0.55;
-                        binVelocities[addWithFlip(biggestBinNumber, -3)] = 0.7;
-                        binVelocities[addWithFlip(biggestBinNumber, -2)] = 0.8;
-                        binVelocities[addWithFlip(biggestBinNumber, -1)] = 0.89;
-                        binVelocities[biggestBinNumber] = 0.9;
-                        binVelocities[addWithFlip(biggestBinNumber, 1)] = 0.89;
-                        binVelocities[addWithFlip(biggestBinNumber, 2)] = 0.8;
-                        binVelocities[addWithFlip(biggestBinNumber, 3)] = 0.7;
-                        binVelocities[addWithFlip(biggestBinNumber, 4)] = 0.55;
+                        //                        binRatio = binRatio + 7.5;
+                        biggestBinNumber1 = (int) binRatio;
+                        binVelocities[addWithFlip(biggestBinNumber1, -4)] = 0.55;
+                        binVelocities[addWithFlip(biggestBinNumber1, -3)] = 0.7;
+                        binVelocities[addWithFlip(biggestBinNumber1, -2)] = 0.8;
+                        binVelocities[addWithFlip(biggestBinNumber1, -1)] = 0.89;
+                        binVelocities[biggestBinNumber1] = 0.9;
+                        binVelocities[addWithFlip(biggestBinNumber1, 1)] = 0.89;
+                        binVelocities[addWithFlip(biggestBinNumber1, 2)] = 0.8;
+                        binVelocities[addWithFlip(biggestBinNumber1, 3)] = 0.7;
+                        binVelocities[addWithFlip(biggestBinNumber1, 4)] = 0.55;
                     }
                 }
             }
+            biggestBinNumber = biggestBinNumber1;
         } else {
-            tone = null;
+            toneOverride = null;
             double biggestBinVelocity = 0;
             if (binVelocities != null) {
                 for (int i = 0; i < binVelocities.length; i++) {
@@ -162,21 +254,19 @@ public class OpenGlCircularVisualizer implements
                     double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
                     int toneNumber = (int) toneRatio;
                     if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
-                        tone = Tone.values()[toneNumber];
+                        toneOverride = Tone.values()[toneNumber];
                     }
                 }
             }
         }
+        return biggestBinNumber;
+    }
 
-
-        drawPitchClassFrame(gl);
-        drawPitchClassBins(gl, biggestBinNumber);
-        drawHalftoneNames(drawable, tone);
+    private boolean harmonWhenPlaying() {
+        return harmonWhenPlaying && Pitchenga.isPlaying();
     }
 
     private void drawPitchClassFrame(GL2 gl) {
-        gl.glClearColor(0f, 0f, 0f, 1f);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
         Color color;
         double halfToneCountInv = 1.0 / HALFTONE_NAMES.length;
@@ -216,7 +306,6 @@ public class OpenGlCircularVisualizer implements
         }
 
         double radius = 0.8;
-
         double angle = 0.5 * (1 - binsPerHalftone) * stepAngle;
         for (int i = 0; i < binVelocities.length; i++, angle += stepAngle) {
             int pitchClass = i / binsPerHalftone;
@@ -228,7 +317,9 @@ public class OpenGlCircularVisualizer implements
             //fixme: hack
             toneRatio = toneRatio - 0.4;
 
-            Color color = colorFunction.toColor(1, toneRatio);
+            double binVelocity = binVelocities[i];
+            Color color = colorFunction.toColor(binVelocity, toneRatio);
+//            Color color = colorFunction.toColor(1, toneRatio);
             double velocity = binVelocities[index];
             double myVelocity = velocity;
             if (biggestBinNumber != i) {
@@ -273,11 +364,7 @@ public class OpenGlCircularVisualizer implements
                 centerRadius = outerRadius - 0.01;
             }
         } else {
-            if (biggestBinNumber == i) {
-                centerRadius = outerRadius * 0.99 - 0.04;
-            } else {
-                centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.02;
-            }
+            centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.02;
         }
 
         double centerAngle = angle - 0.000000001 * stepAngle;
@@ -311,13 +398,15 @@ public class OpenGlCircularVisualizer implements
 
         double centerX = width / 2.0;
         double centerY = height / 2.0;
-        double size = 0.99 * FastMath.min(width, height);
+        double size = 0.96 * FastMath.min(width, height);
         double angleStep = 2 * FastMath.PI / HALFTONE_NAMES.length;
         double angle = 0;
         float scaleFactor = (float) (0.0015f * size);
 
         if (Pitchenga.isPlaying()) {
             tone = toneOverride;
+        } else if (toneOverrideTarsos != null) {
+            tone = toneOverrideTarsos;
         }
         if (binVelocities != null && binVelocities.length > 0) {
             renderer.beginRendering(width, height);

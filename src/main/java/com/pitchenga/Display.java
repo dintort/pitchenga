@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.harmoneye.viz.OpenGlCircularVisualizer.MORE_DARK;
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.*;
 
@@ -95,7 +96,7 @@ public class Display extends JPanel {
         this.fretsBase = fretsBase;
 
         this.views = new JComponent[]{twoOctavePiano, circle, fretsFirst};
-        this.currentView = twoOctavePiano;
+        this.currentView = views[0];
 
         initFontScaling();
     }
@@ -710,8 +711,13 @@ public class Display extends JPanel {
                     } else {
 //                        labelColor = Color.WHITE;
                         labelColor = myTone.diatonic ? Color.BLACK : Color.WHITE;
-                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
+                        double phi2 = (i * Math.PI * 2) / TONES.length;
+                        int x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
+                        int y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
+//                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
+//                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
                         graphics.setColor(myTone.color);
+                        graphics.drawLine(x2 + offset, y2, fullSide / 2 + offset, fullSide / 2);
                         graphics.fillOval(x + offset, y, diameter, diameter);
                         int thickness;
                         if (scaleTones.contains(myTone)) {
@@ -719,7 +725,8 @@ public class Display extends JPanel {
                         } else {
                             thickness = 1 + gap / 12;
                         }
-                        graphics.setColor(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
+//                        graphics.setColor(myTone.diatonic ? MORE_DARK : Color.BLACK);
+                        graphics.setColor(myTone.diatonic ? MORE_DARK : Color.BLACK);
 //                        graphics.setColor(Color.BLACK);
                         graphics.fillOval(offset + x + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
                     }

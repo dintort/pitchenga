@@ -41,6 +41,8 @@ public class ColorFunction {
 
 //		float colorVelocity = velocity * 0.5f;
         double colorVelocity = 0.3 + velocity * 1.2;
+//        double colorVelocity = 0.3 + velocity * 1.2;
+//        double colorVelocity = velocity * 4;
         if (colorVelocity > 1) {
             colorVelocity = 1;
         }

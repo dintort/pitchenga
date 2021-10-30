@@ -417,9 +417,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     @Override
     public void update(AnalyzedFrame pcProfile) {
-//        if (true) {
-//            return;
-//        }
+        if (true) {
+            return;
+        }
         if (isPlaying()) {
             return;
         }
@@ -532,6 +532,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 if (!playing || answer) {
 //                    updatePianoButtons(guess.tone.getButton());
                     if (!isKeyboard || (!playing && !answer)) {
+                        OpenGlCircularVisualizer.toneOverrideTarsos = guess.tone;
+                        OpenGlCircularVisualizer.guessColorOverrideTarsos = guessColor;
+                        OpenGlCircularVisualizer.pitchinessColorOverrideTarsos = pitchinessColor;
                         display.setTone(guess, guessColor, pitchinessColor, frequency);
                     }
                     display.setFillColor(guessColor);
@@ -568,6 +571,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
         }
         int value = convertPitchToSlider(pitch, frequency);
+        OpenGlCircularVisualizer.sliderOverrideTarsos = value;
+
         pitchSlider.setValue(value);
 //        Pitch finalPitch = pitch;
 //        Hashtable<Integer, Label> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
@@ -585,7 +590,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        pitchSlider.setLabelTable(dictionary);
     }
 
-    private int convertPitchToSlider(Pitch pitch, float frequency) {
+    public static int convertPitchToSlider(Pitch pitch, float frequency) {
         int value = pitch.midi * 100;
         //fixme: Polyphonic - multiple dots on the slider
         //fixme: Extract duplication
@@ -1235,8 +1240,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         pitchSliderPanel.add(pitchSlider, BorderLayout.CENTER);
         pitchSlider.setEnabled(false);
         pitchSlider.setValue(0);
-        pitchSlider.getModel().setMinimum(convertPitchToSlider(Mi0, 0f));
-        pitchSlider.getModel().setMaximum(convertPitchToSlider(Re6, 0f));
+        pitchSlider.getModel().setMinimum(convertPitchToSlider(Do1, 0f));
+        pitchSlider.getModel().setMaximum(convertPitchToSlider(Do7, 0f));
         pitchSlider.setMajorTickSpacing(100);
         pitchSlider.setPaintTicks(true);
         Hashtable<Integer, Label> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
@@ -1980,10 +1985,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     //fixme: Add selector for the output device
     private void updateMixer() {
-        if (true) {
-            return;
-        }
-
 //        if ("false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
 //        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
 //            return;
