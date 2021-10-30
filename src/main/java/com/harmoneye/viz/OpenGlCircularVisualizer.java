@@ -22,7 +22,7 @@ public class OpenGlCircularVisualizer implements
         SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
     //    public static final boolean fixmevis = "true".equals(System.getProperty("fixmevis"));
-    public static final boolean harmonWhenPlaying = true;
+    public static final boolean muteWhenPlaying = true;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
@@ -78,7 +78,7 @@ public class OpenGlCircularVisualizer implements
         if (pcProfile == null) {
             return;
         }
-        if (harmonWhenPlaying()) {
+        if (muteWhenPlaying()) {
             return;
         }
 //        if (Pitchenga.frozen) {
@@ -144,6 +144,9 @@ public class OpenGlCircularVisualizer implements
     }
 
     private void drawTuner(GL2 gl, int biggestBinNumber) {
+        if (muteWhenPlaying()) {
+            return;
+        }
         if (binsPerHalftone == 0) {
             return;
         }
@@ -214,7 +217,7 @@ public class OpenGlCircularVisualizer implements
 
     private int getBiggestBinNumber() {
         int biggestBinNumber = -1;
-        if (harmonWhenPlaying()) {
+        if (muteWhenPlaying()) {
             Tone tone = toneOverride;
             int biggestBinNumber1 = biggestBinNumber;
             if (binVelocities != null) {
@@ -262,8 +265,8 @@ public class OpenGlCircularVisualizer implements
         return biggestBinNumber;
     }
 
-    private boolean harmonWhenPlaying() {
-        return harmonWhenPlaying && Pitchenga.isPlaying();
+    private boolean muteWhenPlaying() {
+        return muteWhenPlaying && Pitchenga.isPlaying();
     }
 
     private void drawPitchClassFrame(GL2 gl) {

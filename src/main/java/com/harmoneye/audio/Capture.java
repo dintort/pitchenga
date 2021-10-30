@@ -13,6 +13,7 @@ public class Capture implements Runnable {
 	// If its too small, buffer underruns make weird artifacts!!!
 
 	private static final int DEFAULT_READ_BUFFER_SIZE_SAMPLES = 1024;
+//	private static final int DEFAULT_READ_BUFFER_SIZE_SAMPLES = 512;
 
 	private Thread thread;
 	private AtomicBoolean isRunning = new AtomicBoolean();
