@@ -401,7 +401,7 @@ public class OpenGlCircularVisualizer implements
 
         double centerX = width / 2.0;
         double centerY = height / 2.0;
-        double size = 0.96 * FastMath.min(width, height);
+        double size = 0.95 * FastMath.min(width, height);
         double angleStep = 2 * FastMath.PI / HALFTONE_NAMES.length;
         double angle = 0;
         float scaleFactor = (float) (0.0015f * size);
