@@ -21,8 +21,8 @@ import static java.awt.Color.*;
 public class OpenGlCircularVisualizer implements
         SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
-    //    public static final boolean fixmevis = "true".equals(System.getProperty("fixmevis"));
-    public static final boolean muteWhenPlaying = true;
+//    public static final boolean muteWhenPlaying = "true".equals(System.getProperty("muteWhenPlaying"));
+        public static final boolean muteWhenPlaying = true;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack

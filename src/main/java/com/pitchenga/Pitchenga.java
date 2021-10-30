@@ -528,13 +528,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             SwingUtilities.invokeLater(() -> {
                 updatePitchSlider(guess, frequency, isKeyboard);
                 frequencyLabel.setText(String.format("%05.1f", frequency));
+                if (!playing) {
+                    OpenGlCircularVisualizer.toneOverrideTarsos = guess.tone;
+                } else {
+                    OpenGlCircularVisualizer.toneOverrideTarsos = null;
+                }
+                OpenGlCircularVisualizer.guessColorOverrideTarsos = guessColor;
+                OpenGlCircularVisualizer.pitchinessColorOverrideTarsos = pitchinessColor;
                 boolean answer = getPacer() == Pacer.Answer;
                 if (!playing || answer) {
 //                    updatePianoButtons(guess.tone.getButton());
                     if (!isKeyboard || (!playing && !answer)) {
-                        OpenGlCircularVisualizer.toneOverrideTarsos = guess.tone;
-                        OpenGlCircularVisualizer.guessColorOverrideTarsos = guessColor;
-                        OpenGlCircularVisualizer.pitchinessColorOverrideTarsos = pitchinessColor;
                         display.setTone(guess, guessColor, pitchinessColor, frequency);
                     }
                     display.setFillColor(guessColor);
@@ -1379,7 +1383,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 text.append("\n");
                 text.append(riddlesQueue.length - riddlesPointer);
             }
-            text.append("\n");
+            //fixme: Line break
+            text.append(" ");
+//            text.append("\n");
             text.append(getPacer().bpm);
             display.text(text.toString());
         }
