@@ -21,8 +21,8 @@ import static java.awt.Color.*;
 public class OpenGlCircularVisualizer implements
         SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
-//    public static final boolean muteWhenPlaying = "true".equals(System.getProperty("muteWhenPlaying"));
-        public static final boolean muteWhenPlaying = true;
+    public static final boolean muteWhenPlaying = "true".equals(System.getProperty("muteWhenPlaying"));
+//        public static final boolean muteWhenPlaying = true;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
@@ -139,54 +139,29 @@ public class OpenGlCircularVisualizer implements
 
         drawPitchClassBins(gl, biggestBinNumber);
         drawPitchClassFrame(gl);
-        drawTuner(gl, biggestBinNumber);
+        drawTuner(gl);
         drawHalftoneNames(drawable, toneOverride);
     }
 
-    private void drawTuner(GL2 gl, int biggestBinNumber) {
-        if (muteWhenPlaying()) {
-            return;
-        }
+    private void drawTuner(GL2 gl) {
+//        if (Pitchenga.isPlaying()) {
+//            return;
+//        }
         if (binsPerHalftone == 0) {
             return;
         }
 
-
         int slider = sliderOverrideTarsos;
-//        pitchSlider.getModel().setMinimum(convertPitchToSlider(Mi0, 0f));
-//        pitchSlider.getModel().setMaximum(convertPitchToSlider(Re6, 0f));
-
-
-        //        max = max - min;
-//        slider = slider - min;
         slider = slider * 2;
         slider = slider % SLIDER_MAX;
         double halfToneCountInv = 1.0 / SLIDER_MIN;
         double angle = 2 * FastMath.PI * (slider * halfToneCountInv);
-//        System.out.println(slider + " " + angle);
-
-//        int i = 100;
         int i = slider;
-//        double angle = 0.5 * (1 - binsPerHalftone) * stepAngle;
 
-        int pitchClass = i / binsPerHalftone;
-        int binInPitchClass = i % binsPerHalftone;
-        int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
-        int index = movedPitchClass * binsPerHalftone + binInPitchClass;
-
-        //fixme: hack
-
-//            Color color = colorFunction.toColor(1, toneRatio);
-//        double binVelocity = binVelocities[i];
         Color color = guessColorOverrideTarsos;
-//        Color color = pitchinessColorOverrideTarsos;
         if (color == null) {
             color = white;
-//            color = colorFunction.toColor(binVelocity, toneRatio);
         }
-
-//        double velocity = binVelocities[index];
-        double myVelocity = 1;
 
         double startAngle = angle - 0.5 * stepAngle;
         double sinStartAngle = FastMath.sin(startAngle);
@@ -242,7 +217,7 @@ public class OpenGlCircularVisualizer implements
                 }
             }
             biggestBinNumber = biggestBinNumber1;
-        } else {
+        } else if (!Pitchenga.isPlaying()) {
             toneOverride = null;
             double biggestBinVelocity = 0;
             if (binVelocities != null) {

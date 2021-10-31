@@ -542,7 +542,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                         display.setTone(guess, guessColor, pitchinessColor, frequency);
                     }
                     display.setFillColor(guessColor);
-                    display.update();
+                    //fixme: un-hack
+//                    display.update();
                 }
             });
         }
