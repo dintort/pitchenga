@@ -383,9 +383,10 @@ public class OpenGlCircularVisualizer implements
 
         if (Pitchenga.isPlaying()) {
             tone = toneOverride;
-        } else if (toneOverrideTarsos != null) {
-            tone = toneOverrideTarsos;
         }
+//        else if (toneOverrideTarsos != null) {
+//            tone = toneOverrideTarsos;
+//        }
         if (binVelocities != null && binVelocities.length > 0) {
             renderer.beginRendering(width, height);
             for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
