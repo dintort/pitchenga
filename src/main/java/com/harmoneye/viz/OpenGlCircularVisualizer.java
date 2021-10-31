@@ -144,9 +144,9 @@ public class OpenGlCircularVisualizer implements
     }
 
     private void drawTuner(GL2 gl) {
-//        if (Pitchenga.isPlaying()) {
-//            return;
-//        }
+        if (Pitchenga.isPlaying()) {
+            return;
+        }
         if (binsPerHalftone == 0) {
             return;
         }
