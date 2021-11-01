@@ -1,4 +1,4 @@
-//fixme
+    // fixme:   java: code too large, move to txt files
     //    DoMajOneOctave("Do maj - octave 4",
 //            new Pitch[][][]{{Pitchenga.DO_MAJ_SCALE}}, Pitchenga::shuffle, new Integer[0]),
 //    DoMaj("Do maj - main octaves",

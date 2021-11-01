@@ -9,37 +9,22 @@ import java.util.function.Function;
 import static com.pitchenga.Pitch.*;
 
 public enum Riddler {
-    // fixme:   java: code too large, move to txt files
 //    ChromaticOneOctave("Chromatic - octave 4",
 //            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null),
-    Chromatic("Chromatic",
+    Chromatic("Chromatic - main octaves",
             new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0]),
     Step51("51", new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Me2, Fi2, La2, Do3,}, 100),
-            multiply(new Pitch[][]{
-                    {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
-                    {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-                    {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
-                    {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
-                    {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
-            }, 10),
-            {{Non}},
-            multiply(new Pitch[]{Do2, Me2, Fi2, La2, Do3,}, 200),},
+            multiply(new Pitch[]{Do2, Me2, Fi2, La2, Do3,}, 110),
+            multiply(Sets.octavesDo2ToDo7, 10),
+            {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{1, 0, 1, 1}),
+            new int[]{1, 0, 1}),
     Step52("52", new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Ra2, Ra2, Me2, Fi2, So2, So2, La2, Do3,}, 100),
-            multiply(new Pitch[][]{
-                    {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
-                    {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-                    {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
-                    {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
-                    {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
-            }, 9),
-            {{Non}},
-            multiply(new Pitch[]{Do2, Ra2, Ra2, Me2, Fi2, So2, So2, La2, Do3,}, 200),},
+            multiply(new Pitch[]{Do2, Me2, Fa2, Fa2, Fa2, Fi2, La2, Si2, Si2, Si2, Do3,}, 100),
+            multiply(Sets.octavesDo2ToDo7, 9),
+            {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{1, 0, 1, 1}),
+            new int[]{1, 0, 1}),
     ;
 
     private static Pitch[][] multiply(Pitch[] pitches, int times) {
@@ -74,5 +59,15 @@ public enum Riddler {
 
     public String toString() {
         return name;
+    }
+
+    private static class Sets {
+        private static final Pitch[][] octavesDo2ToDo7 = {
+                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
+                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
+                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
+                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
+                {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
+        };
     }
 }
