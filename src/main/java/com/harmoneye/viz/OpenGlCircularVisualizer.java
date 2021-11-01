@@ -13,8 +13,10 @@ import org.apache.commons.math3.util.FastMath;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
-import static com.pitchenga.Pitch.*;
-import static java.awt.Color.*;
+import static com.pitchenga.Pitch.Do1;
+import static com.pitchenga.Pitch.Do7;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.white;
 
 // TODO: rewrite to use vertex buffers instead of immediate mode
 
@@ -22,7 +24,7 @@ public class OpenGlCircularVisualizer implements
         SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
     public static final boolean muteWhenPlaying = "true".equals(System.getProperty("muteWhenPlaying"));
-//        public static final boolean muteWhenPlaying = true;
+    //        public static final boolean muteWhenPlaying = true;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
@@ -81,16 +83,25 @@ public class OpenGlCircularVisualizer implements
         if (muteWhenPlaying()) {
             return;
         }
-//        if (Pitchenga.frozen) {
-//            return;
-//        }
+        if (!Pitchenga.showSeriesHint && Pitchenga.isPlaying() && binVelocities != null) {
+            double[] octaveBins = pcProfile.getOctaveBins();
+            if (binVelocities == octaveBins) { //Shared array
+                binVelocities = new double[octaveBins.length];
+                System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
+            }
+            for (int i = 0; i < binVelocities.length; i++) {
+                binVelocities[i] = binVelocities[i] * 0.9; //Smooth fadeout
+            }
+            return;
+        }
 
-        CqtContext ctx = pcProfile.getCqtContext();
-
-        binsPerHalftone = ctx.getBinsPerHalftone();
-        halftoneCount = ctx.getHalftonesPerOctave();
-
+        CqtContext cqtContext = pcProfile.getCqtContext();
+        binsPerHalftone = cqtContext.getBinsPerHalftone();
+        halftoneCount = cqtContext.getHalftonesPerOctave();
         binVelocities = pcProfile.getOctaveBins();
+        if (binVelocities == null || binVelocities.length == 0) {
+            return;
+        }
         for (int i = 0; i < binVelocities.length; i++) {
             double binVelocity = binVelocities[i];
             if (binVelocity < 0.2) {
@@ -119,20 +130,11 @@ public class OpenGlCircularVisualizer implements
 
     @Override
     public void display(GLAutoDrawable drawable) {
-//        if (Pitchenga.isPlaying()) {
-//            return;
-//        }
-//        if (Pitchenga.frozen) {
-//            return;
-//        }
-//        if (locked) {
-//            return;
-//        }
         GL2 gl = drawable.getGL().getGL2();
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
-//        Tone tone = toneOverride;
         int biggestBinNumber = getBiggestBinNumber();
+        overrideTone(biggestBinNumber);
 
         gl.glClearColor(0f, 0f, 0f, 1f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -141,6 +143,21 @@ public class OpenGlCircularVisualizer implements
         drawPitchClassFrame(gl);
         drawTuner(gl);
         drawHalftoneNames(drawable, toneOverride);
+    }
+
+    private void overrideTone(int biggestBinNumber) {
+        if (binVelocities == null || binVelocities.length == 0) {
+            return;
+        }
+        double biggestBinVelocity = binVelocities[biggestBinNumber];
+        toneOverride = null;
+        if (biggestBinVelocity > 0.3) {
+            double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
+            int toneNumber = (int) toneRatio;
+            if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
+                toneOverride = Tone.values()[toneNumber];
+            }
+        }
     }
 
     private void drawTuner(GL2 gl) {
@@ -191,53 +208,16 @@ public class OpenGlCircularVisualizer implements
     }
 
     private int getBiggestBinNumber() {
-        int biggestBinNumber = -1;
-        if (muteWhenPlaying()) {
-            Tone tone = toneOverride;
-            int biggestBinNumber1 = biggestBinNumber;
-            if (binVelocities != null) {
-                binVelocities = new double[binVelocities.length];
-                if (binVelocities.length > 0) {
-                    if (tone != null) {
-                        double binRatio = (int) (tone.ordinal() / ((double) Tone.values().length / (double) binVelocities.length));
-                        //fixme: hack
-                        binRatio = binRatio + 4;
-                        //                        binRatio = binRatio + 7.5;
-                        biggestBinNumber1 = (int) binRatio;
-                        binVelocities[addWithFlip(biggestBinNumber1, -4)] = 0.55;
-                        binVelocities[addWithFlip(biggestBinNumber1, -3)] = 0.7;
-                        binVelocities[addWithFlip(biggestBinNumber1, -2)] = 0.8;
-                        binVelocities[addWithFlip(biggestBinNumber1, -1)] = 0.89;
-                        binVelocities[biggestBinNumber1] = 0.9;
-                        binVelocities[addWithFlip(biggestBinNumber1, 1)] = 0.89;
-                        binVelocities[addWithFlip(biggestBinNumber1, 2)] = 0.8;
-                        binVelocities[addWithFlip(biggestBinNumber1, 3)] = 0.7;
-                        binVelocities[addWithFlip(biggestBinNumber1, 4)] = 0.55;
-                    }
-                }
-            }
-            biggestBinNumber = biggestBinNumber1;
-        } else if (!Pitchenga.isPlaying()) {
-            toneOverride = null;
-            double biggestBinVelocity = 0;
-            if (binVelocities != null) {
-                for (int i = 0; i < binVelocities.length; i++) {
-                    double value = binVelocities[i];
-                    if (value > biggestBinVelocity) {
-                        biggestBinVelocity = value;
-                        biggestBinNumber = i;
-                    }
-                }
-                if (biggestBinVelocity > 0.3) {
-                    double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
-                    int toneNumber = (int) toneRatio;
-                    if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
-                        toneOverride = Tone.values()[toneNumber];
-                    }
+        double biggestBinVelocity = 0;
+        if (binVelocities != null) {
+            for (int i = 0; i < binVelocities.length; i++) {
+                double value = binVelocities[i];
+                if (value > biggestBinVelocity) {
+                    return i;
                 }
             }
         }
-        return biggestBinNumber;
+        return 0;
     }
 
     private boolean muteWhenPlaying() {
@@ -279,7 +259,7 @@ public class OpenGlCircularVisualizer implements
     }
 
     private void drawPitchClassBins(GL2 gl, int biggestBinNumber) {
-        if (binVelocities == null) {
+        if (binVelocities == null || binVelocities.length == 0) {
             return;
         }
 
@@ -354,23 +334,11 @@ public class OpenGlCircularVisualizer implements
         gl.glEnd();
     }
 
-    private int addWithFlip(int biggestBinNumber, int i) {
-        int result = biggestBinNumber + i;
-        result = result % binVelocities.length;
-        if (result < 0) {
-//            //fixme: implement
-            result = 0;
-//            result = 108  + result;
-//            result = 0;
-        }
-//        if (result >= 107) {
-//            result = 107;
-//            result = 107 - result;
-//        }
-        return result;
-    }
-
     private void drawHalftoneNames(GLAutoDrawable drawable, Tone tone) {
+        if (binVelocities == null || binVelocities.length == 0) {
+            return;
+        }
+
         int width = drawable.getSurfaceWidth();
         int height = drawable.getSurfaceHeight();
 
@@ -384,55 +352,39 @@ public class OpenGlCircularVisualizer implements
         if (Pitchenga.isPlaying()) {
             tone = toneOverride;
         }
-//        else if (toneOverrideTarsos != null) {
-//            tone = toneOverrideTarsos;
-//        }
-        if (binVelocities != null && binVelocities.length > 0) {
-            renderer.beginRendering(width, height);
-            for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
-                int index = (i * pitchStep) % HALFTONE_NAMES.length;
-                String halftoneName = HALFTONE_NAMES[index];
-                Rectangle2D bounds = renderer.getBounds(halftoneName);
-                int offsetX = (int) (scaleFactor * 0.5f * bounds.getWidth());
-                int offsetY = (int) (scaleFactor * 0.5f * bounds.getHeight());
+        renderer.beginRendering(width, height);
+        for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
+            int index = (i * pitchStep) % HALFTONE_NAMES.length;
+            String halftoneName = HALFTONE_NAMES[index];
+            Rectangle2D bounds = renderer.getBounds(halftoneName);
+            int offsetX = (int) (scaleFactor * 0.5f * bounds.getWidth());
+            int offsetY = (int) (scaleFactor * 0.5f * bounds.getHeight());
 //            double radius = 0.43;
-                double radius = 0.42;
-                int x = (int) (centerX + radius * size * FastMath.sin(angle) - offsetX);
-                int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
-                Color color;
-                if (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i])) {
-                    color = BLACK;
-                    renderer.setColor(color);
-                    renderer.draw3D(halftoneName, x + 4, y - 4, 0, scaleFactor);
-                    color = colorFunction.toColor(100, i);
-//                    color = WHITE;
-                } else {
-                    Tone myTone = Pitchenga.TONE_BY_LOWERCASE_NAME.get(halftoneName);
-                    if (myTone != null && myTone.diatonic) {
-                        color = MORE_DARK;
-                    } else {
-                        color = EVEN_MORE_DARK;
-                    }
-                }
+            double radius = 0.42;
+            int x = (int) (centerX + radius * size * FastMath.sin(angle) - offsetX);
+            int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
+            Color color;
+            if ((tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i]))) {
+                color = BLACK;
                 renderer.setColor(color);
-                renderer.draw3D(halftoneName, x, y, 0, scaleFactor);
+                renderer.draw3D(halftoneName, x + 4, y - 4, 0, scaleFactor);
+                color = colorFunction.toColor(100, i);
+            } else {
+                Tone myTone = Pitchenga.TONE_BY_LOWERCASE_NAME.get(halftoneName);
+                if (myTone != null && myTone.diatonic) {
+                    color = MORE_DARK;
+                } else {
+                    color = EVEN_MORE_DARK;
+                }
             }
-            if (text != null) {
-                renderer.setColor(white);
-                renderer.draw3D(text, 0, 0, 0, scaleFactor);
-            }
-            renderer.endRendering();
+            renderer.setColor(color);
+            renderer.draw3D(halftoneName, x, y, 0, scaleFactor);
         }
-    }
-
-    private float getMaxBinValue(int halftoneIndex) {
-        float max = 0;
-        int baseIndex = binsPerHalftone * halftoneIndex;
-        for (int i = 0; i < binsPerHalftone; i++) {
-            float value = (float) binVelocities[baseIndex + i];
-            max = FastMath.max(max, value);
+        if (text != null) {
+            renderer.setColor(white);
+            renderer.draw3D(text, 0, 0, 0, scaleFactor);
         }
-        return max;
+        renderer.endRendering();
     }
 
     private void setConstantAspectRatio(GLAutoDrawable drawable) {
@@ -452,12 +404,6 @@ public class OpenGlCircularVisualizer implements
 
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
-    }
-
-    double getAverageValue(int upperIndex) {
-        int lowerIndex = (upperIndex + binVelocities.length + 1) % binVelocities.length;
-        upperIndex = upperIndex % binVelocities.length;
-        return 0.5 * (binVelocities[lowerIndex] + binVelocities[upperIndex]);
     }
 
     @Override

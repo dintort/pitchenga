@@ -128,7 +128,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private MidiChannel bassInstrumentChannel;
     private final JPanel controlPanelPanel = new JPanel();
     private JFrame eye;
-    private volatile boolean showSeriesHint;
+    public static volatile boolean showSeriesHint;
 
 
     //fixme: Update the logo with the fixed Me color
@@ -306,7 +306,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 this.riddle.set(riddle);
                 this.riddleTimestampMs = System.currentTimeMillis();
                 boolean voiceHint = isVoiceHint(riddlesPointer);
-                scheduleHint(riddle, riddlesPointer);
+                scheduleHint(riddle);
                 frozen = true;
                 try {
                     boolean flashColors = getHinter() == Hinter.Always;
@@ -667,7 +667,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         display.update();
     }
 
-    private void scheduleHint(Pitch riddle, int seriesCount) {
+    private void scheduleHint(Pitch riddle) {
         if (riddle == null || riddle == Non) {
             return;
         }
@@ -677,8 +677,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         if (hinter == Hinter.Always) {
             return;
         } else if (hinter == Hinter.Series) {
+            showSeriesHint = isShowSeriesHint();
             SwingUtilities.invokeLater(() -> {
-                this.showSeriesHint = isShowSeriesHint(seriesCount);
                 if (showSeriesHint) {
                     showHint(riddle);
                 } else {
@@ -718,12 +718,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         }), hinter.delayMs, TimeUnit.MILLISECONDS);
     }
 
-    public static boolean isShowSeriesHint() {
-        return isShowSeriesHint(riddlesPointer);
-    }
-
-    private static boolean isShowSeriesHint(int seriesCount) {
-        int mod = seriesCount % (setup.repeats * setup.seriesLength);
+    private static boolean isShowSeriesHint() {
+        int mod = riddlesPointer % (setup.repeats * setup.seriesLength);
         return mod >= setup.seriesLength;
     }
 
