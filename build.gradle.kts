@@ -20,7 +20,6 @@ repositories {
 dependencies {
     //implementation 'colt:colt:1.2.0'
     implementation(files("lib/TarsosDSP-2.4.jar"))
-    implementation(files("lib/TarsosDSP-2.4.jar"))
     implementation(files("lib/JTransforms-2.4.jar"))
     implementation(files("lib/commons-math3-3.2.jar"))
     implementation(files("lib/commons-lang3-3.1.jar"))
