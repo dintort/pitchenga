@@ -87,15 +87,15 @@ public class Ptchng extends Setup {
         System.setProperty("com.pitchenga.setup.class", "com.pitchenga.Ptchng");
 
         SwingUtilities.invokeAndWait(() -> {
-            String defaultInput = System.getProperty("com.pitchenga.default.input");
-            if (defaultInput == null) {
+//            String defaultInput = System.getProperty("com.pitchenga.default.input");
+//            if (defaultInput == null) {
 //            Pitchenga secondary = new Pitchenga(false, null);
 //            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
-            System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
+//            System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
 //                System.setProperty("com.pitchenga.default.input", "Microphone (High Definition Aud");
 //            System.setProperty("com.pitchenga.default.input", "STUDIO-CAPTURE");
 //            System.setProperty("com.pitchenga.default.input", "HD Pro Webcam C920");
-            }
+//            }
 //            Pitchenga primary = new Pitchenga(true, secondary);
             Pitchenga primary = new Pitchenga(true, null);
             AbstractHarmonEyeApp app = harmonEye(primary);

@@ -3,10 +3,10 @@ package com.harmoneye.analysis;
 
 public class NoiseGate {
 	private int signalLength;
-	
+
 	private double openThreshold = 0.25;
 	private double closeThreshold = 0.25;
-	
+
 	private ScalarExpSmoother smoother = new ScalarExpSmoother(0.5);
 
 	private double[] previousValues;
