@@ -1,5 +1,7 @@
 package com.pitchenga;
 
+import com.harmoneye.viz.OpenGlCircularVisualizer;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
@@ -10,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.harmoneye.viz.OpenGlCircularVisualizer.MORE_DARK;
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.*;
 
@@ -23,9 +26,10 @@ public class Display extends JPanel {
     private final ScheduledExecutorService asyncExecutor = Executors.newSingleThreadScheduledExecutor(new Threads("pitchenga-display-async"));
 
     private volatile Pitch pitch;
+    private volatile Fugue toneFugue;
     private volatile Color toneColor;
     private volatile Color pitchinessColor;
-    private float frequency;
+    private volatile float frequency;
     private volatile Color fillColor;
     private final Piano twoOctavePiano;
     private final Piano oneOctavePiano;
@@ -92,7 +96,7 @@ public class Display extends JPanel {
         this.fretsBase = fretsBase;
 
         this.views = new JComponent[]{twoOctavePiano, circle, fretsFirst};
-        this.currentView = twoOctavePiano;
+        this.currentView = views[0];
 
         initFontScaling();
     }
@@ -124,6 +128,7 @@ public class Display extends JPanel {
 
 
     public void text(String message) {
+        OpenGlCircularVisualizer.text = message;
 //        text(message, null, null);
 //    }
 //
@@ -147,7 +152,10 @@ public class Display extends JPanel {
             textArea.setVisible(true);
             textArea.append(message);
             textArea.setCaretPosition(textArea.getDocument().getLength());
-            asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> textArea.setVisible(false)),
+            asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> {
+                        textArea.setVisible(false);
+                        OpenGlCircularVisualizer.text = null;
+                    }),
                     3, TimeUnit.SECONDS);
         }
     }
@@ -188,7 +196,9 @@ public class Display extends JPanel {
         this.frequency = frequency;
     }
 
-    public void setTones(Tone... tones) {
+    public void setTones(Fugue toneFugue, Tone... tones) {
+        OpenGlCircularVisualizer.toneOverride = toneFugue == null ? null : toneFugue.pitch.tone;
+        this.toneFugue = toneFugue;
         this.tones.clear();
         this.tones.addAll(Arrays.asList(tones));
         this.pitch = null;
@@ -205,17 +215,26 @@ public class Display extends JPanel {
     }
 
     public void clear() {
-        setTones();
+        setTones(null);
         setFillColor(null);
     }
 
     public void update() {
         //fixme: Generify
+        if (currentView == circle) {
+            circle.setVisible(true);
+            circle.repaint();
+        } else {
+            circle.setVisible(false);
+        }
         if (currentView == twoOctavePiano) {
             if (Pitchenga.playButton.isSelected()) {
+                //fixme: Hack
                 oneOctavePiano.setVisible(true);
                 twoOctavePiano.setVisible(false);
                 oneOctavePiano.update();
+//                circle.setVisible(true);
+//                circle.repaint();
             } else {
                 twoOctavePiano.setVisible(true);
                 oneOctavePiano.setVisible(false);
@@ -224,12 +243,6 @@ public class Display extends JPanel {
         } else {
             oneOctavePiano.setVisible(false);
             twoOctavePiano.setVisible(false);
-        }
-        if (currentView == circle) {
-            circle.setVisible(true);
-            circle.repaint();
-        } else {
-            circle.setVisible(false);
         }
         if (currentView == fretsFirst) {
             if (Pitchenga.playButton.isSelected() /* && !matchPitch */) {
@@ -254,7 +267,7 @@ public class Display extends JPanel {
     public final Pitch[][] FRETS_BASE = {
             {Le4, La4, Se4, Si4, Do5,},
             {Me4, Mi4, Fa4, Fi4, So4,},
-            {null, null, Do4, Ra4, Re4,},
+            {Se3, Si3, Do4, Ra4, Re4,},
     };
 
     @SuppressWarnings("unused")
@@ -458,17 +471,24 @@ public class Display extends JPanel {
                 JPanel panel = panels[i];
                 JLabel label = labels[i];
                 JSlider slider = sliders[i];
+                Button button = buttons[i];
                 if (pitch != null) {
                     Tone myTone = pitch.tone;
                     panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
                     if (myTone == tone && toneColor != null && pitchyColor != null) {
                         label.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness() * 4));
                         panel.setBackground(toneColor);
-                        slider.setValue(convertPitchToSlider(Display.this.pitch, frequency));
+                        int sliderValue = convertPitchToSlider(Display.this.pitch, frequency);
+                        slider.setValue(sliderValue);
                         slider.setVisible(true);
+//                        slider.setVisible(false);
                     } else {
                         slider.setVisible(false);
-                        if (tones.contains(myTone)) {
+                        //fixme: Make less hacky maybe?
+                        boolean hideForDo = (Fugue.DoDo.equals(toneFugue) && !button.equals(Button.K))
+                                || (Fugue.Do.equals(toneFugue) && !button.equals(Button.A));
+//                        Pitchenga.debug("toneFugue=" + toneFugue + ", hideForLowerDo=" + hideForDo);
+                        if (!hideForDo && tones.contains(myTone)) {
                             panel.setBackground(myTone.color);
                             label.setBorder(BorderFactory.createLineBorder(myTone.color, getBorderThickness() * 4));
                         } else {
@@ -529,6 +549,9 @@ public class Display extends JPanel {
 //                    toneLabel.setOpaque(true);
                     toneLabel.setHorizontalTextPosition(SwingConstants.CENTER);
                     panel.setVisible(pitch != null);
+                    if (pitch != null) {
+                        toneLabel.setForeground(pitch.tone.diatonic ? Color.BLACK : Color.WHITE);
+                    }
                     panel.add(Box.createVerticalGlue());
 
 
@@ -585,7 +608,9 @@ public class Display extends JPanel {
                     if (pitch != null) {
                         Tone myTone = pitch.tone;
                         if (myTone == tone && toneColor != null && pitchyColor != null) {
-                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 2));
+                            //fixme: Pitchiness color around the label instead
+//                            panel.setBorder(BorderFactory.createLineBorder(pitchyColor, borderThickness * 2));
+                            panel.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderThickness * 2));
                             panel.setBackground(toneColor);
                         } else {
                             if (tones.contains(myTone)) {
@@ -593,8 +618,8 @@ public class Display extends JPanel {
                                 panel.setBackground(myTone.color);
                             } else {
                                 panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
-                                panel.setBackground(Color.BLACK);
-//                                panel.setBackground(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
+//                                panel.setBackground(Color.BLACK);
+                                panel.setBackground(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
                             }
                         }
                     }
@@ -632,7 +657,8 @@ public class Display extends JPanel {
             }
 
             Dimension bounds = this.getSize();
-            graphics.setColor(fillColor);
+//            graphics.setColor(fillColor);
+            graphics.setColor(Color.BLACK);
             graphics.fillRect(0, 0, bounds.width, bounds.height);
 
             int offset;
@@ -683,9 +709,15 @@ public class Display extends JPanel {
                         graphics.setColor(myTone.color);
                         graphics.fillOval(x + offset, y, diameter, diameter);
                     } else {
-                        labelColor = Color.WHITE;
-                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
+//                        labelColor = Color.WHITE;
+                        labelColor = myTone.diatonic ? Color.BLACK : Color.WHITE;
+                        double phi2 = (i * Math.PI * 2) / TONES.length;
+                        int x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
+                        int y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
+//                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
+//                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
                         graphics.setColor(myTone.color);
+                        graphics.drawLine(x2 + offset, y2, fullSide / 2 + offset, fullSide / 2);
                         graphics.fillOval(x + offset, y, diameter, diameter);
                         int thickness;
                         if (scaleTones.contains(myTone)) {
@@ -693,8 +725,9 @@ public class Display extends JPanel {
                         } else {
                             thickness = 1 + gap / 12;
                         }
-//                        graphics.setColor(myTone.diatonic ? Color.DARK_GRAY : Color.BLACK);
-                        graphics.setColor(Color.BLACK);
+//                        graphics.setColor(myTone.diatonic ? MORE_DARK : Color.BLACK);
+                        graphics.setColor(myTone.diatonic ? MORE_DARK : Color.BLACK);
+//                        graphics.setColor(Color.BLACK);
                         graphics.fillOval(offset + x + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
                     }
                 }

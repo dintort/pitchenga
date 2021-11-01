@@ -1,6 +1,12 @@
 package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
+import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.app.AbstractHarmonEyeApp;
+import com.harmoneye.app.CaptureHarmonEyeApp;
+import com.harmoneye.viz.Visualizer;
+import org.simplericity.macify.eawt.Application;
+import org.simplericity.macify.eawt.DefaultApplication;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -10,6 +16,7 @@ public class Ptchng extends Setup {
 
 
     public Ptchng() {
+
         defaultPenaltyFactor = 3;
         defaultPenaltyFactor = 0;
 
@@ -20,12 +27,24 @@ public class Ptchng extends Setup {
         defaultPitchAlgo = PitchProcessor.PitchEstimationAlgorithm.YIN;
 
 //        riddleInstrument = Instrument.ELECTRIC_BASS_FINGER;
+//        riddleInstruments = new int[] { Instrument.ELECTRIC_PIANO_2 };
+        riddleInstruments = new int[] {
+                Instrument.ACOUSTIC_GRAND_PIANO,
+                Instrument.ELECTRIC_BASS_FINGER,
+                Instrument.ELECTRIC_PIANO_1,
+                Instrument.ELECTRIC_GUITAR_JAZZ,
+                Instrument.TENOR_SAX };
+
 //        riddleInstrument = Instrument.TENOR_SAX;
-//        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
+//        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CkkLEAN;
+        keyboardInstrument = Instrument.ELECTRIC_PIANO_1;
+//        keyboardInstrument = Instrument.ELECTRIC_PIANO_2;
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
-        series = 3;
-        repeat = 3;
+        seriesLength = 3;
+        repeats = 3;
+//        series = 1;
+//        repeat = 1;
 
         defaultHinter = Hinter.Delayed200;
         defaultHinter = Hinter.Delayed100;
@@ -43,10 +62,13 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Tempo120;
         defaultPacer = Pacer.Tempo100;
         defaultPacer = Pacer.Tempo110;
+        defaultPacer = Pacer.Tempo80;
         defaultPacer = Pacer.Tempo75;
 
+        defaultRiddler = Riddler.test;
         defaultRiddler = Riddler.Step51BassOctave2;
         defaultRiddler = Riddler.Step51BassOctave2HackRelearn;
+        defaultRiddler = Riddler.Step51;
 
         defaultRinger = Ringer.Tone;
         defaultRinger = Ringer.None;
@@ -58,21 +80,28 @@ public class Ptchng extends Setup {
 
         mainFrameVisible = false;
         mainFrameVisible = true;
+        fullScreenWhenPlaying = false;
         fullScreenWhenPlaying = true;
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
-        System.setProperty("com.pitchenga.debug", "true");
+//        System.setProperty("com.pitchenga.debug", "true");
         System.setProperty("com.pitchenga.setup.class", "com.pitchenga.Ptchng");
 
         SwingUtilities.invokeAndWait(() -> {
+            String defaultInput = System.getProperty("com.pitchenga.default.input");
+            if (defaultInput == null) {
 //            Pitchenga secondary = new Pitchenga(false, null);
 //            System.setProperty("com.pitchenga.default.input", "NO_AUDIO_INPUT");
             System.setProperty("com.pitchenga.default.input", "Sonic Port VX");
+//                System.setProperty("com.pitchenga.default.input", "Microphone (High Definition Aud");
 //            System.setProperty("com.pitchenga.default.input", "STUDIO-CAPTURE");
 //            System.setProperty("com.pitchenga.default.input", "HD Pro Webcam C920");
+            }
 //            Pitchenga primary = new Pitchenga(true, secondary);
             Pitchenga primary = new Pitchenga(true, null);
+            AbstractHarmonEyeApp app = harmonEye(primary);
+            primary.setEye(app.getFrame());
 
 //            secondary.requestFocus();
 //            Rectangle screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -84,4 +113,26 @@ public class Ptchng extends Setup {
 //            primary.setExtendedState(primary.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         });
     }
+
+    public static AbstractHarmonEyeApp harmonEye(Visualizer<AnalyzedFrame> visualizer2) {
+        Application defaultApplication = new DefaultApplication();
+
+        final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(visualizer2);
+        class Initializer extends SwingWorker<String, Object> {
+            @Override
+            public String doInBackground() {
+                captureHarmonEyeApp.init();
+                captureHarmonEyeApp.start();
+                return null;
+            }
+        }
+
+        new Initializer().execute();
+
+        defaultApplication.addApplicationListener(captureHarmonEyeApp.getApplicationListener());
+        defaultApplication.addPreferencesMenuItem();
+        defaultApplication.setEnabledPreferencesMenu(true);
+        return captureHarmonEyeApp;
+    }
+
 }

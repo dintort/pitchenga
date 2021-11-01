@@ -12,29 +12,29 @@ import java.awt.*;
 public enum Tone {
 
     Do("C", true, new Color(255, 0, 0), Color.WHITE),
-    Ra("Db", false, new Color(127, 0, 0), Color.WHITE),
+    Ra("Db", false, new Color(127, 42, 0), Color.WHITE),
     Re("D", true, new Color(255, 127, 0), Color.WHITE),
     Me("Eb", false, new Color(171, 127, 0), Color.WHITE),
     Mi("E", true, new Color(255, 255, 0), Color.WHITE),
     Fa("F", true, new Color(0, 255, 0), Color.WHITE),
     Fi("F#", false, new Color(0, 127, 127), Color.WHITE),
     So("G", true, new Color(0, 255, 255), Color.WHITE),
-    Le("Ab", false, new Color(0, 0, 127), Color.WHITE),
+    Le("Ab", false, new Color(0, 63, 127), Color.WHITE),
     La("A", true, new Color(0, 0, 255), Color.WHITE),
     Se("Bb", false, new Color(127, 0, 255), Color.WHITE),
     Si("B", true, new Color(255, 0, 255), Color.WHITE),
     ;
 
-    public final String note;
+    public final String west;
     public final boolean diatonic;
     public final Color color;
     public final Color fontColor;
     public final String label;
-    public volatile Button button;
-    public volatile Fugue fugue;
+    private volatile Button button;
+    private volatile Fugue fugue;
 
-    Tone(String note, boolean diatonic, Color color, Color fontColor) {
-        this.note = note;
+    Tone(String west, boolean diatonic, Color color, Color fontColor) {
+        this.west = west;
         this.diatonic = diatonic;
         this.color = color;
         this.fontColor = fontColor;

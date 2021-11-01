@@ -26,9 +26,10 @@ public class Setup {
             Instrument.TENOR_SAX };
     public volatile int keyboardInstrument = Instrument.ELECTRIC_GRAND_PIANO;
     public volatile int ringInstrument = Instrument.ELECTRIC_GUITAR_CLEAN;
-    public volatile int series = 3;
-    public volatile int repeat = 3;
+    public volatile int seriesLength = 3;
+    public volatile int repeats = 3;
     public volatile boolean fullScreenWhenPlaying = false;
+    public volatile boolean voiceHints = true;
 
     public static Setup create() {
         String className = System.getProperty("com.pitchenga.setup.class");
