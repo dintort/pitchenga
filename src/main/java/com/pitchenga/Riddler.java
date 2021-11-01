@@ -1886,9 +1886,10 @@ public enum Riddler {
                     {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
                     {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
             }, 10),
-            {{Non}}},
+            {{Non}},
+            multiply(new Pitch[]{Do2, Me2, Fi2, La2, Do3,}, 300),},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{1, 0}),
+            new int[]{1, 0, 1, 1}),
     ;
 
     private static Pitch[][] multiply(Pitch[] pitches, int times) {
