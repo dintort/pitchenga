@@ -90,7 +90,7 @@ public class OpenGlCircularVisualizer implements
                 System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
             }
             for (int i = 0; i < binVelocities.length; i++) {
-                binVelocities[i] = binVelocities[i] * 0.9; //Smooth fadeout
+                binVelocities[i] = binVelocities[i] * 0.75; //Smooth fadeout
             }
             return;
         }
@@ -134,37 +134,41 @@ public class OpenGlCircularVisualizer implements
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
         int biggestBinNumber = getBiggestBinNumber();
-        overrideTone(biggestBinNumber);
 
         gl.glClearColor(0f, 0f, 0f, 1f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
         drawPitchClassBins(gl, biggestBinNumber);
         drawPitchClassFrame(gl);
-        drawTuner(gl);
-        drawHalftoneNames(drawable, toneOverride);
+        Tone tone = getTone(biggestBinNumber);
+        //fixme: Temporary using the tuner for the second DSP
+//        if (tone != null) {
+            drawTuner(gl);
+//        }
+        drawHalftoneNames(drawable, tone);
     }
 
-    private void overrideTone(int biggestBinNumber) {
-        if (binVelocities == null || binVelocities.length == 0) {
-            return;
+    private Tone getTone(int biggestBinNumber) {
+        if (binVelocities == null || binVelocities.length == 0 || biggestBinNumber < 0 || biggestBinNumber >= binVelocities.length ) {
+            return null;
         }
         double biggestBinVelocity = binVelocities[biggestBinNumber];
-        toneOverride = null;
+        Tone tone = null;
         if (biggestBinVelocity > 0.3) {
             double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
             int toneNumber = (int) toneRatio;
             if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
-                toneOverride = Tone.values()[toneNumber];
+                tone = Tone.values()[toneNumber];
             }
         }
+        return tone;
     }
 
     private void drawTuner(GL2 gl) {
-        if (Pitchenga.isPlaying()) {
+        if (binsPerHalftone == 0) {
             return;
         }
-        if (binsPerHalftone == 0) {
+        if (!Pitchenga.showSeriesHint && Pitchenga.isPlaying()) {
             return;
         }
 
@@ -209,15 +213,17 @@ public class OpenGlCircularVisualizer implements
 
     private int getBiggestBinNumber() {
         double biggestBinVelocity = 0;
+        int biggestBinNumber = -1;
         if (binVelocities != null) {
             for (int i = 0; i < binVelocities.length; i++) {
-                double value = binVelocities[i];
-                if (value > biggestBinVelocity) {
-                    return i;
+                double velocity = binVelocities[i];
+                if (velocity > biggestBinVelocity) {
+                    biggestBinVelocity = velocity;
+                    biggestBinNumber = i;
                 }
             }
         }
-        return 0;
+        return biggestBinNumber;
     }
 
     private boolean muteWhenPlaying() {
@@ -367,7 +373,12 @@ public class OpenGlCircularVisualizer implements
             if ((tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i]))) {
                 color = BLACK;
                 renderer.setColor(color);
-                renderer.draw3D(halftoneName, x + 4, y - 4, 0, scaleFactor);
+                //fixme: There must be an easier way to draw outline font
+                int offset = 2;
+                renderer.draw3D(halftoneName, x + offset, y - offset, 0, scaleFactor);
+                renderer.draw3D(halftoneName, x - offset, y + offset, 0, scaleFactor);
+                renderer.draw3D(halftoneName, x + offset, y + offset, 0, scaleFactor);
+                renderer.draw3D(halftoneName, x - offset, y - offset, 0, scaleFactor);
                 color = colorFunction.toColor(100, i);
             } else {
                 Tone myTone = Pitchenga.TONE_BY_LOWERCASE_NAME.get(halftoneName);

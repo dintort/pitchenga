@@ -20,6 +20,7 @@ public class MusicAnalyzer implements SoundConsumer {
      * [0.0; 1.0] 1.0 = no smoothing
      */
     private static final double SMOOTHING_FACTOR = 0.25;
+//    private static final double SMOOTHING_FACTOR = 0.9;
 
     private final CqtContext ctx;
 
@@ -51,8 +52,8 @@ public class MusicAnalyzer implements SoundConsumer {
     private static final boolean BIN_SMOOTHER_ENABLED = false;
 //    private static final boolean BIN_SMOOTHER_ENABLED = true;
     //    private static final boolean BIN_SMOOTHER_ENABLED = true;
-    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = true;
-//    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = false;
+//    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = true;
+    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = false;
     private static final boolean HARMONIC_DETECTOR_ENABLED = true;
 //    private static final boolean HARMONIC_DETECTOR_ENABLED = false;
 //    private static final boolean PERCUSSION_SUPPRESSOR_ENABLED = true;
@@ -61,7 +62,7 @@ public class MusicAnalyzer implements SoundConsumer {
 //    private static final boolean SPECTRAL_EQUALIZER_ENABLED = false;
     //    private static final boolean SPECTRAL_EQUALIZER_ENABLED = false;
     private static final boolean NOISE_GATE_ENABLED = false;
-    //    private static final boolean NOISE_GATE_ENABLED = true;
+//        private static final boolean NOISE_GATE_ENABLED = true;
     private static final boolean NOISE_GATE_MEDIAN_THRESHOLD_ENABLED = false;
 //    private static final boolean NOISE_GATE_MEDIAN_THRESHOLD_ENABLED = true;
 
