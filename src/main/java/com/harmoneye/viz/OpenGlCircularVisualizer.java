@@ -259,7 +259,7 @@ public class OpenGlCircularVisualizer implements
             double angle = 2 * FastMath.PI * (i * halfToneCountInv);
             double sin = FastMath.sin(angle);
             double cos = FastMath.cos(angle);
-            double lineRadius = 0.71;
+            double lineRadius = 0.70;
             double x = lineRadius * sin;
             double y = lineRadius * cos;
             gl.glVertex2d(x, y);
