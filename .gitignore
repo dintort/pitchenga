@@ -41,6 +41,7 @@ build
 *.nar
 *.ear
 *.zip
+!src/main/resources/viz/*.zip
 *.tar.gz
 *.rar
 

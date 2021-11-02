@@ -294,6 +294,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
 
             Pitch riddle = riddlesQueue[++riddlesPointer];
+            OpenGlCircularVisualizer.currentPitch = riddle;
             if (riddle != null) {
                 Integer instrumentChannel;
                 if (instrumentsQueue.length == 0) {
@@ -735,6 +736,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             return;
         }
         Fugue toneFugue = getToneFugue(riddle);
+        OpenGlCircularVisualizer.currentFugue = toneFugue;
         display.setTones(toneFugue, riddle.tone);
         if (getPacer() != Pacer.Answer) {
             display.setFillColor(riddle.tone.color);
@@ -1166,12 +1168,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         }
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
-        bottomPanel.add(initControlPanel(), BorderLayout.NORTH);
+        initPitchSliderPanel();
+        bottomPanel.add(pitchSliderPanel, BorderLayout.NORTH);
+
+        bottomPanel.add(initControlPanel(), BorderLayout.SOUTH);
 //        bottomPanel.add(initChromaticPiano(), BorderLayout.CENTER);
 //        bottomPanel.add(initDiatonicPiano(), BorderLayout.SOUTH);
-
-        initPitchSliderPanel();
-        bottomPanel.add(pitchSliderPanel, BorderLayout.SOUTH);
 
         updateToneSpinners();
         updateOctaveToggles(getRiddler());
@@ -1196,7 +1198,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        setSize(width, screenSize.height - verticalOffset);
 //        int height = 430;
 //        int height = 195;
-        int height = 530;
+        int height = 452;
         setSize(width, height);
 //        setLocation(0, 538);
         setLocation(0, 0);
@@ -1235,9 +1237,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         JToggleButton showControlToggle = new JToggleButton("");
         frequencyPanel.add(showControlToggle, BorderLayout.SOUTH);
         showControlToggle.setFocusable(false);
-        controlPanelPanel.setVisible(true);
         showControlToggle.addItemListener(event -> controlPanelPanel.setVisible(showControlToggle.isSelected()));
-        showControlToggle.setSelected(false);
+        showControlToggle.setSelected(true);
 
         pitchSliderPanel.add(pitchSlider, BorderLayout.CENTER);
         pitchSlider.setEnabled(false);
@@ -1249,7 +1250,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         Hashtable<Integer, Label> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
                 pitch -> convertPitchToSlider(pitch, 0f),
                 pitch -> {
-                    Label label = new Label(pitch.label, 270.0, -15, 15, false);
+                    Label label = new Label(pitch.name, 270.0, -15, 15, false);
                     label.setFont(MONOSPACED.deriveFont(12f));
                     label.setOpaque(true);
                     label.setForeground(pitch.tone.color);

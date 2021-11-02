@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static com.harmoneye.viz.OpenGlCircularVisualizer.MORE_DARK;
+import static com.harmoneye.viz.OpenGlCircularVisualizer.DARK;
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.*;
 
@@ -726,7 +726,7 @@ public class Display extends JPanel {
                             thickness = 1 + gap / 12;
                         }
 //                        graphics.setColor(myTone.diatonic ? MORE_DARK : Color.BLACK);
-                        graphics.setColor(myTone.diatonic ? MORE_DARK : Color.BLACK);
+                        graphics.setColor(myTone.diatonic ? DARK : Color.BLACK);
 //                        graphics.setColor(Color.BLACK);
                         graphics.fillOval(offset + x + thickness, y + thickness, diameter - thickness * 2, diameter - thickness * 2);
                     }

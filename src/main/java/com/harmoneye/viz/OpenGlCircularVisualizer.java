@@ -6,12 +6,22 @@ import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.awt.TextRenderer;
+import com.pitchenga.Fugue;
+import com.pitchenga.Pitch;
 import com.pitchenga.Pitchenga;
 import com.pitchenga.Tone;
 import org.apache.commons.math3.util.FastMath;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static com.pitchenga.Pitch.Do1;
 import static com.pitchenga.Pitch.Do7;
@@ -29,15 +39,11 @@ public class OpenGlCircularVisualizer implements
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
     public static volatile OpenGlCircularVisualizer INSTANCE;
-    private static final float DEFAULT_LINE_WIDTH = 1f;
-    private static final float WAIT_SCROBBLER_LINE_WIDTH = 1.5f;
 
-    protected static final String[] HALFTONE_NAMES = {"do", "ra", "re", "me",
-            "mi", "fa", "fi", "so", "le", "la", "se", "si"};
-    public static final Color MORE_DARK = new Color(42, 42, 42);
-    private static final Color EVEN_MORE_DARK = new Color(31, 31, 31);
+    protected static final String[] HALFTONE_NAMES = Arrays.stream(Tone.values()).map(tone -> tone.name).toArray(String[]::new);
+    public static final Color DARK = new Color(42, 42, 42);
+    private static final Color MORE_DARK = new Color(31, 31, 31);
     public static volatile Tone toneOverrideTarsos;
-    public static volatile double freqOverrideTarsos;
     public static int sliderOverrideTarsos;
     public static Color guessColorOverrideTarsos;
     public static Color pitchinessColorOverrideTarsos;
@@ -55,6 +61,15 @@ public class OpenGlCircularVisualizer implements
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
     public static volatile String text;
+
+    public static volatile Pitch currentPitch;
+    public static volatile Pitch previousPitch;
+    private static volatile PrintStream recordVizLog;
+    private static volatile ZipOutputStream recordVizZip;
+
+    public static volatile Fugue currentFugue;
+    public static volatile Fugue previousFugue;
+    private static final AtomicInteger currentFrameNumber = new AtomicInteger(-1);
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
@@ -80,17 +95,11 @@ public class OpenGlCircularVisualizer implements
         if (pcProfile == null) {
             return;
         }
-        if (muteWhenPlaying()) {
-            return;
-        }
-        if (!Pitchenga.showSeriesHint && Pitchenga.isPlaying() && binVelocities != null) {
+        if (Pitchenga.isPlaying()) {
             double[] octaveBins = pcProfile.getOctaveBins();
-            if (binVelocities == octaveBins) { //Shared array
+            if (binVelocities != null && binVelocities == octaveBins) { //Shared array
                 binVelocities = new double[octaveBins.length];
                 System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
-            }
-            for (int i = 0; i < binVelocities.length; i++) {
-                binVelocities[i] = binVelocities[i] * 0.75; //Smooth fadeout
             }
             return;
         }
@@ -123,6 +132,15 @@ public class OpenGlCircularVisualizer implements
         stepAngle = 2 * FastMath.PI * segmentCountInv;
     }
 
+    private void fadeOut() {
+        if (binVelocities == null) {
+            return;
+        }
+        for (int i = 0; i < binVelocities.length; i++) {
+            binVelocities[i] = binVelocities[i] * 0.9;
+        }
+    }
+
     @Override
     public void setPitchStep(int i) {
         this.pitchStep = i;
@@ -130,26 +148,100 @@ public class OpenGlCircularVisualizer implements
 
     @Override
     public void display(GLAutoDrawable drawable) {
+        animatePlaying();
         GL2 gl = drawable.getGL().getGL2();
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-
-        int biggestBinNumber = getBiggestBinNumber();
-
         gl.glClearColor(0f, 0f, 0f, 1f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 
+        int biggestBinNumber = getBiggestBinNumber();
         drawPitchClassBins(gl, biggestBinNumber);
         drawPitchClassFrame(gl);
+        drawTuner(gl);
         Tone tone = getTone(biggestBinNumber);
-        //fixme: Temporary using the tuner for the second DSP
-//        if (tone != null) {
-            drawTuner(gl);
-//        }
         drawHalftoneNames(drawable, tone);
+//        recordViz();
+    }
+
+    private void animatePlaying() {
+        if (Pitchenga.isPlaying()) {
+            if (Pitchenga.showSeriesHint) {
+                Fugue previous = previousFugue;
+                Fugue current = currentFugue;
+                if (current != null) {
+                    if (previous != current) {
+                        previousFugue = current;
+                        currentFrameNumber.set(15);
+                    }
+                    int frameNumber = currentFrameNumber.incrementAndGet();
+//                    double[][] viz = pitch.viz;
+                    double[][] viz = current.pitch.viz;
+                    if (viz != null) {
+                        if (frameNumber >= viz.length) {
+                            fadeOut();
+                        } else {
+                            binVelocities = viz[frameNumber];
+                        }
+                    } else {
+                        fadeOut();
+                    }
+                } else {
+                    fadeOut();
+                }
+            } else {
+                fadeOut();
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void recordViz() {
+        Pitch previous = previousPitch;
+        Pitch current = currentPitch;
+        if (current != null) {
+            if (previous != current) {
+                previousPitch = current;
+                try {
+                    if (recordVizLog != null) {
+                        recordVizLog.flush();
+                        recordVizZip.closeEntry();
+                        recordVizLog.close();
+                    }
+                    File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/src/main/resources/viz/");
+                    //noinspection ResultOfMethodCallIgnored
+                    logDir.mkdirs();
+                    //fixme: rename the wav files the same way
+                    File logFile = new File(logDir, current.number + ".zip");
+                    if (logFile.exists()) {
+                        //noinspection ResultOfMethodCallIgnored
+                        logFile.delete();
+                    }
+                    boolean newFile = logFile.createNewFile();
+                    if (!newFile) {
+                        throw new RuntimeException("Failed creating log file=" + logFile.getCanonicalPath());
+                    }
+                    recordVizZip = new ZipOutputStream(new FileOutputStream(logFile));
+                    recordVizZip.putNextEntry(new ZipEntry(current.number + ".txt"));
+                    //fixme: Re-record as binary to save space
+                    recordVizLog = new PrintStream(recordVizZip);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+//            StringBuilder stringBuilder = new StringBuilder();
+            if (binVelocities != null && binVelocities.length > 0) {
+                for (double binVelocity : binVelocities) {
+//                    stringBuilder.append(binVelocity);
+//                    stringBuilder.append(" ");
+                    recordVizLog.print(binVelocity);
+                    recordVizLog.print(" ");
+                }
+                recordVizLog.println();
+            }
+        }
     }
 
     private Tone getTone(int biggestBinNumber) {
-        if (binVelocities == null || binVelocities.length == 0 || biggestBinNumber < 0 || biggestBinNumber >= binVelocities.length ) {
+        if (binVelocities == null || binVelocities.length == 0 || biggestBinNumber < 0 || biggestBinNumber >= binVelocities.length) {
             return null;
         }
         double biggestBinVelocity = binVelocities[biggestBinNumber];
@@ -168,7 +260,7 @@ public class OpenGlCircularVisualizer implements
         if (binsPerHalftone == 0) {
             return;
         }
-        if (Pitchenga.isPlaying()) {
+        if (!Pitchenga.showSeriesHint && Pitchenga.isPlaying()) {
             return;
         }
 
@@ -177,7 +269,6 @@ public class OpenGlCircularVisualizer implements
         slider = slider % SLIDER_MAX;
         double halfToneCountInv = 1.0 / SLIDER_MIN;
         double angle = 2 * FastMath.PI * (slider * halfToneCountInv);
-        int i = slider;
 
         Color color = guessColorOverrideTarsos;
         if (color == null) {
@@ -321,15 +412,15 @@ public class OpenGlCircularVisualizer implements
                 (byte) color.getBlue());
 
         double centerRadius;
-        if (Pitchenga.isPlaying()) {
-            if (biggestBinNumber == i) {
-                centerRadius = outerRadius - 0.03;
-            } else {
-                centerRadius = outerRadius - 0.01;
-            }
-        } else {
-            centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.02;
-        }
+//        if (Pitchenga.isPlaying()) {
+//            if (biggestBinNumber == i) {
+//                centerRadius = outerRadius - 0.03;
+//            } else {
+//                centerRadius = outerRadius - 0.01;
+//            }
+//        } else {
+        centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.02;
+//        }
 
         double centerAngle = angle - 0.000000001 * stepAngle;
         double sinCenterAngle = FastMath.sin(centerAngle);
@@ -383,9 +474,9 @@ public class OpenGlCircularVisualizer implements
             } else {
                 Tone myTone = Pitchenga.TONE_BY_LOWERCASE_NAME.get(halftoneName);
                 if (myTone != null && myTone.diatonic) {
-                    color = MORE_DARK;
+                    color = DARK;
                 } else {
-                    color = EVEN_MORE_DARK;
+                    color = MORE_DARK;
                 }
             }
             renderer.setColor(color);

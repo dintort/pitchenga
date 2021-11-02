@@ -1,6 +1,10 @@
 package com.pitchenga;
 
+import java.io.*;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import static com.pitchenga.Tone.*;
 
@@ -121,8 +125,10 @@ public enum Pitch {
     public final float frequency;
     public final int octave;
     public final String note;
-    public final String label;
+    public final String name;
     public final Player player;
+    public final int number;
+    public final double[][] viz;
     private volatile Fugue fugue;
 
     Pitch(Tone tone, int octave, int midi, float frequency) {
@@ -131,12 +137,41 @@ public enum Pitch {
         this.midi = midi;
         this.frequency = frequency;
         this.note = tone.west + octave;
-        this.label = name().toLowerCase();
-        URL resource = getClass().getResource("/wav/" + midi + ".wav");
-        if (resource == null) {
+        this.name = name().toLowerCase();
+        this.number = octave * 100 + tone.ordinal();
+        URL wavUrl = getClass().getResource("/wav/" + midi + ".wav");
+        if (wavUrl == null) {
             player = null;
         } else {
-            player = new Player(resource);
+            player = new Player(wavUrl);
+        }
+
+        String vizName = String.format("/viz/%03d.zip", number);
+        URL vizUrl = getClass().getResource(vizName);
+        if (vizUrl == null) {
+            viz = null;
+        } else {
+            try {
+                System.out.println("Reading resource=" + vizName);
+                List<double[]> frames = new LinkedList<>();
+                ZipInputStream zipInputStream = new ZipInputStream(vizUrl.openStream());
+                zipInputStream.getNextEntry();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(zipInputStream));
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+//                    System.out.println(line);
+                    String[] strings = line.split(" ");
+                    double[] frame = new double[strings.length];
+                    for (int i = 0; i < strings.length; i++) {
+                        frame[i] = Double.parseDouble(strings[i]);
+                    }
+                    frames.add(frame);
+                }
+                viz = frames.toArray(new double[0][]);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

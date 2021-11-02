@@ -30,6 +30,7 @@ public enum Tone {
     public final Color color;
     public final Color fontColor;
     public final String label;
+    public final String name;
     private volatile Button button;
     private volatile Fugue fugue;
 
@@ -38,7 +39,8 @@ public enum Tone {
         this.diatonic = diatonic;
         this.color = color;
         this.fontColor = fontColor;
-        this.label = " " + name().toLowerCase() + " ";
+        this.name = name().toLowerCase();
+        this.label = " " + name + " ";
     }
 
     public Fugue getFugue() {

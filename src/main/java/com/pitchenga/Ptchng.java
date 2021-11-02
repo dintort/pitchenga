@@ -29,11 +29,13 @@ public class Ptchng extends Setup {
 //        riddleInstrument = Instrument.ELECTRIC_BASS_FINGER;
 //        riddleInstruments = new int[] { Instrument.ELECTRIC_PIANO_2 };
         riddleInstruments = new int[] {
-                Instrument.ACOUSTIC_GRAND_PIANO,
                 Instrument.ELECTRIC_BASS_FINGER,
+                Instrument.ACOUSTIC_GRAND_PIANO,
                 Instrument.ELECTRIC_PIANO_1,
                 Instrument.ELECTRIC_GUITAR_JAZZ,
                 Instrument.TENOR_SAX };
+        voiceHints = false;
+        voiceHints = true;
 
 //        riddleInstrument = Instrument.TENOR_SAX;
 //        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CkkLEAN;
@@ -52,9 +54,9 @@ public class Ptchng extends Setup {
         defaultHinter = Hinter.Delayed3000;
         defaultHinter = Hinter.Delayed500;
         defaultHinter = Hinter.Delayed1000;
-        defaultHinter = Hinter.Always;
         defaultHinter = Hinter.Delayed1000;
         defaultHinter = Hinter.Never;
+        defaultHinter = Hinter.Always;
         defaultHinter = Hinter.Series;
         //fixme: Delay hinter proportionally to the tempo
 
@@ -63,9 +65,12 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Tempo100;
         defaultPacer = Pacer.Tempo110;
         defaultPacer = Pacer.Tempo75;
+        defaultPacer = Pacer.Tempo30;
         defaultPacer = Pacer.Tempo90;
+        defaultPacer = Pacer.Tempo100;
 
         defaultRiddler = Riddler.Step51;
+        defaultRiddler = Riddler.FuguesOrdered;
         defaultRiddler = Riddler.Step52;
 
         defaultRinger = Ringer.Tone;

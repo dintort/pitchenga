@@ -9,7 +9,9 @@ import java.util.function.Function;
 import static com.pitchenga.Pitch.*;
 
 public enum Riddler {
-//    ChromaticOneOctave("Chromatic - octave 4",
+//    FuguesOrdered("All fugues ordered",
+//            new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0]),
+    //    ChromaticOneOctave("Chromatic - octave 4",
 //            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null),
     Chromatic("Chromatic - main octaves",
             new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0]),
@@ -18,13 +20,13 @@ public enum Riddler {
             multiply(Sets.octavesDo2ToDo7, 10),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{1, 0, 1}),
+            new int[]{0, 1, 0}),
     Step52("52", new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Me2, Fa2, Fa2, Fi2, La2, Si2, Si2, Do3,}, 100),
+            multiply(new Pitch[]{Do2, Me2, Fa2, Fa2, Fa2, Fi2, Fi2, Fi2, La2, Si2, Si2, Si2, Si2, Do3,}, 60),
             multiply(Sets.octavesDo2ToDo7, 9),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{1, 0, 1}),
+            new int[]{0, 1, 0}),
     ;
 
     private static Pitch[][] multiply(Pitch[] pitches, int times) {
