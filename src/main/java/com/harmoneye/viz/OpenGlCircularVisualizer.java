@@ -131,13 +131,16 @@ public class OpenGlCircularVisualizer implements
         double segmentCountInv = 1.0 / binVelocities.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
     }
-
     private void fadeOut() {
+        fadeOut(0.9);
+    }
+
+    private void fadeOut(double k) {
         if (binVelocities == null) {
             return;
         }
         for (int i = 0; i < binVelocities.length; i++) {
-            binVelocities[i] = binVelocities[i] * 0.9;
+            binVelocities[i] = binVelocities[i] * k;
         }
     }
 
@@ -171,18 +174,19 @@ public class OpenGlCircularVisualizer implements
                     if (previous != current) {
                         previousFugue = current;
                         currentFrameNumber.set(15);
-                    }
-                    int frameNumber = currentFrameNumber.incrementAndGet();
-//                    double[][] viz = pitch.viz;
-                    double[][] viz = current.pitch.viz;
-                    if (viz != null) {
-                        if (frameNumber >= viz.length) {
-                            fadeOut();
-                        } else {
-                            binVelocities = viz[frameNumber];
-                        }
+                        fadeOut(0.7);
                     } else {
-                        fadeOut();
+                        int frameNumber = currentFrameNumber.incrementAndGet();
+                        double[][] viz = current.pitch.viz;
+                        if (viz != null) {
+                            if (frameNumber >= viz.length) {
+                                fadeOut();
+                            } else {
+                                binVelocities = viz[frameNumber];
+                            }
+                        } else {
+                            fadeOut();
+                        }
                     }
                 } else {
                     fadeOut();
