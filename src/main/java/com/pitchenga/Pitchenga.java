@@ -1195,7 +1195,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        int verticalOffset = (int) (screenSize.getHeight() * 0.7);
 //        setSize(width, screenSize.height - verticalOffset);
 //        int height = 430;
-        int height = 195;
+//        int height = 195;
+        int height = 530;
         setSize(width, height);
 //        setLocation(0, 538);
         setLocation(0, 0);
@@ -1234,7 +1235,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         JToggleButton showControlToggle = new JToggleButton("");
         frequencyPanel.add(showControlToggle, BorderLayout.SOUTH);
         showControlToggle.setFocusable(false);
-        controlPanelPanel.setVisible(false);
+        controlPanelPanel.setVisible(true);
         showControlToggle.addItemListener(event -> controlPanelPanel.setVisible(showControlToggle.isSelected()));
         showControlToggle.setSelected(false);
 

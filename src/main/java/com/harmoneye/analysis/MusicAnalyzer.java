@@ -16,6 +16,9 @@ import com.harmoneye.viz.Visualizer;
 
 public class MusicAnalyzer implements SoundConsumer {
 
+    //fixme: Un-hack
+    public volatile static MusicAnalyzer INSTANCE;
+
     /**
      * [0.0; 1.0] 1.0 = no smoothing
      */
@@ -68,6 +71,7 @@ public class MusicAnalyzer implements SoundConsumer {
 
     public MusicAnalyzer(Visualizer<AnalyzedFrame> visualizer,
                          float sampleRate, int bitsPerSample, Visualizer<AnalyzedFrame> visualizer2) {
+        INSTANCE = this;
         this.visualizer = visualizer;
         this.visualizer2 = visualizer2;
 

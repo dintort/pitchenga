@@ -168,7 +168,7 @@ public class OpenGlCircularVisualizer implements
         if (binsPerHalftone == 0) {
             return;
         }
-        if (!Pitchenga.showSeriesHint && Pitchenga.isPlaying()) {
+        if (Pitchenga.isPlaying()) {
             return;
         }
 
@@ -181,7 +181,7 @@ public class OpenGlCircularVisualizer implements
 
         Color color = guessColorOverrideTarsos;
         if (color == null) {
-            color = white;
+            color = BLACK;
         }
 
         double startAngle = angle - 0.5 * stepAngle;
