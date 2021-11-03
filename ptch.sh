@@ -46,6 +46,7 @@ echo project=$PROJECT
 "$PROJECT/lib/jogamp\gluegen-rt-natives-windows-amd64.jar":\
 "$PROJECT/lib/jogamp\jogl-all-natives-windows-amd64.jar":\
   -DNOcom.pitchenga.default.input=NO_AUDIO_INPUT\
+  -Dcom.pitchenga.tarsos.enabled="true"\
   -Dcom.pitchenga.default.input="Microphone (High Definition Aud"\
   com.pitchenga.Ptchng \
   -NSRequiresAquaSystemAppearance False

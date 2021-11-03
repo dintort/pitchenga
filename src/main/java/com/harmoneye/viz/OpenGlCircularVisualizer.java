@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -57,6 +57,8 @@ public class OpenGlCircularVisualizer implements
     private int binsPerHalftone;
     private int halftoneCount;
     private double stepAngle;
+    private final SortedSet<VelocityAndIndex> topBinVelocities = new TreeSet<>();
+    private final Set<Integer> topBinNumbers = new HashSet<>();
 
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
@@ -111,26 +113,59 @@ public class OpenGlCircularVisualizer implements
         if (binVelocities == null || binVelocities.length == 0) {
             return;
         }
+        adjustVelocities();
+        double segmentCountInv = 1.0 / binVelocities.length;
+        stepAngle = 2 * FastMath.PI * segmentCountInv;
+    }
+
+    private void adjustVelocities() {
+        topBinVelocities.clear();
+        topBinNumbers.clear();
         for (int i = 0; i < binVelocities.length; i++) {
             double binVelocity = binVelocities[i];
+            if (topBinVelocities.size() < 10) {
+                topBinVelocities.add(new VelocityAndIndex(binVelocity, i));
+            }
+            VelocityAndIndex lowest = topBinVelocities.first();
+            if (lowest != null) {
+                if (binVelocity > lowest.velocity) {
+                    topBinVelocities.remove(lowest);
+                    topBinVelocities.add(new VelocityAndIndex(binVelocity, i));
+                }
+            }
+        }
+        for (VelocityAndIndex velocityAndIndex : topBinVelocities) {
+            topBinNumbers.add(velocityAndIndex.index);
+        }
+        for (int i = 0; i < binVelocities.length; i++) {
+            double binVelocity = binVelocities[i];
+            if (topBinNumbers.contains(i)) {
+                VelocityAndIndex top = topBinVelocities.last();
+                if (top.index == i) {
+                    binVelocity = binVelocity * 1.1;
+                } else {
+                    binVelocity = binVelocity * 1.05;
+                    if (binVelocity > 1.05) {
+                        binVelocity = 1.05;
+                    }
+                }
+            } else {
+                binVelocity = binVelocity * 0.8;
+            }
             if (binVelocity < 0.2) {
                 binVelocity = binVelocity * 0.8;
             } else if (binVelocity < 0.3) {
                 binVelocity = binVelocity * 0.9;
             } else if (binVelocity < 0.4) {
                 binVelocity = binVelocity * 0.95;
-            } else if (binVelocity > 0.5) {
-                binVelocity = binVelocity * 1.02;
             }
-//            binVelocity = binVelocity * 1.2;
             if (binVelocity > 1.1) {
                 binVelocity = 1.1;
             }
             binVelocities[i] = binVelocity;
         }
-        double segmentCountInv = 1.0 / binVelocities.length;
-        stepAngle = 2 * FastMath.PI * segmentCountInv;
     }
+
     private void fadeOut() {
         fadeOut(0.9);
     }
@@ -321,10 +356,6 @@ public class OpenGlCircularVisualizer implements
         return biggestBinNumber;
     }
 
-    private boolean muteWhenPlaying() {
-        return muteWhenPlaying && Pitchenga.isPlaying();
-    }
-
     private void drawPitchClassFrame(GL2 gl) {
 
         Color color;
@@ -404,28 +435,18 @@ public class OpenGlCircularVisualizer implements
             gl.glVertex2d(endRadius * sinEndAngle, endRadius * cosEndAngle);
             gl.glEnd();
 
-            drawOuterDot(gl, biggestBinNumber, angle, i, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
+            drawOuterDot(gl, angle, i, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
         }
     }
 
-    private void drawOuterDot(GL2 gl, int biggestBinNumber, double angle, int i, int index, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
+    private void drawOuterDot(GL2 gl, double angle, int i, int index, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
         double outerRadius = 0.98;
         gl.glBegin(GL.GL_TRIANGLES);
         gl.glColor3ub((byte) color.getRed(),
                 (byte) color.getGreen(),
                 (byte) color.getBlue());
 
-        double centerRadius;
-//        if (Pitchenga.isPlaying()) {
-//            if (biggestBinNumber == i) {
-//                centerRadius = outerRadius - 0.03;
-//            } else {
-//                centerRadius = outerRadius - 0.01;
-//            }
-//        } else {
-        centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.02;
-//        }
-
+        double centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.02;
         double centerAngle = angle - 0.000000001 * stepAngle;
         double sinCenterAngle = FastMath.sin(centerAngle);
         double cosCenterAngle = FastMath.cos(centerAngle);
@@ -545,5 +566,33 @@ public class OpenGlCircularVisualizer implements
     @Override
     public Component getComponent() {
         return component;
+    }
+
+    private static class VelocityAndIndex implements Comparable<VelocityAndIndex> {
+        private final double velocity;
+        private final int index;
+
+        public VelocityAndIndex(double velocity, int index) {
+            this.velocity = velocity;
+            this.index = index;
+        }
+
+        @Override
+        public int compareTo(VelocityAndIndex that) {
+            return Double.compare(this.velocity, that.velocity);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            VelocityAndIndex that = (VelocityAndIndex) o;
+            return Double.compare(that.velocity, velocity) == 0 && index == that.index;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(velocity, index);
+        }
     }
 }

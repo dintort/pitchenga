@@ -1,13 +1,10 @@
 package com.harmoneye.audio;
 
-import com.pitchenga.Pitchenga;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Capture implements Runnable {
 
@@ -64,16 +61,25 @@ public class Capture implements Runnable {
     }
 
     private void capture() throws Exception {
-
-        DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-
-        TargetDataLine line = (TargetDataLine) AudioSystem.getLine(info);
-
-        line.open(format, bufferSize);
-
         byte[] data = new byte[bufferSize];
         double[] amplitudes = new double[readBufferSizeInSamples];
 
+        //fixme: Re-init on combo change
+//        Mixer.Info mixerInfo = Pitchenga.INSTANCE.getSelectedMixer();
+//        if (mixerInfo == null || mixerInfo == Setup.NO_AUDIO_INPUT) {
+//            System.out.println("No audio input selected, play using keyboard or mouse");
+//            System.out.println("To play using a musical instrument please select an audio input");
+//            return;
+//        }
+//        Mixer mixer = AudioSystem.getMixer(mixerInfo);
+//        float sampleRate = 44100;
+//        AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
+//        DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
+//        TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
+
+        DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+        TargetDataLine line = (TargetDataLine) AudioSystem.getLine(info);
+        line.open(format, bufferSize);
         line.start();
 
         while (isRunning.get()) {

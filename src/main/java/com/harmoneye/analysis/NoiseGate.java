@@ -24,7 +24,8 @@ public class NoiseGate {
 			double diff = value - prevValue;
 			double threshold = (diff >= 0) ? openThreshold : closeThreshold;
 			if (value < threshold) {
-				values[i] *= 0;//Math.abs(value - threshold);
+//				values[i] *= 0;//Math.abs(value - threshold);
+				values[i] *= 0.8;
 			}
 		}
 		System.arraycopy(values, 0, previousValues, 0, signalLength);

@@ -39,7 +39,7 @@ import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.Do;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualizer<AnalyzedFrame> {
-
+    public static volatile Pitchenga INSTANCE;
     private static final PrintStream log;
     private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
     //    private static final boolean debug = false;
@@ -159,6 +159,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     //fixme: Customizable note names
     public Pitchenga(boolean isPrimary, Pitchenga secondary) {
         super("Pitchenga");
+        if (isPrimary) {
+            INSTANCE = this;
+        }
         try {
             Class<?> fullScreenUtilities = Class.forName("com.apple.eawt.FullScreenUtilities");
             fullScreenUtilities.getMethod("setWindowCanFullScreen", Window.class, Boolean.TYPE).invoke(null, this, true);
@@ -1991,14 +1994,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     //fixme: Add selector for the output device
     private void updateMixer() {
 //        if ("false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
-//        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
-//            return;
-//        }
+        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.enabled"))) {
+            return;
+        }
         try {
             if (audioDispatcher != null) {
                 audioDispatcher.stop();
             }
-            Mixer.Info mixerInfo = (Mixer.Info) inputCombo.getSelectedItem();
+            Mixer.Info mixerInfo = getSelectedMixer();
             if (mixerInfo == null || mixerInfo == Setup.NO_AUDIO_INPUT) {
                 System.out.println("No audio input selected, play using keyboard or mouse");
                 System.out.println("To play using a musical instrument please select an audio input");
@@ -2033,6 +2036,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public Mixer.Info getSelectedMixer() {
+        return (Mixer.Info) inputCombo.getSelectedItem();
     }
 
     private List<Mixer.Info> getAvailableInputs() {
