@@ -57,8 +57,8 @@ public class OpenGlCircularVisualizer implements
     private int binsPerHalftone;
     private int halftoneCount;
     private double stepAngle;
-    private final SortedSet<VelocityAndIndex> topBinVelocities = new TreeSet<>();
-    private final Set<Integer> topBinNumbers = new HashSet<>();
+//    private final SortedSet<VelocityAndIndex> topBinVelocities = new TreeSet<>();
+//    private final Set<Integer> topBinNumbers = new HashSet<>();
 
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
@@ -119,45 +119,47 @@ public class OpenGlCircularVisualizer implements
     }
 
     private void adjustVelocities() {
-        topBinVelocities.clear();
-        topBinNumbers.clear();
+//        topBinVelocities.clear();
+//        topBinNumbers.clear();
+//        for (int i = 0; i < binVelocities.length; i++) {
+//            double binVelocity = binVelocities[i];
+//            if (topBinVelocities.size() < 20) {
+//                topBinVelocities.add(new VelocityAndIndex(binVelocity, i));
+//            }
+//            VelocityAndIndex lowest = topBinVelocities.first();
+//            if (lowest != null) {
+//                if (binVelocity > lowest.velocity) {
+//                    topBinVelocities.remove(lowest);
+//                    topBinVelocities.add(new VelocityAndIndex(binVelocity, i));
+//                }
+//            }
+//        }
+//        for (VelocityAndIndex velocityAndIndex : topBinVelocities) {
+//            topBinNumbers.add(velocityAndIndex.index);
+//        }
         for (int i = 0; i < binVelocities.length; i++) {
             double binVelocity = binVelocities[i];
-            if (topBinVelocities.size() < 10) {
-                topBinVelocities.add(new VelocityAndIndex(binVelocity, i));
-            }
-            VelocityAndIndex lowest = topBinVelocities.first();
-            if (lowest != null) {
-                if (binVelocity > lowest.velocity) {
-                    topBinVelocities.remove(lowest);
-                    topBinVelocities.add(new VelocityAndIndex(binVelocity, i));
-                }
-            }
-        }
-        for (VelocityAndIndex velocityAndIndex : topBinVelocities) {
-            topBinNumbers.add(velocityAndIndex.index);
-        }
-        for (int i = 0; i < binVelocities.length; i++) {
-            double binVelocity = binVelocities[i];
-            if (topBinNumbers.contains(i)) {
-                VelocityAndIndex top = topBinVelocities.last();
-                if (top.index == i) {
-                    binVelocity = binVelocity * 1.1;
-                } else {
-                    binVelocity = binVelocity * 1.05;
-                    if (binVelocity > 1.05) {
-                        binVelocity = 1.05;
-                    }
-                }
-            } else {
-                binVelocity = binVelocity * 0.8;
-            }
+//            if (topBinNumbers.contains(i)) {
+//                VelocityAndIndex top = topBinVelocities.last();
+//                if (top.index == i) {
+//                    binVelocity = binVelocity * 1.1;
+//                } else {
+//                    binVelocity = binVelocity * 1.05;
+//                    if (binVelocity > 1.05) {
+//                        binVelocity = 1.05;
+//                    }
+//                }
+//            } else {
+//                binVelocity = binVelocity * 0.9;
+//            }
             if (binVelocity < 0.2) {
                 binVelocity = binVelocity * 0.8;
             } else if (binVelocity < 0.3) {
                 binVelocity = binVelocity * 0.9;
             } else if (binVelocity < 0.4) {
                 binVelocity = binVelocity * 0.95;
+            } else if (binVelocity > 0.5) {
+                binVelocity = binVelocity * 1.05;
             }
             if (binVelocity > 1.1) {
                 binVelocity = 1.1;
