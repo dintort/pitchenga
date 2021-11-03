@@ -1994,9 +1994,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     //fixme: Add selector for the output device
     private void updateMixer() {
 //        if ("false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
-        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.enabled"))) {
-            return;
-        }
+//        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.enabled"))) {
+//            return;
+//        }
         try {
             if (audioDispatcher != null) {
                 audioDispatcher.stop();

@@ -53,19 +53,19 @@ public class MusicAnalyzer implements SoundConsumer {
     private final AtomicBoolean accumulatorEnabled = new AtomicBoolean();
 
     private static final boolean BIN_SMOOTHER_ENABLED = false;
-//    private static final boolean BIN_SMOOTHER_ENABLED = true;
+    //    private static final boolean BIN_SMOOTHER_ENABLED = true;
     //    private static final boolean BIN_SMOOTHER_ENABLED = true;
     private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = true;
-//    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = false;
+    //    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = false;
     private static final boolean HARMONIC_DETECTOR_ENABLED = true;
-//    private static final boolean HARMONIC_DETECTOR_ENABLED = false;
+    //    private static final boolean HARMONIC_DETECTOR_ENABLED = false;
 //    private static final boolean PERCUSSION_SUPPRESSOR_ENABLED = true;
     private static final boolean PERCUSSION_SUPPRESSOR_ENABLED = false;
     private static final boolean SPECTRAL_EQUALIZER_ENABLED = true;
-//    private static final boolean SPECTRAL_EQUALIZER_ENABLED = false;
+    //    private static final boolean SPECTRAL_EQUALIZER_ENABLED = false;
     //    private static final boolean SPECTRAL_EQUALIZER_ENABLED = false;
     private static final boolean NOISE_GATE_ENABLED = false;
-//        private static final boolean NOISE_GATE_ENABLED = true;
+    //        private static final boolean NOISE_GATE_ENABLED = true;
     private static final boolean NOISE_GATE_MEDIAN_THRESHOLD_ENABLED = false;
 //    private static final boolean NOISE_GATE_MEDIAN_THRESHOLD_ENABLED = true;
 
@@ -75,26 +75,22 @@ public class MusicAnalyzer implements SoundConsumer {
         this.visualizer = visualizer;
         this.visualizer2 = visualizer2;
 
-        //@formatter:off
         ctx = CqtContext.create()
                 .samplingFreq(sampleRate)
-//			.maxFreq((2 << 6) * 65.4063913251)
-//			.octaves(2)
+//                .maxFreq((2 << 6) * 65.4063913251)
+//                .octaves(2)
                 .kernelOctaves(1)
                 .binsPerHalftone(9)
                 .build();
-        //@formatter:on
 
         samples = new double[ctx.getSignalBlockSize()];
         amplitudeSpectrumDb = new double[ctx.getTotalBins()];
         octaveBins = new double[ctx.getBinsPerOctave()];
 
-        ringBufferBank = new MultiRateRingBufferBank(ctx.getSignalBlockSize(),
-                ctx.getOctaves());
+        ringBufferBank = new MultiRateRingBufferBank(ctx.getSignalBlockSize(), ctx.getOctaves());
         dbCalculator = new DecibelCalculator(bitsPerSample);
         pcDetector = new HarmonicPatternPitchClassDetector(ctx);
-        octaveBinSmoother = new ExpSmoother(ctx.getBinsPerOctave(),
-                SMOOTHING_FACTOR);
+        octaveBinSmoother = new ExpSmoother(ctx.getBinsPerOctave(), SMOOTHING_FACTOR);
         allBinSmoother = new ExpSmoother(ctx.getTotalBins(), SMOOTHING_FACTOR);
         //accumulator = new MovingAverageAccumulator(ctx.getBinsPerOctave());
         accumulator = new ExpSmoother(ctx.getBinsPerOctave(), 0.005);

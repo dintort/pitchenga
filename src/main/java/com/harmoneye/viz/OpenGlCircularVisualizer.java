@@ -97,11 +97,10 @@ public class OpenGlCircularVisualizer implements
         if (pcProfile == null) {
             return;
         }
+        double[] octaveBins = pcProfile.getOctaveBins();
         if (Pitchenga.isPlaying()) {
-            double[] octaveBins = pcProfile.getOctaveBins();
-            if (binVelocities != null && binVelocities == octaveBins) { //Shared array
+            if (octaveBins != null && octaveBins == binVelocities) { //Shared array
                 binVelocities = new double[octaveBins.length];
-                System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
             }
             return;
         }
@@ -113,45 +112,14 @@ public class OpenGlCircularVisualizer implements
         if (binVelocities == null || binVelocities.length == 0) {
             return;
         }
-        adjustVelocities();
+        exaggerateVelocities();
         double segmentCountInv = 1.0 / binVelocities.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
     }
 
-    private void adjustVelocities() {
-//        topBinVelocities.clear();
-//        topBinNumbers.clear();
-//        for (int i = 0; i < binVelocities.length; i++) {
-//            double binVelocity = binVelocities[i];
-//            if (topBinVelocities.size() < 20) {
-//                topBinVelocities.add(new VelocityAndIndex(binVelocity, i));
-//            }
-//            VelocityAndIndex lowest = topBinVelocities.first();
-//            if (lowest != null) {
-//                if (binVelocity > lowest.velocity) {
-//                    topBinVelocities.remove(lowest);
-//                    topBinVelocities.add(new VelocityAndIndex(binVelocity, i));
-//                }
-//            }
-//        }
-//        for (VelocityAndIndex velocityAndIndex : topBinVelocities) {
-//            topBinNumbers.add(velocityAndIndex.index);
-//        }
+    private void exaggerateVelocities() {
         for (int i = 0; i < binVelocities.length; i++) {
             double binVelocity = binVelocities[i];
-//            if (topBinNumbers.contains(i)) {
-//                VelocityAndIndex top = topBinVelocities.last();
-//                if (top.index == i) {
-//                    binVelocity = binVelocity * 1.1;
-//                } else {
-//                    binVelocity = binVelocity * 1.05;
-//                    if (binVelocity > 1.05) {
-//                        binVelocity = 1.05;
-//                    }
-//                }
-//            } else {
-//                binVelocity = binVelocity * 0.9;
-//            }
             if (binVelocity < 0.2) {
                 binVelocity = binVelocity * 0.8;
             } else if (binVelocity < 0.3) {
@@ -169,15 +137,11 @@ public class OpenGlCircularVisualizer implements
     }
 
     private void fadeOut() {
-        fadeOut(0.9);
-    }
-
-    private void fadeOut(double k) {
         if (binVelocities == null) {
             return;
         }
         for (int i = 0; i < binVelocities.length; i++) {
-            binVelocities[i] = binVelocities[i] * k;
+            binVelocities[i] = binVelocities[i] * 0.7;
         }
     }
 
@@ -211,7 +175,7 @@ public class OpenGlCircularVisualizer implements
                     if (previous != current) {
                         previousFugue = current;
                         currentFrameNumber.set(15);
-                        fadeOut(0.7);
+                        fadeOut();
                     } else {
                         int frameNumber = currentFrameNumber.incrementAndGet();
                         double[][] viz = current.pitch.viz;
@@ -570,31 +534,4 @@ public class OpenGlCircularVisualizer implements
         return component;
     }
 
-    private static class VelocityAndIndex implements Comparable<VelocityAndIndex> {
-        private final double velocity;
-        private final int index;
-
-        public VelocityAndIndex(double velocity, int index) {
-            this.velocity = velocity;
-            this.index = index;
-        }
-
-        @Override
-        public int compareTo(VelocityAndIndex that) {
-            return Double.compare(this.velocity, that.velocity);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            VelocityAndIndex that = (VelocityAndIndex) o;
-            return Double.compare(that.velocity, velocity) == 0 && index == that.index;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(velocity, index);
-        }
-    }
 }
