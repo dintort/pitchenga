@@ -1,10 +1,5 @@
 package com.harmoneye.analysis;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.math3.stat.descriptive.rank.Median;
-import org.apache.commons.math3.util.FastMath;
-
 import com.harmoneye.audio.DecibelCalculator;
 import com.harmoneye.audio.MultiRateRingBufferBank;
 import com.harmoneye.audio.SoundConsumer;
@@ -13,6 +8,10 @@ import com.harmoneye.math.cqt.FastCqt;
 import com.harmoneye.math.matrix.ComplexVector;
 import com.harmoneye.math.matrix.DComplex;
 import com.harmoneye.viz.Visualizer;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
+import org.apache.commons.math3.util.FastMath;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MusicAnalyzer implements SoundConsumer {
 

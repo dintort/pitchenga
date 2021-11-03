@@ -5,7 +5,7 @@ import com.pitchenga.Pitch;
 import com.pitchenga.Pitchenga;
 import com.pitchenga.Tone;
 
-import java.awt.Color;
+import java.awt.*;
 
 import static com.pitchenga.Tone.Do;
 

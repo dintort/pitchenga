@@ -26,7 +26,7 @@ public enum Fugue {
 
     public final Pitch pitch;
     public final Object[] tune;
-    public final Object[][] intervals ;
+    public final Object[][] intervals;
 
     Fugue(Pitch pitch, Object... coda) {
         this.pitch = pitch;

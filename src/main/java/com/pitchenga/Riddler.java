@@ -9,7 +9,7 @@ import java.util.function.Function;
 import static com.pitchenga.Pitch.*;
 
 public enum Riddler {
-//    FuguesOrdered("All fugues ordered",
+    //    FuguesOrdered("All fugues ordered",
 //            new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0]),
     //    ChromaticOneOctave("Chromatic - octave 4",
 //            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null),

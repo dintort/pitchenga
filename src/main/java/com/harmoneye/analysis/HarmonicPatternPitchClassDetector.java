@@ -1,9 +1,8 @@
 package com.harmoneye.analysis;
 
+import com.harmoneye.math.cqt.CqtContext;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.util.FastMath;
-
-import com.harmoneye.math.cqt.CqtContext;
 
 public class HarmonicPatternPitchClassDetector {
 
@@ -12,17 +11,17 @@ public class HarmonicPatternPitchClassDetector {
 
     // private ScalarExpSmoother smoother = new ScalarExpSmoother(0.1);
 
-    private int harmonicCount;
-    private int binsPerOctave;
-    private int binsPerHalftoneHalf;
-    private double baseFreq;
-    private double baseFreqInv;
-    private double harmonicCountMinusOneInv;
+    private final int harmonicCount;
+    private final int binsPerOctave;
+    private final int binsPerHalftoneHalf;
+    private final double baseFreq;
+    private final double baseFreqInv;
+    private final double harmonicCountMinusOneInv;
 
     private double[] harmonicBins;
-    private int[] harmonicBinsIndexes;
-    private CqtContext ctx;
-    private Median medianStat = new Median();
+    private final int[] harmonicBinsIndexes;
+    private final CqtContext ctx;
+    private final Median medianStat = new Median();
 
     public HarmonicPatternPitchClassDetector(CqtContext ctx) {
         this(ctx, DEFAULT_HARMONIC_COUNT);
@@ -136,7 +135,7 @@ public class HarmonicPatternPitchClassDetector {
     }
 
     /**
-     * @param frequency of the first harmonic
+     * @param frequency     of the first harmonic
      * @param harmonicIndex one-based index of the desired k-th harmonic
      * @return zero-based cq bin index of the k-th harmonic frequency
      */

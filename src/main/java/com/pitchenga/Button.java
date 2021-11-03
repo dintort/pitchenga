@@ -24,8 +24,8 @@ public enum Button {
 //    np12(Fa4, KeyEvent.VK_ , "=", false),
 
 
-    n00(Do4, KeyEvent.VK_BACK_QUOTE, 0,"`", false),
-    n01(Ra4, KeyEvent.VK_1, 0,"1", false),
+    n00(Do4, KeyEvent.VK_BACK_QUOTE, 0, "`", false),
+    n01(Ra4, KeyEvent.VK_1, 0, "1", false),
     n02(Re4, KeyEvent.VK_2, 0, "2", false),
     n03(Me4, KeyEvent.VK_3, 0, "3", false),
     n04(Mi4, KeyEvent.VK_4, 0, "4", false),
@@ -38,7 +38,7 @@ public enum Button {
     n11(Si4, KeyEvent.VK_MINUS, 0, "-", false),
     n12(Do5, KeyEvent.VK_EQUALS, 0, "=", false),
 
-//    do3(Do3, -1, 1, null, false),
+    //    do3(Do3, -1, 1, null, false),
 //    ra3(Ra3, -2, 1, null, false),
 //    re3(Re3, -3, 1, null, false),
 //    me3(Me3, -4, 1, null, false),

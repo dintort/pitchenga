@@ -1,9 +1,7 @@
 package com.pitchenga;
 
 import javax.sound.midi.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.io.*;
 
 public class Midi implements Receiver {
 
@@ -41,15 +39,15 @@ public class Midi implements Receiver {
 
     @Override
     public void send(MidiMessage message, long timeStamp) {
-        if(message instanceof ShortMessage) {
+        if (message instanceof ShortMessage) {
             ShortMessage sMessage = (ShortMessage) message;
             int command = sMessage.getCommand();
             int key = sMessage.getData1();
-            int octave = (key / 12)-1;
+            int octave = (key / 12) - 1;
             int note = key % 12;
             String noteName = Tone.values()[note].name();
             int velocity = sMessage.getData2();
-            switch(command) {
+            switch (command) {
                 case NOTE_ON:
                     Pitchenga.debug("midi on=" + noteName + octave + ", key=" + key + ", velocity=" + velocity);
                     channel.noteOn(key, velocity);

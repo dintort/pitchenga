@@ -15,13 +15,13 @@ public class Capture implements Runnable {
 //	private static final int DEFAULT_READ_BUFFER_SIZE_SAMPLES = 512;
 
     private Thread thread;
-    private AtomicBoolean isRunning = new AtomicBoolean();
+    private final AtomicBoolean isRunning = new AtomicBoolean();
 
-    private int readBufferSizeInSamples;
-    private AudioFormat format;
-    private int bufferSize;
+    private final int readBufferSizeInSamples;
+    private final AudioFormat format;
+    private final int bufferSize;
 
-    private SoundConsumer soundConsumer;
+    private final SoundConsumer soundConsumer;
 
     public Capture(SoundConsumer soundConsumer, float sampleRate, int sampleSizeBits) {
         this.soundConsumer = soundConsumer;

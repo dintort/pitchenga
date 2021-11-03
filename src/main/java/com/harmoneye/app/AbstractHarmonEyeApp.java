@@ -1,5 +1,15 @@
 package com.harmoneye.app;
 
+import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.analysis.MusicAnalyzer;
+import com.harmoneye.viz.OpenGlCircularVisualizer;
+import com.harmoneye.viz.OpenGlLinearVisualizer;
+import com.harmoneye.viz.SwingVisualizer;
+import com.harmoneye.viz.Visualizer;
+import org.simplericity.macify.eawt.ApplicationEvent;
+import org.simplericity.macify.eawt.ApplicationListener;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -8,29 +18,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
-
-import com.harmoneye.viz.OpenGlCircularVisualizer;
-import com.harmoneye.viz.OpenGlLinearVisualizer;
-import com.harmoneye.viz.Visualizer;
-import org.simplericity.macify.eawt.ApplicationEvent;
-import org.simplericity.macify.eawt.ApplicationListener;
-
-import com.harmoneye.analysis.AnalyzedFrame;
-import com.harmoneye.analysis.MusicAnalyzer;
-import com.harmoneye.viz.SwingVisualizer;
-
 public class AbstractHarmonEyeApp {
 
-//    private static final int TIME_PERIOD_MILLIS = 16;
     private static final int TIME_PERIOD_MILLIS = 16;
     private static final String WINDOW_TITLE = "HarmonEye";
 
@@ -54,7 +43,7 @@ public class AbstractHarmonEyeApp {
     private Timer updateTimer;
 
     public AbstractHarmonEyeApp(Visualizer<AnalyzedFrame> visualizer2) {
-		visualizer = new com.harmoneye.viz.OpenGlCircularVisualizer();
+        visualizer = new com.harmoneye.viz.OpenGlCircularVisualizer();
 //        visualizer = new com.harmoneye.viz.OpenGlLinearVisualizer();
 
         soundAnalyzer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE, visualizer2);
@@ -84,7 +73,7 @@ public class AbstractHarmonEyeApp {
 //		frame.setLocation(700, 0);
 //        frame.setLocation(0, 456);
 //		frame.setLocation(0, 0);
-		frame.setLocation(0, 220);
+        frame.setLocation(0, 220);
 //		frame.setLocation(0, 726);
 
         frame.setJMenuBar(createMenuBar());

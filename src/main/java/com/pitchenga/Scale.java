@@ -38,5 +38,5 @@ public enum Scale {
         this.primary = primary;
         this.scale = scale;
     }
-    
+
 }

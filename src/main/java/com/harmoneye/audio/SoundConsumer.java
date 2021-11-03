@@ -1,5 +1,5 @@
 package com.harmoneye.audio;
 
 public interface SoundConsumer {
-	public void consume(double[] samples, byte[] data);
+    void consume(double[] samples, byte[] data);
 }

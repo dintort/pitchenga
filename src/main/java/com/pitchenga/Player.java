@@ -1,8 +1,5 @@
 package com.pitchenga;
 
-import com.harmoneye.analysis.MusicAnalyzer;
-import com.harmoneye.audio.ByteConverter;
-
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;

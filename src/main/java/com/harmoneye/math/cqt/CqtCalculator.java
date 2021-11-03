@@ -1,20 +1,18 @@
 package com.harmoneye.math.cqt;
 
-import java.util.Arrays;
-
+import com.harmoneye.math.matrix.ComplexVector;
+import com.harmoneye.math.matrix.DComplex;
+import com.harmoneye.math.window.WindowFunction;
+import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 import org.apache.commons.math3.analysis.integration.TrapezoidIntegrator;
 import org.apache.commons.math3.analysis.integration.UnivariateIntegrator;
 import org.apache.commons.math3.util.FastMath;
 
-import com.harmoneye.math.matrix.ComplexVector;
-import com.harmoneye.math.matrix.DComplex;
-import com.harmoneye.math.window.WindowFunction;
-
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+import java.util.Arrays;
 
 public class CqtCalculator {
 
-    private CqtContext ctx;
+    private final CqtContext ctx;
 
     private DoubleFFT_1D fft;
 
@@ -59,7 +57,7 @@ public class CqtCalculator {
         return spectrum;
     }
 
-    public ComplexVector conjugatedNormalizedspectralKernel(int k) {
+    public ComplexVector conjugatedNormalizedSpectralKernel(int k) {
         ComplexVector spectrum = spectralKernel(k);
         double normalizationFactor = ctx.getNormalizationFactor();
 

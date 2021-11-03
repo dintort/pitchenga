@@ -5,7 +5,6 @@ import com.harmoneye.math.cqt.CqtContext;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.Animator;
-import com.pitchenga.Pitchenga;
 import com.pitchenga.Tone;
 
 import java.awt.*;
@@ -138,9 +137,9 @@ public class OpenGlLinearVisualizer implements SwingVisualizer<AnalyzedFrame>,
             //fixme: Always 1 for the biggest bin
             Color color = colorFunction.toColor(binVelocity, toneRatio);
 //            Color color = colorFunction.toColor(binVelocity * 0.1, toneRatio);
-			gl.glColor3ub((byte) color.getRed(),
-				(byte) color.getGreen(),
-				(byte) color.getBlue());
+            gl.glColor3ub((byte) color.getRed(),
+                    (byte) color.getGreen(),
+                    (byte) color.getBlue());
 
             double xFrom = i * xStep;
             double xTo = xFrom + xStep;
