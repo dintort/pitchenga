@@ -150,9 +150,9 @@ public enum Pitch {
 
         String videoZipResourcePath = String.format("/video/%03d.zip", number);
         URL videoZipUrl = getClass().getResource(videoZipResourcePath);
+        double[][] video = null;
         if (videoZipUrl == null) {
             System.out.println("Resource not found=" + videoZipResourcePath);
-            video = null;
         } else {
             try {
                 System.out.println("Reading resource=" + videoZipResourcePath);
@@ -171,9 +171,11 @@ public enum Pitch {
                 }
                 video = frames.toArray(new double[0][]);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Failed reading resource=" + videoZipResourcePath + ": " + e);
+                e.printStackTrace();
             }
         }
+        this.video = video;
     }
 
     public Fugue getFugue() {

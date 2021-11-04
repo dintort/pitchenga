@@ -10,9 +10,11 @@ import static com.pitchenga.Pitch.*;
 
 public enum Riddler {
     //    FuguesOrdered("All fugues ordered",
-//            new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0]),
-    //    ChromaticOneOctave("Chromatic - octave 4",
-//            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null),
+//            new Pitch[][][]{{{Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3, Do4,}}}, Pitchenga::ordered, null, null, new int[0]),
+    FuguesOrdered("All fugues ordered",
+            new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0]),
+    ChromaticOneOctave("Chromatic - octave 4",
+            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null, new int[0]),
     Chromatic("Chromatic - main octaves",
             new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0]),
     Step51("51", new Pitch[][][]{

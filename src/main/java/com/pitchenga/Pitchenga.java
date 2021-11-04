@@ -170,6 +170,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
         this.isPrimary = isPrimary;
         this.secondary = secondary;
+        this.setAutoRequestFocus(false);
         if (secondary != null) {
             secondary.setAutoRequestFocus(false);
         }
@@ -973,7 +974,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                     Pitch pitch = (Pitch) next;
                     if (pitch != Non) {
                         int velocity = 100;
-                        if (midiChannel == bassInstrumentChannel) {
+                        if (midiChannel == bassInstrumentChannel || OpenGlCircularVisualizer.RECORD_VIDEO) {
                             velocity = 127;
                         }
                         midiNoteOn(pitch.midi, midiChannel, velocity);
@@ -1284,7 +1285,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             if (!pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
                 if (!playButton.hasFocus()) {
                     playButton.setSelected(!playButton.isSelected());
-                    playButton.requestFocus();
                 }
             }
             if (!pressed && event.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -1292,7 +1292,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
             if (pressed && event.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 playButton.setSelected(false);
-                playButton.requestFocus();
                 boolean set = isInNativeFullScreen.compareAndSet(true, false);
                 if (set) {
                     toggleNativeFullScreen();
@@ -1810,7 +1809,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         resetButton.addActionListener(event -> {
             display.text("\nRST");
             updateMixer();
-            playButton.requestFocus();
         });
 
         JButton loadButton = new JButton("Load");
@@ -1906,7 +1904,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     private void stop() {
         playButton.setSelected(false);
-        playButton.requestFocus();
     }
 
     private Hinter getHinter() {

@@ -29,12 +29,8 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.white;
 
 // TODO: rewrite to use vertex buffers instead of immediate mode
+public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
-public class OpenGlCircularVisualizer implements
-        SwingVisualizer<AnalyzedFrame>, GLEventListener {
-
-    public static final boolean muteWhenPlaying = "true".equals(System.getProperty("muteWhenPlaying"));
-    //        public static final boolean muteWhenPlaying = true;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
@@ -57,18 +53,20 @@ public class OpenGlCircularVisualizer implements
     private int binsPerHalftone;
     private int halftoneCount;
     private double stepAngle;
-//    private final SortedSet<VelocityAndIndex> topBinVelocities = new TreeSet<>();
-//    private final Set<Integer> topBinNumbers = new HashSet<>();
 
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
     public static volatile String text;
 
+    //recording
+    public static final boolean RECORD_VIDEO = false;
+    //    public static final boolean RECORD_VIDEO = true;
     public static volatile Pitch currentPitch;
     public static volatile Pitch previousPitch;
     private static volatile PrintStream recordVideoPrintStream;
     private static volatile ZipOutputStream recordVideoZipStream;
 
+    //playback
     public static volatile Fugue currentFugue;
     public static volatile Fugue previousFugue;
     private static final AtomicInteger currentFrameNumber = new AtomicInteger(-1);
@@ -98,7 +96,7 @@ public class OpenGlCircularVisualizer implements
             return;
         }
         double[] octaveBins = pcProfile.getOctaveBins();
-        if (Pitchenga.isPlaying()) {
+        if (!RECORD_VIDEO && Pitchenga.isPlaying()) {
             if (octaveBins != null && octaveBins == binVelocities) { //Shared array
                 binVelocities = new double[octaveBins.length];
             }
@@ -152,7 +150,7 @@ public class OpenGlCircularVisualizer implements
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        animatePlaying();
+        playVideo();
         GL2 gl = drawable.getGL().getGL2();
         gl.glClearColor(0f, 0f, 0f, 1f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -163,49 +161,56 @@ public class OpenGlCircularVisualizer implements
         drawTuner(gl);
         Tone tone = getTone(biggestBinNumber);
         drawHalftoneNames(drawable, tone);
-//        recordViz();
+        recordVideo();
     }
 
-    private void animatePlaying() {
-        if (Pitchenga.isPlaying()) {
-            if (Pitchenga.showSeriesHint) {
-                Fugue previous = previousFugue;
-                Fugue current = currentFugue;
-                if (current != null) {
-                    if (previous != current) {
-                        previousFugue = current;
-                        currentFrameNumber.set(15);
-                        fadeOut();
-                    } else {
-                        int frameNumber = currentFrameNumber.incrementAndGet();
-                        double[][] video = current.pitch.video;
-                        if (video != null) {
-                            if (frameNumber >= video.length) {
-                                fadeOut();
-                            } else {
-                                binVelocities = video[frameNumber];
-                            }
-                        } else {
-                            fadeOut();
-                        }
-                    }
-                } else {
+    private void playVideo() {
+        if (RECORD_VIDEO) {
+            return;
+        }
+        if (!Pitchenga.isPlaying()) {
+            return;
+        }
+        if (Pitchenga.showSeriesHint) {
+            Fugue previous = previousFugue;
+            Fugue current = currentFugue;
+            if (current != null) {
+                if (previous != current) {
+                    previousFugue = current;
+                    currentFrameNumber.set(15);
                     fadeOut();
+                } else {
+                    int frameNumber = currentFrameNumber.incrementAndGet();
+                    double[][] video = current.pitch.video;
+                    if (video != null) {
+                        if (frameNumber >= video.length) {
+                            fadeOut();
+                        } else {
+                            binVelocities = video[frameNumber];
+                        }
+                    } else {
+                        fadeOut();
+                    }
                 }
             } else {
                 fadeOut();
             }
+        } else {
+            fadeOut();
         }
     }
 
     @SuppressWarnings("unused")
     private void recordVideo() {
+        if (!RECORD_VIDEO) {
+            return;
+        }
         Pitch previous = previousPitch;
         Pitch current = currentPitch;
-        if (current != null) {
-            if (previous != current) {
-                previousPitch = current;
-                try {
+        try {
+            if (current != null) {
+                if (previous != current) {
+                    previousPitch = current;
                     if (recordVideoPrintStream != null) {
                         recordVideoPrintStream.flush();
                         recordVideoZipStream.closeEntry();
@@ -226,22 +231,18 @@ public class OpenGlCircularVisualizer implements
                     }
                     recordVideoZipStream = new ZipOutputStream(new FileOutputStream(logFile));
                     recordVideoZipStream.putNextEntry(new ZipEntry(current.number + ".txt"));
-                    //fixme: Re-record as binary to save space
                     recordVideoPrintStream = new PrintStream(recordVideoZipStream);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                }
+                if (binVelocities != null && binVelocities.length > 0) {
+                    for (double binVelocity : binVelocities) {
+                        recordVideoPrintStream.print(binVelocity);
+                        recordVideoPrintStream.print(" ");
+                    }
+                    recordVideoPrintStream.println();
                 }
             }
-//            StringBuilder stringBuilder = new StringBuilder();
-            if (binVelocities != null && binVelocities.length > 0) {
-                for (double binVelocity : binVelocities) {
-//                    stringBuilder.append(binVelocity);
-//                    stringBuilder.append(" ");
-                    recordVideoPrintStream.print(binVelocity);
-                    recordVideoPrintStream.print(" ");
-                }
-                recordVideoPrintStream.println();
-            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -370,12 +371,11 @@ public class OpenGlCircularVisualizer implements
             int index = movedPitchClass * binsPerHalftone + binInPitchClass;
 
             double toneRatio = i / ((double) binVelocities.length / (double) Tone.values().length);
-            //fixme: hack
+            //fixme: un-hack
             toneRatio = toneRatio - 0.4;
 
             double binVelocity = binVelocities[i];
             Color color = colorFunction.toColor(binVelocity, toneRatio);
-//            Color color = colorFunction.toColor(1, toneRatio);
             double velocity = binVelocities[index];
             double myVelocity = velocity;
             if (biggestBinNumber != i) {
@@ -401,11 +401,11 @@ public class OpenGlCircularVisualizer implements
             gl.glVertex2d(endRadius * sinEndAngle, endRadius * cosEndAngle);
             gl.glEnd();
 
-            drawOuterDot(gl, angle, i, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
+            drawOuterDot(gl, angle, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
         }
     }
 
-    private void drawOuterDot(GL2 gl, double angle, int i, int index, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
+    private void drawOuterDot(GL2 gl, double angle, int index, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
         double outerRadius = 0.98;
         gl.glBegin(GL.GL_TRIANGLES);
         gl.glColor3ub((byte) color.getRed(),
@@ -507,7 +507,7 @@ public class OpenGlCircularVisualizer implements
     @Override
     public void init(GLAutoDrawable drawable) {
         // Synchronize the FPS with the refresh rate of the display (v-sync).
-        // Otherwise we can use the FPSAnimator instead of the plain Animator.
+        // Otherwise, we can use the FPSAnimator instead of the plain Animator.
         GL gl = drawable.getGL();
         gl.setSwapInterval(1);
 
@@ -524,8 +524,7 @@ public class OpenGlCircularVisualizer implements
     }
 
     @Override
-    public void reshape(GLAutoDrawable drawable, int x, int y, int width,
-                        int height) {
+    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
         setConstantAspectRatio(drawable);
     }
 

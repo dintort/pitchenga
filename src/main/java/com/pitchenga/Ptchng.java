@@ -4,6 +4,7 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.app.AbstractHarmonEyeApp;
 import com.harmoneye.app.CaptureHarmonEyeApp;
+import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.Visualizer;
 import org.simplericity.macify.eawt.Application;
 import org.simplericity.macify.eawt.DefaultApplication;
@@ -34,7 +35,6 @@ public class Ptchng extends Setup {
                 Instrument.ELECTRIC_PIANO_1,
                 Instrument.ELECTRIC_GUITAR_JAZZ,
                 Instrument.TENOR_SAX};
-        voiceHints = false;
         voiceHints = true;
 
 //        riddleInstrument = Instrument.TENOR_SAX;
@@ -56,7 +56,6 @@ public class Ptchng extends Setup {
         defaultHinter = Hinter.Delayed1000;
         defaultHinter = Hinter.Delayed1000;
         defaultHinter = Hinter.Never;
-        defaultHinter = Hinter.Always;
         defaultHinter = Hinter.Series;
         //fixme: Delay hinter proportionally to the tempo
 
@@ -65,7 +64,6 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Tempo100;
         defaultPacer = Pacer.Tempo110;
         defaultPacer = Pacer.Tempo75;
-        defaultPacer = Pacer.Tempo30;
         defaultPacer = Pacer.Tempo90;
         defaultPacer = Pacer.Tempo100;
 
@@ -82,8 +80,16 @@ public class Ptchng extends Setup {
 
         mainFrameVisible = false;
         mainFrameVisible = true;
-        fullScreenWhenPlaying = false;
         fullScreenWhenPlaying = true;
+
+        if (OpenGlCircularVisualizer.RECORD_VIDEO) {
+            defaultRiddler = Riddler.FuguesOrdered;
+            voiceHints = false;
+            defaultHinter = Hinter.Always;
+            defaultPacer = Pacer.Tempo30;
+            fullScreenWhenPlaying = false;
+        }
+
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
