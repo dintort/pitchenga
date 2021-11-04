@@ -66,8 +66,8 @@ public class OpenGlCircularVisualizer implements
 
     public static volatile Pitch currentPitch;
     public static volatile Pitch previousPitch;
-    private static volatile PrintStream recordVizLog;
-    private static volatile ZipOutputStream recordVizZip;
+    private static volatile PrintStream recordVideoPrintStream;
+    private static volatile ZipOutputStream recordVideoZipStream;
 
     public static volatile Fugue currentFugue;
     public static volatile Fugue previousFugue;
@@ -178,12 +178,12 @@ public class OpenGlCircularVisualizer implements
                         fadeOut();
                     } else {
                         int frameNumber = currentFrameNumber.incrementAndGet();
-                        double[][] viz = current.pitch.viz;
-                        if (viz != null) {
-                            if (frameNumber >= viz.length) {
+                        double[][] video = current.pitch.video;
+                        if (video != null) {
+                            if (frameNumber >= video.length) {
                                 fadeOut();
                             } else {
-                                binVelocities = viz[frameNumber];
+                                binVelocities = video[frameNumber];
                             }
                         } else {
                             fadeOut();
@@ -199,19 +199,19 @@ public class OpenGlCircularVisualizer implements
     }
 
     @SuppressWarnings("unused")
-    private void recordViz() {
+    private void recordVideo() {
         Pitch previous = previousPitch;
         Pitch current = currentPitch;
         if (current != null) {
             if (previous != current) {
                 previousPitch = current;
                 try {
-                    if (recordVizLog != null) {
-                        recordVizLog.flush();
-                        recordVizZip.closeEntry();
-                        recordVizLog.close();
+                    if (recordVideoPrintStream != null) {
+                        recordVideoPrintStream.flush();
+                        recordVideoZipStream.closeEntry();
+                        recordVideoPrintStream.close();
                     }
-                    File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/src/main/resources/viz/");
+                    File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/src/main/resources/video/");
                     //noinspection ResultOfMethodCallIgnored
                     logDir.mkdirs();
                     //fixme: rename the wav files the same way
@@ -224,10 +224,10 @@ public class OpenGlCircularVisualizer implements
                     if (!newFile) {
                         throw new RuntimeException("Failed creating log file=" + logFile.getCanonicalPath());
                     }
-                    recordVizZip = new ZipOutputStream(new FileOutputStream(logFile));
-                    recordVizZip.putNextEntry(new ZipEntry(current.number + ".txt"));
+                    recordVideoZipStream = new ZipOutputStream(new FileOutputStream(logFile));
+                    recordVideoZipStream.putNextEntry(new ZipEntry(current.number + ".txt"));
                     //fixme: Re-record as binary to save space
-                    recordVizLog = new PrintStream(recordVizZip);
+                    recordVideoPrintStream = new PrintStream(recordVideoZipStream);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -237,10 +237,10 @@ public class OpenGlCircularVisualizer implements
                 for (double binVelocity : binVelocities) {
 //                    stringBuilder.append(binVelocity);
 //                    stringBuilder.append(" ");
-                    recordVizLog.print(binVelocity);
-                    recordVizLog.print(" ");
+                    recordVideoPrintStream.print(binVelocity);
+                    recordVideoPrintStream.print(" ");
                 }
-                recordVizLog.println();
+                recordVideoPrintStream.println();
             }
         }
     }

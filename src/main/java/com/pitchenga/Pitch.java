@@ -130,7 +130,7 @@ public enum Pitch {
     public final String name;
     public final Player player;
     public final int number;
-    public final double[][] viz;
+    public final double[][] video;
     private volatile Fugue fugue;
 
     Pitch(Tone tone, int octave, int midi, float frequency) {
@@ -148,21 +148,20 @@ public enum Pitch {
             player = new Player(wavUrl);
         }
 
-        String vizName = String.format("/viz/%03d.zip", number);
-        URL vizUrl = getClass().getResource(vizName);
-        if (vizUrl == null) {
-            viz = null;
+        String videoZipResourcePath = String.format("/video/%03d.zip", number);
+        URL videoZipUrl = getClass().getResource(videoZipResourcePath);
+        if (videoZipUrl == null) {
+            System.out.println("Resource not found=" + videoZipResourcePath);
+            video = null;
         } else {
             try {
-                System.out.println("Reading resource=" + vizName);
+                System.out.println("Reading resource=" + videoZipResourcePath);
                 List<double[]> frames = new LinkedList<>();
-                ZipInputStream zipInputStream = new ZipInputStream(vizUrl.openStream());
+                ZipInputStream zipInputStream = new ZipInputStream(videoZipUrl.openStream());
                 zipInputStream.getNextEntry();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(zipInputStream));
                 String line;
-
                 while ((line = reader.readLine()) != null) {
-//                    System.out.println(line);
                     String[] strings = line.split(" ");
                     double[] frame = new double[strings.length];
                     for (int i = 0; i < strings.length; i++) {
@@ -170,7 +169,7 @@ public enum Pitch {
                     }
                     frames.add(frame);
                 }
-                viz = frames.toArray(new double[0][]);
+                video = frames.toArray(new double[0][]);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

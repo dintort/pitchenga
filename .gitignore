@@ -41,7 +41,7 @@ build
 *.nar
 *.ear
 *.zip
-!src/main/resources/viz/*.zip
+!src/main/resources/video/*.zip
 *.tar.gz
 *.rar
 
