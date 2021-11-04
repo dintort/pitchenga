@@ -452,12 +452,6 @@ public class Display extends JPanel {
             Tone tone = Display.this.pitch == null ? null : Display.this.pitch.tone;
             Color toneColor = Display.this.toneColor;
             Color pitchyColor = Display.this.pitchinessColor;
-            Color fillColor = Display.this.fillColor;
-            if (fillColor == null) {
-                fillColor = Color.DARK_GRAY;
-            }
-            setBackground(fillColor);
-
             if (panels == null || panels[0] == null) {
                 return;
             }
@@ -474,14 +468,12 @@ public class Display extends JPanel {
                 Button button = buttons[i];
                 if (pitch != null) {
                     Tone myTone = pitch.tone;
-                    panel.setBorder(BorderFactory.createLineBorder(myTone.color, borderThickness));
                     if (myTone == tone && toneColor != null && pitchyColor != null) {
                         label.setBorder(BorderFactory.createLineBorder(pitchyColor, getBorderThickness() * 4));
                         panel.setBackground(toneColor);
                         int sliderValue = convertPitchToSlider(Display.this.pitch, frequency);
                         slider.setValue(sliderValue);
                         slider.setVisible(true);
-//                        slider.setVisible(false);
                     } else {
                         slider.setVisible(false);
                         //fixme: Make less hacky maybe?
