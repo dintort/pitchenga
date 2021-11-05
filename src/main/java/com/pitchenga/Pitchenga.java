@@ -1887,17 +1887,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //            bottomPanel.setVisible(!bottomPanel.isVisible());
             toggleNativeFullScreen();
         } else {
-            GraphicsDevice screenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0];
-//            if (screenDevice.getFullScreenWindow() == this) {
-            if (screenDevice.getFullScreenWindow() == eye) {
+            //            if (screenDevice.getFullScreenWindow() == this) {
+            if (GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].getFullScreenWindow() == eye) {
 //                bottomPanel.setVisible(true);
-                screenDevice.setFullScreenWindow(null);
-                eye.setVisible(true);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
             } else {
 //                bottomPanel.setVisible(false);
-                eye.setVisible(false);
 //                screenDevice.setFullScreenWindow(this);
-                screenDevice.setFullScreenWindow(eye);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
             }
         }
     }
