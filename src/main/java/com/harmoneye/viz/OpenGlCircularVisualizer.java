@@ -105,7 +105,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         if (binVelocities == null || binVelocities.length != octaveBins.length) {
             binVelocities = new double[octaveBins.length];
-            smoother = new ExpSmoother(octaveBins.length, 0.1);
+            smoother = new ExpSmoother(octaveBins.length, 0.2);
         }
         System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
         exaggerateVelocities();
