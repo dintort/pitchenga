@@ -1,6 +1,7 @@
 package com.harmoneye.viz;
 
 import com.harmoneye.analysis.AnalyzedFrame;
+import com.harmoneye.analysis.ExpSmoother;
 import com.harmoneye.math.cqt.CqtContext;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
@@ -70,20 +71,16 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     public static volatile Fugue currentFugue;
     public static volatile Fugue previousFugue;
     private static final AtomicInteger currentFrameNumber = new AtomicInteger(-1);
+    private static volatile ExpSmoother smoother;
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
         GLProfile glp = GLProfile.getDefault();
         GLCapabilities caps = new GLCapabilities(glp);
-
         caps.setSampleBuffers(true);
-
         GLCanvas canvas = new GLCanvas(caps);
-
         canvas.addGLEventListener(this);
-
         component = canvas;
-
         Animator animator = new Animator();
         animator.add(canvas);
         animator.start();
@@ -97,19 +94,20 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         double[] octaveBins = pcProfile.getOctaveBins();
         if (!RECORD_VIDEO && Pitchenga.isPlaying()) {
-            if (octaveBins != null && octaveBins == binVelocities) { //Shared array
-                binVelocities = new double[octaveBins.length];
-            }
             return;
         }
 
         CqtContext cqtContext = pcProfile.getCqtContext();
         binsPerHalftone = cqtContext.getBinsPerHalftone();
         halftoneCount = cqtContext.getHalftonesPerOctave();
-        binVelocities = pcProfile.getOctaveBins();
-        if (binVelocities == null || binVelocities.length == 0) {
+        if (octaveBins == null || octaveBins.length == 0) {
             return;
         }
+        if (binVelocities == null || binVelocities.length != octaveBins.length) {
+            binVelocities = new double[octaveBins.length];
+            smoother = new ExpSmoother(octaveBins.length, 0.1);
+        }
+        System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
         exaggerateVelocities();
         double segmentCountInv = 1.0 / binVelocities.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
@@ -150,10 +148,10 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        playVideo();
         GL2 gl = drawable.getGL().getGL2();
         gl.glClearColor(0f, 0f, 0f, 1f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        playVideo();
 
         int biggestBinNumber = getBiggestBinNumber();
         drawPitchClassBins(gl, biggestBinNumber);
@@ -177,20 +175,19 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             if (current != null) {
                 if (previous != current) {
                     previousFugue = current;
-                    currentFrameNumber.set(15);
-                    fadeOut();
-                } else {
-                    int frameNumber = currentFrameNumber.incrementAndGet();
-                    double[][] video = current.pitch.video;
-                    if (video != null) {
-                        if (frameNumber >= video.length) {
-                            fadeOut();
-                        } else {
-                            binVelocities = video[frameNumber];
-                        }
-                    } else {
+                    currentFrameNumber.set(16);
+                }
+                int frameNumber = currentFrameNumber.incrementAndGet();
+                double[][] video = current.pitch.video;
+                if (video != null) {
+                    if (frameNumber >= video.length) {
                         fadeOut();
+                    } else {
+                        binVelocities = video[frameNumber];
+                        binVelocities = smoother.smooth(binVelocities);
                     }
+                } else {
+                    fadeOut();
                 }
             } else {
                 fadeOut();
@@ -266,7 +263,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         if (binsPerHalftone == 0) {
             return;
         }
-        if (!Pitchenga.showSeriesHint && Pitchenga.isPlaying()) {
+        if (Pitchenga.isPlaying()) {
             return;
         }
 
