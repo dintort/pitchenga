@@ -67,8 +67,7 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Tempo90;
         defaultPacer = Pacer.Tempo100;
 
-        defaultRiddler = Riddler.Step51;
-        defaultRiddler = Riddler.Step52;
+        defaultRiddler = Riddler.Step53;
 
         defaultRinger = Ringer.Tone;
         defaultRinger = Ringer.None;
