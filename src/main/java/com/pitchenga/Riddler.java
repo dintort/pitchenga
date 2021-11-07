@@ -1,8 +1,8 @@
 package com.pitchenga;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -17,7 +17,7 @@ public enum Riddler {
             new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null, new int[0]),
     Chromatic("Chromatic - main octaves",
             new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0]),
-//    Step51("51", new Pitch[][][]{
+    //    Step51("51", new Pitch[][][]{
 //            multiply(new Pitch[]{Do2, Me2, Fi2, La2, Do3,}, 110),
 //            multiply(Sets.octavesDo2ToDo7, 10),
 //            {{Non}},},
@@ -30,25 +30,32 @@ public enum Riddler {
 //            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
 //            new int[]{0, 1, 0}),
     Step53("53", new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Ra2, Ra2, Ra2, Me2, Fa2, Fi2, So2, So2, So2, La2, Si2, Do3,}, 60),
-            multiply(Sets.octavesDo2ToDo7, 9),
+            multiply(new Pitch[]{Do2, Ra2, Ra2, Ra2, Me2, Fa2, Fi2, So2, So2, So2, La2, Si2, Do3,}, 500),
+            multiply(Sets.octavesDo2ToDo7, 500),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             new int[]{0, 1, 0}),
     ;
 
-    private static Pitch[][] multiply(Pitch[] pitches, int times) {
+    @SuppressWarnings("SameParameterValue")
+    private static Pitch[][] multiply(Pitch[] pitches, int count) {
+        int times = count / pitches.length;
         Pitch[][] result = new Pitch[times][];
         Arrays.fill(result, pitches);
         return result;
     }
 
-    private static Pitch[][] multiply(Pitch[][] rows, int times) {
-        List<Pitch[]> result = new ArrayList<>(rows.length * times);
-        for (int i = 0; i < times; i++) {
+    @SuppressWarnings("SameParameterValue")
+    private static Pitch[][] multiply(Pitch[][] rows, int count) {
+        int size = 0;
+        List<Pitch[]> result = new LinkedList<>();
+        while (size <= count) {
+            for (Pitch[] row : rows) {
+                size += row.length;
+            }
             Collections.addAll(result, rows);
         }
-        return result.toArray(new Pitch[0][]);
+         return result.toArray(new Pitch[0][]);
     }
 
     private final String name;
