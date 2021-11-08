@@ -105,7 +105,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         if (binVelocities == null || binVelocities.length != octaveBins.length) {
             binVelocities = new double[octaveBins.length];
-            smoother = new ExpSmoother(octaveBins.length, 0.2);
+            smoother = new ExpSmoother(octaveBins.length, 0.1);
         }
         System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
         exaggerateVelocities();
@@ -137,7 +137,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             return;
         }
         for (int i = 0; i < binVelocities.length; i++) {
-            binVelocities[i] = binVelocities[i] * 0.7;
+            binVelocities[i] = binVelocities[i] * 0.8;
+            binVelocities = smoother.smooth(binVelocities);
         }
     }
 
