@@ -29,8 +29,14 @@ public enum Riddler {
 //            {{Non}},},
 //            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
 //            new int[]{0, 1, 0}),
-    Step53("53", new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Ra2, Ra2, Ra2, Me2, Fa2, Fi2, So2, So2, So2, La2, Si2, Do3,}, 500),
+//    Step53("53", new Pitch[][][]{
+//            multiply(new Pitch[]{Do2, Ra2, Ra2, Ra2, Me2, Fa2, Fi2, So2, So2, So2, La2, Si2, Do3,}, 500),
+//            multiply(Sets.octavesDo2ToDo7, 500),
+//            {{Non}},},
+//            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
+//            new int[]{0, 1, 0}),
+    Step54("54", new Pitch[][][]{
+            multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 500),
             multiply(Sets.octavesDo2ToDo7, 500),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
