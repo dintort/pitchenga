@@ -129,11 +129,16 @@ public class Display extends JPanel {
 
     public void text(String message) {
         OpenGlCircularVisualizer.text = message;
+        asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> {
+//                    textArea.setVisible(false);
+                    OpenGlCircularVisualizer.text = null;
+                }),
+                3, TimeUnit.SECONDS);
 //        text(message, null, null);
 //    }
 //
 //    private void text(String message, Color foreground, Color background) {
-        if (SwingUtilities.isEventDispatchThread()) {
+//        if (SwingUtilities.isEventDispatchThread()) {
             //fixme: Discard oldest when becomes too big
 //            StyledDocument document = text.getStyledDocument();
 //            SimpleAttributeSet attributes = new SimpleAttributeSet();
@@ -149,15 +154,10 @@ public class Display extends JPanel {
 //            } catch (BadLocationException e) {
 //                e.printStackTrace();
 //            }
-            textArea.setVisible(true);
-            textArea.append(message);
-            textArea.setCaretPosition(textArea.getDocument().getLength());
-            asyncExecutor.schedule(() -> SwingUtilities.invokeLater(() -> {
-                        textArea.setVisible(false);
-                        OpenGlCircularVisualizer.text = null;
-                    }),
-                    3, TimeUnit.SECONDS);
-        }
+//            textArea.setVisible(true);
+//            textArea.append(message);
+//            textArea.setCaretPosition(textArea.getDocument().getLength());
+//        }
     }
 
     private void initFontScaling() {

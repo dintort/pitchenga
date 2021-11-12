@@ -20,12 +20,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.pitchenga.Pitch.Do1;
 import static com.pitchenga.Pitch.Do7;
+import static com.pitchenga.Pitchenga.TARSOS;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.white;
 
@@ -40,10 +43,12 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     protected static final String[] HALFTONE_NAMES = Arrays.stream(Tone.values()).map(tone -> tone.name).toArray(String[]::new);
     public static final Color DARK = new Color(42, 42, 42);
     private static final Color MORE_DARK = new Color(31, 31, 31);
+    private static final Color MORE_DARKER = new Color(10, 10, 10);
     public static volatile Tone toneOverrideTarsos;
     public static int sliderOverrideTarsos;
     public static Color guessColorOverrideTarsos;
     public static Color pitchinessColorOverrideTarsos;
+    public static Set<String> scale = new HashSet<>();
 
     private int pitchStep = 1;
 
@@ -68,10 +73,10 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     private static volatile ZipOutputStream recordVideoZipStream;
 
     //playback
-    public static volatile Fugue currentFugue;
-    public static volatile Fugue previousFugue;
-    private static final AtomicInteger currentFrameNumber = new AtomicInteger(-1);
-    private static volatile ExpSmoother smoother;
+    public static volatile Fugue playFugue;
+    public static volatile Fugue playPreviousFugue;
+    private static final AtomicInteger playFrameNumber = new AtomicInteger(-1);
+    private static volatile ExpSmoother playSmoother = new ExpSmoother(CqtContext.binsPerHalftone, 0.2);
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
@@ -105,7 +110,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         if (binVelocities == null || binVelocities.length != octaveBins.length) {
             binVelocities = new double[octaveBins.length];
-            smoother = new ExpSmoother(octaveBins.length, 0.1);
+            playSmoother = new ExpSmoother(octaveBins.length, 0.1);
         }
         System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
         exaggerateVelocities();
@@ -138,7 +143,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         for (int i = 0; i < binVelocities.length; i++) {
             binVelocities[i] = binVelocities[i] * 0.8;
-            binVelocities = smoother.smooth(binVelocities);
+            binVelocities = playSmoother.smooth(binVelocities);
         }
     }
 
@@ -155,8 +160,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         playVideo();
 
         int biggestBinNumber = getBiggestBinNumber();
-        drawPitchClassBins(gl, biggestBinNumber);
         drawPitchClassFrame(gl);
+        drawPitchClassBins(gl, biggestBinNumber);
         drawTuner(gl);
         Tone tone = getTone(biggestBinNumber);
         drawHalftoneNames(drawable, tone);
@@ -171,21 +176,21 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             return;
         }
         if (Pitchenga.showSeriesHint) {
-            Fugue previous = previousFugue;
-            Fugue current = currentFugue;
+            Fugue previous = playPreviousFugue;
+            Fugue current = playFugue;
             if (current != null) {
                 if (previous != current) {
-                    previousFugue = current;
-                    currentFrameNumber.set(16);
+                    playPreviousFugue = current;
+                    playFrameNumber.set(16);
                 }
-                int frameNumber = currentFrameNumber.incrementAndGet();
+                int frameNumber = playFrameNumber.incrementAndGet();
                 double[][] video = current.pitch.video;
                 if (video != null) {
                     if (frameNumber >= video.length) {
                         fadeOut();
                     } else {
                         binVelocities = video[frameNumber];
-                        binVelocities = smoother.smooth(binVelocities);
+                        binVelocities = playSmoother.smooth(binVelocities);
                     }
                 } else {
                     fadeOut();
@@ -260,7 +265,11 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         return tone;
     }
 
+    //fixme: Restore
     private void drawTuner(GL2 gl) {
+        if (!TARSOS) {
+            return;
+        }
         if (binsPerHalftone == 0) {
             return;
         }
@@ -279,30 +288,37 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             color = BLACK;
         }
 
-        double startAngle = angle - 0.5 * stepAngle;
+        double startAngle = angle - 0.3 * stepAngle;
         double sinStartAngle = FastMath.sin(startAngle);
         double cosStartAngle = FastMath.cos(startAngle);
 
-        double endAngle = angle + 0.5 * stepAngle;
+        double endAngle = angle + 0.3 * stepAngle;
         double sinEndAngle = FastMath.sin(endAngle);
         double cosEndAngle = FastMath.cos(endAngle);
 
-        double outerRadius = 0.95;
+        double outerRadius = 0.98;
+        double outerOuterRadius = outerRadius + 0.01;
         gl.glBegin(GL.GL_TRIANGLES);
         gl.glColor3ub((byte) color.getRed(),
                 (byte) color.getGreen(),
                 (byte) color.getBlue());
 
-        double centerRadius;
-        centerRadius = outerRadius;
-        outerRadius = outerRadius - 0.05;
+        double innerRadius;
+        innerRadius = outerRadius;
+        outerRadius = outerRadius - 0.03;
 
         double centerAngle = angle - 0.000000001 * stepAngle;
         double sinCenterAngle = FastMath.sin(centerAngle);
         double cosCenterAngle = FastMath.cos(centerAngle);
-        gl.glVertex2d(centerRadius * sinCenterAngle, centerRadius * cosCenterAngle);
-        gl.glVertex2d(outerRadius * sinStartAngle, outerRadius * cosStartAngle);
-        gl.glVertex2d(outerRadius * sinEndAngle, outerRadius * cosEndAngle);
+        gl.glVertex2d(outerRadius * sinCenterAngle, outerRadius * cosCenterAngle);
+        gl.glVertex2d(innerRadius * sinStartAngle, innerRadius * cosStartAngle);
+        gl.glVertex2d(innerRadius * sinEndAngle, innerRadius * cosEndAngle);
+        gl.glEnd();
+        //fixme: draw a rectangle instead of two circles
+        gl.glBegin(GL.GL_TRIANGLES);
+        gl.glVertex2d(outerOuterRadius * sinCenterAngle, outerOuterRadius * cosCenterAngle);
+        gl.glVertex2d(innerRadius * sinStartAngle, innerRadius * cosStartAngle);
+        gl.glVertex2d(innerRadius * sinEndAngle, innerRadius * cosEndAngle);
         gl.glEnd();
     }
 
@@ -329,6 +345,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         for (int i = 0; i < HALFTONE_NAMES.length; i++) {
             Tone tone = Tone.values()[i];
             color = tone.color;
+            if (Pitchenga.isPlaying() && !scale.isEmpty() && !scale.contains(tone.name)) {
+                color = MORE_DARKER;
+            }
             gl.glColor3ub((byte) color.getRed(),
                     (byte) color.getGreen(),
                     (byte) color.getBlue());
@@ -347,7 +366,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             y = lineRadius * cos;
             gl.glVertex2d(x, y);
 
-            lineRadius = 0.95;
+            lineRadius = 0.94;
             x = lineRadius * sin;
             y = lineRadius * cos;
             gl.glVertex2d(x, y);
@@ -404,17 +423,17 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     }
 
     private void drawOuterDot(GL2 gl, double angle, int index, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
-        double outerRadius = 0.98;
         gl.glBegin(GL.GL_TRIANGLES);
         gl.glColor3ub((byte) color.getRed(),
                 (byte) color.getGreen(),
                 (byte) color.getBlue());
 
-        double centerRadius = outerRadius * 0.99 - binVelocities[index] * 0.02;
+        double outerRadius = 0.98;
+        double innerRadius = outerRadius * 0.99 - binVelocities[index] * 0.01;
         double centerAngle = angle - 0.000000001 * stepAngle;
         double sinCenterAngle = FastMath.sin(centerAngle);
         double cosCenterAngle = FastMath.cos(centerAngle);
-        gl.glVertex2d(centerRadius * sinCenterAngle, centerRadius * cosCenterAngle);
+        gl.glVertex2d(innerRadius * sinCenterAngle, innerRadius * cosCenterAngle);
         gl.glVertex2d(outerRadius * sinStartAngle, outerRadius * cosStartAngle);
         gl.glVertex2d(outerRadius * sinEndAngle, outerRadius * cosEndAngle);
         gl.glEnd();
@@ -442,6 +461,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
             int index = (i * pitchStep) % HALFTONE_NAMES.length;
             String halftoneName = HALFTONE_NAMES[index];
+            if (Pitchenga.isPlaying() && !scale.isEmpty() && !scale.contains(halftoneName)) {
+                continue;
+            }
             Rectangle2D bounds = renderer.getBounds(halftoneName);
             int offsetX = (int) (scaleFactor * 0.5f * bounds.getWidth());
             int offsetY = (int) (scaleFactor * 0.5f * bounds.getHeight());

@@ -1,33 +1,22 @@
 package com.pitchenga;
 
+import static com.pitchenga.Pitch.*;
+
 public enum Scale {
 
-    DoMaj(true, true, new Pitch[]{}),
-    DoMin(false, false, new Pitch[]{}),
-    RaMaj(true, false, new Pitch[]{}),
-    RaMin(false, false, new Pitch[]{}),
-    ReMaj(true, false, new Pitch[]{}),
-    ReMin(false, true, new Pitch[]{}),
-    MeMaj(true, false, new Pitch[]{}),
-    MeMin(false, false, new Pitch[]{}),
-    MiMaj(true, false, new Pitch[]{}),
-    MiMin(false, true, new Pitch[]{}),
-    FaMaj(true, true, new Pitch[]{}),
-    FaMin(false, false, new Pitch[]{}),
-    FiMaj(true, false, new Pitch[]{}),
-    FiMin(false, false, new Pitch[]{}),
-    SoMaj(true, true, new Pitch[]{}),
-    SoMin(false, false, new Pitch[]{}),
-    LeMaj(true, false, new Pitch[]{}),
-    LeMin(false, false, new Pitch[]{}),
-    LaMaj(true, false, new Pitch[]{}),
-    LaMin(false, true, new Pitch[]{}),
-    SeMaj(true, false, new Pitch[]{}),
-    SeMin(false, false, new Pitch[]{}),
-    SiMaj(true, false, new Pitch[]{}),
-    SiMin(false, true, new Pitch[]{}),
+    Do3Maj(true, true, new Pitch[]{Do3, Re3, Mi3, Fa3, So3, La3, Si3, Do3,}),
+    Ra3Maj(true, false, new Pitch[]{Ra3, Me3, Fa3, Fi3, Le3, Se3, Do4, Ra3,}),
+    Re3Maj(true, false, new Pitch[]{Re3, Mi3, Fi3, So3, La3, Si3, Ra3, Re3,}),
+    Me3Maj(true, false, new Pitch[]{Me3, Fa3, So3, Le3, Se3, Do4, Re3, Me3,}),
+    Mi3Maj(true, false, new Pitch[]{Mi3, Fi3, Le3, La3, Si3, Ra3, Me3, Mi3,}),
+    Fa3Maj(true, true, new Pitch[]{Fa3, So3, La3, Se3, Do4, Re3, Mi3, Fa3,}),
+    Fi3Maj(true, false, new Pitch[]{Fi3, Le3, Se3, Si3, Ra3, Me3, Fa3, Fi3,}),
+    So3Maj(true, true, new Pitch[]{So3, La3, Si3, Do4, Re3, Mi3, Fi3, So3,}),
+    Le3Maj(true, false, new Pitch[]{Le3, Se3, Do4, Ra3, Me3, Fa3, So3, Le3,}),
+    La3Maj(true, false, new Pitch[]{La3, Si3, Ra3, Re3, Mi3, Fi3, Le3, La3,}),
+    Se3Maj(true, false, new Pitch[]{Se3, Do4, Re3, Me3, Fa3, So3, La3, Se3,}),
+    Si3Maj(true, false, new Pitch[]{Si3, Ra3, Me3, Mi3, Fi3, Le3, Se3, Si3,}),
     ;
-
 
     private final boolean major;
     private final boolean primary;
@@ -39,4 +28,15 @@ public enum Scale {
         this.scale = scale;
     }
 
+    public Pitch[] getScale() {
+        return scale;
+    }
+
+    public boolean isMajor() {
+        return major;
+    }
+
+    public boolean isPrimary() {
+        return primary;
+    }
 }

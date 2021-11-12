@@ -4,13 +4,13 @@ import com.harmoneye.math.window.HammingWindow;
 import com.harmoneye.math.window.WindowFunction;
 import org.apache.commons.math3.util.FastMath;
 
-public final class CqtContext {
+public class CqtContext {
     private int octaves = 6;
     private Integer kernelOctaves;
     private double maxFreq = 4186.0090448064;
     private double samplingFreq = 22050;
     private int halftonesPerOctave = 12;
-    private int binsPerHalftone = 5;
+    public static int binsPerHalftone = 5;
     private WindowFunction window = new HammingWindow();
     private double chopThreshold = 0.005;
 

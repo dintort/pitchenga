@@ -7,16 +7,17 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.pitchenga.Pitch.*;
+import static com.pitchenga.Pitchenga.transposeScale;
 
 public enum Riddler {
     //    FuguesOrdered("All fugues ordered",
 //            new Pitch[][][]{{{Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3, Do4,}}}, Pitchenga::ordered, null, null, new int[0]),
     FuguesOrdered("All fugues ordered",
-            new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0]),
+            new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
     ChromaticOneOctave("Chromatic - octave 4",
-            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null, new int[0]),
+            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
     Chromatic("Chromatic - main octaves",
-            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0]),
+            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
     //    Step51("51", new Pitch[][][]{
 //            multiply(new Pitch[]{Do2, Me2, Fi2, La2, Do3,}, 110),
 //            multiply(Sets.octavesDo2ToDo7, 10),
@@ -36,12 +37,38 @@ public enum Riddler {
 //            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
 //            new int[]{0, 1, 0}),
     Step54("54", new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 500),
+            multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 50),
+
             multiply(Sets.octavesDo2ToDo7, 500),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{0, 1, 0}),
+            //fixme: Insturments
+            new int[]{0, 0, 0}, new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
+    BassOct3(null, new Pitch[][][]{
+            //fixme: Order by kvint-kvart cirle
+            //fixme base oct +random inversions +limit range
+            //fixme two-oct voice hints
+            multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 400),
+            multiply(transposeScale(Scale.Do3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.So3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Re3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.La3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Mi3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Si3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Fi3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Ra3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Le3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Me3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Se3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Fa3Maj.getScale(), -1, 0), 50),
+            multiply(Sets.octavesDo2ToDo7, 400),
+            {{Non}},},
+            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
+            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, /*0*/}, new String[] {"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
+    //fixme: Repeat the weekly pairs, but with full scale
     ;
+
+    public final String[] messages;
 
     @SuppressWarnings("SameParameterValue")
     private static Pitch[][] multiply(Pitch[] pitches, int count) {
@@ -61,7 +88,7 @@ public enum Riddler {
             }
             Collections.addAll(result, rows);
         }
-         return result.toArray(new Pitch[0][]);
+        return result.toArray(new Pitch[0][]);
     }
 
     private final String name;
@@ -71,13 +98,17 @@ public enum Riddler {
     public final Hinter hinter;
     public final int[] instruments;
 
-    Riddler(String name, Pitch[][][] scale, Function<Pitchenga, List<Pitch>> riddle, Integer[] octaves, Hinter hinter, int[] instruments) {
-        this.name = name;
+    Riddler(String nameOverride, Pitch[][][] scale, Function<Pitchenga, List<Pitch>> riddle, Integer[] octaves, Hinter hinter, int[] instruments, String[] messages) {
+        if (nameOverride == null) {
+            nameOverride = name();
+        }
+        this.name = nameOverride;
         this.scale = scale;
         this.riddle = riddle;
         this.octaves = octaves;
         this.hinter = hinter;
         this.instruments = instruments;
+        this.messages = messages;
     }
 
     public String toString() {

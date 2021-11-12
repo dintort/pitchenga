@@ -39,6 +39,8 @@ import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.Do;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualizer<AnalyzedFrame> {
+        public static final boolean TARSOS = "true".equals(System.getProperty("com.pitchenga.tarsos.enabled"));
+//    public static final boolean TARSOS = true;
     public static volatile Pitchenga INSTANCE;
     private static final PrintStream log;
     private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
@@ -48,7 +50,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private static final Fugue[] FUGUES = Fugue.values();
     private static final Button[] BUTTONS = Button.values();
     private static final Integer[] ALL_OCTAVES = Arrays.stream(PITCHES).map(pitch -> pitch.octave).filter(octave -> octave >= 0).distinct().toArray(Integer[]::new);
-    //fixme: Move to Scale
+    //fixme: Move to Scale?
     public static final Pitch[] CHROMATIC_SCALE = Arrays.stream(FUGUES).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
     //    public static final Pitch[] DO_MAJ_SCALE = Arrays.stream(FUGUES).filter(fugue -> fugue.pitch.tone.diatonic).map(fugue -> fugue.pitch).toArray(Pitch[]::new);
     //    private static final Pitch[] DO_MAJ_HARM_SCALE = new Pitch[]{Do3, Re3, Mi3, Fa3, So3, Le3, Si3, Do4};
@@ -82,7 +84,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private volatile Pitch[] riddlesQueue = new Pitch[0]; // Not thread-safe
     private static int riddlesPointer = -1; // Not thread-safe
     private StringBuilder riddleInfo; // Not thread-safe
-    private volatile Integer[] instrumentsQueue = new Integer[0];  // Not thread-safe
+    private volatile Integer[] instrumentQueue = new Integer[0];  // Not thread-safe
     private final AtomicReference<Pitch> riddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> prevRiddle = new AtomicReference<>(null);
     private final AtomicReference<Pitch> prevPrevRiddle = new AtomicReference<>(null);
@@ -129,6 +131,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private final JPanel controlPanelPanel = new JPanel();
     private JFrame eye;
     public static volatile boolean showSeriesHint;
+    private volatile String[] messageQueue;
+    private volatile String prevMessage;
 
 
     //fixme: Update the logo with the fixed Me color
@@ -289,23 +293,39 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             if (riddlesPointer >= riddlesQueue.length - 1) {
                 Riddler riddler = getRiddler();
                 riddlesQueue = riddler.riddle.apply(this).toArray(new Pitch[0]);
-                riddleInfo = new StringBuilder();
-                for (int i = 0; i < riddlesQueue.length; i++) {
-                    Pitch riddle = riddlesQueue[i];
-                    riddleInfo.append(i).append(":").append(riddle).append(", ");
-                }
                 riddlesPointer = -1;
             }
 
             Pitch riddle = riddlesQueue[++riddlesPointer];
             OpenGlCircularVisualizer.currentPitch = riddle;
             if (riddle != null) {
+                riddleInfo = new StringBuilder();
+//                for (int i = 0; i < riddlesQueue.length; i++) {
+                int pointer = riddlesPointer;
+                if (pointer < 0) {
+                    pointer = 0;
+                }
+                for (int i = pointer; i < riddlesQueue.length; i++) {
+                    Pitch rdl = riddlesQueue[i];
+                    riddleInfo.append(i).append(":").append(rdl).append(", ");
+                }
                 Integer instrumentChannel;
-                if (instrumentsQueue.length == 0) {
+                if (instrumentQueue.length == 0) {
                     instrumentChannel = 0;
                 } else {
-                    instrumentChannel = instrumentsQueue[riddlesPointer];
+                    instrumentChannel = instrumentQueue[riddlesPointer];
                 }
+                String message = messageQueue[riddlesPointer];
+                if (prevMessage == null || !prevMessage.equals(message)) {
+                    display.text(message);
+                    try {
+                        Scale scale = Scale.valueOf(message + "3Maj");
+                        OpenGlCircularVisualizer.scale = Arrays.stream(scale.getScale()).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
+                    } catch (IllegalArgumentException e) {
+                        OpenGlCircularVisualizer.scale = Arrays.stream(CHROMATIC_SCALE).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
+                    }
+                }
+                prevMessage = message;
                 currentRiddleInstrument = riddleInstrumentChannels[instrumentChannel];
                 debug("riddle=" + riddle + ", pointer=" + riddlesPointer + ", riddles=" + riddleInfo);
                 this.riddle.set(riddle);
@@ -533,13 +553,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             SwingUtilities.invokeLater(() -> {
                 updatePitchSlider(guess, frequency, isKeyboard);
                 frequencyLabel.setText(String.format("%05.1f", frequency));
-                if (!playing) {
-                    OpenGlCircularVisualizer.toneOverrideTarsos = guess.tone;
-                } else {
-                    OpenGlCircularVisualizer.toneOverrideTarsos = null;
+                if (TARSOS) {
+                    if (!playing) {
+                        OpenGlCircularVisualizer.toneOverrideTarsos = guess.tone;
+                    } else {
+                        OpenGlCircularVisualizer.toneOverrideTarsos = null;
+                    }
+                    OpenGlCircularVisualizer.guessColorOverrideTarsos = guessColor;
+                    OpenGlCircularVisualizer.pitchinessColorOverrideTarsos = pitchinessColor;
                 }
-                OpenGlCircularVisualizer.guessColorOverrideTarsos = guessColor;
-                OpenGlCircularVisualizer.pitchinessColorOverrideTarsos = pitchinessColor;
                 boolean answer = getPacer() == Pacer.Answer;
                 if (!playing || answer) {
 //                    updatePianoButtons(guess.tone.getButton());
@@ -581,7 +603,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
         }
         int value = convertPitchToSlider(pitch, frequency);
-        OpenGlCircularVisualizer.sliderOverrideTarsos = value;
+        if (TARSOS) {
+            OpenGlCircularVisualizer.sliderOverrideTarsos = value;
+        }
 
         pitchSlider.setValue(value);
 //        Pitch finalPitch = pitch;
@@ -740,7 +764,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             return;
         }
         Fugue toneFugue = getToneFugue(riddle);
-        OpenGlCircularVisualizer.currentFugue = toneFugue;
+        OpenGlCircularVisualizer.playFugue = toneFugue;
         display.setTones(toneFugue, riddle.tone);
         if (getPacer() != Pacer.Answer) {
             display.setFillColor(riddle.tone.color);
@@ -836,7 +860,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     public List<Pitch> shuffleGroupSeries(boolean shuffleMacroGroups, boolean shuffleGroups) {
-        List<Integer> instrumentsQueue = new ArrayList<>();
+        //fixme: Simplify
+        List<String> messageQueue = new ArrayList<>();
+        List<Integer> instrumentQueue = new ArrayList<>();
         int[] riddleInstruments = getRiddler().instruments;
         if (riddleInstruments == null || riddleInstruments.length == 0) {
             riddleInstruments = new int[]{0};
@@ -847,12 +873,21 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         for (int i = 0; i < scales.length; i++) {
             instrumentGroups.add(riddleInstruments[i % riddleInstruments.length]);
         }
+        Queue<String> messageGroups = new LinkedList<>();
+        String[] riddleMessages = getRiddler().messages;
+        if (riddleMessages == null || riddleMessages.length == 0) {
+            riddleMessages = new String[]{""};
+        }
+        for (int i = 0; i < scales.length; i++) {
+            messageGroups.add(riddleMessages[i % riddleMessages.length]);
+        }
         if (shuffleMacroGroups) {
             Collections.shuffle(scalesList);
         }
         List<Pitch> results = new LinkedList<>();
         for (Pitch[][] scale : scalesList) {
             Integer instrument = instrumentGroups.remove();
+            String message = messageGroups.remove();
             List<List<Pitch>> listLists = Arrays.stream(scale)
                     .flatMap(group -> {
                         List<Pitch> pitches = deduplicate(() -> {
@@ -887,7 +922,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                         for (int i = 0; i < setup.repeats; i++) {
                             multi.add(list);
                             for (int j = 0; j < list.size(); j++) {
-                                instrumentsQueue.add(instrument);
+                                messageQueue.add(message);
+                                instrumentQueue.add(instrument);
                             }
                         }
                         return multi;
@@ -899,7 +935,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             results.addAll(result);
         }
         //fixme: Un-hack - return value rather then assign
-        this.instrumentsQueue = instrumentsQueue.toArray(new Integer[0]);
+        this.instrumentQueue = instrumentQueue.toArray(new Integer[0]);
+        this.messageQueue = messageQueue.toArray(new String[0]);
         debug(results + " are the new riddles multiplied");
         return results;
     }
@@ -1987,10 +2024,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     //fixme: Add selector for the output device
     private void updateMixer() {
-//        if ("false".equals(System.getProperty("com.pitchenga.tarsos.fallback"))) {
-//        if (!"true".equals(System.getProperty("com.pitchenga.tarsos.enabled"))) {
-//            return;
-//        }
+        if (!TARSOS) {
+            return;
+        }
         try {
             if (audioDispatcher != null) {
                 audioDispatcher.stop();
@@ -2091,16 +2127,16 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     //fixme: Extract duplication
-//    @SuppressWarnings("SameParameterValue")
-//    public static Pitch[] transposeScale(Pitch[] scale, int shiftOctaves, int shiftSteps) {
-//        List<Pitch> transposed = new ArrayList<>(scale.length);
-//        for (Pitch next : scale) {
-//            next = transposePitch(next, shiftOctaves, shiftSteps);
-//            transposed.add(next);
-//        }
-//        debug("Transposed scale: " + transposed);
-//        return transposed.toArray(new Pitch[0]);
-//    }
+    @SuppressWarnings("SameParameterValue")
+    public static Pitch[] transposeScale(Pitch[] scale, int shiftOctaves, int shiftSteps) {
+        List<Pitch> transposed = new ArrayList<>(scale.length);
+        for (Pitch next : scale) {
+            next = transposePitch(next, shiftOctaves, shiftSteps);
+            transposed.add(next);
+        }
+        debug("Transposed scale: " + transposed);
+        return transposed.toArray(new Pitch[0]);
+    }
 
     public static Object[] transposeFugue(Object[] fugue, int shiftOctaves) {
         List<Object> transposed = new ArrayList<>(fugue.length);
@@ -2131,15 +2167,19 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         if (messages == null || messages.length == 0) {
             String toPrint = Thread.currentThread().getName();
             System.out.println(toPrint);
-            log.println(toPrint);
-            log.flush();
+            if (log != null) {
+                log.println(toPrint);
+                log.flush();
+            }
         }
         if (messages != null) {
             for (Object message : messages) {
                 String toPrint = Thread.currentThread().getName() + ": " + message;
                 System.out.println(toPrint);
-                log.println(toPrint);
-                log.flush();
+                if (log != null) {
+                    log.println(toPrint);
+                    log.flush();
+                }
             }
         }
     }
