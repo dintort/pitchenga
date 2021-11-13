@@ -43,7 +43,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     protected static final String[] HALFTONE_NAMES = Arrays.stream(Tone.values()).map(tone -> tone.name).toArray(String[]::new);
     public static final Color DARK = new Color(42, 42, 42);
     private static final Color MORE_DARK = new Color(31, 31, 31);
-    private static final Color MORE_DARKER = new Color(10, 10, 10);
+    //    private static final Color MORE_DARKER = new Color(10, 10, 10);
+    private static final Color MORE_DARKER = new Color(21, 21, 21);
     public static volatile Tone toneOverrideTarsos;
     public static int sliderOverrideTarsos;
     public static Color guessColorOverrideTarsos;
@@ -113,29 +114,36 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             playSmoother = new ExpSmoother(octaveBins.length, 0.1);
         }
         System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
-        exaggerateVelocities();
+//        exaggerateVelocities();
         double segmentCountInv = 1.0 / binVelocities.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
     }
 
-    private void exaggerateVelocities() {
-        for (int i = 0; i < binVelocities.length; i++) {
-            double binVelocity = binVelocities[i];
-            if (binVelocity < 0.2) {
-                binVelocity = binVelocity * 0.8;
-            } else if (binVelocity < 0.3) {
-                binVelocity = binVelocity * 0.9;
-            } else if (binVelocity < 0.4) {
-                binVelocity = binVelocity * 0.95;
-            } else if (binVelocity > 0.5) {
-                binVelocity = binVelocity * 1.05;
-            }
-            if (binVelocity > 1.1) {
-                binVelocity = 1.1;
-            }
-            binVelocities[i] = binVelocity;
-        }
-    }
+//    private void exaggerateVelocities() {
+//        if (binVelocities == null || binVelocities.length == 0) {
+//            return;
+//        }
+////        int biggestBinNumber = getBiggestBinNumber();
+//        for (int i = 0; i < binVelocities.length; i++) {
+//            double binVelocity = binVelocities[i];
+////            if (i == biggestBinNumber) {
+////                binVelocity = 1.2;
+////            } else
+//            if (binVelocity < 0.2) {
+//                binVelocity = binVelocity * 0.8;
+//            } else if (binVelocity < 0.3) {
+//                binVelocity = binVelocity * 0.9;
+//            } else if (binVelocity < 0.4) {
+//                binVelocity = binVelocity * 0.95;
+//            } else if (binVelocity > 0.5) {
+//                binVelocity = binVelocity * 1.05;
+//            }
+//            if (binVelocity > 1.15) {
+//                binVelocity = 1.15;
+//            }
+//            binVelocities[i] = binVelocity;
+//        }
+//    }
 
     private void fadeOut() {
         if (binVelocities == null) {
@@ -395,9 +403,21 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             Color color = colorFunction.toColor(binVelocity, toneRatio);
             double velocity = binVelocities[index];
             double myVelocity = velocity;
-            if (biggestBinNumber != i) {
+            if (biggestBinNumber == i) {
+                myVelocity = velocity * 1.3;
+            } else if (velocity < 0.2) {
+                myVelocity = velocity * 0.8;
+            } else if (velocity < 0.3) {
                 myVelocity = velocity * 0.9;
+            } else if (velocity < 0.4) {
+                myVelocity = velocity * 0.95;
+            } else if (velocity > 0.5) {
+                myVelocity = velocity * 1.05;
             }
+            if (myVelocity > 1.15) {
+                myVelocity = 1.15;
+            }
+
 
             double startRadius = radius * myVelocity;
             double startAngle = angle - 0.5 * stepAngle;
@@ -476,7 +496,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
                 color = BLACK;
                 renderer.setColor(color);
                 //fixme: There must be an easier way to draw outline font
-                int offset = 2;
+                int offset = 3;
                 renderer.draw3D(halftoneName, x + offset, y - offset, 0, scaleFactor);
                 renderer.draw3D(halftoneName, x - offset, y + offset, 0, scaleFactor);
                 renderer.draw3D(halftoneName, x + offset, y + offset, 0, scaleFactor);
