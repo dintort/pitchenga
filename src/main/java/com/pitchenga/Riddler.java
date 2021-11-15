@@ -45,7 +45,6 @@ public enum Riddler {
             //fixme: Insturments
             new int[]{0, 0, 0}, new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
     BassOct3(null, new Pitch[][][]{
-            //fixme: Order by kvint-kvart cirle
             //fixme base oct +random inversions +limit range
             //fixme two-oct voice hints
             multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 400),
@@ -64,7 +63,7 @@ public enum Riddler {
             multiply(Sets.octavesDo2ToDo7, 400),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, /*0*/}, new String[] {"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
+            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}, new String[] {"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
     //fixme: Repeat the weekly pairs, but with full scale
     ;
 

@@ -133,7 +133,7 @@ public class Display extends JPanel {
 //                    textArea.setVisible(false);
                     OpenGlCircularVisualizer.text = null;
                 }),
-                3, TimeUnit.SECONDS);
+                7, TimeUnit.SECONDS);
 //        text(message, null, null);
 //    }
 //
