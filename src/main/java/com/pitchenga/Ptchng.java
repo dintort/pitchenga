@@ -43,7 +43,7 @@ public class Ptchng extends Setup {
 //        keyboardInstrument = Instrument.ELECTRIC_PIANO_2;
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
-        seriesLength = 4;
+        seriesLength = 3;
         repeats = 3;
 //        series = 1;
 //        repeat = 1;
