@@ -273,7 +273,6 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         return tone;
     }
 
-    //fixme: Restore
     private void drawTuner(GL2 gl) {
         if (!TARSOS) {
             return;
@@ -296,16 +295,16 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             color = BLACK;
         }
 
-        double startAngle = angle - 0.3 * stepAngle;
+        double startAngle = angle - 0.4 * stepAngle;
         double sinStartAngle = FastMath.sin(startAngle);
         double cosStartAngle = FastMath.cos(startAngle);
 
-        double endAngle = angle + 0.3 * stepAngle;
+        double endAngle = angle + 0.4 * stepAngle;
         double sinEndAngle = FastMath.sin(endAngle);
         double cosEndAngle = FastMath.cos(endAngle);
 
         double outerRadius = 0.98;
-        double outerOuterRadius = outerRadius + 0.01;
+        double outerOuterRadius = outerRadius + 0.02;
         gl.glBegin(GL.GL_TRIANGLES);
         gl.glColor3ub((byte) color.getRed(),
                 (byte) color.getGreen(),
@@ -313,7 +312,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
         double innerRadius;
         innerRadius = outerRadius;
-        outerRadius = outerRadius - 0.03;
+        outerRadius = outerRadius - 0.04;
 
         double centerAngle = angle - 0.000000001 * stepAngle;
         double sinCenterAngle = FastMath.sin(centerAngle);
@@ -322,7 +321,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         gl.glVertex2d(innerRadius * sinStartAngle, innerRadius * cosStartAngle);
         gl.glVertex2d(innerRadius * sinEndAngle, innerRadius * cosEndAngle);
         gl.glEnd();
-        //fixme: draw a rectangle instead of two circles
+        //fixme: draw a rectangle instead of two triangles
         gl.glBegin(GL.GL_TRIANGLES);
         gl.glVertex2d(outerOuterRadius * sinCenterAngle, outerOuterRadius * cosCenterAngle);
         gl.glVertex2d(innerRadius * sinStartAngle, innerRadius * cosStartAngle);
@@ -346,9 +345,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     }
 
     private void drawPitchClassFrame(GL2 gl) {
-
         Color color;
         double halfToneCountInv = 1.0 / HALFTONE_NAMES.length;
+        gl.glLineWidth(2f);
         gl.glBegin(GL.GL_LINES);
         for (int i = 0; i < HALFTONE_NAMES.length; i++) {
             Tone tone = Tone.values()[i];
@@ -361,22 +360,21 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
                     (byte) color.getBlue());
 
             double angle = 2 * FastMath.PI * (i * halfToneCountInv);
+            double radius = 0.70;
             double sin = FastMath.sin(angle);
             double cos = FastMath.cos(angle);
-            double lineRadius = 0.70;
-            double x = lineRadius * sin;
-            double y = lineRadius * cos;
+            double x = radius * sin;
+            double y = radius * cos;
             gl.glVertex2d(x, y);
             gl.glVertex2d(0, 0);
 
-            lineRadius = 1;
-            x = lineRadius * sin;
-            y = lineRadius * cos;
+            radius = 1;
+            x = radius * sin;
+            y = radius * cos;
             gl.glVertex2d(x, y);
-
-            lineRadius = 0.94;
-            x = lineRadius * sin;
-            y = lineRadius * cos;
+            radius = 0.935;
+            x = radius * sin;
+            y = radius * cos;
             gl.glVertex2d(x, y);
         }
         gl.glEnd();

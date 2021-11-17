@@ -302,9 +302,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 riddleInfo = new StringBuilder();
 //                for (int i = 0; i < riddlesQueue.length; i++) {
                 int pointer = riddlesPointer;
-                if (pointer < 0) {
-                    pointer = 0;
-                }
                 for (int i = pointer; i < riddlesQueue.length; i++) {
                     Pitch rdl = riddlesQueue[i];
                     riddleInfo.append(i).append(":").append(rdl).append(", ");
