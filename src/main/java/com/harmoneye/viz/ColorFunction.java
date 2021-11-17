@@ -33,7 +33,7 @@ public class ColorFunction {
 //		double pitchyDiff = Math.abs(guess.frequency - pitchy.frequency);
         double pitchyDiff = Math.abs(toneRatio - pitchy.ordinal());
         double inaccuracy = Math.abs(diff) / pitchyDiff;
-        inaccuracy = inaccuracy * 40;
+        inaccuracy = inaccuracy * 50;
         Color toneColor = guess.tone.color;
         Pair<Color, Color> guessAndPitchinessColor = Pitchenga.getGuessAndPitchinessColor(diff, pitchy, inaccuracy, toneColor);
         Color color = guessAndPitchinessColor.left;
@@ -46,7 +46,6 @@ public class ColorFunction {
         if (colorVelocity > 1) {
             colorVelocity = 1;
         }
-        //fixme: restore
         color = Pitchenga.interpolateColor(colorVelocity, Color.black, color);
         return color;
 

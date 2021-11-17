@@ -35,6 +35,7 @@ import static java.awt.Color.white;
 // TODO: rewrite to use vertex buffers instead of immediate mode
 public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
+    public static final boolean DRAW_SNOWFLAKE = false;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
@@ -43,7 +44,6 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     protected static final String[] HALFTONE_NAMES = Arrays.stream(Tone.values()).map(tone -> tone.name).toArray(String[]::new);
     public static final Color DARK = new Color(42, 42, 42);
     private static final Color MORE_DARK = new Color(31, 31, 31);
-    //    private static final Color MORE_DARKER = new Color(10, 10, 10);
     private static final Color MORE_DARKER = new Color(21, 21, 21);
     public static volatile Tone toneOverrideTarsos;
     public static int sliderOverrideTarsos;
@@ -98,52 +98,59 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         if (pcProfile == null) {
             return;
         }
-        double[] octaveBins = pcProfile.getOctaveBins();
+        CqtContext cqtContext = pcProfile.getCqtContext();
+        binsPerHalftone = cqtContext.getBinsPerHalftone();
+        halftoneCount = cqtContext.getHalftonesPerOctave();
+
         if (!RECORD_VIDEO && Pitchenga.isPlaying()) {
             return;
         }
 
-        CqtContext cqtContext = pcProfile.getCqtContext();
-        binsPerHalftone = cqtContext.getBinsPerHalftone();
-        halftoneCount = cqtContext.getHalftonesPerOctave();
+        double[] octaveBins = pcProfile.getOctaveBins();
         if (octaveBins == null || octaveBins.length == 0) {
             return;
         }
-        if (binVelocities == null || binVelocities.length != octaveBins.length) {
-            binVelocities = new double[octaveBins.length];
-            playSmoother = new ExpSmoother(octaveBins.length, 0.1);
+        if (DRAW_SNOWFLAKE) {
+            drawSnowflake();
+        } else {
+            if (binVelocities == null || binVelocities.length != octaveBins.length) {
+                binVelocities = new double[octaveBins.length];
+                playSmoother = new ExpSmoother(octaveBins.length, 0.1);
+            }
+            System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
         }
-        System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
-//        exaggerateVelocities();
         double segmentCountInv = 1.0 / binVelocities.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
+
     }
 
-//    private void exaggerateVelocities() {
-//        if (binVelocities == null || binVelocities.length == 0) {
-//            return;
-//        }
-////        int biggestBinNumber = getBiggestBinNumber();
-//        for (int i = 0; i < binVelocities.length; i++) {
-//            double binVelocity = binVelocities[i];
-////            if (i == biggestBinNumber) {
-////                binVelocity = 1.2;
-////            } else
-//            if (binVelocity < 0.2) {
-//                binVelocity = binVelocity * 0.8;
-//            } else if (binVelocity < 0.3) {
-//                binVelocity = binVelocity * 0.9;
-//            } else if (binVelocity < 0.4) {
-//                binVelocity = binVelocity * 0.95;
-//            } else if (binVelocity > 0.5) {
-//                binVelocity = binVelocity * 1.05;
-//            }
-//            if (binVelocity > 1.15) {
-//                binVelocity = 1.15;
-//            }
-//            binVelocities[i] = binVelocity;
-//        }
-//    }
+    private void drawSnowflake() {
+        double[] velocities = new double[108];
+        for (int i = 0; i < velocities.length; i++) {
+            double velocity;
+            int ii = 5 + i;
+            int mod = ii % 9;
+            if (mod == 0) {
+                velocity = 1.2;
+            } else if (mod == 2) {
+                velocity = 0.8;
+            } else if (mod == 3) {
+                velocity = 0.6;
+            } else if (mod == 4) {
+                velocity = 0.3;
+            } else if (mod == 5) {
+                velocity = 0.3;
+            } else if (mod == 6) {
+                velocity = 0.6;
+            } else if (mod == 7) {
+                velocity = 0.8;
+            } else {
+                velocity = 0.9;
+            }
+            velocities[i] = velocity;
+        }
+        binVelocities = velocities;
+    }
 
     private void fadeOut() {
         if (binVelocities == null) {
@@ -274,7 +281,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     }
 
     private void drawTuner(GL2 gl) {
-        if (!TARSOS) {
+        if (!TARSOS || DRAW_SNOWFLAKE) {
             return;
         }
         if (binsPerHalftone == 0) {
@@ -393,9 +400,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
             int index = movedPitchClass * binsPerHalftone + binInPitchClass;
 
-            double toneRatio = i / ((double) binVelocities.length / (double) Tone.values().length);
-            //fixme: un-hack
-            toneRatio = toneRatio - 0.4;
+            double toneRatio = (i - 5) / ((double) binVelocities.length / (double) Tone.values().length);
 
             double binVelocity = binVelocities[i];
             Color color = colorFunction.toColor(binVelocity, toneRatio);
@@ -490,7 +495,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             int x = (int) (centerX + radius * size * FastMath.sin(angle) - offsetX);
             int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
             Color color;
-            if ((tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i]))) {
+            if (DRAW_SNOWFLAKE || (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i]))) {
                 color = BLACK;
                 renderer.setColor(color);
                 //fixme: There must be an easier way to draw outline font

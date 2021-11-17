@@ -11,6 +11,7 @@ import org.simplericity.macify.eawt.DefaultApplication;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 @SuppressWarnings("unused")
 public class Ptchng extends Setup {
@@ -93,6 +94,7 @@ public class Ptchng extends Setup {
     }
 
     public static void main(String[] args) throws InvocationTargetException, InterruptedException {
+        System.out.println(Arrays.toString(args));
 //        System.setProperty("com.pitchenga.debug", "true");
         System.setProperty("com.pitchenga.setup.class", "com.pitchenga.Ptchng");
 
