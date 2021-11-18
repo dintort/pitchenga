@@ -36,6 +36,7 @@ import static java.awt.Color.white;
 public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
     public static final boolean DRAW_SNOWFLAKE = false;
+//    public static final boolean DRAW_SNOWFLAKE = true;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
@@ -132,20 +133,14 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             int mod = ii % 9;
             if (mod == 0) {
                 velocity = 1.2;
-            } else if (mod == 2) {
-                velocity = 0.8;
-            } else if (mod == 3) {
-                velocity = 0.6;
-            } else if (mod == 4) {
-                velocity = 0.3;
-            } else if (mod == 5) {
-                velocity = 0.3;
-            } else if (mod == 6) {
-                velocity = 0.6;
-            } else if (mod == 7) {
-                velocity = 0.8;
+            } else if (mod == 1 || mod == 8) {
+                velocity = 0.87;
+            } else if (mod == 2 || mod == 7) {
+                velocity = 0.75;
+            } else if (mod == 3 || mod == 6) {
+                velocity = 0.65;
             } else {
-                velocity = 0.9;
+                velocity = 0.3;
             }
             velocities[i] = velocity;
         }

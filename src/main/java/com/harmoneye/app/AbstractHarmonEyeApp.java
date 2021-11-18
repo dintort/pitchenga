@@ -66,6 +66,7 @@ public class AbstractHarmonEyeApp {
 //		frame.setSize(512, 512);
         if (visualizer instanceof OpenGlCircularVisualizer) {
             frame.setSize(700, 710);
+//            frame.setSize(1080, 710);
         } else if (visualizer instanceof OpenGlLinearVisualizer) {
             frame.setSize(1900, 620);
         }
