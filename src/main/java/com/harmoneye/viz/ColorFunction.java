@@ -46,7 +46,9 @@ public class ColorFunction {
         if (colorVelocity > 1) {
             colorVelocity = 1;
         }
-        color = Pitchenga.interpolateColor(colorVelocity, Color.black, color);
+        if (!OpenGlCircularVisualizer.DRAW_SNOWFLAKE) {
+            color = Pitchenga.interpolateColor(colorVelocity, Color.black, color);
+        }
         return color;
 
 ////		double toneRatio = (double) biggest / ((double) values.length / (double) TONES.length);

@@ -395,7 +395,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
             int index = movedPitchClass * binsPerHalftone + binInPitchClass;
 
-            double toneRatio = (i - 5) / ((double) binVelocities.length / (double) Tone.values().length);
+            int ii = i - 4;
+            double toneRatio = ii / ((double) binVelocities.length / (double) Tone.values().length);
 
             double binVelocity = binVelocities[i];
             Color color = colorFunction.toColor(binVelocity, toneRatio);

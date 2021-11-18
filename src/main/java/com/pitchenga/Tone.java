@@ -19,7 +19,7 @@ public enum Tone {
     Fa("F", true, new Color(0, 255, 0), Color.WHITE),
     Fi("F#", false, new Color(0, 127, 127), Color.WHITE),
     So("G", true, new Color(0, 255, 255), Color.WHITE),
-    Le("Ab", false, new Color(0, 63, 127), Color.WHITE),
+    Le("Ab", false, new Color(0, 42, 137), Color.WHITE),
     La("A", true, new Color(0, 0, 255), Color.WHITE),
     Se("Bb", false, new Color(127, 0, 255), Color.WHITE),
     Si("B", true, new Color(255, 0, 255), Color.WHITE),
