@@ -282,7 +282,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         if (binsPerHalftone == 0) {
             return;
         }
-        if (Pitchenga.isPlaying()) {
+        if (Pitchenga.isPlaying() /* && !Pitchenga.showSeriesHint*/) {
             return;
         }
 

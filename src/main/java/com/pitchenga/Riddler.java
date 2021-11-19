@@ -44,7 +44,7 @@ public enum Riddler {
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             //fixme: Insturments
             new int[]{0, 0, 0}, new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
-    BassOct3(null, new Pitch[][][]{
+    BassOct2MiSe(null, new Pitch[][][]{
             //fixme base oct +random inversions +limit range
             //fixme two-oct voice hints
             multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 400),
@@ -60,7 +60,27 @@ public enum Riddler {
             multiply(transposeScale(Scale.Me3Maj.getScale(), -1, 0), 50),
             multiply(transposeScale(Scale.Se3Maj.getScale(), -1, 0), 50),
             multiply(transposeScale(Scale.Fa3Maj.getScale(), -1, 0), 50),
-            multiply(Sets.octavesDo2ToDo7, 400),
+            multiply(Sets.octavesDo2ToDo7, 300),
+            {{Non}},},
+            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
+            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}, new String[] {"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
+    BassOct2ReLe(null, new Pitch[][][]{
+            //fixme base oct +random inversions +limit range
+            //fixme two-oct voice hints
+            multiply(new Pitch[]{Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, Se2, Si2, Do3,}, 400),
+            multiply(transposeScale(Scale.Do3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.So3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Re3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.La3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Mi3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Si3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Fi3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Ra3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Le3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Me3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Se3Maj.getScale(), -1, 0), 50),
+            multiply(transposeScale(Scale.Fa3Maj.getScale(), -1, 0), 50),
+            multiply(Sets.octavesDo2ToDo7, 300),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}, new String[] {"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
