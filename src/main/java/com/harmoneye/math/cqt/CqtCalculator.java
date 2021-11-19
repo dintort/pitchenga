@@ -23,7 +23,8 @@ public class CqtCalculator {
     public double centerFreq(int binIndex) {
         // (k - binsPerHalftoneHalf) instead of k
         // in order to put the center frequency in the center bin for that halftone
-        return (ctx.getBaseFreq() * FastMath.pow(2, (binIndex - ctx.getBinsPerHalftone() / 2.0) * ctx.getBinsPerOctaveInv()));
+        //fixme: Integer division in floating-point context, but when replacing it with 2.0 it displays sharper than it is.
+        return (ctx.getBaseFreq() * FastMath.pow(2, (binIndex - ctx.getBinsPerHalftone() / 2) * ctx.getBinsPerOctaveInv()));
     }
 
     public int bandWidth(int binIndex) {
