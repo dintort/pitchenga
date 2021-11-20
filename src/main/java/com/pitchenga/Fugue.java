@@ -9,27 +9,34 @@ import static com.pitchenga.Pitch.*;
 
 public enum Fugue {
 
-    Do(Do4, eight, Do4, eight, Do4, four),
-    Ra(Ra4, four, Do4, four),
-    Re(Re4, four, Do4, four),
-    Me(Me4, four, sixteen, Do4, four),
-    Mi(Mi4, four, Re4, sixteen, Do4, four),
-    Fa(Fa4, eight, Mi4, sixteen, Re4, sixteen, Do4, four),
-    Fi(Fi4, eight, So4, sixteen, Do5, four),
-    So(So4, eight, La4, sixteen, Si4, sixteen, Do5, four),
-    Le(Le4, four, So4, sixteen, Do5, four),
-    La(La4, four, Si4, sixteen, Do5, four),
-    Se(Se4, four, sixteen, Do5, four),
-    Si(Si4, four, Do5, four),
-    DoDo(Do5, eight, Do5, eight, Do5, four),
+    Do(Do4, new Pitch[]{Do2, Do3, Do4, Do5, Do6, Do7}, eight, Do4, eight, Do4, four),
+    Ra(Ra4, new Pitch[]{Ra1, Ra2, Ra3, Ra4, Ra5, Ra6}, four, Do4, four),
+    Re(Re4, new Pitch[]{Re1, Re2, Re3, Re4, Re5, Re6}, four, Do4, four),
+    Me(Me4, new Pitch[]{Me1, Me2, Me3, Me4, Me5, Me6}, four, sixteen, Do4, four),
+    Mi(Mi4, new Pitch[]{Mi1, Mi2, Mi3, Mi4, Mi5, Mi6}, four, Re4, sixteen, Do4, four),
+    Fa(Fa4, new Pitch[]{Fa1, Fa2, Fa3, Fa4, Fa5, Fa6}, eight, Mi4, sixteen, Re4, sixteen, Do4, four),
+    Fi(Fi4, new Pitch[]{Fi1, Fi2, Fi3, Fi4, Fi5, Fi6}, eight, So4, sixteen, Do5, four),
+    So(So4, new Pitch[]{So1, So2, So3, So4, So5, So6}, eight, La4, sixteen, Si4, sixteen, Do5, four),
+    Le(Le4, new Pitch[]{Le1, Le2, Le3, Le4, Le5, Le6}, four, So4, sixteen, Do5, four),
+    La(La4, new Pitch[]{La1, La2, La3, La4, La5, La6}, four, Si4, sixteen, Do5, four),
+    Se(Se4, new Pitch[]{Se1, Se2, Se3, Se4, Se5, Se6}, four, sixteen, Do5, four),
+    Si(Si4, new Pitch[]{Si1, Si2, Si3, Si4, Si5, Si6}, four, Do5, four),
+    DoDo(Do5, Do.multiPitch, eight, Do5, eight, Do5, four),
     ;
 
     public final Pitch pitch;
+    public final Pitch[] multiPitch;
+    public final int[] multiPitchMidis;
     public final Object[] tune;
     public final Object[][] intervals;
 
-    Fugue(Pitch pitch, Object... coda) {
+    Fugue(Pitch pitch, Pitch[] multiPitch, Object... coda) {
         this.pitch = pitch;
+        this.multiPitch = multiPitch;
+        this.multiPitchMidis = new int[multiPitch.length];
+        for (int i = 0; i < multiPitch.length; i++) {
+            multiPitchMidis[i] = multiPitch[i].midi;
+        }
         List<Object> tune = new ArrayList<>(coda.length + 1);
         tune.add(pitch);
         tune.addAll(Arrays.asList(coda));

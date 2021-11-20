@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.pitchenga.Duration.four;
 import static com.pitchenga.Pitch.*;
@@ -94,10 +96,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private volatile long lastPacerTimestampMs = 0;
     private volatile long lastBuzzTimestampMs;
     public volatile static boolean frozen = false;
-    private final Map<Button, Integer> pressedButtonToMidi = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
+    private final Map<Button, int[]> pressedButtonToMidis = new HashMap<>(); // To ignore OS's key repeating when holding, also used to remember the modified midi code to release
     private volatile boolean fall = false; // Control - octave down
     private volatile boolean lift = false; // Shift - octave up
-    private volatile Integer octaveShift = -1;
+    private volatile Integer octaveShift = -6;
     private volatile Integer transposeShift = 0;
     //        private final boolean forceMidi = false;
     private final boolean forceMidi = true;
@@ -1352,7 +1354,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 fall = pressed;
             }
             if (pressed && event.getKeyCode() == KeyEvent.VK_Z) {
-                if (octaveShift > -5) {
+                if (octaveShift > -6) {
                     //noinspection NonAtomicOperationOnVolatileField
                     octaveShift--;
                 }
@@ -1438,7 +1440,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        }
         updatePianoButton(button, pressed);
         Pitch thePitch = button.pitch;
-        if (octaveShift != 0) {
+        if (octaveShift != 0 && octaveShift != -6) { //fixme magic number
             thePitch = transposePitch(thePitch, octaveShift, 0);
         }
         if (transposeShift != 0) {
@@ -1451,27 +1453,41 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         } else if (lift) {
             thePitch = transposePitch(thePitch, 1, 0);
         }
-//        debug("octaveShift=" + octaveShift + ", fall=" + fall + ", lift=" + lift + ", pitch=" + button.pitch + ", transposed=" + thePitch);
         Pitch pitch = thePitch;
-        int midi = pitch.midi;
+        //        debug("octaveShift=" + octaveShift + ", fall=" + fall + ", lift=" + lift + ", pitch=" + button.pitch + ", transposed=" + thePitch);
+        int[] midis;
+        if (octaveShift == -6) {
+            midis = pitch.getFugue().multiPitchMidis;
+        } else {
+            midis = new int[]{pitch.midi};
+        }
         if (pressed) {
             updatePitch(pitch, pitch.frequency, 1, 42, true);
-            if (!pressedButtonToMidi.containsKey(button)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
-                pressedButtonToMidi.put(button, midi);
+            if (!pressedButtonToMidis.containsKey(button)) { // Cannot just put() and check the previous value because it overrides the modified midi via OS's key repetition
                 transcribe(pitch, true);
-                midiNoteOn(midi, keyboardInstrumentChannel, 127);
+                pressedButtonToMidis.put(button, midis);
+                for (int midi : midis) {
+                    midiNoteOn(midi, keyboardInstrumentChannel, 127);
+                }
             }
         } else {
-            Integer modifiedMidi = pressedButtonToMidi.remove(button);
-            if (modifiedMidi != null) {
-                midi = modifiedMidi;
+            int[] modifiedMidis = pressedButtonToMidis.remove(button);
+            if (modifiedMidis != null) {
+                midis = modifiedMidis;
             }
-            midiNoteOff(midi, keyboardInstrumentChannel);
+            for (int midi : midis) {
+                midiNoteOff(midi, keyboardInstrumentChannel);
+            }
             if (getPacer() == Pacer.Answer) {
                 playExecutor.execute(() -> guess(pitch, true));
             }
         }
-        Tone[] tones = pressedButtonToMidi.keySet().stream().map(k -> k.pitch.tone).toArray(Tone[]::new);
+
+        Tone[] tones = pressedButtonToMidis.values().stream()
+                .flatMap(mds -> Arrays.stream(mds)
+                        .mapToObj(PITCH_BY_MIDI::get))
+                .map(ptch -> ptch.tone)
+                .toArray(Tone[]::new);
         display.setTones(null, tones);
         display.update();
     }
