@@ -10,6 +10,7 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.Visualizer;
+import org.apache.commons.math3.util.FastMath;
 
 import javax.sound.midi.*;
 import javax.sound.sampled.*;
@@ -409,7 +410,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                         for (Pair<Pitch, Double> pitchAndRms : guessQueuePitchAndRms) {
                             if (!guess.equals(pitchAndRms.left)) {
                                 same = false;
-                                maxRms = Math.max(maxRms, pitchAndRms.right);
+                                maxRms = FastMath.max(maxRms, pitchAndRms.right);
                                 break;
                             }
                         }
@@ -485,8 +486,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        } else {
 //            pitchy = Pitchenga.transposePitch(pitch, 0, +1);
 //        }
-//        double pitchyDiff = Math.abs(pitch.frequency - pitchy.frequency);
-//        double accuracy = Math.abs(diff) / pitchyDiff;
+//        double pitchyDiff = FastMath.abs(pitch.frequency - pitchy.frequency);
+//        double accuracy = FastMath.abs(diff) / pitchyDiff;
 //        accuracy = accuracy * 100;
 //        if (pitch.frequency < frequency) {
 //            value += accuracy;
@@ -509,10 +510,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //            Pitch guess = null;
 
 //            for (Pitch aPitch : PITCHES) {
-//                double diff = Math.abs(aPitch.frequency - pitch);
+//                double diff = FastMath.abs(aPitch.frequency - pitch);
 //                if (diff < 5) {
 //                    if (guess != null) {
-//                        if (Math.abs(guess.frequency - pitch) < diff) {
+//                        if (FastMath.abs(guess.frequency - pitch) < diff) {
 //                            aPitch = guess;
 //                        }
 //                    }
@@ -532,8 +533,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         } else {
             pitchy = transposePitch(guess, 0, +1);
         }
-        double pitchyDiff = Math.abs(guess.frequency - pitchy.frequency);
-        double inaccuracy = Math.abs(diff) / pitchyDiff;
+        double pitchyDiff = FastMath.abs(guess.frequency - pitchy.frequency);
+        double inaccuracy = FastMath.abs(diff) / pitchyDiff;
         Color toneColor = guess.tone.color;
         Pair<Color, Color> guessAndPitchinessColor = getGuessAndPitchinessColor(diff, pitchy, inaccuracy, toneColor);
 //        System.out.println("ptch tone=" + guess.tone + " toneNumber=" + guess.tone.ordinal() + " freq=" + frequency + " pitchy=" + pitchy + " diff="
@@ -576,7 +577,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     public static Pair<Color, Color> getGuessAndPitchinessColor(double diff, Pitch pitchy, double pitchinessDiff, Color toneColor) {
         Pair<Color, Color> guessAndPitchinessColor;
         double pitchiness = pitchinessDiff * 20;
-        if (Math.abs(diff) < 0.000000000042) {
+        if (FastMath.abs(diff) < 0.000000000042) {
             guessAndPitchinessColor = new Pair<>(toneColor, toneColor);
         } else {
             //fixme: Unit test for interpolation, e.g. direction
@@ -604,7 +605,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             OpenGlCircularVisualizer.sliderOverrideTarsos = value;
         }
 
-        pitchSlider.setValue(value);
+//        pitchSlider.setValue(value);
+
 //        Pitch finalPitch = pitch;
 //        Hashtable<Integer, Label> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
 //                p -> convertPitchToSlider(p, 0f),
@@ -633,8 +635,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             } else {
                 pitchy = transposePitch(pitch, 0, +1);
             }
-            double pitchyDiff = Math.abs(pitch.frequency - pitchy.frequency);
-            double accuracy = Math.abs(diff) / pitchyDiff;
+            double pitchyDiff = FastMath.abs(pitch.frequency - pitchy.frequency);
+            double accuracy = FastMath.abs(diff) / pitchyDiff;
             accuracy = accuracy * 100;
             if (pitch.frequency < frequency) {
                 value += accuracy;
@@ -658,10 +660,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private Pitch matchPitch(float pitch) {
         Pitch guess = null;
         for (Pitch aPitch : PITCHES) {
-            double diff = Math.abs(aPitch.frequency - pitch);
+            double diff = FastMath.abs(aPitch.frequency - pitch);
             if (diff < 5) {
                 if (guess != null) {
-                    if (Math.abs(guess.frequency - pitch) < diff) {
+                    if (FastMath.abs(guess.frequency - pitch) < diff) {
                         aPitch = guess;
                     }
                 }

@@ -62,9 +62,9 @@ public class SparseRCComplexMatrix2D {
 
         private final int rows;
         private final int columns;
-        private final ArrayList<Double> elements = new ArrayList<Double>();
-        private final ArrayList<Integer> columnIndexes = new ArrayList<Integer>();
-        private final ArrayList<Integer> rowPointers = new ArrayList<Integer>();
+        private final ArrayList<Double> elements = new ArrayList<>();
+        private final ArrayList<Integer> columnIndexes = new ArrayList<>();
+        private final ArrayList<Integer> rowPointers = new ArrayList<>();
 
         public Builder(int rows, int columns) {
             this.rows = rows;
@@ -134,14 +134,12 @@ public class SparseRCComplexMatrix2D {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append(getClass().getSimpleName()).append(' ');
-        sb.append(rows).append('x').append(columns).append('\n');
-        sb.append("elements:").append(Arrays.toString(elements)).append('\n');
-        sb.append("columnIndexes:").append(Arrays.toString(columnIndexes))
-                .append('\n');
-        sb.append("rowPointers:").append(Arrays.toString(rowPointers))
-                .append('\n');
-        return sb.toString();
+        return getClass().getSimpleName() + ' ' +
+                rows + 'x' + columns + '\n' +
+                "elements:" + Arrays.toString(elements) + '\n' +
+                "columnIndexes:" + Arrays.toString(columnIndexes) +
+                '\n' +
+                "rowPointers:" + Arrays.toString(rowPointers) +
+                '\n';
     }
 }

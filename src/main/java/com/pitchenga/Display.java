@@ -1,6 +1,7 @@
 package com.pitchenga;
 
 import com.harmoneye.viz.OpenGlCircularVisualizer;
+import org.apache.commons.math3.util.FastMath;
 
 import javax.swing.*;
 import java.awt.*;
@@ -174,7 +175,7 @@ public class Display extends JPanel {
 
     private void scaleFontAndUpdate() {
         Dimension size = getSize();
-        int min = Math.min(size.height, size.width);
+        int min = FastMath.min(size.height, size.width);
         int fontSize = min / 42;
         Font font = Pitchenga.MONOSPACED.deriveFont((float) fontSize);
         setLabelsFont(font);
@@ -410,8 +411,8 @@ public class Display extends JPanel {
                 } else {
                     pitchy = Pitchenga.transposePitch(pitch, 0, +1);
                 }
-                double pitchyDiff = Math.abs(pitch.frequency - pitchy.frequency);
-                double accuracy = Math.abs(diff) / pitchyDiff;
+                double pitchyDiff = FastMath.abs(pitch.frequency - pitchy.frequency);
+                double accuracy = FastMath.abs(diff) / pitchyDiff;
                 accuracy = accuracy * 100;
                 if (pitch.frequency < frequency) {
                     value += accuracy;
@@ -423,7 +424,7 @@ public class Display extends JPanel {
         }
 
         private int getBorderThickness() {
-            int thickness = (Math.min(getWidth(), getHeight()) / 7) / 50;
+            int thickness = (FastMath.min(getWidth(), getHeight()) / 7) / 50;
             if (thickness == 0) {
                 thickness = 1;
             }
@@ -567,7 +568,7 @@ public class Display extends JPanel {
         }
 
         private int getBorderThickness() {
-            int thickness = (Math.min(getWidth(), getHeight()) / frets[0].length) / 18;
+            int thickness = (FastMath.min(getWidth(), getHeight()) / frets[0].length) / 18;
             if (thickness == 0) {
                 thickness = 1;
             }
@@ -675,15 +676,15 @@ public class Display extends JPanel {
 
             for (int i = 0; i < TONES.length; i++) {
                 Tone myTone = TONES[i];
-                double phi = (i * Math.PI * 2) / TONES.length;
+                double phi = (i * FastMath.PI * 2) / TONES.length;
                 int x;
                 int y;
 //                if (myTone.diatonic) {
-                x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
-                y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
+                x = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.sin(phi) + halfSide - halfRadius + radius);
+                y = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.cos(phi) + halfSide - halfRadius + radius);
 //                } else {
-//                    x = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi) + halfSide - halfRadius + radius);
-//                    y = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi) + halfSide - halfRadius + radius);
+//                    x = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.sin(phi) + halfSide - halfRadius + radius);
+//                    y = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.cos(phi) + halfSide - halfRadius + radius);
 //                }
 
                 Color labelColor;
@@ -703,9 +704,9 @@ public class Display extends JPanel {
                     } else {
 //                        labelColor = Color.WHITE;
                         labelColor = myTone.diatonic ? Color.BLACK : Color.WHITE;
-                        double phi2 = (i * Math.PI * 2) / TONES.length;
-                        int x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
-                        int y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
+                        double phi2 = (i * FastMath.PI * 2) / TONES.length;
+                        int x2 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.sin(phi2) + halfSide + halfRadius + radius);
+                        int y2 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.cos(phi2) + halfSide + halfRadius + radius);
 //                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
 //                        triangle(graphics, offset, gap, fullSide, halfSide, radius, halfRadius, i, myTone.color, false, myTone.diatonic);
                         graphics.setColor(myTone.color);
@@ -738,22 +739,22 @@ public class Display extends JPanel {
         }
 
         private void triangle(Graphics graphics, int offset, int gap, int fullSide, int halfSide, int radius, int halfRadius, int i, Color color, boolean fill, boolean diatonic) {
-            double phi2 = ((i - 0.2) * Math.PI * 2) / TONES.length;
-            double phi3 = ((i + 0.2) * Math.PI * 2) / TONES.length;
+            double phi2 = ((i - 0.2) * FastMath.PI * 2) / TONES.length;
+            double phi3 = ((i + 0.2) * FastMath.PI * 2) / TONES.length;
             int x2;
             int y2;
             int x3;
             int y3;
 //            if (diatonic) {
-            x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
-            y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
-            x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
-            y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
+            x2 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.sin(phi2) + halfSide + halfRadius + radius);
+            y2 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.cos(phi2) + halfSide + halfRadius + radius);
+            x3 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.sin(phi3) + halfSide + halfRadius + radius);
+            y3 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.cos(phi3) + halfSide + halfRadius + radius);
 //            } else {
-//                x2 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi2) + halfSide + halfRadius + radius);
-//                y2 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi2) + halfSide + halfRadius + radius);
-//                x3 = (int) Math.round(gap / 4.0 + halfSide * Math.sin(phi3) + halfSide + halfRadius + radius);
-//                y3 = (int) Math.round(gap / 4.0 + halfSide * Math.cos(phi3) + halfSide + halfRadius + radius);
+//                x2 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.sin(phi2) + halfSide + halfRadius + radius);
+//                y2 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.cos(phi2) + halfSide + halfRadius + radius);
+//                x3 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.sin(phi3) + halfSide + halfRadius + radius);
+//                y3 = (int) FastMath.round(gap / 4.0 + halfSide * FastMath.cos(phi3) + halfSide + halfRadius + radius);
 //            }
             int[] xPoints = {x2 + offset, x3 + offset, fullSide / 2 + offset};
             int[] yPoints = {y2, y3, fullSide / 2};

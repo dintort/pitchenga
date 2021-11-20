@@ -30,7 +30,7 @@ public class ComplexVector {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int i = 0; i < elements.length; i++) {
             if (i > 0) {

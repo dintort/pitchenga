@@ -18,7 +18,7 @@ public class SpectralEqualizer {
         this.size = size;
         this.windowSize = windowSize;
 
-        medianFilter = new Median(windowSize, true);
+        medianFilter = new Median(windowSize);
 
         filteredValues = new double[size];
         window = new double[windowSize];

@@ -9,6 +9,8 @@ CERN makes no representations about the suitability of this software for any pur
 It is provided "as is" without expressed or implied warranty.
  */
 
+import org.apache.commons.math3.util.FastMath;
+
 /**
  * Complex arithmetic
  *
@@ -16,35 +18,35 @@ It is provided "as is" without expressed or implied warranty.
  */
 public class DComplex {
 
-    public static final double abs(double[] x) {
-        double absX = Math.abs(x[0]);
-        double absY = Math.abs(x[1]);
+    public static double abs(double[] x) {
+        double absX = FastMath.abs(x[0]);
+        double absY = FastMath.abs(x[1]);
         if (absX == 0.0 && absY == 0.0) {
             return 0.0;
         } else if (absX >= absY) {
             double d = x[1] / x[0];
-            return absX * Math.sqrt(1.0 + d * d);
+            return absX * FastMath.sqrt(1.0 + d * d);
         } else {
             double d = x[0] / x[1];
-            return absY * Math.sqrt(1.0 + d * d);
+            return absY * FastMath.sqrt(1.0 + d * d);
         }
     }
 
-    public static final double abs(double re, double im) {
-        double absX = Math.abs(re);
-        double absY = Math.abs(im);
+    public static double abs(double re, double im) {
+        double absX = FastMath.abs(re);
+        double absY = FastMath.abs(im);
         if (absX == 0.0 && absY == 0.0) {
             return 0.0;
         } else if (absX >= absY) {
             double d = im / re;
-            return absX * Math.sqrt(1.0 + d * d);
+            return absX * FastMath.sqrt(1.0 + d * d);
         } else {
             double d = re / im;
-            return absY * Math.sqrt(1.0 + d * d);
+            return absY * FastMath.sqrt(1.0 + d * d);
         }
     }
 
-    public static final double[] acos(double[] x) {
+    public static double[] acos(double[] x) {
         double[] z = new double[2];
 
         double re, im;
@@ -62,23 +64,23 @@ public class DComplex {
         z[0] = x[0] + re;
         z[1] = x[1] + im;
 
-        re = Math.log(abs(z));
-        im = Math.atan2(z[1], z[0]);
+        re = FastMath.log(abs(z));
+        im = FastMath.atan2(z[1], z[0]);
 
         z[0] = im;
         z[1] = -re;
         return z;
     }
 
-    public static final double arg(double[] x) {
-        return Math.atan2(x[1], x[0]);
+    public static double arg(double[] x) {
+        return FastMath.atan2(x[1], x[0]);
     }
 
-    public static final double arg(double re, double im) {
-        return Math.atan2(im, re);
+    public static double arg(double re, double im) {
+        return FastMath.atan2(im, re);
     }
 
-    public static final double[] asin(double[] x) {
+    public static double[] asin(double[] x) {
         double[] z = new double[2];
 
         double re, im;
@@ -96,15 +98,15 @@ public class DComplex {
         z[0] = z[0] + re;
         z[1] = z[1] + im;
 
-        re = Math.log(abs(z));
-        im = Math.atan2(z[1], z[0]);
+        re = FastMath.log(abs(z));
+        im = FastMath.atan2(z[1], z[0]);
 
         z[0] = im;
         z[1] = -re;
         return z;
     }
 
-    public static final double[] atan(double[] x) {
+    public static double[] atan(double[] x) {
         double[] z = new double[2];
 
         double re, im;
@@ -117,8 +119,8 @@ public class DComplex {
 
         z = div(z, re, im);
 
-        re = Math.log(abs(z));
-        im = Math.atan2(z[1], z[0]);
+        re = FastMath.log(abs(z));
+        im = FastMath.atan2(z[1], z[0]);
 
         z[0] = 0.5 * im;
         z[1] = -0.5 * re;
@@ -126,14 +128,14 @@ public class DComplex {
         return z;
     }
 
-    public static final double[] conj(double[] x) {
+    public static double[] conj(double[] x) {
         double[] z = new double[2];
         z[0] = x[0];
         z[1] = -x[1];
         return z;
     }
 
-    public static final double[] cos(double[] x) {
+    public static double[] cos(double[] x) {
         double[] z = new double[2];
 
         double re1, im1, re2, im2;
@@ -143,13 +145,13 @@ public class DComplex {
         iz_re = -x[1];
         iz_im = x[0];
 
-        scalar = Math.exp(iz_re);
-        re1 = scalar * Math.cos(iz_im);
-        im1 = scalar * Math.sin(iz_im);
+        scalar = FastMath.exp(iz_re);
+        re1 = scalar * FastMath.cos(iz_im);
+        im1 = scalar * FastMath.sin(iz_im);
 
-        scalar = Math.exp(-iz_re);
-        re2 = scalar * Math.cos(-iz_im);
-        im2 = scalar * Math.sin(-iz_im);
+        scalar = FastMath.exp(-iz_re);
+        re2 = scalar * FastMath.cos(-iz_im);
+        im2 = scalar * FastMath.sin(-iz_im);
 
         re1 = re1 + re2;
         im1 = im1 + im2;
@@ -160,11 +162,11 @@ public class DComplex {
         return z;
     }
 
-    public static final double[] div(double[] x, double re, double im) {
+    public static double[] div(double[] x, double re, double im) {
         double[] z = new double[2];
         double scalar;
 
-        if (Math.abs(re) >= Math.abs(im)) {
+        if (FastMath.abs(re) >= FastMath.abs(im)) {
             scalar = 1.0 / (re + im * (im / re));
 
             z[0] = scalar * (x[0] + x[1] * (im / re));
@@ -180,35 +182,35 @@ public class DComplex {
         return z;
     }
 
-    public static final double[] div(double[] x, double[] y) {
+    public static double[] div(double[] x, double[] y) {
         return div(x, y[0], y[1]);
     }
 
-    public static final double equals(double[] x, double[] y, double tol) {
-        if (abs(x[0] - y[0], x[1] - y[1]) <= Math.abs(tol)) {
+    public static double equals(double[] x, double[] y, double tol) {
+        if (abs(x[0] - y[0], x[1] - y[1]) <= FastMath.abs(tol)) {
             return 1;
         } else {
             return 0;
         }
     }
 
-    public static final boolean isEqual(double[] x, double[] y, double tol) {
-        return abs(x[0] - y[0], x[1] - y[1]) <= Math.abs(tol);
+    public static boolean isEqual(double[] x, double[] y, double tol) {
+        return abs(x[0] - y[0], x[1] - y[1]) <= FastMath.abs(tol);
     }
 
-    public static final double[] exp(double[] x) {
+    public static double[] exp(double[] x) {
         double[] z = new double[2];
-        double scalar = Math.exp(x[0]);
-        z[0] = scalar * Math.cos(x[1]);
-        z[1] = scalar * Math.sin(x[1]);
+        double scalar = FastMath.exp(x[0]);
+        z[0] = scalar * FastMath.cos(x[1]);
+        z[1] = scalar * FastMath.sin(x[1]);
         return z;
     }
 
-    public static final double[] inv(double[] x) {
+    public static double[] inv(double[] x) {
         double[] z = new double[2];
         if (x[1] != 0.0) {
             double scalar;
-            if (Math.abs(x[0]) >= Math.abs(x[1])) {
+            if (FastMath.abs(x[0]) >= FastMath.abs(x[1])) {
                 scalar = 1.0 / (x[0] + x[1] * (x[1] / x[0]));
                 z[0] = scalar;
                 z[1] = scalar * (-x[1] / x[0]);
@@ -224,96 +226,96 @@ public class DComplex {
         return z;
     }
 
-    public static final double[] log(double[] x) {
+    public static double[] log(double[] x) {
         double[] z = new double[2];
-        z[0] = Math.log(abs(x));
+        z[0] = FastMath.log(abs(x));
         z[1] = arg(x);
         return z;
     }
 
-    public static final double[] minus(double[] x, double[] y) {
+    public static double[] minus(double[] x, double[] y) {
         double[] z = new double[2];
         z[0] = x[0] - y[0];
         z[1] = x[1] - y[1];
         return z;
     }
 
-    public static final double[] minusAbs(double[] x, double[] y) {
+    public static double[] minusAbs(double[] x, double[] y) {
         double[] z = new double[2];
-        z[0] = Math.abs(x[0] - y[0]);
-        z[1] = Math.abs(x[1] - y[1]);
+        z[0] = FastMath.abs(x[0] - y[0]);
+        z[1] = FastMath.abs(x[1] - y[1]);
         return z;
     }
 
-    public static final double[] mult(double[] x, double y) {
+    public static double[] mult(double[] x, double y) {
         double[] z = new double[2];
         z[0] = x[0] * y;
         z[1] = x[1] * y;
         return z;
     }
 
-    public static final double[] mult(double[] x, double[] y) {
+    public static double[] mult(double[] x, double[] y) {
         double[] z = new double[2];
         z[0] = x[0] * y[0] - x[1] * y[1];
         z[1] = x[1] * y[0] + x[0] * y[1];
         return z;
     }
 
-    public static final double[] neg(double[] x) {
+    public static double[] neg(double[] x) {
         double[] z = new double[2];
         z[0] = -x[0];
         z[1] = -x[1];
         return z;
     }
 
-    public static final double[] plus(double[] x, double[] y) {
+    public static double[] plus(double[] x, double[] y) {
         double[] z = new double[2];
         z[0] = x[0] + y[0];
         z[1] = x[1] + y[1];
         return z;
     }
 
-    public static final double[] pow(double[] x, double y) {
+    public static double[] pow(double[] x, double y) {
         double[] z = new double[2];
-        double re = y * Math.log(abs(x));
+        double re = y * FastMath.log(abs(x));
         double im = y * arg(x);
-        double scalar = Math.exp(re);
-        z[0] = scalar * Math.cos(im);
-        z[1] = scalar * Math.sin(im);
+        double scalar = FastMath.exp(re);
+        z[0] = scalar * FastMath.cos(im);
+        z[1] = scalar * FastMath.sin(im);
         return z;
     }
 
-    public static final double[] pow(double x, double[] y) {
+    public static double[] pow(double x, double[] y) {
         double[] z = new double[2];
-        double re = Math.log(Math.abs(x));
-        double im = Math.atan2(0.0, x);
+        double re = FastMath.log(FastMath.abs(x));
+        double im = FastMath.atan2(0.0, x);
 
         double re2 = (re * y[0]) - (im * y[1]);
         double im2 = (re * y[1]) + (im * y[0]);
 
-        double scalar = Math.exp(re2);
+        double scalar = FastMath.exp(re2);
 
-        z[0] = scalar * Math.cos(im2);
-        z[1] = scalar * Math.sin(im2);
+        z[0] = scalar * FastMath.cos(im2);
+        z[1] = scalar * FastMath.sin(im2);
         return z;
     }
 
-    public static final double[] pow(double[] x, double[] y) {
+    public static double[] pow(double[] x, double[] y) {
         double[] z = new double[2];
-        double re = Math.log(abs(x));
+        double re = FastMath.log(abs(x));
         double im = arg(x);
 
         double re2 = (re * y[0]) - (im * y[1]);
         double im2 = (re * y[1]) + (im * y[0]);
 
-        double scalar = Math.exp(re2);
+        double scalar = FastMath.exp(re2);
 
-        z[0] = scalar * Math.cos(im2);
-        z[1] = scalar * Math.sin(im2);
+        z[0] = scalar * FastMath.cos(im2);
+        z[1] = scalar * FastMath.sin(im2);
         return z;
     }
 
-    public static final double[] sin(double[] x) {
+    public static double[] sin(double[] x) {
         double[] z = new double[2];
         double re1, im1, re2, im2;
         double scalar;
@@ -322,13 +324,13 @@ public class DComplex {
         iz_re = -x[1];
         iz_im = x[0];
 
-        scalar = Math.exp(iz_re);
-        re1 = scalar * Math.cos(iz_im);
-        im1 = scalar * Math.sin(iz_im);
+        scalar = FastMath.exp(iz_re);
+        re1 = scalar * FastMath.cos(iz_im);
+        im1 = scalar * FastMath.sin(iz_im);
 
-        scalar = Math.exp(-iz_re);
-        re2 = scalar * Math.cos(-iz_im);
-        im2 = scalar * Math.sin(-iz_im);
+        scalar = FastMath.exp(-iz_re);
+        re2 = scalar * FastMath.cos(-iz_im);
+        im2 = scalar * FastMath.sin(-iz_im);
 
         re1 = re1 - re2;
         im1 = im1 - im2;
@@ -339,17 +341,17 @@ public class DComplex {
         return z;
     }
 
-    public static final double[] sqrt(double[] x) {
+    public static double[] sqrt(double[] x) {
         double[] z = new double[2];
         double absx = abs(x);
         double tmp;
         if (absx > 0.0) {
             if (x[0] > 0.0) {
-                tmp = Math.sqrt(0.5 * (absx + x[0]));
+                tmp = FastMath.sqrt(0.5 * (absx + x[0]));
                 z[0] = tmp;
                 z[1] = 0.5 * (x[1] / tmp);
             } else {
-                tmp = Math.sqrt(0.5 * (absx - x[0]));
+                tmp = FastMath.sqrt(0.5 * (absx - x[0]));
                 if (x[1] < 0.0) {
                     tmp = -tmp;
                 }
@@ -363,11 +365,11 @@ public class DComplex {
         return z;
     }
 
-    public static final double[] square(double[] x) {
+    public static double[] square(double[] x) {
         return mult(x, x);
     }
 
-    public static final double[] tan(double[] x) {
+    public static double[] tan(double[] x) {
         double[] z = new double[2];
         double scalar;
         double iz_re, iz_im;
@@ -377,13 +379,13 @@ public class DComplex {
         iz_re = -x[1];
         iz_im = x[0];
 
-        scalar = Math.exp(iz_re);
-        re1 = scalar * Math.cos(iz_im);
-        im1 = scalar * Math.sin(iz_im);
+        scalar = FastMath.exp(iz_re);
+        re1 = scalar * FastMath.cos(iz_im);
+        im1 = scalar * FastMath.sin(iz_im);
 
-        scalar = Math.exp(-iz_re);
-        re2 = scalar * Math.cos(-iz_im);
-        im2 = scalar * Math.sin(-iz_im);
+        scalar = FastMath.exp(-iz_re);
+        re2 = scalar * FastMath.cos(-iz_im);
+        im2 = scalar * FastMath.sin(-iz_im);
 
         re3 = re1 - re2;
         im3 = im1 - im2;

@@ -24,11 +24,16 @@ public class DoubleRingBuffer {
      * @param samples
      */
     public void write(double[] samples) {
-        int index = endIndex;
-        endIndex = incrementIndex(endIndex, samples.length);
-        for (int i = 0; i < samples.length; i++) {
-            buffer[index] = samples[i];
-            index = incrementIndex(index, 1);
+        int startIndex = endIndex;
+        int endIndex = incrementIndex(this.endIndex, samples.length);
+        this.endIndex = endIndex;
+
+        if (startIndex < endIndex) {
+            System.arraycopy(samples, 0, buffer, startIndex, samples.length);
+        } else {
+            int read = bufferSize - startIndex;
+            System.arraycopy(samples, 0, buffer, startIndex, read);
+            System.arraycopy(samples, read - 1, buffer, 0, samples.length - read);
         }
     }
 
@@ -40,14 +45,22 @@ public class DoubleRingBuffer {
      * @param result
      */
     public void readLast(int length, double[] result) {
-        int index = incrementIndex(endIndex, -length);
-        for (int i = 0; i < length; i++) {
-            result[i] = buffer[index];
-            index = incrementIndex(index, 1);
+        int startIndex = incrementIndex(endIndex, -length);
+        int read = bufferSize - startIndex;
+        System.arraycopy(buffer, startIndex, result, 0, read);
+        if (read < length) {
+            System.arraycopy(buffer, 0, result, read - 1, length - read);
         }
     }
 
     private int incrementIndex(int value, int increment) {
-        return (value + increment + bufferSize) % bufferSize;
+        int result = value + increment;
+        if (result < 0) {
+            return result + bufferSize;
+        } else if (result > bufferSize - 1) {
+            return result - bufferSize;
+        } else {
+            return result;
+        }
     }
 }

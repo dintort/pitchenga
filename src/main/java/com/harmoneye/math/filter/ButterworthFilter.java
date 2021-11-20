@@ -35,9 +35,9 @@ public class ButterworthFilter implements Filter {
     /**
      * Low-pass filters the time-domain signal in place by a 6th order Butterworth
      * filter. The cut-off frequency is half of the Nyquist frequency (ie. 0.25 x
-     * sampling frequency.
+     * sampling frequency.)
      * <p>
-     * This function is not thead-safe.
+     * This function is not thread-safe.
      */
     public double[] filter(double[] signal) {
         if (filteredSignal == null || filteredSignal.length != signal.length) {
@@ -63,8 +63,8 @@ public class ButterworthFilter implements Filter {
     }
 
     private void shift(double[] values) {
-        for (int i = 0; i < values.length - 1; i++) {
-            values[i] = values[i + 1];
+        if (values.length - 1 >= 0) {
+            System.arraycopy(values, 1, values, 0, values.length - 1);
         }
     }
 

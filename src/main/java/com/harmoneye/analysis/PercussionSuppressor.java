@@ -28,14 +28,13 @@ public class PercussionSuppressor {
         }
         historyColumn = new double[historySize];
         filteredValues = new double[size];
-        medianFilter = new Median(historySize, true);
+        medianFilter = new Median(historySize);
     }
 
     public double[] filter(double[] values) {
         shift(historicValues);
         add(historicValues, values);
-        double[] median = getMedian(historicValues);
-        return median;
+        return getMedian(historicValues);
     }
 
     private void shift(double[][] historicValues) {

@@ -14,7 +14,6 @@ public class HarmonicPatternPitchClassDetector {
     private final int harmonicCount;
     private final int binsPerOctave;
     private final int binsPerHalftoneHalf;
-    private final double baseFreq;
     private final double baseFreqInv;
     private final double harmonicCountMinusOneInv;
 
@@ -32,7 +31,7 @@ public class HarmonicPatternPitchClassDetector {
         this.harmonicCount = harmonicCount;
         binsPerOctave = ctx.getBinsPerOctave();
         binsPerHalftoneHalf = ctx.getBinsPerHalftone() / 2;
-        baseFreq = ctx.getBaseFreq();
+        double baseFreq = ctx.getBaseFreq();
         baseFreqInv = 1.0 / baseFreq;
 
         harmonicBinsIndexes = new int[harmonicCount];

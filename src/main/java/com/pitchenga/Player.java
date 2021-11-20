@@ -1,5 +1,7 @@
 package com.pitchenga;
 
+import org.apache.commons.math3.util.FastMath;
+
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;
@@ -22,22 +24,11 @@ public class Player {
             clip.open(audioInputStream);
             float volume = 0.4f;
             FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            gainControl.setValue(20f * (float) Math.log10(volume));
+            gainControl.setValue(20f * (float) FastMath.log10(volume));
         } catch (LineUnavailableException | UnsupportedAudioFileException | IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-
-//        try {
-//            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(resource);
-//            int readBytesCount = audioInputStream.read(data, 0, bufferSize);
-//            if (readBytesCount == -1) {
-//                return;
-//            }
-//            ByteConverter.littleEndianBytesToDoubles(data, amplitudes);
-//        } catch (UnsupportedAudioFileException | IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void play() {

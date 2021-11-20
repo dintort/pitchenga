@@ -4,6 +4,7 @@ import com.pitchenga.Pair;
 import com.pitchenga.Pitch;
 import com.pitchenga.Pitchenga;
 import com.pitchenga.Tone;
+import org.apache.commons.math3.util.FastMath;
 
 import java.awt.*;
 
@@ -31,8 +32,8 @@ public class ColorFunction {
             pitchy = Pitchenga.transposePitch(guess, 0, +1);
         }
 //		double pitchyDiff = Math.abs(guess.frequency - pitchy.frequency);
-        double pitchyDiff = Math.abs(toneRatio - pitchy.ordinal());
-        double inaccuracy = Math.abs(diff) / pitchyDiff;
+        double pitchyDiff = FastMath.abs(toneRatio - pitchy.ordinal());
+        double inaccuracy = FastMath.abs(diff) / pitchyDiff;
         inaccuracy = inaccuracy * 50;
         Color toneColor = guess.tone.color;
         Pair<Color, Color> guessAndPitchinessColor = Pitchenga.getGuessAndPitchinessColor(diff, pitchy, inaccuracy, toneColor);

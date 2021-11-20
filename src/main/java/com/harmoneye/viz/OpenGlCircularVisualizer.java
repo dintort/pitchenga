@@ -115,10 +115,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             drawSnowflake();
         } else {
             if (binVelocities == null || binVelocities.length != octaveBins.length) {
-                binVelocities = new double[octaveBins.length];
                 playSmoother = new ExpSmoother(octaveBins.length, 0.1);
             }
-            System.arraycopy(octaveBins, 0, binVelocities, 0, octaveBins.length);
+            binVelocities = octaveBins;
         }
         double segmentCountInv = 1.0 / binVelocities.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;

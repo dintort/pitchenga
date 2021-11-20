@@ -53,7 +53,6 @@ public class MusicAnalyzer implements SoundConsumer {
 
     private static final boolean BIN_SMOOTHER_ENABLED = false;
     //    private static final boolean BIN_SMOOTHER_ENABLED = true;
-    //    private static final boolean BIN_SMOOTHER_ENABLED = true;
     private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = true;
     //    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = false;
     private static final boolean HARMONIC_DETECTOR_ENABLED = true;

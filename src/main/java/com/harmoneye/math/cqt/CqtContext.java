@@ -97,7 +97,7 @@ public class CqtContext {
     }
 
     public void setBinsPerHalftone(int binsPerHalftone) {
-        this.binsPerHalftone = binsPerHalftone;
+        CqtContext.binsPerHalftone = binsPerHalftone;
     }
 
     public WindowFunction getWindow() {

@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AbstractHarmonEyeApp {
 
     private static final int TIME_PERIOD_MILLIS = 16;
+//    private static final int TIME_PERIOD_MILLIS = 8;
     private static final String WINDOW_TITLE = "HarmonEye";
 
     protected static final float AUDIO_SAMPLE_RATE = 44100.0f;
@@ -63,7 +64,6 @@ public class AbstractHarmonEyeApp {
         JFrame frame = new JFrame(WINDOW_TITLE);
         frame.add(visualizer.getComponent());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame.setSize(512, 512);
         if (visualizer instanceof OpenGlCircularVisualizer) {
             if (OpenGlCircularVisualizer.DRAW_SNOWFLAKE) {
                 frame.setSize(1080, 1280);
@@ -74,12 +74,7 @@ public class AbstractHarmonEyeApp {
             frame.setSize(1900, 620);
         }
         frame.setLocationRelativeTo(null);
-//		frame.setLocation(700, 0);
-//        frame.setLocation(0, 456);
-//		frame.setLocation(0, 0);
         frame.setLocation(0, 220);
-//		frame.setLocation(0, 726);
-
         frame.setJMenuBar(createMenuBar());
 
         return frame;
@@ -272,7 +267,7 @@ public class AbstractHarmonEyeApp {
 
         public void handleOpenApplication(ApplicationEvent event) {
             // Ok, we know our application started
-            // Not much to do about that..
+            // Not much to do about that.
         }
 
         public void handleOpenFile(ApplicationEvent event) {

@@ -1,5 +1,7 @@
 package com.pitchenga;
 
+import org.apache.commons.math3.util.FastMath;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,7 +10,6 @@ public class Label extends JLabel {
     private final double rotateDegrees;
     private final int shiftX;
     private final int shiftY;
-    private final boolean outline;
 
     public Label(String text, double rotateDegrees, int shiftX, int shiftY, boolean outline) {
         super(text);
@@ -16,7 +17,6 @@ public class Label extends JLabel {
         this.rotateDegrees = rotateDegrees;
         this.shiftX = shiftX;
         this.shiftY = shiftY;
-        this.outline = outline;
     }
 
     public void paintComponent(Graphics g) {
@@ -24,7 +24,7 @@ public class Label extends JLabel {
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         graphics.setColor(getForeground());
-        graphics.rotate(Math.toRadians(rotateDegrees));
+        graphics.rotate(FastMath.toRadians(rotateDegrees));
         graphics.drawString(text, shiftX, shiftY);
 
         //fixme: Need to calculate the right translate offsets

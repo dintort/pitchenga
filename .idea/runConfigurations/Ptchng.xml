@@ -3,7 +3,7 @@
     <option name="MAIN_CLASS_NAME" value="com.pitchenga.Ptchng" />
     <module name="pitchenga.main" />
     <option name="PROGRAM_PARAMETERS" value="-NSRequiresAquaSystemAppearance False" />
-    <option name="VM_PARAMETERS" value="-Dcom.pitchenga.debug=true" />
+    <option name="VM_PARAMETERS" value="-Xmx1g -Xms128m -Dcom.pitchenga.debug=true" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
