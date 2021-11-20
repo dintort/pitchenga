@@ -171,8 +171,10 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         int biggestBinNumber = getBiggestBinNumber();
         drawPitchClassFrame(gl);
         drawPitchClassBins(gl, biggestBinNumber);
-        drawTuner(gl);
         Tone tone = getTone(biggestBinNumber);
+        if (tone != null) {
+            drawTuner(gl);
+        }
         drawHalftoneNames(drawable, tone);
         recordVideo();
     }

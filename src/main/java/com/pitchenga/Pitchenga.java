@@ -607,7 +607,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             OpenGlCircularVisualizer.sliderOverrideTarsos = value;
         }
 
-//        pitchSlider.setValue(value);
+        pitchSlider.setValue(value);
 
 //        Pitch finalPitch = pitch;
 //        Hashtable<Integer, Label> dictionary = new Hashtable<>(Arrays.stream(PITCHES).collect(Collectors.toMap(
