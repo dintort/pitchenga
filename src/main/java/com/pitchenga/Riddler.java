@@ -39,7 +39,7 @@ public enum Riddler {
     Step54("54", new Pitch[][][]{
             multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 50),
 
-            multiply(Sets.octavesDo2ToDo7, 500),
+            multiply(Scale.octavesDo2ToDo7, 500),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             //fixme: Insturments
@@ -58,10 +58,11 @@ public enum Riddler {
             multiply(transposeScale(Scale.Me3Maj.getScale(), -1, 0), 50),
             multiply(transposeScale(Scale.Se3Maj.getScale(), -1, 0), 50),
             multiply(transposeScale(Scale.Fa3Maj.getScale(), -1, 0), 50),
-            multiply(Sets.octavesDo2ToDo7, 300),
+            multiply(Scale.octavesDo2ToDo7, 300),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}, new String[]{"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
+            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+            new String[]{"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
     //fixme multi-oct voice hints
     BassOct2ReLe(null, new Pitch[][][]{
             multiply(new Pitch[]{Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, Se2, Si2, Do3,}, 400),
@@ -77,11 +78,24 @@ public enum Riddler {
             multiply(transposeScale(Scale.Me3Maj.getScale(), -1, 0), 50),
             multiply(transposeScale(Scale.Se3Maj.getScale(), -1, 0), 50),
             multiply(transposeScale(Scale.Fa3Maj.getScale(), -1, 0), 50),
-            multiply(Sets.octavesDo2ToDo7, 300),
+            Scale.DoMajWide,
+            Scale.SoMajWide,
+            Scale.ReMajWide,
+            Scale.LaMajWide,
+            Scale.MiMajWide,
+            Scale.SiMajWide,
+            Scale.FiMajWide,
+            Scale.RaMajWide,
+            Scale.LeMajWide,
+            Scale.MeMajWide,
+            Scale.SeMajWide,
+            Scale.FaMajWide,
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}, new String[]{"Re/Le", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
-    //fixme: Repeat the weekly pairs, but with full scale
+            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            new String[]{"Re/Le",
+                    "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa",
+                    "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "End"}),
     ;
 
     public final String[] messages;
@@ -132,12 +146,5 @@ public enum Riddler {
     }
 
     private static class Sets {
-        private static final Pitch[][] octavesDo2ToDo7 = {
-                {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2,},
-                {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3,},
-                {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4,},
-                {Do5, Ra5, Re5, Me5, Mi5, Fa5, Fi5, So5, Le5, La5, Se5, Si5,},
-                {Do6, Ra6, Re6, Me6, Mi6, Fa6, Fi6, So6, Le6, La6, Se6, Si6, Do7,},
-        };
     }
 }
