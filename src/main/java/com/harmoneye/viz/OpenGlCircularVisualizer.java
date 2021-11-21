@@ -266,7 +266,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         double biggestBinVelocity = binVelocities[biggestBinNumber];
         Tone tone = null;
-        if (biggestBinVelocity > 0.3) {
+        if (biggestBinVelocity > 0.5) {
             double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
             int toneNumber = (int) toneRatio;
             if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
