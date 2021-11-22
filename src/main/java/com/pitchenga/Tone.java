@@ -13,7 +13,7 @@ public enum Tone {
 
     Do("C", true, new Color(255, 0, 0), Color.WHITE),
     Ra("Db", false, new Color(127, 42, 0), Color.WHITE),
-    Re("D", true, new Color(255, 73, 0), Color.WHITE),
+    Re("D", true, new Color(255, 93, 0), Color.WHITE),
     Me("Eb", false, new Color(171, 127, 0), Color.WHITE),
     Mi("E", true, new Color(255, 255, 0), Color.WHITE),
     Fa("F", true, new Color(0, 255, 0), Color.WHITE),
