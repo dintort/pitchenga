@@ -135,11 +135,11 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             } else if (mod == 1 || mod == 8) {
                 velocity = 0.87;
             } else if (mod == 2 || mod == 7) {
-                velocity = 0.75;
+                velocity = 0.72;
             } else if (mod == 3 || mod == 6) {
-                velocity = 0.65;
+                velocity = 0.61;
             } else {
-                velocity = 0.3;
+                velocity = 0.46;
             }
             velocities[i] = velocity;
         }
