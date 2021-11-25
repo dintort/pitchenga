@@ -6,26 +6,32 @@ import com.harmoneye.math.cqt.CqtContext;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.awt.TextRenderer;
-import com.pitchenga.Fugue;
-import com.pitchenga.Pitch;
-import com.pitchenga.Pitchenga;
-import com.pitchenga.Tone;
+import com.pitchenga.*;
 import org.apache.commons.math3.util.FastMath;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static com.jogamp.opengl.GL.*;
 import static com.pitchenga.Pitch.Do1;
 import static com.pitchenga.Pitch.Do7;
 import static com.pitchenga.Pitchenga.TARSOS;
@@ -36,7 +42,7 @@ import static java.awt.Color.white;
 public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
     public static final boolean DRAW_SNOWFLAKE = false;
-//    public static final boolean DRAW_SNOWFLAKE = true;
+//        public static final boolean DRAW_SNOWFLAKE = true;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
@@ -46,11 +52,45 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     public static final Color DARK = new Color(42, 42, 42);
     private static final Color MORE_DARK = new Color(31, 31, 31);
     private static final Color MORE_DARKER = new Color(21, 21, 21);
+
+    //recording
+    public static final boolean RECORD_VIDEO = false;
+    //    public static final boolean RECORD_VIDEO = true;
+    public static volatile Pitch currentPitch;
+    public static volatile Pitch previousPitch;
+    private static volatile PrintStream recordVideoPrintStream;
+    private static volatile ZipOutputStream recordVideoZipStream;
+    // capturing scales
+    private int scaleCounter = 0;
+    @SuppressWarnings("unchecked")
+    private static final Pair<String, Scale>[] SCALES = new Pair[]{
+            new Pair<>("00", Scale.Do3Maj),
+            new Pair<>("01", Scale.So3Maj),
+            new Pair<>("02", Scale.Re3Maj),
+            new Pair<>("03", Scale.La3Maj),
+            new Pair<>("04", Scale.Mi3Maj),
+            new Pair<>("05", Scale.Si3Maj),
+            new Pair<>("06", Scale.Fi3Maj),
+            new Pair<>("07", Scale.Ra3Maj),
+            new Pair<>("08", Scale.Le3Maj),
+            new Pair<>("09", Scale.Me3Maj),
+            new Pair<>("10", Scale.Se3Maj),
+            new Pair<>("11", Scale.Fa3Maj)};
+    private static final AtomicBoolean printScreen = new AtomicBoolean(false);
+
+    //playback
+    public static volatile Fugue playFugue;
+    public static volatile Fugue playPreviousFugue;
+    private static final AtomicInteger playFrameNumber = new AtomicInteger(-1);
+    private static volatile ExpSmoother playSmoother = new ExpSmoother(CqtContext.binsPerHalftone, 0.2);
+
     public static volatile Tone toneOverrideTarsos;
     public static int sliderOverrideTarsos;
     public static Color guessColorOverrideTarsos;
     public static Color pitchinessColorOverrideTarsos;
-    public static Set<String> scale = new HashSet<>();
+//    public static volatile Set<String> scale = getToneNames(SCALES[0].right);
+    public static volatile Set<String> scale = Collections.emptySet();
+
 
     private int pitchStep = 1;
 
@@ -65,20 +105,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
     public static volatile String text;
-
-    //recording
-    public static final boolean RECORD_VIDEO = false;
-    //    public static final boolean RECORD_VIDEO = true;
-    public static volatile Pitch currentPitch;
-    public static volatile Pitch previousPitch;
-    private static volatile PrintStream recordVideoPrintStream;
-    private static volatile ZipOutputStream recordVideoZipStream;
-
-    //playback
-    public static volatile Fugue playFugue;
-    public static volatile Fugue playPreviousFugue;
-    private static final AtomicInteger playFrameNumber = new AtomicInteger(-1);
-    private static volatile ExpSmoother playSmoother = new ExpSmoother(CqtContext.binsPerHalftone, 0.2);
+    private volatile int biggestBinNumber;
+    private volatile Tone tone;
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
@@ -92,6 +120,13 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         animator.add(canvas);
         animator.start();
         // TODO: stop the animator if the computation is stopped
+
+        canvas.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                printScreen.set(true);
+            }
+        });
     }
 
     @Override
@@ -111,6 +146,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         if (octaveBins == null || octaveBins.length == 0) {
             return;
         }
+        this.biggestBinNumber = getBiggestBinNumber();
+        this.tone = getTone(biggestBinNumber, 0.5);
+
         if (DRAW_SNOWFLAKE) {
             drawSnowflake();
         } else {
@@ -127,19 +165,24 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     private void drawSnowflake() {
         double[] velocities = new double[108];
         for (int i = 0; i < velocities.length; i++) {
-            double velocity;
-            int ii = 5 + i;
-            int mod = ii % 9;
-            if (mod == 0) {
-                velocity = 1.2;
-            } else if (mod == 1 || mod == 8) {
-                velocity = 0.87;
-            } else if (mod == 2 || mod == 7) {
-                velocity = 0.72;
-            } else if (mod == 3 || mod == 6) {
-                velocity = 0.61;
+            Tone myTone = getTone(i, -1.0);
+            double velocity = 0.0;
+            if (scale.isEmpty() || (myTone != null && scale.contains(myTone.name))) {
+                int ii = 5 + i;
+                int mod = ii % 9;
+                if (mod == 0) {
+                    velocity = 1.2;
+                } else if (mod == 1 || mod == 8) {
+                    velocity = 0.87;
+                } else if (mod == 2 || mod == 7) {
+                    velocity = 0.72;
+                } else if (mod == 3 || mod == 6) {
+                    velocity = 0.61;
+                } else if (scale.isEmpty()) {
+                    velocity = 0.46;
+                }
             } else {
-                velocity = 0.46;
+                velocity = 0.0;
             }
             velocities[i] = velocity;
         }
@@ -168,14 +211,13 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         playVideo();
 
-        int biggestBinNumber = getBiggestBinNumber();
         drawPitchClassFrame(gl);
         drawPitchClassBins(gl, biggestBinNumber);
-        Tone tone = getTone(biggestBinNumber);
         if (tone != null) {
             drawTuner(gl);
         }
         drawHalftoneNames(drawable, tone);
+        printScreen(gl, 1080, 1080);
         recordVideo();
     }
 
@@ -260,14 +302,14 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
     }
 
-    private Tone getTone(int biggestBinNumber) {
-        if (binVelocities == null || binVelocities.length == 0 || biggestBinNumber < 0 || biggestBinNumber >= binVelocities.length) {
+    private Tone getTone(int binNumber, double threshold) {
+        if (binVelocities == null || binVelocities.length == 0 || binNumber < 0 || binNumber >= binVelocities.length) {
             return null;
         }
-        double biggestBinVelocity = binVelocities[biggestBinNumber];
+        double binVelocity = binVelocities[binNumber];
         Tone tone = null;
-        if (biggestBinVelocity > 0.5) {
-            double toneRatio = (double) biggestBinNumber / ((double) binVelocities.length / (double) Tone.values().length);
+        if (binVelocity > threshold) {
+            double toneRatio = (double) binNumber / ((double) binVelocities.length / (double) Tone.values().length);
             int toneNumber = (int) toneRatio;
             if (toneNumber >= 0 && toneNumber <= Tone.values().length + 1) {
                 tone = Tone.values()[toneNumber];
@@ -481,7 +523,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
             int index = (i * pitchStep) % HALFTONE_NAMES.length;
             String halftoneName = HALFTONE_NAMES[index];
-            if (Pitchenga.isPlaying() && !scale.isEmpty() && !scale.contains(halftoneName)) {
+            if ((Pitchenga.isPlaying() || DRAW_SNOWFLAKE) && !scale.isEmpty() && !scale.contains(halftoneName)) {
                 continue;
             }
             Rectangle2D bounds = renderer.getBounds(halftoneName);
@@ -518,6 +560,44 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             renderer.draw3D(text, 0, 0, 0, scaleFactor);
         }
         renderer.endRendering();
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void printScreen(GL2 gl4, int width, int height) {
+        if (!printScreen.getAndSet(false)) {
+            return;
+        }
+        scaleCounter++;
+        Pair<String, Scale> scalePair = SCALES[scaleCounter - 1];
+
+        try {
+            BufferedImage screenshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics graphics = screenshot.getGraphics();
+
+            ByteBuffer buffer = GLBuffers.newDirectByteBuffer(width * height * 4);
+
+            gl4.glReadBuffer(GL_BACK);
+            gl4.glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
+                    graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff),
+                            (buffer.get() & 0xff)));
+                    buffer.get();
+                    graphics.drawRect(w, height - h, 1, 1);
+                }
+            }
+//            BufferUtils.destroyDirectBuffer(buffer);
+
+            String name = scalePair.left + "-" + scalePair.right.getScale()[0].tone.name;
+            System.out.print("\"" + name + "\", ");
+            File outputfile = new File("src/main/resources/scales/" + name + ".png");
+            ImageIO.write(screenshot, "png", outputfile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        OpenGlCircularVisualizer.scale = getToneNames(SCALES[scaleCounter].right);
+
     }
 
     private void setConstantAspectRatio(GLAutoDrawable drawable) {
@@ -571,6 +651,10 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     @Override
     public Component getComponent() {
         return component;
+    }
+
+    private static Set<String> getToneNames(Scale scale) {
+        return Arrays.stream(scale.getScale()).map(p -> p.tone.name).collect(Collectors.toSet());
     }
 
 }

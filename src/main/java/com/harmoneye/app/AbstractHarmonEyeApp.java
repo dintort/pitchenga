@@ -66,7 +66,7 @@ public class AbstractHarmonEyeApp {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         if (visualizer instanceof OpenGlCircularVisualizer) {
             if (OpenGlCircularVisualizer.DRAW_SNOWFLAKE) {
-                frame.setSize(1080, 1280);
+                frame.setSize(1080, 1110);
             } else {
                 frame.setSize(700, 710);
             }
