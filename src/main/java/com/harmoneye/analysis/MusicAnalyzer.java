@@ -50,11 +50,12 @@ public class MusicAnalyzer implements SoundConsumer {
 
     private final AtomicBoolean initialized = new AtomicBoolean();
     private final AtomicBoolean accumulatorEnabled = new AtomicBoolean();
+//    private final AtomicBoolean octaveBinSmootherEnabled = new AtomicBoolean(true);
 
-    private static final boolean BIN_SMOOTHER_ENABLED = false;
-    //    private static final boolean BIN_SMOOTHER_ENABLED = true;
-    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = true;
-    //    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = false;
+//    private static final boolean BIN_SMOOTHER_ENABLED = false;
+//        private static final boolean BIN_SMOOTHER_ENABLED = true;
+//    private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = true;
+//        private static final boolean OCTAVE_BIN_SMOOTHER_ENABLED = false;
     private static final boolean HARMONIC_DETECTOR_ENABLED = true;
     //    private static final boolean HARMONIC_DETECTOR_ENABLED = false;
 //    private static final boolean PERCUSSION_SUPPRESSOR_ENABLED = true;
@@ -152,7 +153,8 @@ public class MusicAnalyzer implements SoundConsumer {
     private AnalyzedFrame analyzeFrame(double[] amplitudeSpectrumDb) {
         double[] detectedPitchClasses = null;
 
-        if (BIN_SMOOTHER_ENABLED) {
+        boolean binSmootherEnabled = true;
+        if (binSmootherEnabled) {
             amplitudeSpectrumDb = allBinSmoother.smooth(amplitudeSpectrumDb);
         }
         if (PERCUSSION_SUPPRESSOR_ENABLED) {
@@ -196,13 +198,17 @@ public class MusicAnalyzer implements SoundConsumer {
     }
 
     private double[] smooth(double[] octaveBins) {
+        boolean octaveBinSmootherEnabled = true;
+//        boolean octaveBinSmootherEnabled = false;
+//        boolean octaveBinSmootherEnabled.set(true);
+//        octaveBinSmootherEnabled.set(false);
         double[] smoothedOctaveBins;
         double[] accumulatedOctaveBins = accumulator.smooth(octaveBins);
         if (accumulatorEnabled.get()) {
             //accumulator.add(octaveBins);
             //smoothedOctaveBins = accumulator.getAverage();
             smoothedOctaveBins = accumulatedOctaveBins;
-        } else if (OCTAVE_BIN_SMOOTHER_ENABLED) {
+        } else if (octaveBinSmootherEnabled) {
             smoothedOctaveBins = octaveBinSmoother.smooth(octaveBins);
         } else {
             smoothedOctaveBins = octaveBins;

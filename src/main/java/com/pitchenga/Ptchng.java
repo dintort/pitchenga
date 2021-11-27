@@ -44,7 +44,8 @@ public class Ptchng extends Setup {
 //        keyboardInstrument = Instrument.ELECTRIC_PIANO_2;
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
-        seriesLength = 3;
+        //fixme: Move to riddle
+        seriesLength = 4;
         repeats = 3;
 //        series = 1;
 //        repeat = 1;
@@ -69,7 +70,8 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Tempo100;
 
 //        defaultRiddler = Riddler.Step54;
-        defaultRiddler = Riddler.BassOct2ReLe;
+//        defaultRiddler = Riddler.BassOct2ReLe;
+        defaultRiddler = Riddler.Bass;
 
         defaultRinger = Ringer.Tone;
         defaultRinger = Ringer.None;

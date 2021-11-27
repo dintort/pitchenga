@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AbstractHarmonEyeApp {
 
+//    private static final int TIME_PERIOD_MILLIS = 64;
+//    private static final int TIME_PERIOD_MILLIS = 32;
     private static final int TIME_PERIOD_MILLIS = 16;
 //    private static final int TIME_PERIOD_MILLIS = 8;
     private static final String WINDOW_TITLE = "HarmonEye";

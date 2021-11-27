@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,14 +34,13 @@ import static com.jogamp.opengl.GL.*;
 import static com.pitchenga.Pitch.Do1;
 import static com.pitchenga.Pitch.Do7;
 import static com.pitchenga.Pitchenga.TARSOS;
-import static java.awt.Color.BLACK;
-import static java.awt.Color.white;
+import static java.awt.Color.*;
 
 // TODO: rewrite to use vertex buffers instead of immediate mode
 public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>, GLEventListener {
 
     public static final boolean DRAW_SNOWFLAKE = false;
-//        public static final boolean DRAW_SNOWFLAKE = true;
+    //        public static final boolean DRAW_SNOWFLAKE = true;
     public static final int SLIDER_MIN = Pitchenga.convertPitchToSlider(Do1, Do1.frequency);
     public static final int SLIDER_MAX = Pitchenga.convertPitchToSlider(Do7, Do7.frequency);
     //fixme: Un-hack
@@ -88,8 +86,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     public static int sliderOverrideTarsos;
     public static Color guessColorOverrideTarsos;
     public static Color pitchinessColorOverrideTarsos;
-//    public static volatile Set<String> scale = getToneNames(SCALES[0].right);
-    public static volatile Set<String> scale = Collections.emptySet();
+    public static volatile Set<String> scale = getToneNames(SCALES[0].right);
+//    public static volatile Set<String> scale = Collections.emptySet();
 
 
     private int pitchStep = 1;
@@ -121,12 +119,14 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         animator.start();
         // TODO: stop the animator if the computation is stopped
 
-        canvas.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                printScreen.set(true);
-            }
-        });
+        if (DRAW_SNOWFLAKE) {
+            canvas.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    printScreen.set(true);
+                }
+            });
+        }
     }
 
     @Override
@@ -160,6 +160,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         double segmentCountInv = 1.0 / binVelocities.length;
         stepAngle = 2 * FastMath.PI * segmentCountInv;
 
+        updateStars();
     }
 
     private void drawSnowflake() {
@@ -213,12 +214,14 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
         drawPitchClassFrame(gl);
         drawPitchClassBins(gl, biggestBinNumber);
-        if (tone != null) {
-            drawTuner(gl);
-        }
         drawHalftoneNames(drawable, tone);
+
         printScreen(gl, 1080, 1080);
         recordVideo();
+        //fixme:
+//        if (tone != null) {
+//            drawTuner(gl);
+//        }
     }
 
     private void playVideo() {
@@ -397,7 +400,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         for (int i = 0; i < HALFTONE_NAMES.length; i++) {
             Tone tone = Tone.values()[i];
             color = tone.color;
-            if (Pitchenga.isPlaying() && !scale.isEmpty() && !scale.contains(tone.name)) {
+//            if (Pitchenga.isPlaying() && !scale.isEmpty() && !scale.contains(tone.name)) {
+            if (!scale.isEmpty() && !scale.contains(tone.name)) {
                 color = MORE_DARKER;
             }
             gl.glColor3ub((byte) color.getRed(),
@@ -480,6 +484,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             gl.glVertex2d(endRadius * sinEndAngle, endRadius * cosEndAngle);
             gl.glEnd();
 
+            drawStars(gl, angle, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
             drawOuterDot(gl, angle, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
         }
     }
@@ -499,6 +504,105 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         gl.glVertex2d(outerRadius * sinStartAngle, outerRadius * cosStartAngle);
         gl.glVertex2d(outerRadius * sinEndAngle, outerRadius * cosEndAngle);
         gl.glEnd();
+    }
+
+    public static final int starsDepth = 64;
+    //    private static final double[][] stars = new double[128][];
+    private static final double[][] stars = new double[starsDepth][];
+    private static volatile int starsIndex = 0;
+    private static int starsSkipFrameCounter = 0;
+
+    private void drawStars(GL2 gl, double angle, int binIndex, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
+        int currentIndex = starsIndex(starsIndex, 0);
+        gl.glBegin(GL_TRIANGLES);
+        for (int offset = 0; offset < stars.length; offset++) {
+            int myIndex = starsIndex(currentIndex, -offset);
+            double[] myStars = stars[myIndex];
+            if (myStars == null) {
+                continue;
+            }
+            double myVelocity = myStars[binIndex];
+            if (myVelocity < 0.3) {
+                continue;
+            }
+            gl.glBegin(GL.GL_TRIANGLES);
+            gl.glColor3ub((byte) color.getRed(),
+                    (byte) color.getGreen(),
+                    (byte) color.getBlue());
+
+            double outerRadius = 0.3 + (offset * 0.02);
+//            double outerRadius = 0.4 + ((((currentIndex   % starsDepth)+ offset) ) * 0.02);
+//                    double innerRadius = outerRadius * 0.99 - binVelocities[index] * 0.01;
+//            double innerRadius = outerRadius * 0.99 - binVelocities[index] * (1.0 / offset) * 0.1;
+//            double innerRadius = outerRadius * 0.99 - (1.0 / (offset * 0.5)) * binVelocities[index] * 0.3;
+            double innerRadius = outerRadius - (myVelocity * myVelocity * myVelocity * myVelocity) * 0.15;
+//            double innerRadius = outerRadius * myVelocity * 0.1;
+//            if (outerRadius - innerRadius < 0.005) {
+//                continue;
+//            }
+            double centerAngle = angle - 0.000000001 * stepAngle;
+            double sinCenterAngle = FastMath.sin(centerAngle);
+            double cosCenterAngle = FastMath.cos(centerAngle);
+            gl.glVertex2d(innerRadius * sinCenterAngle, innerRadius * cosCenterAngle);
+            gl.glVertex2d(outerRadius * sinStartAngle, outerRadius * cosStartAngle);
+            gl.glVertex2d(outerRadius * sinEndAngle, outerRadius * cosEndAngle);
+            gl.glEnd();
+
+
+//            double startRadius = outerRadius * myVelocity;
+//            double startAngle = angle - 0.5 * stepAngle;
+//            double sinStartAngle = FastMath.sin(startAngle);
+//            double cosStartAngle = FastMath.cos(startAngle);
+//
+//            double endRadius = radius * myVelocity;
+//            double endAngle = angle + 0.5 * stepAngle;
+//            double sinEndAngle = FastMath.sin(endAngle);
+//            double cosEndAngle = FastMath.cos(endAngle);
+//
+//            gl.glBegin(GL.GL_TRIANGLES);
+//            gl.glColor3ub((byte) color.getRed(),
+//                    (byte) color.getGreen(),
+//                    (byte) color.getBlue());
+//            gl.glVertex2d(0, 0);
+//            gl.glVertex2d(startRadius * sinStartAngle, startRadius * cosStartAngle);
+//            gl.glVertex2d(endRadius * sinEndAngle, endRadius * cosEndAngle);
+//            gl.glEnd();
+
+        }
+        gl.glEnd();
+    }
+
+    private void updateStars() {
+//        if (starsSkipFrameCounter++ >= 1) {
+//            starsSkipFrameCounter = 0;
+//        } else {
+//            return;
+//        }
+
+        int prevIndex = starsIndex;
+//        double[] prevStars = stars[prevIndex];
+        int newIndex = starsIndex(prevIndex, 1);
+        double[] newStars = binVelocities;
+//        if (prevStars == newStars) {
+//            return prevIndex;
+//        }
+        if (stars[newIndex] == null || stars[newIndex].length != newStars.length) {
+            stars[newIndex] = new double[newStars.length];
+        }
+        System.arraycopy(newStars, 0, stars[newIndex], 0, newStars.length);
+        starsIndex = newIndex;
+    }
+
+    private int starsIndex(int counter, int offset) {
+        int i = counter + offset;
+        double[][] stars = OpenGlCircularVisualizer.stars;
+        while (i >= stars.length) {
+            i = i - stars.length;
+        }
+        while (i < 0) {
+            i = i + stars.length;
+        }
+        return i;
     }
 
     private void drawHalftoneNames(GLAutoDrawable drawable, Tone tone) {
@@ -523,7 +627,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         for (int i = 0; i < HALFTONE_NAMES.length; i++, angle += angleStep) {
             int index = (i * pitchStep) % HALFTONE_NAMES.length;
             String halftoneName = HALFTONE_NAMES[index];
-            if ((Pitchenga.isPlaying() || DRAW_SNOWFLAKE) && !scale.isEmpty() && !scale.contains(halftoneName)) {
+//            if ((Pitchenga.isPlaying() || DRAW_SNOWFLAKE) && !scale.isEmpty() && !scale.contains(halftoneName)) {
+            if (!scale.isEmpty() && !scale.contains(halftoneName)) {
                 continue;
             }
             Rectangle2D bounds = renderer.getBounds(halftoneName);
@@ -535,14 +640,21 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
             Color color;
             if (DRAW_SNOWFLAKE || (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i]))) {
-                color = BLACK;
-                renderer.setColor(color);
                 //fixme: There must be an easier way to draw outline font
-                int offset = 3;
+                int offset;
+                offset = 3;
+                renderer.setColor(BLACK);
                 renderer.draw3D(halftoneName, x + offset, y - offset, 0, scaleFactor);
                 renderer.draw3D(halftoneName, x - offset, y + offset, 0, scaleFactor);
                 renderer.draw3D(halftoneName, x + offset, y + offset, 0, scaleFactor);
                 renderer.draw3D(halftoneName, x - offset, y - offset, 0, scaleFactor);
+
+//                offset = 1;
+//                renderer.setColor(WHITE);
+//                renderer.draw3D(halftoneName, x + offset, y - offset, 0, scaleFactor);
+//                renderer.draw3D(halftoneName, x - offset, y + offset, 0, scaleFactor);
+//                renderer.draw3D(halftoneName, x + offset, y + offset, 0, scaleFactor);
+//                renderer.draw3D(halftoneName, x - offset, y - offset, 0, scaleFactor);
                 color = colorFunction.toColor(100, i);
             } else {
                 Tone myTone = Pitchenga.TONE_BY_LOWERCASE_NAME.get(halftoneName);
