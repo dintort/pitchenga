@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -86,8 +87,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     public static int sliderOverrideTarsos;
     public static Color guessColorOverrideTarsos;
     public static Color pitchinessColorOverrideTarsos;
-    public static volatile Set<String> scale = getToneNames(SCALES[0].right);
-//    public static volatile Set<String> scale = Collections.emptySet();
+//    public static volatile Set<String> scale = getToneNames(SCALES[0].right);
+    public static volatile Set<String> scale = Collections.emptySet();
 
 
     private int pitchStep = 1;
@@ -532,7 +533,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 //                    double innerRadius = outerRadius * 0.99 - binVelocities[index] * 0.01;
 //            double innerRadius = outerRadius * 0.99 - binVelocities[index] * (1.0 / offset) * 0.1;
 //            double innerRadius = outerRadius * 0.99 - (1.0 / (offset * 0.5)) * binVelocities[index] * 0.3;
-            double innerRadius = outerRadius - (myVelocity * myVelocity * myVelocity * myVelocity) * 0.02;
+            double innerRadius = outerRadius - FastMath.pow(myVelocity, 4) * 0.03;
 //            double innerRadius = outerRadius * myVelocity * 0.1;
 //            if (outerRadius - innerRadius < 0.005) {
 //                continue;
