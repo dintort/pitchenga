@@ -528,7 +528,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
                     (byte) color.getGreen(),
                     (byte) color.getBlue());
 
-            double outerRadius = 0.4 + (offset * 0.0234);
+            double outerRadius = 0.4 + (offset * 0.02315);
 //            double outerRadius = 0.4 + ((((currentIndex   % starsDepth)+ offset) ) * 0.02);
 //                    double innerRadius = outerRadius * 0.99 - binVelocities[index] * 0.01;
 //            double innerRadius = outerRadius * 0.99 - binVelocities[index] * (1.0 / offset) * 0.1;
