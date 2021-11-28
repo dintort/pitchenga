@@ -1906,6 +1906,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 }
             }
         } else {
+            OpenGlCircularVisualizer.scale = Collections.emptySet();
+            prevMessage = null;
             playButton.setText("Play");
 //            bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
