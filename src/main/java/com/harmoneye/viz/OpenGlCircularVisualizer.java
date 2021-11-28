@@ -535,9 +535,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 //            double innerRadius = outerRadius * 0.99 - (1.0 / (offset * 0.5)) * binVelocities[index] * 0.3;
             double innerRadius = outerRadius - FastMath.pow(myVelocity, 4) * 0.03;
 //            double innerRadius = outerRadius * myVelocity * 0.1;
-//            if (outerRadius - innerRadius < 0.005) {
-//                continue;
-//            }
+            if (outerRadius - innerRadius < 0.001) {
+                continue;
+            }
             double centerAngle = angle - 0.000000001 * stepAngle;
             double sinCenterAngle = FastMath.sin(centerAngle);
             double cosCenterAngle = FastMath.cos(centerAngle);
