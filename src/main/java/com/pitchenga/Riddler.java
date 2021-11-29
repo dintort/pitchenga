@@ -100,7 +100,8 @@ public enum Riddler {
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "End"}),
     Bass(null, new Pitch[][][]{
 //            multiply(new Pitch[]{Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4,}, 400),
-            multiply(new Pitch[]{Do3, Mi3, So3, La3, Do4,}, 400),
+            multiply(new Pitch[]{Do3, Me3, Fi3, La3, Do4,}, 400),
+//            multiply(new Pitch[]{Do3, Me3, Me3, Mi3, Mi3, Fa3, Fi3, La3, Do4,}, 400),
             multiply(transposeScale(Scale.Do3Maj.getScale(), -1, 0), 50),
             multiply(transposeScale(Scale.So3Maj.getScale(), -1, 0), 50),
             multiply(transposeScale(Scale.Re3Maj.getScale(), -1, 0), 50),
@@ -130,7 +131,7 @@ public enum Riddler {
             new int[]{0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            new String[]{"Do",
+            new String[]{"Bass3",
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa",
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "End",}),
     ;

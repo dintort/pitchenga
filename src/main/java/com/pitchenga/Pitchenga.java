@@ -804,15 +804,28 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         }
 
         if (setup.repeats > 0) {
-            Pitch firstInSeries = null;
+            //fixme: Generalize?
+            Pitch first = null;
+            Pitch second = null;
+            Pitch third = null;
             for (int i = 0; i < pitches.size(); i++) {
                 Pitch pitch = pitches.get(i);
                 int mod = i % setup.seriesLength;
                 if (mod == 0) {
-                    firstInSeries = pitch;
+                    first = pitch;
+                    second = null;
+                    third = null;
+                } else if (mod == 1) {
+                    second = pitch;
+                } else if (mod == 2) {
+                    third = pitch;
+                } else if (mod == 3) {
+                    if (first == third && second == pitch) {
+                        return true;
+                    }
                 }
                 if (mod == setup.seriesLength - 1) {
-                    if (pitch.equals(firstInSeries)) {
+                    if (pitch.equals(first)) {
                         return true;
                     }
                 }
