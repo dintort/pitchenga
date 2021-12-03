@@ -126,7 +126,7 @@ public enum Riddler {
             Scale.FaMajWide,
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{0,
+            new int[]{0, 0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             new String[]{"Do", "So",
