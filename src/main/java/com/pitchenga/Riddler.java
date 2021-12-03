@@ -37,47 +37,46 @@ public enum Riddler {
 //            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
 //            new int[]{0, 1, 0}),
     Step54("54", new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 50),
-
-            multiply(Scale.octavesDo2ToDo7, 500),
+            multiply(50, new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}),
+            multiply(500, Scale.octavesDo2ToDo7),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             //fixme: Insturments
             new int[]{0, 0, 0}, new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
     BassOct2MiSe(null, new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}, 400),
-            multiply(transposeScale(Scale.Do3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.So3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Re3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.La3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Mi3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Si3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Fi3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Ra3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Le3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Me3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Se3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Fa3Maj.getScale(), -1, 0), 50),
-            multiply(Scale.octavesDo2ToDo7, 300),
+            multiply(400, new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}),
+            multiply(50, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.So3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Re3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.La3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Mi3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Si3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Fi3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Ra3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Le3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Me3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Se3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Fa3Maj.getScale(), -1, 0)),
+            multiply(300, Scale.octavesDo2ToDo7),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
             new String[]{"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
     //fixme multi-oct voice hints
     BassOct2ReLe(null, new Pitch[][][]{
-            multiply(new Pitch[]{Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, Se2, Si2, Do3,}, 400),
-            multiply(transposeScale(Scale.Do3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.So3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Re3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.La3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Mi3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Si3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Fi3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Ra3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Le3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Me3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Se3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Fa3Maj.getScale(), -1, 0), 50),
+            multiply(400, new Pitch[]{Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, Se2, Si2, Do3,}),
+            multiply(50, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.So3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Re3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.La3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Mi3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Si3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Fi3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Ra3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Le3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Me3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Se3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Fa3Maj.getScale(), -1, 0)),
             Scale.DoMajWide,
             Scale.SoMajWide,
             Scale.ReMajWide,
@@ -99,21 +98,20 @@ public enum Riddler {
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa",
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "End"}),
     Bass(null, new Pitch[][][]{
-//            multiply(new Pitch[]{Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4,}, 400),
-            multiply(new Pitch[]{Do3, Me3, Fi3, La3, Do4,}, 400),
-//            multiply(new Pitch[]{Do3, Me3, Me3, Mi3, Mi3, Fa3, Fi3, La3, Do4,}, 400),
-            multiply(transposeScale(Scale.Do3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.So3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Re3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.La3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Mi3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Si3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Fi3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Ra3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Le3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Me3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Se3Maj.getScale(), -1, 0), 50),
-            multiply(transposeScale(Scale.Fa3Maj.getScale(), -1, 0), 50),
+            multiply(400, Scale.Do3Maj.getScale()),
+            mergeMultiply(400, Scale.So3Maj.getScale(), new Pitch[] {Fi3, Fi3, Fi3}),
+            multiply(50, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.So3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Re3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.La3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Mi3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Si3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Fi3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Ra3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Le3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Me3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Se3Maj.getScale(), -1, 0)),
+            multiply(50, transposeScale(Scale.Fa3Maj.getScale(), -1, 0)),
             Scale.DoMajWide,
             Scale.SoMajWide,
             Scale.ReMajWide,
@@ -131,7 +129,7 @@ public enum Riddler {
             new int[]{0,
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            new String[]{"Bass3",
+            new String[]{"Do", "So",
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa",
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "End",}),
     ;
@@ -139,7 +137,7 @@ public enum Riddler {
     public final String[] messages;
 
     @SuppressWarnings("SameParameterValue")
-    private static Pitch[][] multiply(Pitch[] pitches, int count) {
+    private static Pitch[][] multiply(int count, Pitch[] pitches) {
         int times = count / pitches.length;
         Pitch[][] result = new Pitch[times][];
         Arrays.fill(result, pitches);
@@ -147,7 +145,7 @@ public enum Riddler {
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static Pitch[][] multiply(Pitch[][] rows, int count) {
+    private static Pitch[][] multiply(int count, Pitch[][] rows) {
         int size = 0;
         List<Pitch[]> result = new LinkedList<>();
         while (size <= count) {
@@ -157,6 +155,16 @@ public enum Riddler {
             Collections.addAll(result, rows);
         }
         return result.toArray(new Pitch[0][]);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private static Pitch[][] mergeMultiply(int count, Pitch[]... rows) {
+        int size = 0;
+        List<Pitch> merged = new LinkedList<>();
+        for (Pitch[] row : rows) {
+            merged.addAll(Arrays.asList(row));
+        }
+        return multiply(count, merged.toArray(new Pitch[0]));
     }
 
     private final String name;

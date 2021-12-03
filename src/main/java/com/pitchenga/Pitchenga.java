@@ -781,14 +781,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         int attempts = 4096;
         while (true) {
             attempts--;
-            debug("De-duplicating, attempts=" + attempts);
             pitches = supplier.get();
-            if (pitches.size() <= 3) {
+            if (pitches.size() <= setup.seriesLength) {
                 return pitches;
             }
             if (!hasDuplicates(pitches) || attempts < 0) {
                 return pitches;
             }
+            debug("De-duplicating, attempts=" + attempts);
         }
     }
 
@@ -1146,7 +1146,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         try {
             //fixme: Configurable log path
             if (debug) {
-                File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/logs/");
+                File logDir = new File(System.getProperty("user.home") + "/Documents/pitchenga/logs/");
                 //noinspection ResultOfMethodCallIgnored
                 logDir.mkdirs();
                 File logFile = new File(logDir, "pitchenga.log");
