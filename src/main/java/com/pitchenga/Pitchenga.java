@@ -34,8 +34,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static com.pitchenga.Duration.four;
 import static com.pitchenga.Pitch.*;
@@ -1430,17 +1428,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         index = up ? index + 1 : index - 1;
         if (index >= 0 && index < pacerCombo.getItemCount()) {
             pacerCombo.setSelectedIndex(index);
-            StringBuilder text = new StringBuilder();
-            if (playButton.isSelected()) {
-                text.append("\n");
-                text.append(riddlesQueue.length - riddlesPointer);
-            }
-            //fixme: Line break
-            text.append(" ");
-//            text.append("\n");
-            text.append(getPacer().bpm);
-            display.text(text.toString());
+            displayTempoAndRemainingSize();
         }
+    }
+
+    private void displayTempoAndRemainingSize() {
+        display.text((riddlesQueue.length - riddlesPointer) + " " + getPacer().bpm);
     }
 
     private void handleButton(Button button, boolean pressed) {
@@ -1895,8 +1888,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         if (secondary != null) {
             secondary.setVisible(!playing);
         }
+        displayTempoAndRemainingSize();
         if (playing) {
-            resetGame();
+//            resetGame();
             playButton.setText("Stop");
             lastPacerTimestampMs = 0;
             playExecutor.execute(() -> guess(null, false));
@@ -1920,7 +1914,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
         } else {
             OpenGlCircularVisualizer.scale = Collections.emptySet();
-            prevMessage = null;
+//            prevMessage = null;
             playButton.setText("Play");
 //            bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
