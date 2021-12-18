@@ -22,7 +22,7 @@ build
 # Compiled class file
 *.class
 out
-π
+
 # Log file
 *.log
 
