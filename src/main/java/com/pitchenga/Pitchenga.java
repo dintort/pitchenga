@@ -318,12 +318,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 if (prevMessage == null || !prevMessage.equals(message)) {
 //                    display.text(message);
                     displayTempoAndRemainingSize();
-                    try {
-                        Scale scale = Scale.valueOf(message + "3Maj");
-                        OpenGlCircularVisualizer.scale = Arrays.stream(scale.getScale()).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
-                    } catch (IllegalArgumentException e) {
-                        OpenGlCircularVisualizer.scale = Arrays.stream(CHROMATIC_SCALE).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
-                    }
                 }
                 prevMessage = message;
                 currentRiddleInstrument = riddleInstrumentChannels[instrumentChannel];
@@ -1435,8 +1429,14 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private void displayTempoAndRemainingSize() {
         String text = (riddlesQueue.length - riddlesPointer)
                 + " " + getPacer().bpm
-                + " " + this.message;
+                + " " + message;
         display.text(text);
+        try {
+            Scale scale = Scale.valueOf(message + "3Maj");
+            OpenGlCircularVisualizer.scale = Arrays.stream(scale.getScale()).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
+        } catch (IllegalArgumentException e) {
+            OpenGlCircularVisualizer.scale = Arrays.stream(CHROMATIC_SCALE).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
+        }
     }
 
     private void handleButton(Button button, boolean pressed) {
