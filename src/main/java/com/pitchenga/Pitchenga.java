@@ -134,6 +134,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     public static volatile boolean showSeriesHint;
     private volatile String[] messageQueue;
     private volatile String prevMessage;
+    private volatile String message = "";
 
 
     //fixme: Update the logo with the fixed Me color
@@ -313,9 +314,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 } else {
                     instrumentChannel = instrumentQueue[riddlesPointer];
                 }
-                String message = messageQueue[riddlesPointer];
+                this.message = messageQueue[riddlesPointer];
                 if (prevMessage == null || !prevMessage.equals(message)) {
-                    display.text(message);
+//                    display.text(message);
+                    displayTempoAndRemainingSize();
                     try {
                         Scale scale = Scale.valueOf(message + "3Maj");
                         OpenGlCircularVisualizer.scale = Arrays.stream(scale.getScale()).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
@@ -1401,8 +1403,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 if (riddlesPointer >= riddlesQueue.length - 1) {
                     riddlesPointer = 0;
                 }
-                display.text("\n");
-                display.text(String.valueOf(riddlesQueue.length - riddlesPointer));
+                displayTempoAndRemainingSize();
                 return true;
             }
             if (pressed && event.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
@@ -1410,8 +1411,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 if (riddlesPointer < 0) {
                     riddlesPointer = 0;
                 }
-                display.text("\n");
-                display.text(String.valueOf(riddlesQueue.length - riddlesPointer));
+                displayTempoAndRemainingSize();
                 return true;
             }
             Button button = BUTTON_BY_CODE.get(event.getKeyCode());
@@ -1433,7 +1433,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     private void displayTempoAndRemainingSize() {
-        display.text((riddlesQueue.length - riddlesPointer) + " " + getPacer().bpm);
+        String text = (riddlesQueue.length - riddlesPointer)
+                + " " + getPacer().bpm
+                + " " + this.message;
+        display.text(text);
     }
 
     private void handleButton(Button button, boolean pressed) {
