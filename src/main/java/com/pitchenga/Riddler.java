@@ -116,7 +116,7 @@ public enum Riddler {
             mergeMultiply(40, transposeScale(Scale.Si3Maj.getScale(), 0, 0), new Pitch[]{Se3, Se3, Se3}),
             mergeMultiply(40, transposeScale(Scale.Si3Maj.getScale(), -1, 0)),
             Scale.SiMajWide,
-            mergeMultiply(40, transposeScale(Scale.Do3Maj.getScale(), 0, 0), new Pitch[]{Fa3, Fa3, Fa3}),
+            mergeMultiply(40, transposeScale(Scale.Fi3Maj.getScale(), 0, 0), new Pitch[]{Fa3, Fa3, Fa3}),
             mergeMultiply(40, transposeScale(Scale.Fi3Maj.getScale(), -1, 0)),
             Scale.FiMajWide,
             mergeMultiply(40, transposeScale(Scale.Ra3Maj.getScale(), 0, 0), new Pitch[]{Do3, Do3, Do3}),
