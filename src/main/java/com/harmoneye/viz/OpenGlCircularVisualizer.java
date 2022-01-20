@@ -34,6 +34,7 @@ import java.util.zip.ZipOutputStream;
 import static com.jogamp.opengl.GL.*;
 import static com.pitchenga.Pitch.Do1;
 import static com.pitchenga.Pitch.Do7;
+import static com.pitchenga.Pitchenga.CHROMATIC_SCALE;
 import static com.pitchenga.Pitchenga.TARSOS;
 import static java.awt.Color.*;
 
@@ -48,6 +49,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     public static volatile OpenGlCircularVisualizer INSTANCE;
 
     protected static final String[] HALFTONE_NAMES = Arrays.stream(Tone.values()).map(tone -> tone.name).toArray(String[]::new);
+    public static final Color LESS_DARK = new Color(73, 73, 73);
     public static final Color DARK = new Color(42, 42, 42);
     private static final Color MORE_DARK = new Color(31, 31, 31);
     private static final Color MORE_DARKER = new Color(21, 21, 21);
@@ -87,8 +89,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     public static int sliderOverrideTarsos;
     public static Color guessColorOverrideTarsos;
     public static Color pitchinessColorOverrideTarsos;
-//    public static volatile Set<String> scale = getToneNames(SCALES[0].right);
-    public static volatile Set<String> scale = Collections.emptySet();
+    //    public static volatile Set<String> scale = getToneNames(SCALES[0].right);
+    private static volatile Set<String> scale = Collections.emptySet();
+    private static volatile String scaleName = "";
 
 
     private int pitchStep = 1;
@@ -223,7 +226,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             drawTuner(gl);
         }
         gl.glEnd();
-        drawHalftoneNames(drawable, gl, tone);
+        drawHalftoneNames(drawable, tone);
 
         printScreen(gl, 1080, 1080);
         recordVideo();
@@ -506,7 +509,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     }
 
     public static final int starsDepth = 64;
-//    public static final int starsDepth = 128;
+    //    public static final int starsDepth = 128;
     //    private static final double[][] stars = new double[128][];
     private static final double[][] stars = new double[starsDepth][];
     private static volatile int starsIndex = 0;
@@ -601,7 +604,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         return i;
     }
 
-    private void drawHalftoneNames(GLAutoDrawable drawable, GL2 gl, Tone tone) {
+    private void drawHalftoneNames(GLAutoDrawable drawable, Tone tone) {
         if (binVelocities == null || binVelocities.length == 0) {
             return;
         }
@@ -636,7 +639,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             int y = (int) (centerY + radius * size * FastMath.cos(angle) - offsetY);
             Color color;
             if (DRAW_SNOWFLAKE || (tone != null && tone.name().equalsIgnoreCase(HALFTONE_NAMES[i]))) {
-                //fixme: There must be an easier way to draw outline font
+                //fixme: There must be an easier way to render outlined font
                 int offset;
                 offset = 4;
                 renderer.setColor(BLACK);
@@ -654,17 +657,21 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
                 color = colorFunction.toColor(100, i);
             } else {
                 Tone myTone = Pitchenga.TONE_BY_LOWERCASE_NAME.get(halftoneName);
-                if (myTone != null && myTone.diatonic) {
-                    color = DARK;
+                if (myTone != null && myTone.name.equalsIgnoreCase(scaleName)) {
+                    color = LESS_DARK;
                 } else {
-                    color = MORE_DARK;
+                    if (myTone != null && myTone.diatonic) {
+                        color = DARK;
+                    } else {
+                        color = MORE_DARK;
+                    }
                 }
             }
             renderer.setColor(color);
             renderer.draw3D(halftoneName, x, y, 0, scaleFactor);
         }
         if (text != null) {
-            renderer.setColor(white);
+            renderer.setColor(WHITE);
             renderer.draw3D(text, 0, 0, 0, scaleFactor);
         }
         renderer.endRendering();
@@ -706,6 +713,16 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         OpenGlCircularVisualizer.scale = getToneNames(SCALES[scaleCounter].right);
 
+    }
+
+    public static void setScale(String scaleName) {
+        Pitch[] pitches = CHROMATIC_SCALE;
+        try {
+            pitches = Scale.valueOf(scaleName + "3Maj").getScale();
+        } catch (IllegalArgumentException ignore) {
+        }
+        OpenGlCircularVisualizer.scale = Arrays.stream(pitches).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
+        OpenGlCircularVisualizer.scaleName = scaleName;
     }
 
     private void setConstantAspectRatio(GLAutoDrawable drawable) {

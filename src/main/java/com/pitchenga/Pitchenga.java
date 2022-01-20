@@ -1431,12 +1431,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 + " " + getPacer().bpm
                 + " " + message;
         display.text(text);
-        try {
-            Scale scale = Scale.valueOf(message + "3Maj");
-            OpenGlCircularVisualizer.scale = Arrays.stream(scale.getScale()).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
-        } catch (IllegalArgumentException e) {
-            OpenGlCircularVisualizer.scale = Arrays.stream(CHROMATIC_SCALE).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
-        }
+        String message = this.message;
+        OpenGlCircularVisualizer.setScale(message);
     }
 
     private void handleButton(Button button, boolean pressed) {
@@ -1916,7 +1912,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 }
             }
         } else {
-            OpenGlCircularVisualizer.scale = Collections.emptySet();
+            OpenGlCircularVisualizer.setScale(null);
 //            prevMessage = null;
             playButton.setText("Play");
 //            bottomPanel.setVisible(true);
