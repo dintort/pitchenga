@@ -33,8 +33,8 @@ public class Ptchng extends Setup {
         riddleInstruments = new int[]{
                 Instrument.ELECTRIC_BASS_FINGER,
                 Instrument.ACOUSTIC_GRAND_PIANO,
+                Instrument.CHURCH_ORGAN,
                 Instrument.ELECTRIC_PIANO_1,
-                Instrument.ELECTRIC_GUITAR_JAZZ,
                 Instrument.TENOR_SAX};
         voiceHints = true;
 
@@ -50,38 +50,20 @@ public class Ptchng extends Setup {
 //        series = 1;
 //        repeat = 1;
 
-        defaultHinter = Hinter.Delayed200;
-        defaultHinter = Hinter.Delayed100;
-        defaultHinter = Hinter.Delayed700;
-        defaultHinter = Hinter.Delayed3000;
-        defaultHinter = Hinter.Delayed500;
-        defaultHinter = Hinter.Delayed1000;
-        defaultHinter = Hinter.Delayed1000;
-        defaultHinter = Hinter.Never;
         defaultHinter = Hinter.Series;
         //fixme: Delay hinter proportionally to the tempo
 
         defaultPacer = Pacer.Answer;
-        defaultPacer = Pacer.Tempo120;
-        defaultPacer = Pacer.Tempo100;
-        defaultPacer = Pacer.Tempo110;
-        defaultPacer = Pacer.Tempo75;
-        defaultPacer = Pacer.Tempo90;
         defaultPacer = Pacer.Tempo100;
 
-//        defaultRiddler = Riddler.Step54;
-//        defaultRiddler = Riddler.BassOct2ReLe;
         defaultRiddler = Riddler.Bass;
 
-        defaultRinger = Ringer.Tone;
         defaultRinger = Ringer.None;
 
         defaultBuzzer = Buzzer.Tone;
 
-        defaultAudioInput = NO_AUDIO_INPUT;
         defaultAudioInput = null;
 
-        mainFrameVisible = false;
         mainFrameVisible = true;
         fullScreenWhenPlaying = true;
 
