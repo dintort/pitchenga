@@ -97,7 +97,7 @@ public enum Riddler {
             new String[]{"Re/Le",
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa",
                     "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "End"}),
-    Bass(null, new Pitch[][][]{
+    BassAll(null, new Pitch[][][]{
             merge(70, transposeScale(Scale.Do3Maj.getScale(), 0, 0), new Pitch[]{Si3, Si3, Si3}),
             merge(30, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
             Scale.DoMajWide,
@@ -139,6 +139,41 @@ public enum Riddler {
             //fixme: Use macro groups and remove duplication
             new int[]{0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1},
             new String[]{"Do", "Do", "Do", "So", "So", "So", "Re", "Re", "Re", "La", "La", "La", "Mi", "Mi", "Mi", "Si", "Si", "Si", "Fi", "Fi", "Fi", "Ra", "Ra", "Ra", "Le", "Le", "Le", "Me", "Me", "Me", "Se", "Se", "Se", "Fa", "Fa", "Fa", "End",}),
+    Bass(null, new Pitch[][][]{
+            multiply(400, new Pitch[]{Do1, Me1, Me1, Fi1, Fi1, La1, La1, Do2,}),
+//            multiply(400, new Pitch[]{Do1, Me1, Fi1, La1, Do2,}),
+            multiply(50, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
+            Scale.DoMajWide,
+            multiply(40, transposeScale(Scale.So3Maj.getScale(), -1, 0)),
+            Scale.SoMajWide,
+            multiply(40, transposeScale(Scale.Re3Maj.getScale(), -1, 0)),
+            Scale.ReMajWide,
+            multiply(40, transposeScale(Scale.La3Maj.getScale(), -1, 0)),
+            Scale.LaMajWide,
+            multiply(40, transposeScale(Scale.Mi3Maj.getScale(), -1, 0)),
+            Scale.MiMajWide,
+            multiply(40, transposeScale(Scale.Si3Maj.getScale(), -1, 0)),
+            Scale.SiMajWide,
+            multiply(40, transposeScale(Scale.Fi3Maj.getScale(), -1, 0)),
+            Scale.FiMajWide,
+            multiply(40, transposeScale(Scale.Ra3Maj.getScale(), -1, 0)),
+            Scale.RaMajWide,
+            multiply(40, transposeScale(Scale.Le3Maj.getScale(), -1, 0)),
+            Scale.LeMajWide,
+            multiply(40, transposeScale(Scale.Me3Maj.getScale(), -1, 0)),
+            Scale.MeMajWide,
+            multiply(40, transposeScale(Scale.Se3Maj.getScale(), -1, 0)),
+            Scale.SeMajWide,
+            multiply(40, transposeScale(Scale.Fa3Maj.getScale(), -1, 0)),
+            Scale.FaMajWide,
+            {{Non}},},
+            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
+            new int[]{0,
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+            new String[]{"Oct2",
+                    "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa",
+                    "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "End"}),
     ;
 
     public final String[] messages;
@@ -197,6 +232,4 @@ public enum Riddler {
         return name;
     }
 
-    private static class Sets {
-    }
 }

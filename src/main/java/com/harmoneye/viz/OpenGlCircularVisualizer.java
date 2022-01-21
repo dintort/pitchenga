@@ -51,8 +51,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     protected static final String[] HALFTONE_NAMES = Arrays.stream(Tone.values()).map(tone -> tone.name).toArray(String[]::new);
     public static final Color LESS_DARK = new Color(73, 73, 73);
     public static final Color DARK = new Color(42, 42, 42);
-    private static final Color MORE_DARK = new Color(31, 31, 31);
-    private static final Color MORE_DARKER = new Color(21, 21, 21);
+    private static final Color MORE_DARK = new Color(21, 21, 21);
 
     //recording
     public static final boolean RECORD_VIDEO = false;
@@ -408,7 +407,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             color = tone.color;
 //            if (Pitchenga.isPlaying() && !scale.isEmpty() && !scale.contains(tone.name)) {
             if (!scale.isEmpty() && !scale.contains(tone.name)) {
-                color = MORE_DARKER;
+                color = MORE_DARK;
             }
             gl.glColor3ub((byte) color.getRed(),
                     (byte) color.getGreen(),
@@ -660,11 +659,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
                 if (myTone != null && myTone.name.equalsIgnoreCase(scaleName)) {
                     color = LESS_DARK;
                 } else {
-                    if (myTone != null && myTone.diatonic) {
-                        color = DARK;
-                    } else {
-                        color = MORE_DARK;
-                    }
+                    color = DARK;
                 }
             }
             renderer.setColor(color);
