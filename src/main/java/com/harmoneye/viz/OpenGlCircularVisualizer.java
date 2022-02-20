@@ -666,7 +666,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             renderer.draw3D(halftoneName, x, y, 0, scaleFactor);
         }
         if (text != null) {
-            renderer.setColor(WHITE);
+            renderer.setColor(LESS_DARK);
             renderer.draw3D(text, 0, 0, 0, scaleFactor);
         }
         renderer.endRendering();
