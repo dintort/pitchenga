@@ -2119,7 +2119,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         javax.sound.midi.Instrument instrument;
         for (int i = 0; i < setup.riddleInstruments.length; i++) {
             int riddleInstrumentId = setup.riddleInstruments[i];
-            if (riddleInstrumentId == Instrument.ELECTRIC_BASS_FINGER) {
+            if (riddleInstrumentId == Instrument.ELECTRIC_BASS_PICK) {
                 bassInstrumentChannel = riddleInstrumentChannels[i];
             }
             instrument = instruments[riddleInstrumentId];
