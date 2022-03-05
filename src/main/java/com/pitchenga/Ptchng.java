@@ -37,6 +37,7 @@ public class Ptchng extends Setup {
                 Instrument.ELECTRIC_PIANO_1,
                 Instrument.TENOR_SAX};
         voiceHints = true;
+        voiceHints = false;
 
 //        riddleInstrument = Instrument.TENOR_SAX;
 //        keyboardInstrument = Instrument.ELECTRIC_GUITAR_CkkLEAN;
@@ -47,8 +48,8 @@ public class Ptchng extends Setup {
         //fixme: Move to riddle
         seriesLength = 4;
         repeats = 3;
-//        series = 1;
-//        repeat = 1;
+//        seriesLength = 1;
+//        repeats = 1;
 
         defaultHinter = Hinter.Series;
         //fixme: Delay hinter proportionally to the tempo
@@ -56,6 +57,7 @@ public class Ptchng extends Setup {
         defaultPacer = Pacer.Answer;
         defaultPacer = Pacer.Tempo100;
 
+        defaultRiddler = Riddler.Rec;
         defaultRiddler = Riddler.Bass;
 
         defaultRinger = Ringer.None;

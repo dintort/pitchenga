@@ -314,7 +314,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 } else {
                     instrumentChannel = instrumentQueue[riddlesPointer];
                 }
-                this.message = messageQueue[riddlesPointer];
+                this.message = messageQueue == null ? "" : messageQueue[riddlesPointer];
                 if (prevMessage == null || !prevMessage.equals(message)) {
 //                    display.text(message);
                     displayTempoAndRemainingSize();

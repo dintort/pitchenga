@@ -11,7 +11,9 @@ import static com.pitchenga.Pitchenga.transposeScale;
 
 public enum Riddler {
     //    FuguesOrdered("All fugues ordered",
-//            new Pitch[][][]{{{Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3, Do4,}}}, Pitchenga::ordered, null, null, new int[0]),
+//            new Pitch[][][]{{{Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3, Do4,π}}}, Pitchenga::ordered, null, null, new int[0]),
+    Rec("Rec", new Pitch[][][]{{{Mi2, Fa2, Fi2, Fi2, Fi2, So2, Le2, La2, Se2, Si2, Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, Fi3, Fi3, So3, Le3, La3, Se3, Si3, Do4, Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, Fi4, Fi4, So4, Le4, La4,}}},
+            Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
     FuguesOrdered("All fugues ordered",
             new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
     ChromaticOneOctave("Chromatic - octave 4",
