@@ -973,10 +973,17 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     public List<Pitch> ordered() {
-        return Arrays.stream(getRiddler().scale)
+        List<Pitch> ordered = Arrays.stream(getRiddler().scale)
                 .flatMap(Arrays::stream)
                 .flatMap(Arrays::stream)
                 .collect(Collectors.toList());
+        List<Pitch> multi = new ArrayList<>();
+        for (Pitch pitch : ordered) {
+            for (int i = 0; i < setup.repeats; i++) {
+                multi.add(pitch);
+            }
+        }
+        return multi;
     }
 
     private List<Pitch> addOctaves(List<Pitch> scale) {
