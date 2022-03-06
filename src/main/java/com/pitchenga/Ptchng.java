@@ -69,8 +69,8 @@ public class Ptchng extends Setup {
         defaultAudioInput = null;
 
         mainFrameVisible = true;
-        fullScreenWhenPlaying = true;
         fullScreenWhenPlaying = false;
+        fullScreenWhenPlaying = true;
 
         if (OpenGlCircularVisualizer.RECORD_VIDEO) {
             defaultRiddler = Riddler.FuguesOrdered;
