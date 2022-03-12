@@ -218,14 +218,14 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             updateStars();
         }
 
-        drawPitchClassFrame(gl);
+        drawFrame(gl);
         gl.glBegin(GL_TRIANGLES);
-        drawPitchClassBins(gl, biggestBinNumber);
+        drawBins(gl, biggestBinNumber);
         if (tone != null) {
             drawTuner(gl);
         }
         gl.glEnd();
-        drawHalftoneNames(drawable, tone);
+        drawLabels(drawable, tone);
 
         printScreen(gl, 1080, 1080);
         recordVideo();
@@ -397,7 +397,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         return biggestBinNumber;
     }
 
-    private void drawPitchClassFrame(GL2 gl) {
+    private void drawFrame(GL2 gl) {
         Color color;
         double halfToneCountInv = 1.0 / HALFTONE_NAMES.length;
         gl.glLineWidth(2f);
@@ -434,7 +434,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         gl.glEnd();
     }
 
-    private void drawPitchClassBins(GL2 gl, int biggestBinNumber) {
+    private void drawBins(GL2 gl, int biggestBinNumber) {
         if (binVelocities == null || binVelocities.length == 0) {
             return;
         }
@@ -488,11 +488,11 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             gl.glVertex2d(endRadius * sinEndAngle, endRadius * cosEndAngle);
 
             drawStars(gl, angle, i, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
-            drawOuterDot(gl, angle, i, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
+            drawOuterCircleDot(gl, angle, i, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
         }
     }
 
-    private void drawOuterDot(GL2 gl, double angle, int index, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
+    private void drawOuterCircleDot(GL2 gl, double angle, int index, Color color, double sinStartAngle, double cosStartAngle, double sinEndAngle, double cosEndAngle) {
         gl.glColor3ub((byte) color.getRed(),
                 (byte) color.getGreen(),
                 (byte) color.getBlue());
@@ -591,19 +591,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         starsIndex = newIndex;
     }
 
-    private int starsIndex(int counter, int offset) {
-        int i = counter + offset;
-        double[][] stars = OpenGlCircularVisualizer.stars;
-        while (i >= stars.length) {
-            i = i - stars.length;
-        }
-        while (i < 0) {
-            i = i + stars.length;
-        }
-        return i;
-    }
-
-    private void drawHalftoneNames(GLAutoDrawable drawable, Tone tone) {
+    private void drawLabels(GLAutoDrawable drawable, Tone tone) {
         if (binVelocities == null || binVelocities.length == 0) {
             return;
         }
@@ -670,6 +658,18 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             renderer.draw3D(text, 0, 0, 0, scaleFactor);
         }
         renderer.endRendering();
+    }
+
+    private int starsIndex(int counter, int offset) {
+        int i = counter + offset;
+        double[][] stars = OpenGlCircularVisualizer.stars;
+        while (i >= stars.length) {
+            i = i - stars.length;
+        }
+        while (i < 0) {
+            i = i + stars.length;
+        }
+        return i;
     }
 
     @SuppressWarnings("SameParameterValue")
