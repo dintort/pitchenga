@@ -442,17 +442,18 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         double radius = 0.8;
         double angle = 0.5 * (1 - binsPerHalftone) * stepAngle;
         for (int i = 0; i < binVelocities.length; i++, angle += stepAngle) {
-            int pitchClass = i / binsPerHalftone;
-            int binInPitchClass = i % binsPerHalftone;
-            int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
-            int index = movedPitchClass * binsPerHalftone + binInPitchClass;
+            //fixme: Why was this here?
+//            int pitchClass = i / binsPerHalftone;
+//            int binInPitchClass = i % binsPerHalftone;
+//            int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
+//            int index = movedPitchClass * binsPerHalftone + binInPitchClass;
 
             int ii = i - 4;
             double toneRatio = ii / ((double) binVelocities.length / (double) Tone.values().length);
 
-            double binVelocity = binVelocities[i];
-            Color color = colorFunction.toColor(binVelocity, toneRatio);
-            double velocity = binVelocities[index];
+            double velocity = binVelocities[i];
+            Color color = colorFunction.toColor(velocity, toneRatio);
+//            double velocity = binVelocities[index];
             double myVelocity = velocity;
             if (biggestBinNumber == i) {
                 myVelocity = velocity * 1.3;
@@ -468,7 +469,6 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             if (myVelocity > 1.15) {
                 myVelocity = 1.15;
             }
-
 
             double startRadius = radius * myVelocity;
             double startAngle = angle - 0.5 * stepAngle;
@@ -487,8 +487,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             gl.glVertex2d(startRadius * sinStartAngle, startRadius * cosStartAngle);
             gl.glVertex2d(endRadius * sinEndAngle, endRadius * cosEndAngle);
 
-            drawStars(gl, angle, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
-            drawOuterDot(gl, angle, index, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
+            drawStars(gl, angle, i, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
+            drawOuterDot(gl, angle, i, color, sinStartAngle, cosStartAngle, sinEndAngle, cosEndAngle);
         }
     }
 
