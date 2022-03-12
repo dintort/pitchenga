@@ -34,8 +34,7 @@ import java.util.zip.ZipOutputStream;
 import static com.jogamp.opengl.GL.*;
 import static com.pitchenga.Pitch.Do1;
 import static com.pitchenga.Pitch.Do7;
-import static com.pitchenga.Pitchenga.CHROMATIC_SCALE;
-import static com.pitchenga.Pitchenga.TARSOS;
+import static com.pitchenga.Pitchenga.*;
 import static java.awt.Color.*;
 
 // TODO: rewrite to use vertex buffers instead of immediate mode
@@ -447,35 +446,34 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 //            int binInPitchClass = i % binsPerHalftone;
 //            int movedPitchClass = (pitchClass * pitchStep) % halftoneCount;
 //            int index = movedPitchClass * binsPerHalftone + binInPitchClass;
+//            double velocity = binVelocities[index];
+            double velocity = binVelocities[i];
 
             int ii = i - 4;
             double toneRatio = ii / ((double) binVelocities.length / (double) Tone.values().length);
 
-            double velocity = binVelocities[i];
             Color color = colorFunction.toColor(velocity, toneRatio);
-//            double velocity = binVelocities[index];
-            double myVelocity = velocity;
             if (biggestBinNumber == i) {
-                myVelocity = velocity * 1.3;
+                velocity *= 1.3;
             } else if (velocity < 0.2) {
-                myVelocity = velocity * 0.8;
+                velocity *= 0.8;
             } else if (velocity < 0.3) {
-                myVelocity = velocity * 0.9;
+                velocity *= 0.9;
             } else if (velocity < 0.4) {
-                myVelocity = velocity * 0.95;
+                velocity *= 0.95;
             } else if (velocity > 0.5) {
-                myVelocity = velocity * 1.05;
+                velocity *= 1.05;
             }
-            if (myVelocity > 1.15) {
-                myVelocity = 1.15;
+            if (velocity > 1.15) {
+                velocity = 1.15;
             }
 
-            double startRadius = radius * myVelocity;
+            double startRadius = radius * velocity;
             double startAngle = angle - 0.5 * stepAngle;
             double sinStartAngle = FastMath.sin(startAngle);
             double cosStartAngle = FastMath.cos(startAngle);
 
-            double endRadius = radius * myVelocity;
+            double endRadius = radius * velocity;
             double endAngle = angle + 0.5 * stepAngle;
             double sinEndAngle = FastMath.sin(endAngle);
             double cosEndAngle = FastMath.cos(endAngle);
@@ -523,7 +521,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
                 continue;
             }
             double myVelocity = myStars[binIndex];
-            if (myVelocity < 0.4) {
+            if (myVelocity < 0.5) {
                 continue;
             }
             gl.glColor3ub((byte) color.getRed(),

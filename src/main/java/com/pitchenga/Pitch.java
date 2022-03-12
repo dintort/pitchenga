@@ -165,7 +165,11 @@ public enum Pitch {
                     String[] strings = line.split(" ");
                     double[] frame = new double[strings.length];
                     for (int i = 0; i < strings.length; i++) {
-                        frame[i] = Double.parseDouble(strings[i]);
+                        double velocity = Double.parseDouble(strings[i]);
+                        if (velocity < 0.81) {
+                            velocity *= 0.6;
+                        }
+                        frame[i] = velocity;
                     }
                     frames.add(frame);
                 }
