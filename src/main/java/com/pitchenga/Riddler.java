@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.pitchenga.Pitch.*;
+import static com.pitchenga.Pitchenga.CHROMATIC_SCALE;
 import static com.pitchenga.Pitchenga.transposeScale;
 
 public enum Riddler {
@@ -141,7 +142,7 @@ public enum Riddler {
             //fixme: Use macro groups and remove duplication
             new int[]{0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1},
             new String[]{"Do", "Do", "Do", "So", "So", "So", "Re", "Re", "Re", "La", "La", "La", "Mi", "Mi", "Mi", "Si", "Si", "Si", "Fi", "Fi", "Fi", "Ra", "Ra", "Ra", "Le", "Le", "Le", "Me", "Me", "Me", "Se", "Se", "Se", "Fa", "Fa", "Fa", "End",}),
-    Bass(null, new Pitch[][][]{
+    BassScales(null, new Pitch[][][]{
             multiply(500, new Pitch[]{Do1, Me1, Me1, Fi1, Fi1, La1, La1, Do2,}),
 //            multiply(500, new Pitch[]{Do1, Me1, Fi1, La1, Do2,}),
             multiply(50, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
@@ -172,6 +173,14 @@ public enum Riddler {
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             new int[]{0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
             new String[]{"Bass", "Do", "Do", "So", "So", "Re", "Re", "La", "La", "Mi", "Mi", "Si", "Si", "Fi", "Fi", "Ra", "Ra", "Le", "Le", "Me", "Me", "Se", "Se", "Fa", "Fa", "End",}),
+    Bass(null, new Pitch[][][]{
+            multiply(500, new Pitch[]{Do1, Me1, Me1, Fi1, Fi1, La1, La1, Do2,}),
+            multiply(300, transposeScale(CHROMATIC_SCALE, -1, 0)),
+            multiply(300,Scale.octavesDo2ToDo7),
+            {{Non}},},
+            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
+            new int[]{0, 0, 1, 0,},
+            new String[]{"Bass octave 1", "Bass octave 2", "Piano", "End",}),
     ;
 
     public final String[] messages;
