@@ -174,7 +174,7 @@ public enum Riddler {
             new int[]{0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
             new String[]{"Bass", "Do", "Do", "So", "So", "Re", "Re", "La", "La", "Mi", "Mi", "Si", "Si", "Fi", "Fi", "Ra", "Ra", "Le", "Le", "Me", "Me", "Se", "Se", "Fa", "Fa", "End",}),
     Bass(null, new Pitch[][][]{
-            multiply(500, new Pitch[]{Do1, Me1, Me1, Fi1, Fi1, La1, La1, Do2,}),
+            multiply(600, new Pitch[]{Do1, Me1, Me1, Fi1, Fi1, La1, La1, Do2,}),
             multiply(300, transposeScale(CHROMATIC_SCALE, -1, 0)),
             multiply(300,Scale.octavesDo2ToDo7),
             {{Non}},},
