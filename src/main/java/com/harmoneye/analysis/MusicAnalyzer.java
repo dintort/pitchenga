@@ -129,16 +129,14 @@ public class MusicAnalyzer implements SoundConsumer {
 
     private void computeCqtSpectrum() {
         int startIndex = (ctx.getOctaves() - 1) * ctx.getBinsPerOctave();
-        for (int octave = 0; octave < ctx.getOctaves(); octave++, startIndex -= ctx
-                .getBinsPerOctave()) {
+        for (int octave = 0; octave < ctx.getOctaves(); octave++, startIndex -= ctx.getBinsPerOctave()) {
             ringBufferBank.readLast(octave, samples.length, samples);
             ComplexVector cqtSpectrum = cqt.transform(samples);
             toAmplitudeDbSpectrum(cqtSpectrum, amplitudeSpectrumDb, startIndex);
         }
     }
 
-    private void toAmplitudeDbSpectrum(ComplexVector cqtSpectrum,
-                                       double[] amplitudeSpectrum, int startIndex) {
+    private void toAmplitudeDbSpectrum(ComplexVector cqtSpectrum, double[] amplitudeSpectrum, int startIndex) {
         double[] elements = cqtSpectrum.getElements();
         for (int i = 0, index = 0; i < cqtSpectrum.size(); i++, index += 2) {
             double re = elements[index];

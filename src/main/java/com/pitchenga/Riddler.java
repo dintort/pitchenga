@@ -1,14 +1,12 @@
 package com.pitchenga;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Pitchenga.CHROMATIC_SCALE;
 import static com.pitchenga.Pitchenga.transposeScale;
+import static com.pitchenga.Tone.*;
 
 public enum Riddler {
     //    FuguesOrdered("All fugues ordered",
@@ -174,16 +172,33 @@ public enum Riddler {
             new int[]{0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
             new String[]{"Bass", "Do", "Do", "So", "So", "Re", "Re", "La", "La", "Mi", "Mi", "Si", "Si", "Fi", "Fi", "Ra", "Ra", "Le", "Le", "Me", "Me", "Se", "Se", "Fa", "Fa", "End",}),
     Bass(null, new Pitch[][][]{
-            multiply(600, new Pitch[]{Do1, Me1, Me1, Fi1, Fi1, La1, La1, Do2,}),
-            multiply(300, transposeScale(CHROMATIC_SCALE, -1, 0)),
-            multiply(300,Scale.octavesDo2ToDo7),
+            multiply(300, new Pitch[]{Do1, Do1, Me1, Me1, Fi1, La1,}),
+            multiply(300, filter(new Pitch[][] { transposeScale(CHROMATIC_SCALE, -1, 0) }, Do, Me, Fi, La)),
+            multiply(300, filter(new Pitch[][] { transposeScale(CHROMATIC_SCALE, 0,0) }, Do, Me, Fi, La)),
+            multiply(300, filter(Scale.octavesDo2ToDo7, Do, Me, Fi, La)),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
-            new int[]{0, 0, 1, 0,},
-            new String[]{"Bass octave 1", "Bass octave 2", "Piano", "End",}),
+            new int[]{0, 0, 0, 1, 0,},
+            new String[]{"Bass1", "Bass2", "Bass3", "Piano", "End",}),
     ;
 
     public final String[] messages;
+
+    private static Pitch[][] filter(Pitch[][] pitches, Tone... tones) {
+        Pitch[][] result = new Pitch[pitches.length][];
+        Set<Tone> toneSet = new HashSet<>(Arrays.asList(tones));
+        for (int i = 0; i < result.length; i++) {
+            Pitch[] sourceRow = pitches[i];
+            List<Pitch> resultRow = new ArrayList<>(sourceRow.length);
+            for (Pitch pitch : sourceRow) {
+                if (toneSet.contains(pitch.tone)) {
+                    resultRow.add(pitch);
+                }
+            }
+            result[i] = resultRow.toArray(new Pitch[0]);
+        }
+        return result;
+    }
 
     @SuppressWarnings("SameParameterValue")
     private static Pitch[][] multiply(int count, Pitch[] pitches) {

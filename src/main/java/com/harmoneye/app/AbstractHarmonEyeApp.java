@@ -6,6 +6,7 @@ import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.OpenGlLinearVisualizer;
 import com.harmoneye.viz.SwingVisualizer;
 import com.harmoneye.viz.Visualizer;
+import com.pitchenga.Pitchenga;
 import org.simplericity.macify.eawt.ApplicationEvent;
 import org.simplericity.macify.eawt.ApplicationListener;
 
@@ -151,7 +152,9 @@ public class AbstractHarmonEyeApp {
         TimerTask updateTask = new TimerTask() {
             @Override
             public void run() {
-                soundAnalyzer.updateSignal();
+                if (!Pitchenga.isPlaying()) {
+                    soundAnalyzer.updateSignal();
+                }
             }
         };
         updateTimer.scheduleAtFixedRate(updateTask, 200, TIME_PERIOD_MILLIS);
