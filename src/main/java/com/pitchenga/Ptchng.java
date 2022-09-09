@@ -33,9 +33,10 @@ public class Ptchng extends Setup {
         riddleInstruments = new int[]{
                 Instrument.ELECTRIC_BASS_FINGER,
                 Instrument.ACOUSTIC_GRAND_PIANO,
-                Instrument.CHURCH_ORGAN,
                 Instrument.ELECTRIC_PIANO_1,
-                Instrument.TENOR_SAX};
+                Instrument.CHURCH_ORGAN,
+                Instrument.TENOR_SAX
+        };
         voiceHints = true;
 
 //        riddleInstrument = Instrument.TENOR_SAX;
@@ -61,6 +62,7 @@ public class Ptchng extends Setup {
 
         defaultRiddler = Riddler.Rec;
         defaultRiddler = Riddler.Bass;
+        defaultRiddler = Riddler.BassScales;
 
         defaultRinger = Ringer.None;
 
