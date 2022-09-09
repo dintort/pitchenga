@@ -68,12 +68,12 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             new Pair<>("02", Scale.Re3Maj),
             new Pair<>("03", Scale.La3Maj),
             new Pair<>("04", Scale.Mi3Maj),
-            new Pair<>("05", Scale.Si3Maj),
+            new Pair<>("05", Scale.Ti3Maj),
             new Pair<>("06", Scale.Fi3Maj),
             new Pair<>("07", Scale.Ra3Maj),
             new Pair<>("08", Scale.Le3Maj),
             new Pair<>("09", Scale.Me3Maj),
-            new Pair<>("10", Scale.Se3Maj),
+            new Pair<>("10", Scale.Te3Maj),
             new Pair<>("11", Scale.Fa3Maj)};
     private static final AtomicBoolean printScreen = new AtomicBoolean(false);
 
@@ -713,8 +713,12 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     public static void setScale(String scaleName) {
         Pitch[] pitches = CHROMATIC_SCALE;
         try {
-            pitches = Scale.valueOf(scaleName + "3Maj").getScale();
-        } catch (IllegalArgumentException ignore) {
+            if (scaleName != null && !scaleName.isEmpty()) {
+                Scale scale = Scale.valueOf(scaleName + "3Maj");
+                pitches = scale.getScale();
+            }
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
         OpenGlCircularVisualizer.scale = Arrays.stream(pitches).map(pitch -> pitch.tone.name).collect(Collectors.toSet());
         OpenGlCircularVisualizer.scaleName = scaleName;
