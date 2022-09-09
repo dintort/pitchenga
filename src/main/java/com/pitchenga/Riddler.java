@@ -11,14 +11,14 @@ import static com.pitchenga.Tone.*;
 public enum Riddler {
     //    FuguesOrdered("All fugues ordered",
 //            new Pitch[][][]{{{Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4,π}}}, Pitchenga::ordered, null, null, new int[0]),
-    Rec("Rec", new Pitch[][][]{{{Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4, Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4,}}},
-            Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
+    Rec("Rec", new Pitch[][][]{{{Mi2, Fa2, Fi2, So2, Le2, La2, Te2, Ti2, Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Te3, Ti3, Do4, Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4,}}},
+            Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Te", "Ti"}),
     FuguesOrdered("All fugues ordered",
-            new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
+            new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Te", "Ti"}),
     ChromaticOneOctave("Chromatic - octave 4",
-            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
+            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, new Integer[0], null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Te", "Ti"}),
     Chromatic("Chromatic - main octaves",
-            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
+            new Pitch[][][]{{Pitchenga.CHROMATIC_SCALE}}, Pitchenga::shuffle, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Te", "Ti"}),
     //    Step51("51", new Pitch[][][]{
 //            multiply(new Pitch[]{Do2, Me2, Fi2, La2, Do3,}, 110),
 //            multiply(Sets.octavesDo2ToDo7, 10),
@@ -38,14 +38,14 @@ public enum Riddler {
 //            pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
 //            new int[]{0, 1, 0}),
     Step54("54", new Pitch[][][]{
-            multiply(50, new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}),
+            multiply(50, new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Te2, Te2, Te2, Te2, Ti2, Do3,}),
             multiply(500, Scale.octavesDo2ToDo7),
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             //fixme: Insturments
-            new int[]{0, 0, 0}, new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Se", "Si"}),
+            new int[]{0, 0, 0}, new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Te", "Ti"}),
     BassOct2MiSe(null, new Pitch[][][]{
-            multiply(400, new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Se2, Se2, Se2, Se2, Si2, Do3,}),
+            multiply(400, new Pitch[]{Do2, Ra2, Me2, Mi2, Mi2, Mi2, Mi2, Fa2, Fi2, So2, La2, Te2, Te2, Te2, Te2, Ti2, Do3,}),
             multiply(50, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
             multiply(50, transposeScale(Scale.So3Maj.getScale(), -1, 0)),
             multiply(50, transposeScale(Scale.Re3Maj.getScale(), -1, 0)),
@@ -62,10 +62,10 @@ public enum Riddler {
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
-            new String[]{"Mi/Se", "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "Piano", "End"}),
+            new String[]{"Mi/Te", "Do", "So", "Re", "La", "Mi", "Ti", "Fi", "Ra", "Le", "Me", "Te", "Fa", "Piano", "End"}),
     //fixme multi-oct voice hints
     BassOct2ReLe(null, new Pitch[][][]{
-            multiply(400, new Pitch[]{Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, Se2, Si2, Do3,}),
+            multiply(400, new Pitch[]{Do2, Ra2, Re2, Re2, Re2, Re2, Re2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, Le2, Le2, Le2, Le2, Le2, La2, Te2, Ti2, Do3,}),
             multiply(50, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
             multiply(50, transposeScale(Scale.So3Maj.getScale(), -1, 0)),
             multiply(50, transposeScale(Scale.Re3Maj.getScale(), -1, 0)),
@@ -96,10 +96,10 @@ public enum Riddler {
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             new String[]{"Re/Le",
-                    "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa",
-                    "Do", "So", "Re", "La", "Mi", "Si", "Fi", "Ra", "Le", "Me", "Se", "Fa", "End"}),
+                    "Do", "So", "Re", "La", "Mi", "Ti", "Fi", "Ra", "Le", "Me", "Te", "Fa",
+                    "Do", "So", "Re", "La", "Mi", "Ti", "Fi", "Ra", "Le", "Me", "Te", "Fa", "End"}),
     BassAll(null, new Pitch[][][]{
-            merge(70, transposeScale(Scale.Do3Maj.getScale(), 0, 0), new Pitch[]{Si3, Si3, Si3}),
+            merge(70, transposeScale(Scale.Do3Maj.getScale(), 0, 0), new Pitch[]{Ti3, Ti3, Ti3}),
             merge(30, transposeScale(Scale.Do3Maj.getScale(), -1, 0)),
             Scale.DoMajWide,
             merge(70, transposeScale(Scale.So3Maj.getScale(), 0, 0), new Pitch[]{Fi3, Fi3, Fi3}),
@@ -114,7 +114,7 @@ public enum Riddler {
             merge(70, transposeScale(Scale.Mi3Maj.getScale(), 0, 0), new Pitch[]{Me3, Me3, Me3}),
             merge(30, transposeScale(Scale.Mi3Maj.getScale(), -1, 0)),
             Scale.MiMajWide,
-            merge(70, transposeScale(Scale.Si3Maj.getScale(), 0, 0), new Pitch[]{Se3, Se3, Se3}),
+            merge(70, transposeScale(Scale.Si3Maj.getScale(), 0, 0), new Pitch[]{Te3, Te3, Te3}),
             merge(30, transposeScale(Scale.Si3Maj.getScale(), -1, 0)),
             Scale.SiMajWide,
             merge(70, transposeScale(Scale.Fi3Maj.getScale(), 0, 0), new Pitch[]{Fa3, Fa3, Fa3}),
@@ -139,7 +139,7 @@ public enum Riddler {
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             //fixme: Use macro groups and remove duplication
             new int[]{0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1},
-            new String[]{"Do", "Do", "Do", "So", "So", "So", "Re", "Re", "Re", "La", "La", "La", "Mi", "Mi", "Mi", "Si", "Si", "Si", "Fi", "Fi", "Fi", "Ra", "Ra", "Ra", "Le", "Le", "Le", "Me", "Me", "Me", "Se", "Se", "Se", "Fa", "Fa", "Fa", "End",}),
+            new String[]{"Do", "Do", "Do", "So", "So", "So", "Re", "Re", "Re", "La", "La", "La", "Mi", "Mi", "Mi", "Ti", "Ti", "Ti", "Fi", "Fi", "Fi", "Ra", "Ra", "Ra", "Le", "Le", "Le", "Me", "Me", "Me", "Te", "Te", "Te", "Fa", "Fa", "Fa", "End",}),
     BassScales(null, new Pitch[][][]{
             multiply(500, new Pitch[]{Do1, Me1, Me1, Fi1, Fi1, La1, La1, Do2,}),
 //            multiply(500, new Pitch[]{Do1, Me1, Fi1, La1, Do2,}),
@@ -170,7 +170,7 @@ public enum Riddler {
             {{Non}},},
             pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null,
             new int[]{0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new String[]{"Bass", "Do", "Do", "So", "So", "Re", "Re", "La", "La", "Mi", "Mi", "Si", "Si", "Fi", "Fi", "Ra", "Ra", "Le", "Le", "Me", "Me", "Se", "Se", "Fa", "Fa", "End",}),
+            new String[]{"Bass", "Do", "Do", "So", "So", "Re", "Re", "La", "La", "Mi", "Mi", "Ti", "Ti", "Fi", "Fi", "Ra", "Ra", "Le", "Le", "Me", "Me", "Te", "Te", "Fa", "Fa", "End",}),
     Bass(null, new Pitch[][][]{
             multiply(300, new Pitch[]{Do1, Do1, Me1, Me1, Fi1, La1,}),
             multiply(300, filter(new Pitch[][] { transposeScale(CHROMATIC_SCALE, -1, 0) }, Do, Me, Fi, La)),

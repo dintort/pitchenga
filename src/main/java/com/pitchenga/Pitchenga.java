@@ -160,7 +160,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     //fixme: Port to iOS and Android
     //fixme: Documentation / how to play
     //fixme: Visualize chords - like this, but adjust the palette: https://glasses.withinmyworld.org/index.php/2012/08/18/chord-colors-perfect-pitch-and-synesthesia/#.XkVt9y2ZO24
-    //fixme: Alternative color schemes from config files. E.g. https://www.nature.com/articles/s41598-017-18150-y/figures/2;  .put("Do", new Color(253, 203, 3)).put("Ra", new Color(65, 3, 75)).put("Re", new Color(3, 179, 253)).put("Me", new Color(244, 56, 6)).put("Mi", new Color(250, 111, 252)).put("Fa", new Color(2, 252, 37)).put("Fi", new Color(3, 88, 69)).put("So", new Color(252, 2, 2)).put("Le", new Color(16, 24, 106)).put("La", new Color(251, 245, 173)).put("Se", new Color(2, 243, 252)).put("Si", new Color(219, 192, 244))
+    //fixme: Alternative color schemes from config files. E.g. https://www.nature.com/articles/s41598-017-18150-y/figures/2;  .put("Do", new Color(253, 203, 3)).put("Ra", new Color(65, 3, 75)).put("Re", new Color(3, 179, 253)).put("Me", new Color(244, 56, 6)).put("Mi", new Color(250, 111, 252)).put("Fa", new Color(2, 252, 37)).put("Fi", new Color(3, 88, 69)).put("So", new Color(252, 2, 2)).put("Le", new Color(16, 24, 106)).put("La", new Color(251, 245, 173)).put("Te", new Color(2, 243, 252)).put("Ti", new Color(219, 192, 244))
     //fixme: Split view and controller
     //fixme: Customizable note names
     public Pitchenga(boolean isPrimary, Pitchenga secondary) {

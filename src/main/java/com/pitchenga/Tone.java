@@ -4,9 +4,9 @@ import java.awt.*;
 
 /**
  * Tone names are based on https://en.wikipedia.org/wiki/Solfege#Chromatic_variants and http://openmusictheory.com/chromaticSolfege.html
- * major: do di re ri mi fa fi so se la li si
- * minor: do di re me mi fa fi so le la se si
- * lowrd: do ra re me mi fa se so le la se si - this one, but F# instead of Gb
+ * major: do di re ri mi fa fi so te la li ti
+ * minor: do di re me mi fa fi so le la te ti
+ * lowrd: do ra re me mi fa te so le la te ti - this one, but F# instead of Gb
  * Colors are roughly based on Isaac Newton's color wheel and https://www.nature.com/articles/s41598-017-18150-y/figures/2 but only using round numbers (circle.png).
  */
 public enum Tone {
@@ -21,8 +21,8 @@ public enum Tone {
     So("G", true, new Color(0, 255, 255), Color.WHITE),
     Le("Ab", false, new Color(0, 42, 137), Color.WHITE),
     La("A", true, new Color(0, 0, 255), Color.WHITE),
-    Se("Bb", false, new Color(127, 0, 255), Color.WHITE),
-    Si("B", true, new Color(255, 0, 255), Color.WHITE),
+    Te("Bb", false, new Color(127, 0, 255), Color.WHITE),
+    Ti("B", true, new Color(255, 0, 255), Color.WHITE),
     ;
 
     public final String west;

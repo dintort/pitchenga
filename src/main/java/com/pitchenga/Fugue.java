@@ -16,11 +16,11 @@ public enum Fugue {
     Mi(Mi4, new Pitch[]{Mi1, Mi2, Mi3, Mi4, Mi5, Mi6}, four, Re4, sixteen, Do4, four),
     Fa(Fa4, new Pitch[]{Fa1, Fa2, Fa3, Fa4, Fa5, Fa6}, eight, Mi4, sixteen, Re4, sixteen, Do4, four),
     Fi(Fi4, new Pitch[]{Fi1, Fi2, Fi3, Fi4, Fi5, Fi6}, eight, So4, sixteen, Do5, four),
-    So(So4, new Pitch[]{So1, So2, So3, So4, So5, So6}, eight, La4, sixteen, Si4, sixteen, Do5, four),
+    So(So4, new Pitch[]{So1, So2, So3, So4, So5, So6}, eight, La4, sixteen, Ti4, sixteen, Do5, four),
     Le(Le4, new Pitch[]{Le1, Le2, Le3, Le4, Le5, Le6}, four, So4, sixteen, Do5, four),
-    La(La4, new Pitch[]{La1, La2, La3, La4, La5, La6}, four, Si4, sixteen, Do5, four),
-    Se(Se4, new Pitch[]{Se1, Se2, Se3, Se4, Se5, Se6}, four, sixteen, Do5, four),
-    Si(Si4, new Pitch[]{Si1, Si2, Si3, Si4, Si5, Si6}, four, Do5, four),
+    La(La4, new Pitch[]{La1, La2, La3, La4, La5, La6}, four, Ti4, sixteen, Do5, four),
+    Te(Te4, new Pitch[]{Te1, Te2, Te3, Te4, Te5, Te6}, four, sixteen, Do5, four),
+    Ti(Ti4, new Pitch[]{Ti1, Ti2, Ti3, Ti4, Ti5, Ti6}, four, Do5, four),
     DoDo(Do5, Do.multiPitch, eight, Do5, eight, Do5, four),
     ;
 

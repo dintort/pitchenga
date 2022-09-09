@@ -41,13 +41,13 @@
 //                new Pitch[][][]{{transposeScale(DO_MAJ_SCALE, 0, 9)}}, Pitchenga::shuffle, null),
 //        LaMajHarm("La maj harm - main octaves",
 //                new Pitch[][][]{{transposeScale(DO_MAJ_HARM_SCALE, 0, 9)}}, Pitchenga::shuffle, null),
-//        SeMaj("Se maj - main octaves",
+//        SeMaj("Te maj - main octaves",
 //                new Pitch[][][]{{transposeScale(DO_MAJ_SCALE, 0, 10)}}, Pitchenga::shuffle, null),
-//        SeMajHarm("Se maj harm - main octaves",
+//        SeMajHarm("Te maj harm - main octaves",
 //                new Pitch[][][]{{transposeScale(DO_MAJ_HARM_SCALE, 0, 10)}}, Pitchenga::shuffle, null),
-//        SiMaj("Si maj - main octaves",
+//        SiMaj("Ti maj - main octaves",
 //                new Pitch[][][]{{transposeScale(DO_MAJ_SCALE, 0, 11)}}, Pitchenga::shuffle, null),
-//        SiMajHarm("Si maj harm - main octaves",
+//        SiMajHarm("Ti maj harm - main octaves",
 //                new Pitch[][][]{{transposeScale(DO_MAJ_HARM_SCALE, 0, 11)}}, Pitchenga::shuffle, null),
 //    ChromaticScaleUpDown("Chromatic scale Mi3-La5-Mi3",
 //            new Pitch[][][]{new Pitch[][]{
@@ -793,7 +793,7 @@
 //    }, {
 //            {Non}
 //    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
-//    Step37Octaves2And3And4And5ShuffledSiDo("Step 37: Octaves 2, 3, 4, 5 shuffled - Si, Do", new Pitch[][][]{{
+//    Step37Octaves2And3And4And5ShuffledSiDo("Step 37: Octaves 2, 3, 4, 5 shuffled - Ti, Do", new Pitch[][][]{{
 //            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
 //            {/* */Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4, Do4, Do4, Do4, Do4, Do4,},
 //            {/* */Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Si4, Si4, Si4, Si4, Si4, Do5, Do5, Do5, Do5, Do5, Do5,},
@@ -845,7 +845,7 @@
 //    }, {
 //            {Non}
 //    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null),
-//    Step38Octaves2And3And4And5ShuffledLaSe("Step 38: Octaves 2, 3, 4, 5 shuffled - La, Se", new Pitch[][][]{{
+//    Step38Octaves2And3And4And5ShuffledLaSe("Step 38: Octaves 2, 3, 4, 5 shuffled - La, Te", new Pitch[][][]{{
 //            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, La2, La2, La2, La2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2,},
 //            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, La3, La3, La3, La3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3,},
 //            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, La4, La4, La4, La4, La4, Se4, Se4, Se4, Se4, Se4, Se4, Si4,},
@@ -1177,7 +1177,7 @@
 //    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
 //
 //    //fixme: Rename numbers
-//    Step43Octaves2And3And4And5And6SiDo("Step 43: Octaves 2, 3, 4, 5, 6 - Si, Do", new Pitch[][][]{{
+//    Step43Octaves2And3And4And5And6SiDo("Step 43: Octaves 2, 3, 4, 5, 6 - Ti, Do", new Pitch[][][]{{
 //            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, Se2, Si2, Si2, Si2, Si2, Si2, Si2, Do3, Do3, Do3, Do3, Do3, Do3,},
 //            {/* */Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Si3, Si3, Si3, Si3, Si3, Do4, Do4, Do4, Do4, Do4, Do4,},
 //            {/* */Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, Se4, Si4, Si4, Si4, Si4, Si4, Si4, Do5, Do5, Do5, Do5, Do5, Do5,},
@@ -1240,7 +1240,7 @@
 //    }, {
 //            {Non}
 //    }}, pitchenga -> pitchenga.shuffleGroupSeries(false, true), new Integer[0], null, new int[0]),
-//    Step44Octaves2And3And4And5And6LaSe("Step 44: Octaves 2, 3, 4, 5, 6 - La, Se", new Pitch[][][]{{
+//    Step44Octaves2And3And4And5And6LaSe("Step 44: Octaves 2, 3, 4, 5, 6 - La, Te", new Pitch[][][]{{
 //            {Do2, Ra2, Re2, Me2, Mi2, Fa2, Fi2, So2, Le2, La2, La2, La2, La2, La2, La2, Se2, Se2, Se2, Se2, Se2, Se2, Si2,},
 //            {Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, La3, La3, La3, La3, La3, Se3, Se3, Se3, Se3, Se3, Se3, Si3,},
 //            {Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4, La4, La4, La4, La4, La4, Se4, Se4, Se4, Se4, Se4, Se4, Si4,},
