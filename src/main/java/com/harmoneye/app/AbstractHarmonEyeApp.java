@@ -21,11 +21,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AbstractHarmonEyeApp {
 
-//    private static final int TIME_PERIOD_MILLIS = 64;
+    //    private static final int TIME_PERIOD_MILLIS = 64;
 //    private static final int TIME_PERIOD_MILLIS = 32;
     private static final int TIME_PERIOD_MILLIS = 16;
-//    private static final int TIME_PERIOD_MILLIS = 8;
-    private static final String WINDOW_TITLE = "HarmonEye";
+    //    private static final int TIME_PERIOD_MILLIS = 8;
+    private static final String WINDOW_TITLE = "Pitchenga";
 
     protected static final float AUDIO_SAMPLE_RATE = 44100.0f;
     protected static final int AUDIO_BITS_PER_SAMPLE = 16;
@@ -46,26 +46,27 @@ public class AbstractHarmonEyeApp {
 
     private Timer updateTimer;
 
-    public AbstractHarmonEyeApp(Visualizer<AnalyzedFrame> visualizer2) {
+    public AbstractHarmonEyeApp(Pitchenga pitchenga) {
         visualizer = new com.harmoneye.viz.OpenGlCircularVisualizer();
 //        visualizer = new com.harmoneye.viz.OpenGlLinearVisualizer();
 
-        soundAnalyzer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE, visualizer2);
+        soundAnalyzer = new MusicAnalyzer(visualizer, AUDIO_SAMPLE_RATE, AUDIO_BITS_PER_SAMPLE, pitchenga);
 
         circleOfFifthsEnabledAction = new CircleOfFifthsEnabledAction("Circle of fifths", null, "", KeyEvent.VK_F);
         pauseAction = new PauseAction("Pause", null, "", KeyEvent.VK_P);
         accumulationEnabledAction = new AccumulationEnabledAction("Accumulate", null, "", KeyEvent.VK_A);
 
-        frame = createFrame();
+        frame = createFrame(pitchenga);
 
         appListener = new MyApplicationListener(frame);
 
         frame.setVisible(true);
     }
 
-    private JFrame createFrame() {
-        JFrame frame = new JFrame(WINDOW_TITLE);
+    private JFrame createFrame(Pitchenga frame) {
+//        JFrame frame = new JFrame(WINDOW_TITLE);
         frame.add(visualizer.getComponent());
+//        frame.getMainPanel().add(visualizer.getComponent(), BorderLayout.NORTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         if (visualizer instanceof OpenGlCircularVisualizer) {
             if (OpenGlCircularVisualizer.DRAW_SNOWFLAKE) {
@@ -77,7 +78,8 @@ public class AbstractHarmonEyeApp {
             frame.setSize(1900, 620);
         }
         frame.setLocationRelativeTo(null);
-        frame.setLocation(0, 220);
+        frame.setLocation(0, 0);
+//        frame.setLocation(0, 220);
         frame.setJMenuBar(createMenuBar());
 
         return frame;

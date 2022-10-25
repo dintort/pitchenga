@@ -115,10 +115,10 @@ public class Ptchng extends Setup {
         });
     }
 
-    public static AbstractHarmonEyeApp harmonEye(Visualizer<AnalyzedFrame> visualizer2) {
+    public static AbstractHarmonEyeApp harmonEye(Pitchenga pitchenga) {
         Application defaultApplication = new DefaultApplication();
 
-        final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(visualizer2);
+        final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(pitchenga);
         class Initializer extends SwingWorker<String, Object> {
             @Override
             public String doInBackground() {

@@ -70,6 +70,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private final BlockingQueue<Runnable> playQueue = new ArrayBlockingQueue<>(1);
     private final ExecutorService playExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, playQueue, new Threads("pitchenga-play"), new ThreadPoolExecutor.DiscardOldestPolicy());
     private final Random random = new Random();
+    private final JPanel mainPanel = new JPanel();
     private volatile AudioDispatcher audioDispatcher;
     //fixme: +Selectors for instruments +Random instrument: 1) guitar/piano/sax 2) more 3) all
     private final MidiChannel[] riddleInstrumentChannels;
@@ -167,6 +168,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         super("Pitchenga");
         if (isPrimary) {
             INSTANCE = this;
+            Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+                System.out.println("Uncaught exception on thread=" + t + ": " + e);
+                e.printStackTrace();
+            });
         }
         try {
             Class<?> fullScreenUtilities = Class.forName("com.apple.eawt.FullScreenUtilities");
@@ -1206,7 +1211,6 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        initIcon();
         this.setLayout(new BorderLayout());
 
-        JPanel mainPanel = new JPanel();
         this.add(mainPanel);
         mainPanel.setBackground(Color.DARK_GRAY);
         bottomPanel.setBackground(Color.DARK_GRAY);
@@ -1243,6 +1247,10 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //            JFrame frame = new JFrame("Test");
 //            frame.setVisible(true);
 //        }
+    }
+
+    public JPanel getMainPanel() {
+        return mainPanel;
     }
 
     private void initSizeAndLocation() {
