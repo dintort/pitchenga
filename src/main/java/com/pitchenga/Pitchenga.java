@@ -1212,15 +1212,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         this.setLayout(new BorderLayout());
 
         this.add(mainPanel);
-        mainPanel.setBackground(Color.DARK_GRAY);
-        bottomPanel.setBackground(Color.DARK_GRAY);
+        mainPanel.setBackground(Color.BLACK);
+        bottomPanel.setBackground(Color.BLACK);
         mainPanel.setLayout(new BorderLayout());
 
-        JPanel displayPanel = new JPanel();
-        mainPanel.add(displayPanel, BorderLayout.CENTER);
-        displayPanel.setBackground(Color.DARK_GRAY);
-        displayPanel.setLayout(new BorderLayout());
-        displayPanel.add(display, BorderLayout.CENTER);
+//        JPanel displayPanel = new JPanel();
+//        mainPanel.add(displayPanel, BorderLayout.NORTH);
+//        displayPanel.setBackground(Color.DARK_GRAY);
+//        displayPanel.setLayout(new BorderLayout());
+//        displayPanel.add(display, BorderLayout.CENTER);
 
 
         for (Button button : Button.values()) {
@@ -1284,25 +1284,26 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         pitchSliderPanel.setOpaque(false);
 
         //fixme: Display frequency in the overlay layer same as transcribe history?
-        JPanel frequencyPanel = new JPanel(new BorderLayout());
-        pitchSliderPanel.add(frequencyPanel, BorderLayout.WEST);
-        frequencyPanel.setOpaque(false);
-        frequencyPanel.add(frequencyLabel, BorderLayout.NORTH);
-        frequencyLabel.setFont(MONOSPACED.deriveFont(9f));
-        frequencyLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        frequencyLabel.setForeground(Color.LIGHT_GRAY);
+//        JPanel frequencyPanel = new JPanel(new BorderLayout());
+//        pitchSliderPanel.add(frequencyPanel, BorderLayout.WEST);
+//        frequencyPanel.setOpaque(false);
+//        frequencyPanel.add(frequencyLabel, BorderLayout.NORTH);
+//        frequencyLabel.setFont(MONOSPACED.deriveFont(9f));
+//        frequencyLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//        frequencyLabel.setForeground(Color.LIGHT_GRAY);
 
-        JButton flipDisplayButton = new JButton("");
-        frequencyPanel.add(flipDisplayButton, BorderLayout.CENTER);
-        flipDisplayButton.setFocusable(false);
-        flipDisplayButton.setSelected(false);
-        flipDisplayButton.addActionListener(event -> display.flip());
-
-        JToggleButton showControlToggle = new JToggleButton("");
-        frequencyPanel.add(showControlToggle, BorderLayout.SOUTH);
-        showControlToggle.setFocusable(false);
-        showControlToggle.addItemListener(event -> controlPanelPanel.setVisible(showControlToggle.isSelected()));
-        showControlToggle.setSelected(true);
+//        JButton flipDisplayButton = new JButton("");
+//        frequencyPanel.add(flipDisplayButton, BorderLayout.CENTER);
+//        flipDisplayButton.setFocusable(false);
+//        flipDisplayButton.setSelected(false);
+//        flipDisplayButton.addActionListener(event -> display.flip());
+//
+//        JToggleButton showControlToggle = new JToggleButton("");
+//        frequencyPanel.add(showControlToggle, BorderLayout.SOUTH);
+//        showControlToggle.setFocusable(false);
+//        showControlToggle.addItemListener(event -> controlPanelPanel.setVisible(showControlToggle.isSelected()));
+////        showControlToggle.setSelected(true);
+//        showControlToggle.setSelected(false);
 
         pitchSliderPanel.add(pitchSlider, BorderLayout.CENTER);
         pitchSlider.setEnabled(false);
@@ -1530,6 +1531,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     private JPanel initControlPanel() {
+        controlPanelPanel.setVisible(false);
         controlPanelPanel.setBackground(Color.DARK_GRAY);
         JPanel controlPanel = new JPanel();
         controlPanel.setBackground(Color.DARK_GRAY);
@@ -1959,15 +1961,15 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         if (nativeFullScreenAvailable) {
             boolean current = isInNativeFullScreen.get();
             isInNativeFullScreen.compareAndSet(current, !current);
-//            bottomPanel.setVisible(!bottomPanel.isVisible());
+            bottomPanel.setVisible(!bottomPanel.isVisible());
             toggleNativeFullScreen();
         } else {
             //            if (screenDevice.getFullScreenWindow() == this) {
             if (GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].getFullScreenWindow() == eye) {
-//                bottomPanel.setVisible(true);
+                bottomPanel.setVisible(true);
                 GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
             } else {
-//                bottomPanel.setVisible(false);
+                bottomPanel.setVisible(false);
 //                screenDevice.setFullScreenWindow(this);
                 GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
             }

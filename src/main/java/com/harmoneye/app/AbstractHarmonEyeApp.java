@@ -5,7 +5,6 @@ import com.harmoneye.analysis.MusicAnalyzer;
 import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.OpenGlLinearVisualizer;
 import com.harmoneye.viz.SwingVisualizer;
-import com.harmoneye.viz.Visualizer;
 import com.pitchenga.Pitchenga;
 import org.simplericity.macify.eawt.ApplicationEvent;
 import org.simplericity.macify.eawt.ApplicationListener;
@@ -65,14 +64,15 @@ public class AbstractHarmonEyeApp {
 
     private JFrame createFrame(Pitchenga frame) {
 //        JFrame frame = new JFrame(WINDOW_TITLE);
-        frame.add(visualizer.getComponent());
+//        frame.add(visualizer.getComponent());
 //        frame.getMainPanel().add(visualizer.getComponent(), BorderLayout.NORTH);
+        frame.getMainPanel().add(visualizer.getComponent(), BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         if (visualizer instanceof OpenGlCircularVisualizer) {
             if (OpenGlCircularVisualizer.DRAW_SNOWFLAKE) {
                 frame.setSize(1080, 1110);
             } else {
-                frame.setSize(700, 710);
+                frame.setSize(700, 773);
             }
         } else if (visualizer instanceof OpenGlLinearVisualizer) {
             frame.setSize(1900, 620);
