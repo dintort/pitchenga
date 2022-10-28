@@ -1180,6 +1180,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         UIManager.put("control", new Color(128, 128, 128));
         UIManager.put("info", new Color(128, 128, 128));
         UIManager.put("nimbusBase", new Color(18, 30, 49));
+        UIManager.put("nimbusBlueGrey", new Color(16, 16, 16));
         UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
         UIManager.put("nimbusDisabledText", new Color(128, 128, 128));
         UIManager.put("nimbusFocus", new Color(115, 164, 209));
