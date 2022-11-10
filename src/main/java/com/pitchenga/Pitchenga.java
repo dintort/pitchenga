@@ -10,6 +10,7 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.Visualizer;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
 import javax.sound.midi.*;
@@ -405,13 +406,13 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                     }
                     double maxRms = rms;
                     if (guessQueuePitchAndRms.size() < 1) {
-                        guessQueuePitchAndRms.add(new Pair<>(guess, rms));
+                        guessQueuePitchAndRms.add(Pair.of(guess, rms));
                     } else {
                         boolean same = true;
                         for (Pair<Pitch, Double> pitchAndRms : guessQueuePitchAndRms) {
-                            if (!guess.equals(pitchAndRms.left)) {
+                            if (!guess.equals(pitchAndRms.getLeft())) {
                                 same = false;
-                                maxRms = FastMath.max(maxRms, pitchAndRms.right);
+                                maxRms = FastMath.max(maxRms, pitchAndRms.getRight());
                                 break;
                             }
                         }
@@ -426,7 +427,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                             }
                         } else {
                             guessQueuePitchAndRms.clear();
-                            guessQueuePitchAndRms.add(new Pair<>(guess, rms));
+                            guessQueuePitchAndRms.add(Pair.of(guess, rms));
                         }
                     }
                     if (maxRms > rmsThreshold) {
@@ -541,8 +542,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 //        System.out.println("ptch tone=" + guess.tone + " toneNumber=" + guess.tone.ordinal() + " freq=" + frequency + " pitchy=" + pitchy + " diff="
 //                + diff + " pitchyDiff=" + pitchyDiff + " inaccuracy=" + inaccuracy + " color=" + guessAndPitchinessColor.left);
 
-        Color guessColor = guessAndPitchinessColor.left;
-        Color pitchinessColor = guessAndPitchinessColor.right;
+        Color guessColor = guessAndPitchinessColor.getLeft();
+        Color pitchinessColor = guessAndPitchinessColor.getRight();
         boolean playing = isPlaying();
 //        if (debug && !playing && isPrimary) {
 //            debug(String.format(" %s | pitch=%.2fHz | probability=%.2f | rms=%.2f | diff=%.2f | pitchyDiff=%.2f | inaccuracy=%.2f | guessRoundedColor=%s | pitchyColor=%s | guessColor=%s | borderColor=%s",
@@ -579,12 +580,12 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         Pair<Color, Color> guessAndPitchinessColor;
         double pitchiness = pitchinessDiff * 20;
         if (FastMath.abs(diff) < 0.000000000042) {
-            guessAndPitchinessColor = new Pair<>(toneColor, toneColor);
+            guessAndPitchinessColor = Pair.of(toneColor, toneColor);
         } else {
             //fixme: Unit test for interpolation, e.g. direction
             Color guessColor = interpolateColor(pitchinessDiff, toneColor, pitchy.tone.color);
             Color pitchinessColor = interpolateColor(pitchiness, toneColor, pitchy.tone.color);
-            guessAndPitchinessColor = new Pair<>(guessColor, pitchinessColor);
+            guessAndPitchinessColor = Pair.of(guessColor, pitchinessColor);
         }
         return guessAndPitchinessColor;
     }

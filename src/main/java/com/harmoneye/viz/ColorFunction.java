@@ -1,9 +1,9 @@
 package com.harmoneye.viz;
 
-import com.pitchenga.Pair;
 import com.pitchenga.Pitch;
 import com.pitchenga.Pitchenga;
 import com.pitchenga.Tone;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
 import java.awt.*;
@@ -37,7 +37,7 @@ public class ColorFunction {
         inaccuracy = inaccuracy * 50;
         Color toneColor = guess.tone.color;
         Pair<Color, Color> guessAndPitchinessColor = Pitchenga.getGuessAndPitchinessColor(diff, pitchy, inaccuracy, toneColor);
-        Color color = guessAndPitchinessColor.left;
+        Color color = guessAndPitchinessColor.getLeft();
 //		Color color = toneColor;
 
 //		float colorVelocity = velocity * 0.5f;

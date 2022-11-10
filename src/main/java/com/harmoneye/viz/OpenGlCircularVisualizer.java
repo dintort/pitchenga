@@ -9,6 +9,7 @@ import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.pitchenga.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
 import javax.imageio.ImageIO;
@@ -22,9 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -63,18 +63,18 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     private int scaleCounter = 0;
     @SuppressWarnings("unchecked")
     private static final Pair<String, Scale>[] SCALES = new Pair[]{
-            new Pair<>("00", Scale.Do3Maj),
-            new Pair<>("01", Scale.So3Maj),
-            new Pair<>("02", Scale.Re3Maj),
-            new Pair<>("03", Scale.La3Maj),
-            new Pair<>("04", Scale.Mi3Maj),
-            new Pair<>("05", Scale.Ti3Maj),
-            new Pair<>("06", Scale.Fi3Maj),
-            new Pair<>("07", Scale.Ra3Maj),
-            new Pair<>("08", Scale.Le3Maj),
-            new Pair<>("09", Scale.Me3Maj),
-            new Pair<>("10", Scale.Te3Maj),
-            new Pair<>("11", Scale.Fa3Maj)};
+            Pair.of("00", Scale.Do3Maj),
+            Pair.of("01", Scale.So3Maj),
+            Pair.of("02", Scale.Re3Maj),
+            Pair.of("03", Scale.La3Maj),
+            Pair.of("04", Scale.Mi3Maj),
+            Pair.of("05", Scale.Ti3Maj),
+            Pair.of("06", Scale.Fi3Maj),
+            Pair.of("07", Scale.Ra3Maj),
+            Pair.of("08", Scale.Le3Maj),
+            Pair.of("09", Scale.Me3Maj),
+            Pair.of("10", Scale.Te3Maj),
+            Pair.of("11", Scale.Fa3Maj)};
     private static final AtomicBoolean printScreen = new AtomicBoolean(false);
 
     //playback
@@ -99,14 +99,11 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     private final ColorFunction colorFunction = new ColorFunction();
     private final Component component;
     private int binsPerHalftone;
-    private int halftoneCount;
     private double stepAngle;
 
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
     public static volatile String text;
-    private volatile int biggestBinNumber;
-    private volatile Tone tone;
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
@@ -138,7 +135,6 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         CqtContext cqtContext = pcProfile.getCqtContext();
         binsPerHalftone = cqtContext.getBinsPerHalftone();
-        halftoneCount = cqtContext.getHalftonesPerOctave();
 
         if (!RECORD_VIDEO && Pitchenga.isPlaying()) {
             return;
@@ -148,8 +144,6 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         if (octaveBins == null || octaveBins.length == 0) {
             return;
         }
-        this.biggestBinNumber = getBiggestBinNumber();
-        this.tone = getTone(biggestBinNumber, 0.5);
 
         if (DRAW_SNOWFLAKE) {
             drawSnowflake();
@@ -217,9 +211,29 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             updateStars();
         }
 
+        List<Pair<Integer, Double>> indexToVelocityPairs = new LinkedList<>();
+        int[] binOrders = null;
+        if (binVelocities != null) {
+            for (int i = 0; i < binVelocities.length; i++) {
+                double velocity = binVelocities[i];
+                indexToVelocityPairs.add(Pair.of(i, velocity));
+            }
+            indexToVelocityPairs.sort(Comparator.comparingDouble(Pair::getRight));
+            indexToVelocityPairs = new ArrayList<>(indexToVelocityPairs);
+            binOrders = new int[binVelocities.length];
+            for (int i = 0; i < binVelocities.length; i++) {
+                Pair<Integer, Double> indexToVelocityPair = indexToVelocityPairs.get(i);
+                binOrders[indexToVelocityPair.getLeft()] = i;
+            }
+        }
+
+        int biggestBinNumber = binOrders == null ? -1 : indexToVelocityPairs.get(indexToVelocityPairs.size() - 1).getLeft();
+        Tone tone = getTone(biggestBinNumber, 0.3);
+//        debug("biggestBinNumber=" + biggestBinNumber + ", tone=" + tone);
+
         drawFrame(gl);
         gl.glBegin(GL_TRIANGLES);
-        drawBins(gl, biggestBinNumber);
+        drawBins(gl, binOrders);
         if (tone != null) {
             drawTuner(gl);
         }
@@ -381,21 +395,6 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         gl.glEnd();
     }
 
-    private int getBiggestBinNumber() {
-        double biggestBinVelocity = 0;
-        int biggestBinNumber = -1;
-        if (binVelocities != null) {
-            for (int i = 0; i < binVelocities.length; i++) {
-                double velocity = binVelocities[i];
-                if (velocity > biggestBinVelocity) {
-                    biggestBinVelocity = velocity;
-                    biggestBinNumber = i;
-                }
-            }
-        }
-        return biggestBinNumber;
-    }
-
     private void drawFrame(GL2 gl) {
         Color color;
         double halfToneCountInv = 1.0 / HALFTONE_NAMES.length;
@@ -433,7 +432,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         gl.glEnd();
     }
 
-    private void drawBins(GL2 gl, int biggestBinNumber) {
+    private void drawBins(GL2 gl, int[] binOrders) {
         if (binVelocities == null || binVelocities.length == 0) {
             return;
         }
@@ -454,17 +453,8 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
             Color color = colorFunction.toColor(velocity, toneRatio);
             if (!isPlaying()) {
-                if (biggestBinNumber == i) {
-                    velocity *= 1.3;
-                } else if (velocity < 0.2) {
-                    velocity *= 0.8;
-                } else if (velocity < 0.3) {
-                    velocity *= 0.9;
-                } else if (velocity < 0.4) {
-                    velocity *= 0.95;
-                } else if (velocity > 0.5) {
-                    velocity *= 1.05;
-                }
+                int binOrder = binOrders[i];
+                velocity *= binOrder * 0.013;
             }
             if (velocity > 1.15) {
                 velocity = 1.15;
@@ -699,14 +689,14 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             }
 //            BufferUtils.destroyDirectBuffer(buffer);
 
-            String name = scalePair.left + "-" + scalePair.right.getScale()[0].tone.name;
+            String name = scalePair.getLeft() + "-" + scalePair.getRight().getScale()[0].tone.name;
             System.out.print("\"" + name + "\", ");
             File outputfile = new File("src/main/resources/scales/" + name + ".png");
             ImageIO.write(screenshot, "png", outputfile);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        OpenGlCircularVisualizer.scale = getToneNames(SCALES[scaleCounter].right);
+        OpenGlCircularVisualizer.scale = getToneNames(SCALES[scaleCounter].getRight());
 
     }
 
