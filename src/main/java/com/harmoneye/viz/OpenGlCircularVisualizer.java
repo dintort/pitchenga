@@ -233,7 +233,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
         drawFrame(gl);
         gl.glBegin(GL_TRIANGLES);
-        drawBins(gl, binOrders);
+        drawBins(gl, binOrders, biggestBinNumber);
         if (tone != null) {
             drawTuner(gl);
         }
@@ -432,7 +432,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         gl.glEnd();
     }
 
-    private void drawBins(GL2 gl, int[] binOrders) {
+    private void drawBins(GL2 gl, int[] binOrders, int biggestBinNumber) {
         if (binVelocities == null || binVelocities.length == 0) {
             return;
         }
@@ -455,6 +455,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             if (!isPlaying()) {
                 int binOrder = binOrders[i];
                 velocity *= binOrder * 0.013;
+                if (i == biggestBinNumber) {
+                    velocity *= 1.3;
+                }
             }
             if (velocity > 1.15) {
                 velocity = 1.15;
