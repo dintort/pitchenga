@@ -228,7 +228,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
 
         int biggestBinNumber = binOrders == null ? -1 : indexToVelocityPairs.get(indexToVelocityPairs.size() - 1).getLeft();
-        Tone tone = getTone(biggestBinNumber, 0.3);
+        Tone tone = getTone(biggestBinNumber, 0.4);
 //        debug("biggestBinNumber=" + biggestBinNumber + ", tone=" + tone);
 
         drawFrame(gl);

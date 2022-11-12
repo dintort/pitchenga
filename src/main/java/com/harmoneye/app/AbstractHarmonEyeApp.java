@@ -78,7 +78,8 @@ public class AbstractHarmonEyeApp {
             frame.setSize(1900, 620);
         }
         frame.setLocationRelativeTo(null);
-        frame.setLocation(0, 0);
+//        frame.setLocation(0, 0);
+        frame.setLocation(0, 158);
 //        frame.setLocation(0, 220);
         frame.setJMenuBar(createMenuBar());
 
