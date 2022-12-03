@@ -72,12 +72,13 @@ public class AbstractHarmonEyeApp {
             if (OpenGlCircularVisualizer.DRAW_SNOWFLAKE) {
                 frame.setSize(1080, 1110);
             } else {
-                frame.setSize(700, 773);
+//                frame.setSize(700, 773);
+                frame.setSize(700, 728);
             }
         } else if (visualizer instanceof OpenGlLinearVisualizer) {
             frame.setSize(1900, 620);
         }
-        frame.setLocationRelativeTo(null);
+        frame.setLocationRelativeTo(null);π
 //        frame.setLocation(0, 0);
 //        frame.setLocation(0, 158);
         frame.setLocation(0, 1066);

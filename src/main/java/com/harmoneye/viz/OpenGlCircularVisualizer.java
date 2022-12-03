@@ -452,7 +452,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             double toneRatio = ii / ((double) binVelocities.length / (double) Tone.values().length);
 
             Color color = colorFunction.toColor(velocity, toneRatio);
-            if (!isPlaying()) {
+            if (!isPlaying() && binOrders != null) {
                 int binOrder = binOrders[i];
                 velocity *= binOrder * 0.013;
                 if (i == biggestBinNumber) {

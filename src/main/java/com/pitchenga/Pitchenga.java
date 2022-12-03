@@ -41,8 +41,8 @@ import static com.pitchenga.Pitch.*;
 import static com.pitchenga.Tone.Do;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualizer<AnalyzedFrame> {
-    //        public static final boolean TARSOS = "true".equals(System.getProperty("com.pitchenga.tarsos.enabled"));
-    public static final boolean TARSOS = true;
+            public static final boolean TARSOS = "true".equals(System.getProperty("com.pitchenga.tarsos.enabled"));
+//    public static final boolean TARSOS = true;
     public static volatile Pitchenga INSTANCE;
     private static final PrintStream log;
     private static final boolean debug = "true".equalsIgnoreCase(System.getProperty("com.pitchenga.debug"));
@@ -1229,7 +1229,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             keyButtons[button.ordinal()] = new JToggleButton(button.label);
         }
 
-        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+//        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         initPitchSliderPanel();
         bottomPanel.add(pitchSliderPanel, BorderLayout.NORTH);
 
