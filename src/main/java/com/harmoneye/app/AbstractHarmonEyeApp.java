@@ -78,7 +78,7 @@ public class AbstractHarmonEyeApp {
         } else if (visualizer instanceof OpenGlLinearVisualizer) {
             frame.setSize(1900, 620);
         }
-        frame.setLocationRelativeTo(null);π
+        frame.setLocationRelativeTo(null);
 //        frame.setLocation(0, 0);
 //        frame.setLocation(0, 158);
         frame.setLocation(0, 1066);
