@@ -136,10 +136,6 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         CqtContext cqtContext = pcProfile.getCqtContext();
         binsPerHalftone = cqtContext.getBinsPerHalftone();
 
-        if (!RECORD_VIDEO && Pitchenga.isPlaying()) {
-            return;
-        }
-
         double[] octaveBins = pcProfile.getOctaveBins();
         if (octaveBins == null || octaveBins.length == 0) {
             return;
@@ -207,7 +203,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         gl.glClearColor(0f, 0f, 0f, 1f);
         gl.glClear(GL.GL_COLOR_BUFFER_BIT);
         playVideo();
-        if (Pitchenga.isPlaying()) { //fixme: Maybe move updateStars from update to here completely
+        if (Pitchenga.isPlaying()) { //fixme: Move updateStars from update to here completely
             updateStars();
         }
 

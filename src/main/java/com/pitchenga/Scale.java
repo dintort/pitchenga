@@ -4,7 +4,7 @@ import static com.pitchenga.Pitch.*;
 
 public enum Scale {
 
-    Do3Maj(new Pitch[]{Do3, Re3, Mi3, Fa3, So3, La3, Ti3, Do3,}),
+    Do3Maj(new Pitch[]{Do3, Re3, Mi3, Fa3, So3, La3, Ti3, Do4,}),
     Ra3Maj(new Pitch[]{Ra3, Me3, Fa3, Fi3, Le3, Te3, Do4, Do3,}),
     Re3Maj(new Pitch[]{Re3, Mi3, Fi3, So3, La3, Ti3, Ra3, Re3,}),
     Me3Maj(new Pitch[]{Me3, Fa3, So3, Le3, Te3, Do4, Re3, Do3,}),

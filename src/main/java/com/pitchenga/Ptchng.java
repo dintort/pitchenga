@@ -46,10 +46,6 @@ public class Ptchng extends Setup {
 //        ringInstrument = Instrument.ACOUSTIC_GRAND_PIANO;
 
         //fixme: Move to riddle
-        seriesLength = 1;
-        repeats = 20;
-        seriesLength = 1;
-        repeats = 2;
         seriesLength = 4;
         repeats = 3;
 
@@ -80,6 +76,14 @@ public class Ptchng extends Setup {
             defaultHinter = Hinter.Always;
             defaultPacer = Pacer.Tempo30;
             fullScreenWhenPlaying = false;
+        }
+        if (defaultRiddler.equals(Riddler.Rec)) {
+            defaultPacer = Pacer.Tempo60;
+            defaultHinter = Hinter.Never;
+            fullScreenWhenPlaying = false;
+            repeats = 20;
+            seriesLength = 1;
+            voiceHints = false;
         }
 
     }

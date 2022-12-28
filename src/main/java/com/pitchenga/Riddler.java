@@ -11,7 +11,8 @@ import static com.pitchenga.Tone.*;
 public enum Riddler {
     //    FuguesOrdered("All fugues ordered",
 //            new Pitch[][][]{{{Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Se3, Si3, Do4,π}}}, Pitchenga::ordered, null, null, new int[0]),
-    Rec("Rec", new Pitch[][][]{{{Mi2, Fa2, Fi2, So2, Le2, La2, Te2, Ti2, Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Te3, Ti3, Do4, Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4,}}},
+    Rec("Rec", new Pitch[][][]{{{Do4, Ti3, Te3, La3, Le3, So3, Fi3, Fa3, Mi3, Me3, Re3, Ra3, Do3,}}},
+//    Rec("Rec", new Pitch[][][]{{{Ti2, Ti2, Do3, Ra3, Re3, Me3, Mi3, Fa3, Fi3, So3, Le3, La3, Te3, Ti3, Do4, Do4, Ra4, Re4, Me4, Mi4, Fa4, Fi4, So4, Le4, La4,}}},
             Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Te", "Ti"}),
     FuguesOrdered("All fugues ordered",
             new Pitch[][][]{{Arrays.stream(Fugue.values()).map(fugue -> fugue.pitch).toArray(Pitch[]::new)}}, Pitchenga::ordered, null, null, new int[0], new String[]{"Do", "Ra", "Re", "Me", "Mi", "Fa", "Fi", "So", "Le", "La", "Te", "Ti"}),

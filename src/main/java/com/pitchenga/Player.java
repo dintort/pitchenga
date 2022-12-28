@@ -22,7 +22,7 @@ public class Player {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(resource);
             this.clip = AudioSystem.getClip();
             clip.open(audioInputStream);
-            float volume = 0.1f;
+            float volume = 0.2f;
             FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
             gainControl.setValue(20f * (float) FastMath.log10(volume));
         } catch (LineUnavailableException | UnsupportedAudioFileException | IOException e) {
