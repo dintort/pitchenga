@@ -1410,7 +1410,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 nextTempo(true);
                 return true;
             }
-            if (pressed && event.getKeyCode() == KeyEvent.VK_PAGE_UP) {
+            if (pressed && event.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
                 riddlesPointer += 100;
                 if (riddlesPointer >= riddlesQueue.length - 1) {
                     riddlesPointer = 0;
@@ -1418,7 +1418,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 displayTempoAndRemainingSize();
                 return true;
             }
-            if (pressed && event.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
+            if (pressed && event.getKeyCode() == KeyEvent.VK_PAGE_UP) {
                 riddlesPointer -= 100;
                 if (riddlesPointer < 0) {
                     riddlesPointer = 0;
