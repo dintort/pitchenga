@@ -765,7 +765,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             return;
         }
         Fugue toneFugue = getToneFugue(riddle);
-        OpenGlCircularVisualizer.playFugue = toneFugue;
+        OpenGlCircularVisualizer.setVideoCurrentFugue(toneFugue);
         display.setTones(toneFugue, riddle.tone);
         if (getPacer() != Pacer.Answer) {
             display.setFillColor(riddle.tone.color);

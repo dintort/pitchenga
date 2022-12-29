@@ -50,7 +50,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     protected static final String[] HALFTONE_NAMES = Arrays.stream(Tone.values()).map(tone -> tone.name).toArray(String[]::new);
     public static final Color LESS_DARK = new Color(73, 73, 73);
     public static final Color DARK = new Color(42, 42, 42);
-    private static final Color MORE_DARK = new Color(21, 21, 21);
+    private static final Color MORE_DARK = new Color(10, 10, 10);
 
     //recording
     public static final boolean RECORD_VIDEO = false;
@@ -77,11 +77,12 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             Pair.of("11", Scale.Fa3Maj)};
     private static final AtomicBoolean printScreen = new AtomicBoolean(false);
 
-    //playback
-    public static volatile Fugue playFugue;
-    public static volatile Fugue playPreviousFugue;
-    private static final AtomicInteger playFrameNumber = new AtomicInteger(-1);
-    private static volatile ExpSmoother playSmoother = new ExpSmoother(CqtContext.binsPerHalftone, 0.2);
+    //Video playback
+    public static final AtomicBoolean videoNewFugue = new AtomicBoolean(true);
+    private static volatile Fugue videoCurrentFugue;
+    private static volatile Fugue videoPreviousFugue;
+    private static final AtomicInteger videoFrameNumber = new AtomicInteger(-1);
+    private static volatile ExpSmoother videoSmoother = new ExpSmoother(CqtContext.binsPerHalftone, 0.2);
 
     public static volatile Tone toneOverrideTarsos;
     public static int sliderOverrideTarsos;
@@ -145,7 +146,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             drawSnowflake();
         } else {
             if (binVelocities == null || binVelocities.length != octaveBins.length) {
-                playSmoother = new ExpSmoother(octaveBins.length, 0.1);
+                videoSmoother = new ExpSmoother(octaveBins.length, 0.1);
             }
             binVelocities = octaveBins;
         }
@@ -188,7 +189,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         }
         for (int i = 0; i < binVelocities.length; i++) {
             binVelocities[i] = binVelocities[i] * 0.8;
-            binVelocities = playSmoother.smooth(binVelocities);
+            binVelocities = videoSmoother.smooth(binVelocities);
         }
     }
 
@@ -248,21 +249,21 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             return;
         }
         if (Pitchenga.showSeriesHint) {
-            Fugue previous = playPreviousFugue;
-            Fugue current = playFugue;
+            Fugue previous = videoPreviousFugue;
+            Fugue current = videoCurrentFugue;
             if (current != null) {
-                if (previous != current) {
-                    playPreviousFugue = current;
-                    playFrameNumber.set(16);
+                if (videoNewFugue.compareAndSet(true, false)) {
+                    videoPreviousFugue = current;
+                    videoFrameNumber.set(16);
                 }
-                int frameNumber = playFrameNumber.incrementAndGet();
+                int frameNumber = videoFrameNumber.incrementAndGet();
                 double[][] video = current.pitch.video;
                 if (video != null) {
                     if (frameNumber >= video.length) {
                         fadeOut();
                     } else {
                         binVelocities = video[frameNumber];
-                        binVelocities = playSmoother.smooth(binVelocities);
+                        binVelocities = videoSmoother.smooth(binVelocities);
                     }
                 } else {
                     fadeOut();
@@ -270,9 +271,15 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
             } else {
                 fadeOut();
             }
+//            Pitchenga.debug("current=" + current + ", previous=" + previous + ", bins=" + Arrays.toString(binVelocities));
         } else {
             fadeOut();
         }
+    }
+
+    public static void setVideoCurrentFugue(Fugue newFugue) {
+        videoNewFugue.set(true);
+        videoCurrentFugue = newFugue;
     }
 
     @SuppressWarnings("unused")
