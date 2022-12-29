@@ -32,8 +32,8 @@ public class Ptchng extends Setup {
 //        riddleInstruments = new int[] { Instrument.ELECTRIC_PIANO_2 };
         riddleInstruments = new int[]{
                 Instrument.ELECTRIC_BASS_FINGER,
-                Instrument.ELECTRIC_PIANO_1,
                 Instrument.ACOUSTIC_GRAND_PIANO,
+                Instrument.ELECTRIC_PIANO_1,
                 Instrument.CHURCH_ORGAN,
                 Instrument.TENOR_SAX
         };
