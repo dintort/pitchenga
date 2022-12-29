@@ -53,8 +53,8 @@ public class Ptchng extends Setup {
         //fixme: Delay hinter proportionally to the tempo
 
         defaultPacer = Pacer.Answer;
-        defaultPacer = Pacer.Tempo60;
         defaultPacer = Pacer.Tempo100;
+        defaultPacer = Pacer.Tempo70;
 
         defaultRiddler = Riddler.Rec;
         defaultRiddler = Riddler.Bass;
