@@ -454,9 +454,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
                 if (i == biggestBinNumber) {
                     velocity *= 1.3;
                 }
-            }
-            if (velocity > 1.15) {
-                velocity = 1.15;
+                if (velocity > 1.15) {
+                    velocity = 1.15;
+                }
             }
 
             double startRadius = radius * velocity;
