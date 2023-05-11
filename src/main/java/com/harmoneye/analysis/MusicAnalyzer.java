@@ -151,10 +151,8 @@ public class MusicAnalyzer implements SoundConsumer {
     private AnalyzedFrame analyzeFrame(double[] amplitudeSpectrumDb) {
         double[] detectedPitchClasses = null;
 
-        boolean binSmootherEnabled = true;
-        if (binSmootherEnabled) {
-            amplitudeSpectrumDb = allBinSmoother.smooth(amplitudeSpectrumDb);
-        }
+        amplitudeSpectrumDb = allBinSmoother.smooth(amplitudeSpectrumDb);
+
         if (PERCUSSION_SUPPRESSOR_ENABLED) {
             amplitudeSpectrumDb = percussionSuppressor.filter(amplitudeSpectrumDb);
         }
