@@ -12,7 +12,7 @@ import java.awt.*;
 public enum Tone {
 
     Do("C", true, new Color(255, 0, 0), Color.WHITE),
-    Ra("Db", false, new Color(137, 42, 0), Color.WHITE),
+    Ra("Db", false, new Color(100, 42, 0), Color.WHITE),
     Re("D", true, new Color(255, 110, 0), Color.WHITE),
     Me("Eb", false, new Color(171, 127, 0), Color.WHITE),
     Mi("E", true, new Color(255, 255, 0), Color.WHITE),
