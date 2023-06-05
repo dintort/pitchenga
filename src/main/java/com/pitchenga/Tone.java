@@ -7,7 +7,7 @@ import java.awt.*;
  * major: do di re ri mi fa fi so te la li ti
  * minor: do di re me mi fa fi so le la te ti
  * lowrd: do ra re me mi fa te so le la te ti - this one, but F# instead of Gb
- * Colors are roughly based on Isaac Newton's color wheel and https://www.nature.com/articles/s41598-017-18150-y/figures/2 but only using round numbers (circle.png).
+ * Colors are roughly based on Isaac Newton's color wheel and https://www.nature.com/articles/s41598-017-18150-y/figures/2 (circle.png).
  */
 public enum Tone {
 
