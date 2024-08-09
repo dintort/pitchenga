@@ -3,7 +3,7 @@
     <option name="MAIN_CLASS_NAME" value="com.pitchenga.Ptchng" />
     <module name="pitchenga.main" />
     <option name="PROGRAM_PARAMETERS" value="-NSRequiresAquaSystemAppearance False" />
-    <option name="VM_PARAMETERS" value="-Xmx1g -Xms128m -Dcom.pitchenga.debug=true" />
+    <option name="VM_PARAMETERS" value="-Xmx1g -Xms128m -Dcom.pitchenga.debug=true --add-exports java.desktop/com.apple.eawt=ALL-UNNAMED --add-exports=java.desktop/sun.awt=ALL-UNNAMED" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

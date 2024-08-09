@@ -2244,11 +2244,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         try {
             Class<?> appClass = Class.forName("com.apple.eawt.Application");
             Object app = appClass.getMethod("getApplication").invoke(null);
-            if (eye == null) {
-                System.out.println("eye is null");
-            }
-            app.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(app, this);
-//            app.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(app, eye);
+            app.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(app, eye);
         } catch (Exception e) {
             e.printStackTrace();
 //            log(e.getMessage());
@@ -2256,17 +2252,24 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     }
 
     public static boolean isNativeFullScreenAvailable() {
-        return false;
-//        try {
-//            Class.forName("com.apple.eawt.FullScreenUtilities");
-//            Class.forName("com.apple.eawt.Application");
-//        } catch (ClassNotFoundException e) {
-//            return false;
-//        }
-//        return true;
-
+        try {
+            Class.forName("com.apple.eawt.FullScreenUtilities");
+            Class.forName("com.apple.eawt.Application");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
+    public static void setNativeFullScreenEnabled(Window frame, boolean enabled)  {
+        try {
+            Class<? extends Object> fsu = Class.forName("com.apple.eawt.FullScreenUtilities");
+            fsu.getMethod("setWindowCanFullScreen", Window.class, Boolean.TYPE).invoke(null, frame, enabled);
+        } catch (Exception e) {
+            e.printStackTrace();
+//            log(e.getMessage());
+        }
+    }
 
     @Override
     public void setPitchStep(int i) {
@@ -2275,6 +2278,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     public void setEye(JFrame eye) {
         this.eye = eye;
+        if (nativeFullScreenAvailable) {
+            setNativeFullScreenEnabled(eye, true);
+        }
     }
 
 }

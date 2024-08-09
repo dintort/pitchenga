@@ -1,8 +1,5 @@
 package com.harmoneye.app;
 
-import org.simplericity.macify.eawt.Application;
-import org.simplericity.macify.eawt.DefaultApplication;
-
 import javax.swing.*;
 
 /**
@@ -36,8 +33,6 @@ public class HarmonEye {
     private static final class AppThread implements Runnable {
         @Override
         public void run() {
-            Application app = new DefaultApplication();
-
             final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(null);
             class Initializer extends SwingWorker<String, Object> {
                 @Override
@@ -49,10 +44,6 @@ public class HarmonEye {
             }
 
             new Initializer().execute();
-
-            app.addApplicationListener(captureHarmonEyeApp.getApplicationListener());
-            app.addPreferencesMenuItem();
-            app.setEnabledPreferencesMenu(true);
         }
     }
 }

@@ -1,13 +1,9 @@
 package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
-import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.app.AbstractHarmonEyeApp;
 import com.harmoneye.app.CaptureHarmonEyeApp;
 import com.harmoneye.viz.OpenGlCircularVisualizer;
-import com.harmoneye.viz.Visualizer;
-import org.simplericity.macify.eawt.Application;
-import org.simplericity.macify.eawt.DefaultApplication;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -121,9 +117,7 @@ public class Ptchng extends Setup {
     }
 
     public static AbstractHarmonEyeApp harmonEye(Pitchenga pitchenga) {
-        Application defaultApplication = new DefaultApplication();
-
-        final CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(pitchenga);
+        CaptureHarmonEyeApp captureHarmonEyeApp = new CaptureHarmonEyeApp(pitchenga);
         class Initializer extends SwingWorker<String, Object> {
             @Override
             public String doInBackground() {
@@ -132,12 +126,7 @@ public class Ptchng extends Setup {
                 return null;
             }
         }
-
         new Initializer().execute();
-
-        defaultApplication.addApplicationListener(captureHarmonEyeApp.getApplicationListener());
-        defaultApplication.addPreferencesMenuItem();
-        defaultApplication.setEnabledPreferencesMenu(true);
         return captureHarmonEyeApp;
     }
 
