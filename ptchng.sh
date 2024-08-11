@@ -4,10 +4,9 @@
 
 
 echo home=$HOME
-#JDK=/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
-JRE=/Library/Internet\ Plug-Ins/JavaAppletPlugin.plugin/Contents/Home
-#JDK=/c/Program\ Files/RedHat/java-1.8.0-openjdk-1.8.0.212-3
-PROJECT=$HOME/dev/pitchenga
+JRE=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home
+#JRE=/Library/Internet\ Plug-Ins/JavaAppletPlugin.plugin/Contents/Home
+PROJECT=$HOME/Documents/pitchenga
 echo project=$PROJECT
 #"$JRE/bin/java" -classpath "$JRE/lib/charsets.jar":"$JRE/lib/ext/cldrdata.jar":"$JRE/lib/ext/dnsns.jar":"$JRE/lib/ext/jaccess.jar":"$JRE/lib/ext/localedata.jar":"$JRE/lib/ext/nashorn.jar":"$JRE/lib/ext/sunec.jar":"$JRE/lib/ext/sunjce_provider.jar":"$JRE/lib/ext/sunpkcs11.jar":"$JRE/lib/ext/zipfs.jar":"$JRE/lib/jce.jar":"$JRE/lib/jsse.jar":"$JRE/lib/management-agent.jar":"$JRE/lib/resources.jar":"$JRE/lib/rt.jar":"$JDK/lib/dt.jar":"$JDK/lib/jconsole.jar":"$JDK/lib/sa-jdi.jar":"$JDK/lib/tools.jar":"$PROJECT/out/production/classes":"$PROJECT/out/production/resources":"$PROJECT/lib/TarsosDSP-2.4.jar" com.pitchenga.Ptchng -NSRequiresAquaSystemAppearance False
 
@@ -22,10 +21,15 @@ echo project=$PROJECT
 "$PROJECT/lib/macify-1.6.jar":\
 "$PROJECT/lib/mp3spi-1.9.5.4.jar":\
 "$PROJECT/lib/tritonus-share-0.3.7.4.jar":\
-"$PROJECT/lib/jogamp\gluegen-rt.jar":\
-"$PROJECT/lib/jogamp\jogl-all.jar":\
-"$PROJECT/lib/jogamp\gluegen-rt-natives-macosx-universal.jar":\
-"$PROJECT/lib/jogamp\jogl-all-natives-macosx-universal.jar":\
+"$PROJECT/lib/jogamp/gluegen-rt-2.5.0.jar":\
+"$PROJECT/lib/jogamp/gluegen-rt-2.5.0-natives-macosx-universal.jar":\
+"$PROJECT/lib/jogamp/jogl-all-2.5.0.jar":\
+"$PROJECT/lib/jogamp/jogl-all-2.5.0-natives-macosx-universal.jar":\
+  -Xmx1g \
+  -Xms128m \
+  -Dcom.pitchenga.debug=true \
+  --add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED \
+  --add-exports=java.desktop/sun.awt=ALL-UNNAMED \
   com.pitchenga.Ptchng \
   -NSRequiresAquaSystemAppearance False
 

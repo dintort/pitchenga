@@ -6,8 +6,6 @@ import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.OpenGlLinearVisualizer;
 import com.harmoneye.viz.SwingVisualizer;
 import com.pitchenga.Pitchenga;
-import org.simplericity.macify.eawt.ApplicationEvent;
-import org.simplericity.macify.eawt.ApplicationListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,8 +36,6 @@ public class AbstractHarmonEyeApp {
     private JMenuItem pauseMenuItem;
     private final AccumulationEnabledAction accumulationEnabledAction;
 
-    private final ApplicationListener appListener;
-
     private final SwingVisualizer<AnalyzedFrame> visualizer;
     private final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -56,8 +52,6 @@ public class AbstractHarmonEyeApp {
         accumulationEnabledAction = new AccumulationEnabledAction("Accumulate", null, "", KeyEvent.VK_A);
 
         frame = createFrame(pitchenga);
-
-        appListener = new MyApplicationListener(frame);
 
         frame.setVisible(true);
     }
@@ -80,7 +74,7 @@ public class AbstractHarmonEyeApp {
         }
         frame.setLocationRelativeTo(null);
 //        frame.setLocation(0, 0);
-        frame.setLocation(0, 767);
+        frame.setLocation(0, 700);
 //        frame.setLocation(0, 158);
 //        frame.setLocation(0, 220);
         frame.setJMenuBar(createMenuBar());
@@ -239,73 +233,6 @@ public class AbstractHarmonEyeApp {
         public void actionPerformed(ActionEvent e) {
             soundAnalyzer.toggleAccumulatorEnabled();
         }
-    }
-
-    // Must be public!!
-    public static class MyApplicationListener implements ApplicationListener {
-
-        private final JFrame frame;
-
-        public MyApplicationListener(JFrame frame) {
-            this.frame = frame;
-        }
-
-        private void handle(ApplicationEvent event, String message) {
-            JOptionPane.showMessageDialog(frame, message);
-            event.setHandled(true);
-        }
-
-        public void handleAbout(ApplicationEvent event) {
-            String message = prepareAboutMessage();
-            JOptionPane.showMessageDialog(frame, message, "About HarmonEye", JOptionPane.INFORMATION_MESSAGE);
-            event.setHandled(true);
-        }
-
-        private String prepareAboutMessage() {
-            Package p = getClass().getPackage();
-            String version = p.getImplementationVersion();
-            if (version == null) {
-                version = "";
-            }
-
-            return "HarmonEye\n" +
-                    "Version: " + version + "\n\n" +
-                    "A software that enables you to see what you hear.\n" +
-                    "Crafted with love by Bohumír Zamecník since 2012.\n\n" + //Sorry for butchering the accented symbols, but it crashed on windows :(
-                    "http://harmoneye.com/";
-        }
-
-        public void handleOpenApplication(ApplicationEvent event) {
-            // Ok, we know our application started
-            // Not much to do about that.
-        }
-
-        public void handleOpenFile(ApplicationEvent event) {
-            handle(event, "openFileInEditor: " + event.getFilename());
-        }
-
-        public void handlePreferences(ApplicationEvent event) {
-            // TODO
-            handle(event, "For now there are no preferences.");
-        }
-
-        public void handlePrintFile(ApplicationEvent event) {
-            handle(event, "Sorry, printing not implemented");
-        }
-
-        public void handleQuit(ApplicationEvent event) {
-            //handle(event, "exitAction");
-            System.exit(0);
-        }
-
-        public void handleReOpenApplication(ApplicationEvent event) {
-            event.setHandled(true);
-            frame.setVisible(true);
-        }
-    }
-
-    public ApplicationListener getApplicationListener() {
-        return appListener;
     }
 
     private static class WebHelper {
