@@ -34,10 +34,10 @@ dependencies {
 //    macBundleApp(":appbundler:1.0")
 
     implementation(files("lib/jogamp/gluegen-rt-2.5.0.jar"))
-    implementation(files("lib/jogamp/gluegen-rt-2.5.0-sources.zip"))
+//    implementation(files("lib/jogamp/gluegen-rt-2.5.0-sources.zip"))
     implementation(files("lib/jogamp/gluegen-rt-2.5.0-natives-macosx-universal.jar"))
     implementation(files("lib/jogamp/jogl-all-2.5.0.jar"))
-    implementation(files("lib/jogamp/jogl-all-2.5.0-sources.zip"))
+//    implementation(files("lib/jogamp/jogl-all-2.5.0-sources.zip"))
     implementation(files("lib/jogamp/jogl-all-2.5.0-natives-macosx-universal.jar"))
     //fixme: if (os = muzdie) {
 //    implementation(files("lib/jogamp/gluegen-rt-natives-windows-amd64.jar"))
@@ -55,5 +55,13 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.pitchenga.Pitchenga")
+//    mainClass.set("com.pitchenga.Pitchenga")
+    mainClass.set("com.pitchenga.Ptchng")
+}
+
+tasks.jar {
+    manifest.attributes["Main-Class"] = application.mainClass
+    val dependencies = configurations.runtimeClasspath.get().map(::zipTree)
+    from(dependencies)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
