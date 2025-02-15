@@ -1,4 +1,4 @@
-package com.pitchenga;
+package com.pitchenga.domain;
 
 import java.awt.*;
 

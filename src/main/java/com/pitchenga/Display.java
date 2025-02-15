@@ -1,6 +1,11 @@
 package com.pitchenga;
 
 import com.harmoneye.viz.OpenGlCircularVisualizer;
+import com.pitchenga.domain.Button;
+import com.pitchenga.domain.Fugue;
+import com.pitchenga.domain.Pitch;
+import com.pitchenga.domain.Tone;
+import com.pitchenga.util.Threads;
 import org.apache.commons.math3.util.FastMath;
 
 import javax.swing.*;
@@ -14,8 +19,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.harmoneye.viz.OpenGlCircularVisualizer.DARK;
-import static com.pitchenga.Pitch.*;
-import static com.pitchenga.Tone.*;
+import static com.pitchenga.domain.Pitch.*;
+import static com.pitchenga.domain.Tone.*;
 
 public class Display extends JPanel {
     private static final Tone[] TONES = new Tone[]{Fi, Fa, Mi, Me, Re, Ra, Do, Ti, Te, La, Le, So};

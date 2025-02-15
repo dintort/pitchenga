@@ -1,11 +1,13 @@
-package com.pitchenga;
+package com.pitchenga.domain;
+
+import com.pitchenga.Pitchenga;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.pitchenga.Duration.*;
-import static com.pitchenga.Pitch.*;
+import static com.pitchenga.domain.Duration.*;
+import static com.pitchenga.domain.Pitch.*;
 
 public enum Fugue {
 

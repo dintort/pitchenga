@@ -1,7 +1,7 @@
 package com.pitchenga;
 
 
-import static com.pitchenga.Pitch.*;
+import static com.pitchenga.domain.Pitch.*;
 
 public class PitchengaTest {
 

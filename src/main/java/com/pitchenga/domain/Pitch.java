@@ -1,4 +1,6 @@
-package com.pitchenga;
+package com.pitchenga.domain;
+
+import com.pitchenga.Player;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
-import static com.pitchenga.Tone.*;
+import static com.pitchenga.domain.Tone.*;
 
 public enum Pitch {
     Non(Do, -1, -1, -1f),

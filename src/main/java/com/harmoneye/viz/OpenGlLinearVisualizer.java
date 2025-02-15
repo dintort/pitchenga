@@ -5,7 +5,7 @@ import com.harmoneye.math.cqt.CqtContext;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.Animator;
-import com.pitchenga.Tone;
+import com.pitchenga.domain.Tone;
 
 import java.awt.*;
 

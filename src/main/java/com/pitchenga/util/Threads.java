@@ -1,4 +1,4 @@
-package com.pitchenga;
+package com.pitchenga.util;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;

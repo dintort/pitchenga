@@ -1,5 +1,7 @@
 package com.pitchenga;
 
+import com.pitchenga.domain.Tone;
+
 import javax.sound.midi.*;
 import java.util.List;
 

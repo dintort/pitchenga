@@ -1,9 +1,11 @@
-package com.pitchenga;
+package com.pitchenga.domain;
+
+import com.pitchenga.Pitchenga;
 
 import java.util.function.Function;
 
-import static com.pitchenga.Duration.*;
-import static com.pitchenga.Tone.Do;
+import static com.pitchenga.domain.Duration.*;
+import static com.pitchenga.domain.Tone.Do;
 
 public enum Buzzer {
     Tune("Riddle mnemonic tune", Pitchenga::transposeTune),

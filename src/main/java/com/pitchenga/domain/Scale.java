@@ -1,6 +1,6 @@
-package com.pitchenga;
+package com.pitchenga.domain;
 
-import static com.pitchenga.Pitch.*;
+import static com.pitchenga.domain.Pitch.*;
 
 public enum Scale {
 

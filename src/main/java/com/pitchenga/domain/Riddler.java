@@ -1,12 +1,14 @@
-package com.pitchenga;
+package com.pitchenga.domain;
+
+import com.pitchenga.Pitchenga;
 
 import java.util.*;
 import java.util.function.Function;
 
-import static com.pitchenga.Pitch.*;
+import static com.pitchenga.domain.Pitch.*;
 import static com.pitchenga.Pitchenga.CHROMATIC_SCALE;
 import static com.pitchenga.Pitchenga.transposeScale;
-import static com.pitchenga.Tone.*;
+import static com.pitchenga.domain.Tone.*;
 
 public enum Riddler {
     //    FuguesOrdered("All fugues ordered",

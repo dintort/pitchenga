@@ -1,4 +1,4 @@
-package com.pitchenga;
+package com.pitchenga.domain;
 
 @SuppressWarnings({"unused", "RedundantSuppression"})
 //fixme: Update according to Fluid R3

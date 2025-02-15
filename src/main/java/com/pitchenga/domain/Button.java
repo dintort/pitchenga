@@ -1,8 +1,8 @@
-package com.pitchenga;
+package com.pitchenga.domain;
 
 import java.awt.event.KeyEvent;
 
-import static com.pitchenga.Pitch.*;
+import static com.pitchenga.domain.Pitch.*;
 
 public enum Button {
     //fixme: +Alternative full-keyboard diatonic layout with sharps via shift?

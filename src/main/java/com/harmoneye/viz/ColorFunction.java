@@ -1,14 +1,14 @@
 package com.harmoneye.viz;
 
-import com.pitchenga.Pitch;
+import com.pitchenga.domain.Pitch;
 import com.pitchenga.Pitchenga;
-import com.pitchenga.Tone;
+import com.pitchenga.domain.Tone;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
 import java.awt.*;
 
-import static com.pitchenga.Tone.Do;
+import static com.pitchenga.domain.Tone.Do;
 
 public class ColorFunction {
 

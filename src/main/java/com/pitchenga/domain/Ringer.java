@@ -1,9 +1,11 @@
-package com.pitchenga;
+package com.pitchenga.domain;
+
+import com.pitchenga.Pitchenga;
 
 import java.util.function.Function;
 
-import static com.pitchenga.Duration.*;
-import static com.pitchenga.Tone.*;
+import static com.pitchenga.domain.Duration.*;
+import static com.pitchenga.domain.Tone.*;
 
 public enum Ringer {
     None("Ring nothing", pitch -> new Object[]{thirtyTwo}),

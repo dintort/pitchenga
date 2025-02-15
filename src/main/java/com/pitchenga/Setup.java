@@ -1,6 +1,7 @@
 package com.pitchenga;
 
 import be.tarsos.dsp.pitch.PitchProcessor;
+import com.pitchenga.domain.*;
 
 import javax.sound.sampled.Mixer;
 import java.lang.reflect.InvocationTargetException;

@@ -1,4 +1,4 @@
-package com.pitchenga;
+package com.pitchenga.domain;
 
 public class Duration {
     public static final int thirtyTwo = 50;

@@ -1,4 +1,4 @@
-package com.pitchenga;
+package com.pitchenga.domain;
 
 public enum Hinter {
     Always("Hint: immediately", 0),

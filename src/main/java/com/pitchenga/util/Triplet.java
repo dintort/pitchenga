@@ -1,13 +1,13 @@
-package com.pitchenga;
+package com.pitchenga.util;
 
 import java.util.Objects;
 
-class Triplet<FIRST, SECOND, THIRD> {
+public class Triplet<FIRST, SECOND, THIRD> {
     public final FIRST first;
     public final SECOND second;
     public final THIRD third;
 
-    Triplet(FIRST first, SECOND second, THIRD third) {
+    public Triplet(FIRST first, SECOND second, THIRD third) {
         this.first = first;
         this.second = second;
         this.third = third;

@@ -9,6 +9,10 @@ import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.pitchenga.*;
+import com.pitchenga.domain.Fugue;
+import com.pitchenga.domain.Pitch;
+import com.pitchenga.domain.Scale;
+import com.pitchenga.domain.Tone;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
@@ -32,8 +36,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.jogamp.opengl.GL.*;
-import static com.pitchenga.Pitch.Do1;
-import static com.pitchenga.Pitch.Do7;
+import static com.pitchenga.domain.Pitch.Do1;
+import static com.pitchenga.domain.Pitch.Do7;
 import static com.pitchenga.Pitchenga.*;
 import static java.awt.Color.*;
 

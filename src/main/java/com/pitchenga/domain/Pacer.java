@@ -1,4 +1,4 @@
-package com.pitchenga;
+package com.pitchenga.domain;
 
 public enum Pacer {
     Answer("Answer to continue", 0),

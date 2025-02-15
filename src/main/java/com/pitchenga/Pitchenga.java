@@ -10,6 +10,11 @@ import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.viz.OpenGlCircularVisualizer;
 import com.harmoneye.viz.Visualizer;
+import com.pitchenga.domain.*;
+import com.pitchenga.domain.Button;
+import com.pitchenga.domain.Instrument;
+import com.pitchenga.util.Threads;
+import com.pitchenga.util.Triplet;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
@@ -36,9 +41,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.pitchenga.Duration.four;
-import static com.pitchenga.Pitch.*;
-import static com.pitchenga.Tone.Do;
+import static com.pitchenga.domain.Duration.four;
+import static com.pitchenga.domain.Pitch.*;
+import static com.pitchenga.domain.Tone.Do;
 
 public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualizer<AnalyzedFrame> {
             public static final boolean TARSOS = "true".equals(System.getProperty("com.pitchenga.tarsos.enabled"));
@@ -1426,7 +1431,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 displayTempoAndRemainingSize();
                 return true;
             }
-            Button button = BUTTON_BY_CODE.get(event.getKeyCode());
+            com.pitchenga.domain.Button button = BUTTON_BY_CODE.get(event.getKeyCode());
             if (button == null) {
                 return false;
             }

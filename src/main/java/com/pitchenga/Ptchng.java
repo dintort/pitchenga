@@ -4,6 +4,7 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 import com.harmoneye.app.AbstractHarmonEyeApp;
 import com.harmoneye.app.CaptureHarmonEyeApp;
 import com.harmoneye.viz.OpenGlCircularVisualizer;
+import com.pitchenga.domain.*;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
