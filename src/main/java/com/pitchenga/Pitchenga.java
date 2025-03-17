@@ -1349,6 +1349,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             } else {
                 return false;
             }
+//            debug(eye.getLocation());
 //            debug("Frozen=" + frozen + ", key=" + event + ";");
             if (!pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
                 if (!playButton.hasFocus()) {
