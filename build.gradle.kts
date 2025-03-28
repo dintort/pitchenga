@@ -71,6 +71,7 @@ application {
         "-XX:HeapDumpPath=.",
         "-XX:+ExitOnOutOfMemoryError",
         "-Dcom.pitchenga.debug=true",
+        "-Dapple.awt.application.appearance=system",
         "--add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED",
         "--add-exports=java.desktop/sun.awt=ALL-UNNAMED"
     )
@@ -113,6 +114,7 @@ tasks.register<Exec>("packageMacApp") {
         "--java-options", "-XX:HeapDumpPath=.",
         "--java-options", "-XX:+ExitOnOutOfMemoryError",
         "--java-options", "-Dcom.pitchenga.debug=false",
+        "--java-options", "-Dapple.awt.application.appearance=system",
         "--java-options", "--add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED",
         "--java-options", "--add-exports=java.desktop/sun.awt=ALL-UNNAMED"
     )
