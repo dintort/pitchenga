@@ -60,7 +60,12 @@ application {
 }
 
 tasks.jar {
-    manifest.attributes["Main-Class"] = application.mainClass
+    manifest {
+        attributes(
+            "Main-Class" to application.mainClass,
+            "NSRequiresAquaSystemAppearance" to "False",
+        )
+    }
     val dependencies = configurations.runtimeClasspath.get().map(::zipTree)
     from(dependencies)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
