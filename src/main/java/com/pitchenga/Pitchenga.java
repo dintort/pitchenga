@@ -1158,7 +1158,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         try {
             //fixme: Configurable log path
             if (debug) {
-                File logDir = new File(System.getProperty("user.home") + "/Documents/pitchenga/logs/");
+                File logDir = new File(System.getProperty("user.home") + "/dev/pitchenga/logs/");
                 //noinspection ResultOfMethodCallIgnored
                 logDir.mkdirs();
                 File logFile = new File(logDir, "pitchenga.log");
