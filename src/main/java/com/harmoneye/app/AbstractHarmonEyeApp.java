@@ -68,7 +68,8 @@ public class AbstractHarmonEyeApp {
             } else {
 //                frame.setSize(700, 773);
 //                frame.setSize(700, 728);
-                frame.setSize(512, 540);
+//                frame.setSize(512, 540);
+                frame.setSize(572, 600);
             }
         } else if (visualizer instanceof OpenGlLinearVisualizer) {
             frame.setSize(1900, 620);
@@ -79,7 +80,7 @@ public class AbstractHarmonEyeApp {
 //        frame.setLocation(424, 25);
 //        frame.setLocation(86, 521);
 //        frame.setLocation(-948, 25);
-        frame.setLocation(434, 25);
+        frame.setLocation(374, 25);
 //        frame.setLocation(0, 158);
 //        frame.setLocation(0, 220);
         frame.setJMenuBar(createMenuBar());

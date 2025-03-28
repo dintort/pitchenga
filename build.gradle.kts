@@ -1,5 +1,3 @@
-import org.gradle.internal.declarativedsl.parsing.main
-
 plugins {
     java
     application
@@ -54,9 +52,28 @@ dependencies {
 //    test("junit:junit:4.10")
 }
 
+tasks {
+    distZip {
+        enabled = false
+    }
+    distTar {
+        enabled = false
+    }
+}
+
 application {
 //    mainClass.set("com.pitchenga.Pitchenga")
     mainClass.set("com.pitchenga.Ptchng")
+    applicationDefaultJvmArgs = listOf(
+        "-Xmx1g",
+        "-Xms128m",
+        "-XX:+HeapDumpOnOutOfMemoryError",
+        "-XX:HeapDumpPath=.",
+        "-XX:+ExitOnOutOfMemoryError",
+        "-Dcom.pitchenga.debug=true",
+        "--add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED",
+        "--add-exports=java.desktop/sun.awt=ALL-UNNAMED"
+    )
 }
 
 tasks.jar {
@@ -69,4 +86,38 @@ tasks.jar {
     val dependencies = configurations.runtimeClasspath.get().map(::zipTree)
     from(dependencies)
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.register<Exec>("packageMacApp") {
+    dependsOn("jar")
+    doFirst {
+        delete("build/Pitchenga.app")
+    }
+
+    commandLine(
+        "jpackage",
+        "--input", "build/libs",
+        "--main-jar", "pitchenga.jar",
+        "--main-class", application.mainClass.get(),
+        "--name", "Pitchenga",
+        "--dest", "build/",
+        "--type", "app-image",
+        "--icon", "src/main/resources/pitchenga.icns",
+        "--app-version", "1.0.0",
+        "--vendor", "Your Name",
+        "--mac-package-name", "Pitchenga",
+        "--mac-package-identifier", "com.pitchenga",
+        "--java-options", "-Xmx1g",
+        "--java-options", "-Xms128m",
+        "--java-options", "-XX:+HeapDumpOnOutOfMemoryError",
+        "--java-options", "-XX:HeapDumpPath=.",
+        "--java-options", "-XX:+ExitOnOutOfMemoryError",
+        "--java-options", "-Dcom.pitchenga.debug=false",
+        "--java-options", "--add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED",
+        "--java-options", "--add-exports=java.desktop/sun.awt=ALL-UNNAMED"
+    )
+}
+
+tasks.assemble {
+    finalizedBy("packageMacApp")
 }
