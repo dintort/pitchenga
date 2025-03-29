@@ -70,7 +70,7 @@ application {
         "-XX:+HeapDumpOnOutOfMemoryError",
         "-XX:HeapDumpPath=.",
         "-XX:+ExitOnOutOfMemoryError",
-        "-Dcom.pitchenga.debug=true",
+        "-Dcom.pitchenga.debug=false",
         "-Dapple.awt.application.appearance=system",
         "--add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED",
         "--add-exports=java.desktop/sun.awt=ALL-UNNAMED"
