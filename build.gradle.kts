@@ -13,6 +13,8 @@ repositories {
 //    google()
 }
 
+val jogampVersion = "2.6.0"
+
 dependencies {
     implementation("be.tarsos.dsp:core:2.5")
 //    implementation(files("lib/TarsosDSP-2.4.jar"))
@@ -33,23 +35,19 @@ dependencies {
 
 //    macBundleApp(":appbundler:1.0")
 
-//    implementation(files("lib/jogamp/gluegen-rt-2.5.0.jar"))
-    implementation("org.jogamp.gluegen:gluegen-rt:2.6.0")
-    implementation("org.jogamp.gluegen:gluegen-rt-main:2.6.0")
-//    implementation(files("lib/jogamp/gluegen-rt-2.5.0-natives-macosx-universal.jar"))
-    implementation("org.jogamp.gluegen:gluegen-rt-natives-macosx-universal:2.6.0")
-    implementation("org.jogamp.gluegen:gluegen-rt-natives-windows-amd64:2.6.0")
-    implementation("org.jogamp.gluegen:gluegen-rt-natives-linux-amd64:2.6.0")
+    implementation("org.jogamp.gluegen:gluegen-rt:$jogampVersion")
+    implementation("org.jogamp.gluegen:gluegen-rt-main:$jogampVersion")
+    implementation("org.jogamp.jogl:jogl-all:$jogampVersion")
+    implementation("org.jogamp.jogl:jogl-all-main:$jogampVersion")
 
-//    implementation(files("lib/jogamp/jogl-all-2.5.0.jar"))
-    implementation("org.jogamp.jogl:jogl-all:2.6.0")
-//    implementation(files("lib/jogamp/jogl-all-2.5.0-natives-macosx-universal.jar"))
-    implementation("org.jogamp.jogl:jogl-all-natives-macosx-universal:2.6.0")
-    implementation("org.jogamp.jogl:jogl-all-natives-windows-amd64:2.6.0")
-    implementation("org.jogamp.jogl:jogl-all-natives-linux-amd64:2.6.0")
-//    implementation("org.jogl-all.jogl:jogl-all-natives-macosx-universal:v2.4.0-rc-20210111")
-//    macRuntime(":jogl-all-natives-macosx-universal:")
-    //fixme: if (os = muzdie) {
+    //    runtimeOnly(files("lib/jogamp/gluegen-rt-2.5.0-natives-macosx-universal.jar"))
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt:$jogampVersion:natives-macosx-universal")
+//    runtimeOnly("org.jogamp.gluegen:gluegen-rt:$jogampVersion:natives-windows-amd64")
+//    runtimeOnly("org.jogamp.gluegen:gluegen-rt:$jogampVersion:natives-linux-amd64")
+    runtimeOnly("org.jogamp.jogl:jogl-all:$jogampVersion:natives-macosx-universal")
+//    runtimeOnly("org.jogamp.jogl:jogl-all:$jogampVersion:natives-windows-amd64")
+//    runtimeOnly("org.jogamp.jogl:jogl-all:$jogampVersion:natives-linux-amd64")
+
 //    implementation(files("lib/jogamp/gluegen-rt-natives-windows-amd64.jar"))
 //    implementation(files("lib/jogamp/jogl-all-natives-windows-amd64.jar"))
 //    implementation(files("lib/jogamp/gluegen-rt-natives-linux-amd64.jar"))
@@ -78,15 +76,24 @@ application {
         "-XX:+ExitOnOutOfMemoryError",
         "-Dcom.pitchenga.debug=true",
         "-Dapple.awt.application.appearance=system",
+        "-Djogamp.debug.JNILibLoader=true",
+        "-Djogamp.debug.NativeLibrary=true",
         "--add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED",
-        "--add-exports=java.desktop/sun.awt=ALL-UNNAMED"
+        "--add-exports=java.desktop/sun.awt=ALL-UNNAMED",
+        "--add-exports=java.desktop/sun.lwawt=ALL-UNNAMED",
+        "--add-exports=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
+        "--add-exports=java.desktop/sun.java2d=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.java2d=ALL-UNNAMED"
     )
 }
 
 tasks.jar {
     manifest {
         attributes(
-            "Main-Class" to application.mainClass,
+            "Main-Class" to application.mainClass.get(),
             "NSRequiresAquaSystemAppearance" to "False",
         )
     }
@@ -121,8 +128,17 @@ tasks.register<Exec>("packageMacApp") {
         "--java-options", "-XX:+ExitOnOutOfMemoryError",
         "--java-options", "-Dcom.pitchenga.debug=false",
         "--java-options", "-Dapple.awt.application.appearance=system",
+//        "--java-options", "-Djogamp.debug.JNILibLoader=true",
+//        "--java-options", "-Djogamp.debug.NativeLibrary=true",
         "--java-options", "--add-exports=java.desktop/com.apple.eawt=ALL-UNNAMED",
-        "--java-options", "--add-exports=java.desktop/sun.awt=ALL-UNNAMED"
+        "--java-options", "--add-exports=java.desktop/sun.awt=ALL-UNNAMED",
+        "--java-options", "--add-exports=java.desktop/sun.lwawt=ALL-UNNAMED",
+        "--java-options", "--add-exports=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
+        "--java-options", "--add-exports=java.desktop/sun.java2d=ALL-UNNAMED",
+        "--java-options", "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+        "--java-options", "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
+        "--java-options", "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
+        "--java-options", "--add-opens=java.desktop/sun.java2d=ALL-UNNAMED"
     )
 }
 

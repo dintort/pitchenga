@@ -84,8 +84,8 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
     private final MidiChannel[] riddleInstrumentChannels;
     private final MidiChannel keyboardInstrumentChannel;
     private final MidiChannel ringInstrumentChannel;
-//    private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
-//    private final AtomicBoolean isInNativeFullScreen = new AtomicBoolean(false);
+    private final boolean nativeFullScreenAvailable = isNativeFullScreenAvailable();
+    private final AtomicBoolean isInNativeFullScreen = new AtomicBoolean(false);
 
     private final AtomicReference<Tone> lastGuess = new AtomicReference<>(null);
     private volatile Pitch lastPitch;
@@ -181,11 +181,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
                 e.printStackTrace();
             });
         }
-//        try {
-//            Class<?> fullScreenUtilities = Class.forName("com.apple.eawt.FullScreenUtilities");
-//            fullScreenUtilities.getMethod("setWindowCanFullScreen", Window.class, Boolean.TYPE).invoke(null, this, true);
-//        } catch (Exception ignore) {
-//        }
+        try {
+            Class<?> fullScreenUtilities = Class.forName("com.apple.eawt.FullScreenUtilities");
+            fullScreenUtilities.getMethod("setWindowCanFullScreen", Window.class, Boolean.TYPE).invoke(null, this, true);
+        } catch (Exception ignore) {
+        }
 
         this.isPrimary = isPrimary;
         this.secondary = secondary;
@@ -1156,6 +1156,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pitchenga"); //fixme: Does not work
         System.setProperty("sun.java2d.opengl", "true");
 //        System.setProperty("sun.java2d.opengl", "false");
+        System.setProperty("sun.java2d.noddraw", "true");
         System.setProperty("sun.java2d.xrender", "f");
 //        System.setProperty("jogl.main.thread", "true");
 
@@ -1353,7 +1354,7 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             } else {
                 return false;
             }
-            debug(eye.getLocation());
+//            debug(eye.getLocation());
 //            debug("Frozen=" + frozen + ", key=" + event + ";");
             if (!pressed && event.getKeyCode() == KeyEvent.VK_SPACE) {
                 if (!playButton.hasFocus()) {
@@ -1365,11 +1366,11 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             }
             if (pressed && event.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 playButton.setSelected(false);
-//                boolean set = isInNativeFullScreen.compareAndSet(true, false);
-//                if (set) {
-//                    toggleNativeFullScreen();
-//                }
-//                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
+                boolean set = isInNativeFullScreen.compareAndSet(true, false);
+                if (set) {
+                    toggleNativeFullScreen();
+                }
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
             }
             if (!pressed && event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                 display.clearText();
@@ -1924,68 +1925,68 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
             playExecutor.execute(() -> guess(null, false));
 //            bottomPanel.setVisible(false);
             pitchSliderPanel.setVisible(false);
-//            if (setup.fullScreenWhenPlaying) {
-//                if (nativeFullScreenAvailable) {
-//                    boolean current = isInNativeFullScreen.get();
-//                    if (!current) {
-//                        boolean set = isInNativeFullScreen.compareAndSet(false, true);
-//                        if (set) {
-//                            toggleNativeFullScreen();
-//                        }
-//                    }
-//                } else {
-//                    this.previousSize = getSize();
-//                    this.previousLocation = getLocation();
-////                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
-//                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
-//                }
-//            }
+            if (setup.fullScreenWhenPlaying) {
+                if (nativeFullScreenAvailable) {
+                    boolean current = isInNativeFullScreen.get();
+                    if (!current) {
+                        boolean set = isInNativeFullScreen.compareAndSet(false, true);
+                        if (set) {
+                            toggleNativeFullScreen();
+                        }
+                    }
+                } else {
+                    this.previousSize = getSize();
+                    this.previousLocation = getLocation();
+//                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(this);
+                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
+                }
+            }
         } else {
             OpenGlCircularVisualizer.setScale(null);
 //            prevMessage = null;
             playButton.setText("Play");
 //            bottomPanel.setVisible(true);
             pitchSliderPanel.setVisible(true);
-//            if (setup.fullScreenWhenPlaying) {
-//                if (nativeFullScreenAvailable) {
-//                    boolean current = isInNativeFullScreen.get();
-//                    if (current) {
-//                        boolean set = isInNativeFullScreen.compareAndSet(true, false);
-//                        if (set) {
-//                            toggleNativeFullScreen();
-//                        }
-//                    }
-//                } else {
-//                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
-//                    if (previousSize != null && previousLocation != null) {
-//                        setSize(previousSize);
-//                        setLocation(previousLocation);
-//                        this.previousSize = getSize();
-//                        this.previousLocation = getLocation();
-//                    }
-//                }
-//            }
+            if (setup.fullScreenWhenPlaying) {
+                if (nativeFullScreenAvailable) {
+                    boolean current = isInNativeFullScreen.get();
+                    if (current) {
+                        boolean set = isInNativeFullScreen.compareAndSet(true, false);
+                        if (set) {
+                            toggleNativeFullScreen();
+                        }
+                    }
+                } else {
+                    GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
+                    if (previousSize != null && previousLocation != null) {
+                        setSize(previousSize);
+                        setLocation(previousLocation);
+                        this.previousSize = getSize();
+                        this.previousLocation = getLocation();
+                    }
+                }
+            }
         }
         debug("running=" + playing);
     }
 
     private void handleEnterButton() {
-//        if (nativeFullScreenAvailable) {
-//            boolean current = isInNativeFullScreen.get();
-//            isInNativeFullScreen.compareAndSet(current, !current);
-//            bottomPanel.setVisible(!bottomPanel.isVisible());
-//            toggleNativeFullScreen();
-//        } else {
-//            //            if (screenDevice.getFullScreenWindow() == this) {
-//            if (GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].getFullScreenWindow() == eye) {
-//                bottomPanel.setVisible(true);
-//                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
-//            } else {
-//                bottomPanel.setVisible(false);
-////                screenDevice.setFullScreenWindow(this);
-//                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
-//            }
-//        }
+        if (nativeFullScreenAvailable) {
+            boolean current = isInNativeFullScreen.get();
+            isInNativeFullScreen.compareAndSet(current, !current);
+            bottomPanel.setVisible(!bottomPanel.isVisible());
+            toggleNativeFullScreen();
+        } else {
+            //            if (screenDevice.getFullScreenWindow() == this) {
+            if (GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].getFullScreenWindow() == eye) {
+                bottomPanel.setVisible(true);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(null);
+            } else {
+                bottomPanel.setVisible(false);
+//                screenDevice.setFullScreenWindow(this);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()[0].setFullScreenWindow(eye);
+            }
+        }
     }
 
     private void stop() {
@@ -2237,50 +2238,50 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
         }
     }
 
-//    private void initIcon() {
-//        Image image = Toolkit.getDefaultToolkit().getImage(Display.class.getResource("/pitchenga.png"));
-//        this.setIconImage(image);
-//        try {
-//            Class<?> clazz = Class.forName("com.apple.eawt.Application");
-//            Method getApplication = clazz.getMethod("getApplication");
-//            Object application = getApplication.invoke(null);
-//            Method setDockIconImage = clazz.getMethod("setDockIconImage", Image.class);
-//            setDockIconImage.invoke(application, image);
-//        } catch (Exception ignore) {
-//        }
-//    }
+    private void initIcon() {
+        Image image = Toolkit.getDefaultToolkit().getImage(Display.class.getResource("/pitchenga.png"));
+        this.setIconImage(image);
+        try {
+            Class<?> clazz = Class.forName("com.apple.eawt.Application");
+            Method getApplication = clazz.getMethod("getApplication");
+            Object application = getApplication.invoke(null);
+            Method setDockIconImage = clazz.getMethod("setDockIconImage", Image.class);
+            setDockIconImage.invoke(application, image);
+        } catch (Exception ignore) {
+        }
+    }
 
     //fixme: This works wrong when the window was put to full screen manually
-//    public void toggleNativeFullScreen() {
-//        try {
-//            Class<?> appClass = Class.forName("com.apple.eawt.Application");
-//            Object app = appClass.getMethod("getApplication").invoke(null);
-//            app.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(app, eye);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-////            log(e.getMessage());
-//        }
-//    }
+    public void toggleNativeFullScreen() {
+        try {
+            Class<?> appClass = Class.forName("com.apple.eawt.Application");
+            Object app = appClass.getMethod("getApplication").invoke(null);
+            app.getClass().getMethod("requestToggleFullScreen", Window.class).invoke(app, eye);
+        } catch (Exception e) {
+            e.printStackTrace();
+//            log(e.getMessage());
+        }
+    }
 
-//    public static boolean isNativeFullScreenAvailable() {
-//        try {
-//            Class.forName("com.apple.eawt.FullScreenUtilities");
-//            Class.forName("com.apple.eawt.Application");
-//            return true;
-//        } catch (ClassNotFoundException e) {
-//            return false;
-//        }
-//    }
+    public static boolean isNativeFullScreenAvailable() {
+        try {
+            Class.forName("com.apple.eawt.FullScreenUtilities");
+            Class.forName("com.apple.eawt.Application");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 
-//    public static void setNativeFullScreenEnabled(Window frame, boolean enabled)  {
-//        try {
-//            Class<? extends Object> fsu = Class.forName("com.apple.eawt.FullScreenUtilities");
-//            fsu.getMethod("setWindowCanFullScreen", Window.class, Boolean.TYPE).invoke(null, frame, enabled);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-////            log(e.getMessage());
-//        }
-//    }
+    public static void setNativeFullScreenEnabled(Window frame, boolean enabled)  {
+        try {
+            Class<? extends Object> fsu = Class.forName("com.apple.eawt.FullScreenUtilities");
+            fsu.getMethod("setWindowCanFullScreen", Window.class, Boolean.TYPE).invoke(null, frame, enabled);
+        } catch (Exception e) {
+            e.printStackTrace();
+//            log(e.getMessage());
+        }
+    }
 
     @Override
     public void setPitchStep(int i) {
@@ -2289,9 +2290,9 @@ public class Pitchenga extends JFrame implements PitchDetectionHandler, Visualiz
 
     public void setEye(JFrame eye) {
         this.eye = eye;
-//        if (nativeFullScreenAvailable) {
-//            setNativeFullScreenEnabled(eye, true);
-//        }
+        if (nativeFullScreenAvailable) {
+            setNativeFullScreenEnabled(eye, true);
+        }
     }
 
 }

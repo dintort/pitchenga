@@ -1,23 +1,43 @@
 package com.harmoneye.viz;
 
+import static com.jogamp.opengl.GL.GL_BACK;
+import static com.jogamp.opengl.GL.GL_RGBA;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
+import static com.pitchenga.Pitchenga.CHROMATIC_SCALE;
+import static com.pitchenga.Pitchenga.TARSOS;
+import static com.pitchenga.Pitchenga.isPlaying;
+import static com.pitchenga.domain.Pitch.Do1;
+import static com.pitchenga.domain.Pitch.Do7;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.WHITE;
+
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.analysis.ExpSmoother;
 import com.harmoneye.math.cqt.CqtContext;
-import com.jogamp.opengl.*;
-import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.awt.TextRenderer;
-import com.pitchenga.*;
+import com.pitchenga.Pitchenga;
 import com.pitchenga.domain.Fugue;
 import com.pitchenga.domain.Pitch;
 import com.pitchenga.domain.Scale;
 import com.pitchenga.domain.Tone;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.util.FastMath;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -27,19 +47,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.jogamp.opengl.GL.*;
-import static com.pitchenga.domain.Pitch.Do1;
-import static com.pitchenga.domain.Pitch.Do7;
-import static com.pitchenga.Pitchenga.*;
-import static java.awt.Color.*;
+import javax.imageio.ImageIO;
 
 // TODO: rewrite to use vertex buffers instead of immediate mode
 public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>, GLEventListener {
@@ -109,17 +130,16 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
     public static volatile String text;
-    private final Animator animator;
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
         GLProfile glp = GLProfile.getDefault();
         GLCapabilities caps = new GLCapabilities(glp);
         caps.setSampleBuffers(true);
-        GLCanvas canvas = new GLCanvas(caps);
+        GLJPanel canvas = new GLJPanel(caps);
         canvas.addGLEventListener(this);
         component = canvas;
-        animator = new Animator();
+        Animator animator = new Animator();
         animator.add(canvas);
         animator.start();
         // TODO: stop the animator if the computation is stopped
@@ -746,9 +766,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
     @Override
     public void dispose(GLAutoDrawable drawable) {
-        if (animator != null && animator.isStarted()) {
-            animator.stop();
-        }
+        // TODO Auto-generated method stub
     }
 
     @Override
