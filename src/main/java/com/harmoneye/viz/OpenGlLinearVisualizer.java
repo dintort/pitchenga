@@ -3,7 +3,7 @@ package com.harmoneye.viz;
 import com.harmoneye.analysis.AnalyzedFrame;
 import com.harmoneye.math.cqt.CqtContext;
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.Animator;
 import com.pitchenga.domain.Tone;
 
@@ -23,15 +23,16 @@ public class OpenGlLinearVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
     private boolean isLandscape;
     private double aspectRatio = 1.0;
+    private final Animator animator;
 
     public OpenGlLinearVisualizer() {
         GLProfile glp = GLProfile.getDefault();
         GLCapabilities caps = new GLCapabilities(glp);
         caps.setSampleBuffers(true);
-        GLCanvas canvas = new GLCanvas(caps);
+        GLJPanel canvas = new GLJPanel(caps);
         canvas.addGLEventListener(this);
         component = canvas;
-        Animator animator = new Animator(canvas);
+        animator = new Animator(canvas);
         animator.start();
         // TODO: stop the animator if the computation is stopped
     }
@@ -178,7 +179,9 @@ public class OpenGlLinearVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
     @Override
     public void dispose(GLAutoDrawable drawable) {
-        // TODO Auto-generated method stub
+        if (animator != null && animator.isStarted()) {
+            animator.stop();
+        }
     }
 
     @Override

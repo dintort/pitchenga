@@ -4,7 +4,9 @@ plugins {
 }
 
 repositories {
-//    mavenCentral()
+    mavenCentral()
+    maven { url = uri("https://mvn.0110.be/releases") }
+    maven { url = uri("https://jogamp.org/deployment/maven") }
 //    maven {
 //        url = uri("https://mvnrepository.com/artifact/")
 //    }
@@ -12,43 +14,47 @@ repositories {
 }
 
 dependencies {
-    //implementation 'colt:colt:1.2.0'
-    implementation(files("lib/TarsosDSP-2.4.jar"))
-    implementation(files("lib/JTransforms-2.4.jar"))
-    implementation(files("lib/commons-math3-3.2.jar"))
-    implementation(files("lib/commons-lang3-3.1.jar"))
-    implementation(files("lib/jlayer-1.0.1.4.jar"))
+    implementation("be.tarsos.dsp:core:2.5")
+//    implementation(files("lib/TarsosDSP-2.4.jar"))
+//    implementation(files("lib/JTransforms-2.4.jar"))
+    implementation("edu.emory.mathcs:JTransforms:2.4")
+//    implementation(files("lib/commons-math3-3.2.jar"))
+    implementation("org.apache.commons:commons-math3:3.2")
+//    implementation(files("lib/commons-lang3-3.1.jar"))
+    implementation("org.apache.commons:commons-lang3:3.1")
+//    implementation(files("lib/jlayer-1.0.1.4.jar"))
+    implementation("javazoom:jlayer:1.0.1")
 //    implementation(files("lib/macify-1.6.jar"))
 //    implementation(files("lib/mp3spi-1.9.5.4.jar"))
 //    implementation(files("lib/tritonus-share-0.3.7.4.jar"))
-//    implementation("edu.emory.mathcs:JTransforms:2.4")
-//    implementation("org.apache.commons:commons-math3:3.2")
-//    implementation("org.apache.commons:commons-lang3:3.1")
 //    implementation("org.simplericity.macify:macify:1.6")
-//    implementation("javazoom:jlayer:1.0.1")
 //    implementation("com.googlecode.soundlibs:mp3spi:1.9.5.4")
 //    implementation("com.googlecode.soundlibs:tritonus-share:0.3.7.4")
 
 //    macBundleApp(":appbundler:1.0")
 
-    implementation(files("lib/jogamp/gluegen-rt-2.5.0.jar"))
-//    implementation(files("lib/jogamp/gluegen-rt-2.5.0-sources.zip"))
-    implementation(files("lib/jogamp/gluegen-rt-2.5.0-natives-macosx-universal.jar"))
-    implementation(files("lib/jogamp/jogl-all-2.5.0.jar"))
-//    implementation(files("lib/jogamp/jogl-all-2.5.0-sources.zip"))
-    implementation(files("lib/jogamp/jogl-all-2.5.0-natives-macosx-universal.jar"))
+//    implementation(files("lib/jogamp/gluegen-rt-2.5.0.jar"))
+    implementation("org.jogamp.gluegen:gluegen-rt:2.6.0")
+    implementation("org.jogamp.gluegen:gluegen-rt-main:2.6.0")
+//    implementation(files("lib/jogamp/gluegen-rt-2.5.0-natives-macosx-universal.jar"))
+    implementation("org.jogamp.gluegen:gluegen-rt-natives-macosx-universal:2.6.0")
+    implementation("org.jogamp.gluegen:gluegen-rt-natives-windows-amd64:2.6.0")
+    implementation("org.jogamp.gluegen:gluegen-rt-natives-linux-amd64:2.6.0")
+
+//    implementation(files("lib/jogamp/jogl-all-2.5.0.jar"))
+    implementation("org.jogamp.jogl:jogl-all:2.6.0")
+//    implementation(files("lib/jogamp/jogl-all-2.5.0-natives-macosx-universal.jar"))
+    implementation("org.jogamp.jogl:jogl-all-natives-macosx-universal:2.6.0")
+    implementation("org.jogamp.jogl:jogl-all-natives-windows-amd64:2.6.0")
+    implementation("org.jogamp.jogl:jogl-all-natives-linux-amd64:2.6.0")
+//    implementation("org.jogl-all.jogl:jogl-all-natives-macosx-universal:v2.4.0-rc-20210111")
+//    macRuntime(":jogl-all-natives-macosx-universal:")
     //fixme: if (os = muzdie) {
 //    implementation(files("lib/jogamp/gluegen-rt-natives-windows-amd64.jar"))
 //    implementation(files("lib/jogamp/jogl-all-natives-windows-amd64.jar"))
 //    implementation(files("lib/jogamp/gluegen-rt-natives-linux-amd64.jar"))
 //    implementation(files("lib/jogamp/jogl-all-natives-linux-amd64.jar"))
 
-//    implementation("org.jogl-all.jogl:jogl-all-natives-macosx-universal:v2.4.0-rc-20210111")
-//    macRuntime(":jogl-all-natives-macosx-universal:")
-//    implementation("org.jogamp.jogl:jogl-all:2.3.2")
-//    implementation("org.jogamp.gluegen:gluegen-rt:2.3.2")
-//    implementation("org.jogamp.gluegen:gluegen-rt:")
-//    macRuntime(":gluegen-rt-natives-macosx-universal:")
 //    test("junit:junit:4.10")
 }
 

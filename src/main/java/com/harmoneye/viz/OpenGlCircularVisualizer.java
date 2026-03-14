@@ -109,6 +109,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
     private TextRenderer renderer;
     public static volatile Tone toneOverride;
     public static volatile String text;
+    private final Animator animator;
 
     public OpenGlCircularVisualizer() {
         INSTANCE = this;
@@ -118,7 +119,7 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
         GLCanvas canvas = new GLCanvas(caps);
         canvas.addGLEventListener(this);
         component = canvas;
-        Animator animator = new Animator();
+        animator = new Animator();
         animator.add(canvas);
         animator.start();
         // TODO: stop the animator if the computation is stopped
@@ -745,7 +746,9 @@ public class OpenGlCircularVisualizer implements SwingVisualizer<AnalyzedFrame>,
 
     @Override
     public void dispose(GLAutoDrawable drawable) {
-        // TODO Auto-generated method stub
+        if (animator != null && animator.isStarted()) {
+            animator.stop();
+        }
     }
 
     @Override
