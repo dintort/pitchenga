@@ -10,11 +10,14 @@ import com.pitchenga.Pitchenga;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.net.URI;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.prefs.Preferences;
 
 public class AbstractHarmonEyeApp {
 
@@ -62,7 +65,16 @@ public class AbstractHarmonEyeApp {
 //        frame.getMainPanel().add(visualizer.getComponent(), BorderLayout.NORTH);
         frame.getMainPanel().add(visualizer.getComponent(), BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        if (visualizer instanceof OpenGlCircularVisualizer) {
+
+        Preferences prefs = Preferences.userNodeForPackage(AbstractHarmonEyeApp.class);
+        int x = prefs.getInt("x", -1);
+        int y = prefs.getInt("y", -1);
+        int width = prefs.getInt("width", -1);
+        int height = prefs.getInt("height", -1);
+
+        if (width != -1 && height != -1) {
+            frame.setSize(width, height);
+        } else if (visualizer instanceof OpenGlCircularVisualizer) {
             if (OpenGlCircularVisualizer.DRAW_SNOWFLAKE) {
                 frame.setSize(1080, 1110);
             } else {
@@ -75,18 +87,41 @@ public class AbstractHarmonEyeApp {
             frame.setSize(1900, 620);
         }
         frame.setLocationRelativeTo(null);
+        if (x != -1 && y != -1) {
 //        frame.setLocation(0, 0);
 //        frame.setLocation(0, 700);
 //        frame.setLocation(424, 25);
 //        frame.setLocation(86, 521);
 //        frame.setLocation(-948, 25);
 //        frame.setLocation(303, 25);
-        frame.setLocation(108, 30);
+//        frame.setLocation(108, 30);
+            frame.setLocation(x, y);
 //        frame.setLocation(0, 158);
 //        frame.setLocation(0, 220);
+        }
         frame.setJMenuBar(createMenuBar());
 
+        frame.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                saveWindowState(frame);
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                saveWindowState(frame);
+            }
+        });
+
         return frame;
+    }
+
+    private void saveWindowState(JFrame frame) {
+        Preferences prefs = Preferences.userNodeForPackage(AbstractHarmonEyeApp.class);
+        prefs.putInt("x", frame.getX());
+        prefs.putInt("y", frame.getY());
+        prefs.putInt("width", frame.getWidth());
+        prefs.putInt("height", frame.getHeight());
     }
 
     private JMenuBar createMenuBar() {
